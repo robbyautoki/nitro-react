@@ -14,7 +14,7 @@ export const CatalogSimplePriceWidgetView: FC<CatalogSimplePriceWidgetViewProps>
     const { currentOffer = null } = useCatalog();
 
     return (
-        <Flex gap={ gap } alignItems="center" classNames={ [ 'bg-muted', 'p-1', 'rounded' ] } { ...rest }>
+        <Flex gap={ gap } alignItems="center" className="catalog-product-price" { ...rest }>
             <CatalogPriceDisplayWidgetView separator={ true } offer={ currentOffer } />
         </Flex>
     );

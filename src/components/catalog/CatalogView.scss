@@ -18,6 +18,179 @@
         padding: 0 4px;
         text-align: right;
     }
+
+    // ─── Scoped Bootstrap Overrides ───
+    // These restyle common components within the catalog scope
+
+    // Form inputs
+    .form-control {
+        border: 1px solid #E4E4E7;
+        border-radius: 6px;
+        font-size: 12px;
+        background: #FFFFFF;
+        color: #18181B;
+        outline: none;
+        transition: border-color 0.15s ease;
+
+        &:focus {
+            border-color: #A1A1AA;
+            box-shadow: none;
+        }
+
+        &::placeholder {
+            color: #A1A1AA;
+        }
+    }
+
+    .form-control-sm {
+        height: 32px;
+        padding: 0 10px;
+    }
+
+    // Select dropdowns
+    .form-select {
+        border: 1px solid #E4E4E7;
+        border-radius: 6px;
+        font-size: 12px;
+        background-color: #FFFFFF;
+        color: #18181B;
+        transition: border-color 0.15s ease;
+
+        &:focus {
+            border-color: #A1A1AA;
+            box-shadow: none;
+        }
+    }
+
+    // Buttons
+    .btn {
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+        background: #18181B;
+        border-color: #18181B;
+        color: #FFFFFF;
+
+        &:hover, &:focus {
+            background: #27272A;
+            border-color: #27272A;
+        }
+
+        &:disabled {
+            background: #E4E4E7;
+            border-color: #E4E4E7;
+            color: #A1A1AA;
+        }
+    }
+
+    .btn-success {
+        background: #18181B;
+        border-color: #18181B;
+        color: #FFFFFF;
+
+        &:hover, &:focus {
+            background: #27272A;
+            border-color: #27272A;
+        }
+    }
+
+    .btn-secondary {
+        background: #FFFFFF;
+        border: 1px solid #E4E4E7;
+        color: #3F3F46;
+
+        &:hover, &:focus {
+            background: #F4F4F5;
+            border-color: #A1A1AA;
+        }
+    }
+
+    .btn-warning {
+        background: #F59E0B;
+        border-color: #F59E0B;
+        color: #FFFFFF;
+        border-radius: 8px;
+
+        &:hover {
+            background: #D97706;
+            border-color: #D97706;
+        }
+    }
+
+    .btn-danger {
+        background: #EF4444;
+        border-color: #EF4444;
+        color: #FFFFFF;
+        border-radius: 8px;
+
+        &:hover {
+            background: #DC2626;
+            border-color: #DC2626;
+        }
+
+        &:disabled {
+            background: #FCA5A5;
+            border-color: #FCA5A5;
+        }
+    }
+
+    .btn-group {
+        gap: 4px;
+
+        .btn {
+            border-radius: 6px;
+        }
+    }
+
+    // Grid items
+    .layout-grid-item {
+        border-color: #E4E4E7 !important;
+        background-color: #FFFFFF;
+        border-radius: 8px;
+        transition: all 0.15s ease;
+
+        &:hover {
+            border-color: #A1A1AA !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        &.active {
+            border-color: #18181B !important;
+            background-color: #FFFFFF !important;
+            box-shadow: 0 0 0 1px #18181B;
+        }
+    }
+
+    // Background overrides
+    .bg-muted {
+        background-color: #F4F4F5 !important;
+    }
+
+    // Text overrides
+    .text-black {
+        color: #18181B !important;
+    }
+
+    // Textarea
+    textarea.form-control {
+        border-radius: 6px;
+        resize: none;
+    }
+
+    // Form checks (checkboxes)
+    .form-check-input {
+        border-radius: 4px;
+        border-color: #D4D4D8;
+
+        &:checked {
+            background-color: #18181B;
+            border-color: #18181B;
+        }
+    }
 }
 
 // Modern SaaS Tabs
@@ -308,6 +481,75 @@
         height: 15px;
         border-radius: 6px;
     }
+
+    // Scoped overrides for gift dialog
+    .form-control {
+        border: 1px solid #E4E4E7;
+        border-radius: 6px;
+        font-size: 12px;
+        background: #FFFFFF;
+        color: #18181B;
+
+        &:focus {
+            border-color: #A1A1AA;
+            box-shadow: none;
+        }
+
+        &::placeholder {
+            color: #A1A1AA;
+        }
+    }
+
+    .form-check-input {
+        border-radius: 4px;
+        border-color: #D4D4D8;
+
+        &:checked {
+            background-color: #18181B;
+            border-color: #18181B;
+        }
+    }
+
+    .btn {
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .btn-primary {
+        background: #18181B;
+        border-color: #18181B;
+
+        &:hover {
+            background: #27272A;
+        }
+    }
+
+    .btn-success {
+        background: #18181B;
+        border-color: #18181B;
+        border-radius: 8px;
+
+        &:hover {
+            background: #27272A;
+        }
+    }
+
+    .btn-group {
+        gap: 4px;
+
+        .btn {
+            border-radius: 6px;
+        }
+    }
+
+    .btn-link.text-black {
+        color: #71717A !important;
+
+        &:hover {
+            color: #18181B !important;
+        }
+    }
 }
 
 // Modern navigation grid container (replaces old Bootstrap grid)
@@ -350,6 +592,16 @@
             color: $black;
             font-size: 10px;
             padding: 1px;
+        }
+
+        .nav-chevron {
+            font-size: 9px;
+            color: #A1A1AA;
+            transition: transform 0.15s ease;
+
+            &.expanded {
+                transform: rotate(90deg);
+            }
         }
     }
 }

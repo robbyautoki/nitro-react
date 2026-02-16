@@ -34,7 +34,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = props =>
                         </> }
                     { currentOffer &&
                         <>
-                            <Flex center overflow="hidden" style={ { height: 140 } }>
+                            <Flex center overflow="hidden" style={ { height: 160 } }>
                                 { (currentOffer.product.productType !== ProductTypeEnum.BADGE) &&
                                     <>
                                         <CatalogViewProductWidgetView />

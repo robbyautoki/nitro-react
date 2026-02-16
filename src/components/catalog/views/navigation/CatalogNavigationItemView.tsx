@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
+import { FaChevronRight } from 'react-icons/fa';
 import { ICatalogNode } from '../../../../api';
 import { Base, LayoutGridItem, Text } from '../../../../common';
 import { useCatalog } from '../../../../hooks';
@@ -16,17 +16,14 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
 {
     const { node = null, child = false } = props;
     const { activateNode = null } = useCatalog();
-    
+
     return (
         <Base className="nitro-catalog-navigation-section">
             <LayoutGridItem gap={ 1 } column={ false } itemActive={ node.isActive } onClick={ event => activateNode(node) } className={ child ? 'inset' : '' }>
                 <CatalogIconView icon={ node.iconId } />
                 <Text grow truncate>{ node.localization }</Text>
                 { node.isBranch &&
-                    <>
-                        { node.isOpen && <FaCaretUp className="fa-icon" /> }
-                        { !node.isOpen && <FaCaretDown className="fa-icon" /> }
-                    </> }
+                    <FaChevronRight className={ `fa-icon nav-chevron ${ node.isOpen ? 'expanded' : '' }` } /> }
             </LayoutGridItem>
             { node.isOpen && node.isBranch &&
                 <CatalogNavigationSetView node={ node } child={ true } /> }

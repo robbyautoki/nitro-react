@@ -79,7 +79,7 @@ export const CatalogView: FC<{}> = props =>
     return (
         <>
             { isVisible &&
-                <NitroCardView uniqueKey="catalog" className="nitro-catalog" style={ GetConfiguration('catalog.headers') ? { width: 820 } : {} }>
+                <NitroCardView uniqueKey="catalog" className="nitro-catalog" style={ GetConfiguration('catalog.headers') ? { width: 840 } : {} }>
                     <NitroCardHeaderView headerText={ LocalizeText('catalog.title') } onCloseClick={ event => setIsVisible(false) } />
                     {/* Tab Navigation */}
                     { rootNode && (rootNode.children.length > 0) &&
@@ -103,9 +103,9 @@ export const CatalogView: FC<{}> = props =>
                             </TabsList>
                         </Tabs> }
                     <NitroCardContentView>
-                        <div className="flex h-full gap-2">
+                        <div className="flex h-full gap-3">
                             { !navigationHidden &&
-                                <div className="w-[180px] min-w-[180px] flex flex-col gap-1.5">
+                                <div className="w-[200px] min-w-[200px] flex flex-col">
                                     <CatalogNavigationView node={ activeNodes?.[0] } />
                                 </div> }
                             <div className="flex-1 min-w-0 overflow-hidden">

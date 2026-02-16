@@ -15,7 +15,9 @@ export default defineConfig({
         assetsInlineLimit: 102400,
         rollupOptions: {
             output: {
-                assetFileNames: 'src/assets/[name].[ext]',
+                assetFileNames: 'assets/[name]-[hash].[ext]',
+                chunkFileNames: 'assets/[name]-[hash].js',
+                entryFileNames: 'assets/[name]-[hash].js',
                 manualChunks: id =>
                 {
                     if(id.includes('node_modules'))

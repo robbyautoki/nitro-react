@@ -1,8 +1,9 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useMemo } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { FaTimes } from 'react-icons/fa';
 import { AddEventLinkTracker, GetConfiguration, LocalizeText, RemoveLinkEventTracker } from '../../api';
-import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { useCatalog } from '../../hooks';
+import { Drawer, DrawerClose, DrawerContent } from '../ui/drawer';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { CatalogIconView } from './views/catalog-icon/CatalogIconView';
 import { CatalogInspectorView } from './views/CatalogInspectorView';
@@ -24,6 +25,7 @@ export const CatalogView: FC<{}> = props =>
 {
     const { isVisible = false, setIsVisible = null, rootNode = null, currentPage = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById } = useCatalog();
 
+    const [ activeSnap, setActiveSnap ] = useState<number | string | null>(0.85);
     const activeTabId = useMemo(() => rootNode?.children?.find(c => c.isActive)?.pageId?.toString(), [ rootNode ]);
     const showInspector = currentPage && !SELF_CONTAINED_LAYOUTS.has(currentPage.layoutCode);
 
@@ -89,13 +91,29 @@ export const CatalogView: FC<{}> = props =>
 
     return (
         <>
-            { isVisible &&
-                <NitroCardView uniqueKey="catalog" className="nitro-catalog" style={ GetConfiguration('catalog.headers') ? { width: 940 } : {} }>
-                    <NitroCardHeaderView headerText={ LocalizeText('catalog.title') } onCloseClick={ event => setIsVisible(false) } />
+            <Drawer
+                open={ isVisible }
+                onOpenChange={ setIsVisible }
+                modal={ false }
+                snapPoints={ [ 0.55, 0.85 ] }
+                activeSnapPoint={ activeSnap }
+                setActiveSnapPoint={ setActiveSnap }
+            >
+                <DrawerContent className="nitro-catalog">
+                    {/* Header: Title + Close */}
+                    <div className="flex items-center justify-between px-5 py-2 shrink-0">
+                        <h2 className="text-sm font-semibold text-zinc-900 tracking-tight">
+                            { LocalizeText('catalog.title') }
+                        </h2>
+                        <DrawerClose className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-colors">
+                            <FaTimes className="text-xs" />
+                        </DrawerClose>
+                    </div>
+
                     {/* Tab Navigation */}
                     { rootNode && (rootNode.children.length > 0) &&
                         <Tabs value={ activeTabId } onValueChange={ onTabChange }>
-                            <TabsList className="w-full justify-start gap-0.5 rounded-none border-b border-zinc-200 bg-zinc-50/80 px-2 h-auto py-1">
+                            <TabsList className="w-full justify-start gap-0.5 rounded-none border-b border-zinc-200 bg-zinc-50/80 px-3 h-auto py-1 shrink-0">
                                 { rootNode.children.map(child =>
                                 {
                                     if(!child.isVisible) return null;
@@ -113,10 +131,12 @@ export const CatalogView: FC<{}> = props =>
                                 }) }
                             </TabsList>
                         </Tabs> }
-                    <NitroCardContentView>
-                        <div className="flex h-full gap-3">
+
+                    {/* Content — 3-column layout */}
+                    <div className="flex-1 min-h-0 overflow-hidden px-4 pb-4 pt-2">
+                        <div className="flex h-full gap-3 max-w-[1200px] mx-auto">
                             { !navigationHidden &&
-                                <div className="w-[160px] min-w-[160px] flex flex-col">
+                                <div className="w-[180px] min-w-[180px] flex flex-col">
                                     <CatalogNavigationView node={ activeNodes?.[0] } />
                                 </div> }
                             <div className="flex-1 min-w-0 overflow-hidden">
@@ -127,8 +147,9 @@ export const CatalogView: FC<{}> = props =>
                                     <CatalogInspectorView />
                                 </div> }
                         </div>
-                    </NitroCardContentView>
-                </NitroCardView> }
+                    </div>
+                </DrawerContent>
+            </Drawer>
             <CatalogGiftView />
             <MarketplacePostOfferView />
         </>

@@ -1,8 +1,9 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, useEffect } from 'react';
 import { AddEventLinkTracker, GetConfiguration, LocalizeText, RemoveLinkEventTracker } from '../../api';
-import { Column, Flex, Grid, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView } from '../../common';
+import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { useCatalog } from '../../hooks';
+import { ScrollArea } from '../ui/scroll-area';
 import { CatalogIconView } from './views/catalog-icon/CatalogIconView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
@@ -19,9 +20,9 @@ export const CatalogView: FC<{}> = props =>
             linkReceived: (url: string) =>
             {
                 const parts = url.split('/');
-        
+
                 if(parts.length < 2) return;
-        
+
                 switch(parts[1])
                 {
                     case 'show':
@@ -54,7 +55,7 @@ export const CatalogView: FC<{}> = props =>
                         {
                             setIsVisible(true);
                         }
-        
+
                         return;
                 }
             },
@@ -69,39 +70,40 @@ export const CatalogView: FC<{}> = props =>
     return (
         <>
             { isVisible &&
-                <NitroCardView uniqueKey="catalog" className="nitro-catalog" style={ GetConfiguration('catalog.headers') ? { width: 710 } : {} }>
+                <NitroCardView uniqueKey="catalog" className="nitro-catalog" style={ GetConfiguration('catalog.headers') ? { width: 820 } : {} }>
                     <NitroCardHeaderView headerText={ LocalizeText('catalog.title') } onCloseClick={ event => setIsVisible(false) } />
-                    <NitroCardTabsView>
+                    {/* Tab Navigation */}
+                    <div className="catalog-tabs-bar">
                         { rootNode && (rootNode.children.length > 0) && rootNode.children.map(child =>
                         {
                             if(!child.isVisible) return null;
 
                             return (
-                                <NitroCardTabsItemView key={ child.pageId } isActive={ child.isActive } onClick={ event =>
-                                {
-                                    if(searchResult) setSearchResult(null);
-
-                                    activateNode(child);
-                                } } >
-                                    <Flex gap={ GetConfiguration('catalog.tab.icons') ? 1 : 0 } alignItems="center">
-                                        { GetConfiguration('catalog.tab.icons') && <CatalogIconView icon={ child.iconId } /> }
-                                        { child.localization }
-                                    </Flex>
-                                </NitroCardTabsItemView>
+                                <button
+                                    key={ child.pageId }
+                                    className={ `catalog-tab-item ${ child.isActive ? 'active' : '' }` }
+                                    onClick={ event =>
+                                    {
+                                        if(searchResult) setSearchResult(null);
+                                        activateNode(child);
+                                    } }
+                                >
+                                    { GetConfiguration('catalog.tab.icons') && <CatalogIconView icon={ child.iconId } /> }
+                                    { child.localization }
+                                </button>
                             );
                         }) }
-                    </NitroCardTabsView>
+                    </div>
                     <NitroCardContentView>
-                        <Grid>
+                        <div className="catalog-body">
                             { !navigationHidden &&
-                                <Column size={ 3 } overflow="hidden">
-                                    { activeNodes && (activeNodes.length > 0) &&
-                                        <CatalogNavigationView node={ activeNodes[0] } /> }
-                                </Column> }
-                            <Column size={ !navigationHidden ? 9 : 12 } overflow="hidden">
+                                <div className="catalog-sidebar">
+                                    <CatalogNavigationView node={ activeNodes?.[0] } />
+                                </div> }
+                            <div className={ `catalog-content ${ navigationHidden ? 'full-width' : '' }` }>
                                 { GetCatalogLayout(currentPage, () => setNavigationHidden(true)) }
-                            </Column>
-                        </Grid>
+                            </div>
+                        </div>
                     </NitroCardContentView>
                 </NitroCardView> }
             <CatalogGiftView />

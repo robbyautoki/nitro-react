@@ -1,4 +1,4 @@
-$nitro-card-header-height: 33px;
+$nitro-card-header-height: 40px;
 $nitro-card-tabs-height: 33px;
 
 .nitro-card {
@@ -10,164 +10,183 @@ $nitro-card-tabs-height: 33px;
     }
 
     &.theme-primary {
-        border: $border-width solid $border-color;
+        border: 1px solid #E4E4E7;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
 
         .nitro-card-header {
-            min-height: 33px;
-            max-height: 33px;
-            background: $primary;
+            min-height: 40px;
+            max-height: 40px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #F4F4F5;
 
             .nitro-card-header-text {
-                color: $white;
+                color: #18181B;
                 text-shadow: none;
-                @include font-size($h4-font-size);
+                font-weight: 600;
+                font-size: 13px;
             }
 
             .nitro-card-header-close {
                 cursor: pointer;
-                padding: 2px 2px;
+                padding: 4px;
                 line-height: 1;
-                border-radius: $border-radius;
-                border: 1px solid rgba($white, 0.3);
-                background: rgba($white, 0.15);
+                border-radius: 6px;
+                border: none;
+                background: transparent;
+                color: #A1A1AA;
 
                 &:hover {
-                    background: rgba($white, 0.25);
+                    background: #F4F4F5;
+                    color: #18181B;
                 }
 
                 &:active {
-                    background: rgba($white, 0.1);
+                    background: #E4E4E7;
                 }
             }
 
             .nitro-card-header-report-camera {
                 cursor: pointer;
-                padding: 1px 3px;
+                padding: 4px;
                 line-height: 1;
-                border-radius: $border-radius;
-                border: 1px solid rgba($white, 0.3);
-                background: rgba($white, 0.15);
+                border-radius: 6px;
+                border: none;
+                background: transparent;
+                color: #A1A1AA;
 
                 &:hover {
-                    background: rgba($white, 0.25);
+                    background: #F4F4F5;
+                    color: #18181B;
                 }
 
                 &:active {
-                    background: rgba($white, 0.1);
+                    background: #E4E4E7;
                 }
             }
         }
 
         .nitro-card-tabs {
-            background-color: #F4F4F5;
+            background-color: #FAFAFA;
+            border-bottom: 1px solid #E4E4E7;
 
             .nav-item {
                 padding: $nav-link-padding-y $nav-link-padding-x;
-                background-color: #E4E4E7;
-                color: $black;
+                background-color: transparent;
+                color: #71717A;
                 z-index: 1;
-                margin-bottom: -1px;
+                margin-bottom: 0;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 500;
+                transition: all 0.15s ease;
 
                 &.active {
                     background-color: $white;
-                    border-color: $border-color $border-color $white !important;
-                    border-bottom: 1px solid $border-color;
+                    color: #18181B;
+                    border-color: transparent !important;
+                    border-bottom: none;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 
                     &:before {
-                        background: $white;
+                        display: none;
                     }
                 }
 
+                &:hover:not(.active) {
+                    background-color: #F4F4F5;
+                    color: #18181B;
+                }
+
                 &:before {
-                    content: '';
-                    position: absolute;
-                    width: 93%;
-                    height: 3px;
-                    border-radius: 0.25rem;
-                    top: 1.5px;
-                    left: 0;
-                    right: 0;
-                    margin: auto;
-                    background: #D4D4D8;
-                    z-index: 1;
+                    display: none;
                 }
             }
         }
 
         .content-area {
-            background-color: $light;
+            background-color: #FFFFFF;
         }
     }
 
     &.theme-primary-slim {
-        border: $border-width solid $border-color;
+        border: 1px solid #E4E4E7;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
 
         .nitro-card-header {
             position: relative;
-            min-height: 28px;
-            max-height: 28px;
-            background: $primary;
-            border-bottom: 1px solid $border-color;
+            min-height: 32px;
+            max-height: 32px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #F4F4F5;
             box-shadow: none;
             width: 100%;
             margin: 0;
-            padding-top:2px;
+            padding-top: 0;
 
             &:before {
                 display: none;
             }
 
             .nitro-card-header-text {
-                color: $white;
+                color: #18181B;
                 text-shadow: none;
-                @include font-size($h5-font-size);
+                font-weight: 600;
+                font-size: 12px;
                 min-height: 21px;
             }
 
             .nitro-card-header-close {
                 cursor: pointer;
-                padding: 0px 2px;
+                padding: 3px;
                 line-height: 1;
-                @include font-size($h7-font-size);
-                border-radius: $border-radius;
-                border: 1px solid rgba($white, 0.3);
-                background: rgba($white, 0.15);
+                font-size: 11px;
+                border-radius: 5px;
+                border: none;
+                background: transparent;
+                color: #A1A1AA;
 
                 &:hover {
-                    background: rgba($white, 0.25);
+                    background: #F4F4F5;
+                    color: #18181B;
                 }
 
                 &:active {
-                    background: rgba($white, 0.1);
+                    background: #E4E4E7;
                 }
             }
 
             .nitro-card-header-report-camera {
                 cursor: pointer;
-                padding: 0px 2px;
+                padding: 3px;
                 margin-right: 4px;
                 line-height: 1;
-                @include font-size($h7-font-size);
-                border-radius: $border-radius;
-                border: 1px solid rgba($white, 0.3);
-                background: rgba($white, 0.15);
+                font-size: 11px;
+                border-radius: 5px;
+                border: none;
+                background: transparent;
+                color: #A1A1AA;
 
                 &:hover {
-                    background: rgba($white, 0.25);
+                    background: #F4F4F5;
+                    color: #18181B;
                 }
 
                 &:active {
-                    background: rgba($white, 0.1);
+                    background: #E4E4E7;
                 }
             }
         }
 
         .nitro-card-tabs {
-            background-color: #F4F4F5;
+            background-color: #FAFAFA;
         }
 
         .content-area {
-            background-color: $light;
+            background-color: #FFFFFF;
         }
     }
 }
@@ -200,7 +219,7 @@ $nitro-card-tabs-height: 33px;
     height: 100%;
     min-height: $nitro-card-tabs-height;
     max-height: $nitro-card-tabs-height;
-    border-bottom: $nav-tabs-border-width solid $nav-tabs-border-color;
+    border-bottom: 1px solid #E4E4E7;
 }
 
 .nitro-card-accordion-set {
@@ -209,10 +228,10 @@ $nitro-card-tabs-height: 33px;
         height: 100%;
         overflow: hidden;
         background: rgba($white, 0.5);
-        border-bottom: 1px solid rgba($black, 0.2);
+        border-bottom: 1px solid rgba($black, 0.1);
     }
 
     .nitro-card-accordion-set-header {
-        border-bottom: 1px solid rgba($black, 0.2);
+        border-bottom: 1px solid rgba($black, 0.1);
     }
 }

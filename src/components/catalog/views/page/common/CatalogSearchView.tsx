@@ -2,8 +2,10 @@ import { IFurnitureData } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import { CatalogPage, CatalogType, FilterCatalogNode, FurnitureOffer, GetOfferNodes, GetSessionDataManager, ICatalogNode, ICatalogPage, IPurchasableOffer, LocalizeText, PageLocalization, SearchResult } from '../../../../../api';
-import { Button, Flex } from '../../../../../common';
+import { Flex } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
+import { Button } from '../../../../ui/button';
+import { Input } from '../../../../ui/input';
 
 export const CatalogSearchView: FC<{}> = props =>
 {
@@ -81,14 +83,14 @@ export const CatalogSearchView: FC<{}> = props =>
     return (
         <Flex gap={ 1 }>
             <Flex fullWidth alignItems="center" position="relative">
-                <input type="text" className="form-control form-control-sm" placeholder={ LocalizeText('generic.search') } value={ searchValue } onChange={ event => setSearchValue(event.target.value) } />
+                <Input type="text" className="h-8 text-xs" placeholder={ LocalizeText('generic.search') } value={ searchValue } onChange={ event => setSearchValue(event.target.value) } />
             </Flex>
             { (!searchValue || !searchValue.length) &&
-                <Button variant="primary" className="catalog-search-button">
+                <Button size="icon" className="h-8 w-8 shrink-0">
                     <FaSearch className="fa-icon" />
                 </Button> }
             { searchValue && !!searchValue.length &&
-                <Button variant="primary" className="catalog-search-button" onClick={ event => setSearchValue('') }>
+                <Button size="icon" className="h-8 w-8 shrink-0" onClick={ event => setSearchValue('') }>
                     <FaTimes className="fa-icon" />
                 </Button> }
         </Flex>

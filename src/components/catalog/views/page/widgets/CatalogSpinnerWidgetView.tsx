@@ -3,6 +3,7 @@ import { FaMinus, FaPlus } from 'react-icons/fa';
 import { LocalizeText } from '../../../../../api';
 import { Flex, Text } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
+import { Input } from '../../../../ui/input';
 
 const MIN_VALUE: number = 1;
 const MAX_VALUE: number = 100;
@@ -38,7 +39,7 @@ export const CatalogSpinnerWidgetView: FC<{}> = props =>
             <Text>{ LocalizeText('catalog.bundlewidget.spinner.select.amount') }</Text>
             <Flex alignItems="center" gap={ 1 }>
                 <FaMinus className="text-black cursor-pointer fa-icon" onClick={ event => updateQuantity(quantity - 1) } />
-                <input type="number" className="form-control form-control-sm quantity-input" value={ quantity } onChange={ event => updateQuantity(event.target.valueAsNumber) } />
+                <Input type="number" className="h-7 w-10 px-1 text-center text-xs" value={ quantity } onChange={ event => updateQuantity(event.target.valueAsNumber) } />
                 <FaPlus className="text-black cursor-pointer fa-icon" onClick={ event => updateQuantity(quantity + 1) } />
             </Flex>
         </>

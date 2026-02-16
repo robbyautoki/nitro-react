@@ -2,9 +2,7 @@ import { IFurnitureData } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import { CatalogPage, CatalogType, FilterCatalogNode, FurnitureOffer, GetOfferNodes, GetSessionDataManager, ICatalogNode, ICatalogPage, IPurchasableOffer, LocalizeText, PageLocalization, SearchResult } from '../../../../../api';
-import { Flex } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
-import { Button } from '../../../../ui/button';
 import { Input } from '../../../../ui/input';
 
 export const CatalogSearchView: FC<{}> = props =>
@@ -81,18 +79,22 @@ export const CatalogSearchView: FC<{}> = props =>
     }, [ offersToNodes, currentType, rootNode, searchValue, setCurrentPage, setSearchResult ]);
 
     return (
-        <Flex gap={ 1 }>
-            <Flex fullWidth alignItems="center" position="relative">
-                <Input type="text" className="h-8 text-xs" placeholder={ LocalizeText('generic.search') } value={ searchValue } onChange={ event => setSearchValue(event.target.value) } />
-            </Flex>
-            { (!searchValue || !searchValue.length) &&
-                <Button size="icon" className="h-8 w-8 shrink-0">
-                    <FaSearch className="fa-icon" />
-                </Button> }
+        <div className="relative">
+            <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] pointer-events-none" />
+            <Input
+                type="text"
+                className="h-7 text-xs pl-7 pr-7"
+                placeholder={ LocalizeText('generic.search') }
+                value={ searchValue }
+                onChange={ event => setSearchValue(event.target.value) }
+            />
             { searchValue && !!searchValue.length &&
-                <Button size="icon" className="h-8 w-8 shrink-0" onClick={ event => setSearchValue('') }>
-                    <FaTimes className="fa-icon" />
-                </Button> }
-        </Flex>
+                <button
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-zinc-400 hover:text-zinc-600 transition-colors"
+                    onClick={ () => setSearchValue('') }
+                >
+                    <FaTimes className="text-[9px]" />
+                </button> }
+        </div>
     );
 }

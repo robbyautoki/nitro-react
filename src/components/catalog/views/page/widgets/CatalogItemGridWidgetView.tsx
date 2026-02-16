@@ -11,7 +11,7 @@ interface CatalogItemGridWidgetViewProps extends AutoGridProps
 
 export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = props =>
 {
-    const { columnCount = 5, children = null, ...rest } = props;
+    const { columnCount = 7, children = null, ...rest } = props;
     const { currentOffer = null, setCurrentOffer = null, currentPage = null, setPurchaseOptions = null } = useCatalog();
     const elementRef = useRef<HTMLDivElement>();
 

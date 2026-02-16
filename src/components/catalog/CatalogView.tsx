@@ -103,12 +103,12 @@ export const CatalogView: FC<{}> = props =>
                             </TabsList>
                         </Tabs> }
                     <NitroCardContentView>
-                        <div className="catalog-body">
+                        <div className="flex h-full gap-2">
                             { !navigationHidden &&
-                                <div className="catalog-sidebar">
+                                <div className="w-[180px] min-w-[180px] flex flex-col gap-1.5">
                                     <CatalogNavigationView node={ activeNodes?.[0] } />
                                 </div> }
-                            <div className={ `catalog-content ${ navigationHidden ? 'full-width' : '' }` }>
+                            <div className="flex-1 min-w-0 overflow-hidden">
                                 { GetCatalogLayout(currentPage, () => setNavigationHidden(true)) }
                             </div>
                         </div>

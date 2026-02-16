@@ -193,8 +193,8 @@ $nitro-card-tabs-height: 33px;
 
 .content-area {
     height: 100%;
-    padding-top: $container-padding-x;
-    padding-bottom: $container-padding-x;
+    padding-top: 8px;
+    padding-bottom: 8px;
     overflow: auto;
 
     &.theme-dark {

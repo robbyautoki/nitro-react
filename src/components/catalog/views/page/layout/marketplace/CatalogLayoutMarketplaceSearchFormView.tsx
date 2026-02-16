@@ -1,6 +1,5 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 import { IMarketplaceSearchOptions, LocalizeText, MarketplaceSearchType } from '../../../../../../api';
-import { Button, Column, Flex, Text } from '../../../../../../common';
 
 export interface SearchFormViewProps
 {
@@ -16,7 +15,7 @@ export const SearchFormView: FC<SearchFormViewProps> = props =>
     const [ searchQuery, setSearchQuery ] = useState('');
     const [ min, setMin ] = useState(0);
     const [ max, setMax ] = useState(0);
-    
+
     const onSortTypeChange = useCallback((sortType: number) =>
     {
         setSortType(sortType);
@@ -32,10 +31,10 @@ export const SearchFormView: FC<SearchFormViewProps> = props =>
         onSearch({ minPrice: minPrice, maxPrice: maxPrice, type: sortType, query: searchQuery })
     }, [ max, min, onSearch, searchQuery, sortType ]);
 
-    useEffect( () => 
+    useEffect( () =>
     {
         if(!sortTypes || !sortTypes.length) return;
-        
+
         const sortType = sortTypes[0];
 
         setSortType(sortType);
@@ -44,28 +43,28 @@ export const SearchFormView: FC<SearchFormViewProps> = props =>
     }, [ onSearch, searchType, sortTypes ]);
 
     return (
-        <Column gap={ 1 }>
-            <Flex alignItems="center" gap={ 1 }>
-                <Text className="col-3">{ LocalizeText('catalog.marketplace.sort_order') }</Text>
+        <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+                <span className="w-1/4 text-xs text-zinc-600 shrink-0">{ LocalizeText('catalog.marketplace.sort_order') }</span>
                 <select className="form-select form-select-sm" value={ sortType } onChange={ event => onSortTypeChange(parseInt(event.target.value)) }>
                     { sortTypes.map(type => <option key={ type } value={ type }>{ LocalizeText(`catalog.marketplace.sort.${ type }`) }</option>) }
                 </select>
-            </Flex>
+            </div>
             { searchType === MarketplaceSearchType.ADVANCED &&
                 <>
-                    <Flex alignItems="center" gap={ 1 }>
-                        <Text className="col-3">{ LocalizeText('catalog.marketplace.search_name') }</Text>
+                    <div className="flex items-center gap-2">
+                        <span className="w-1/4 text-xs text-zinc-600 shrink-0">{ LocalizeText('catalog.marketplace.search_name') }</span>
                         <input className="form-control form-control-sm" type="text" value={ searchQuery } onChange={ event => setSearchQuery(event.target.value) }/>
-                    </Flex>
-                    <Flex alignItems="center" gap={ 1 }>
-                        <Text className="col-3">{ LocalizeText('catalog.marketplace.search_price') }</Text>
-                        <Flex fullWidth gap={ 1 }>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="w-1/4 text-xs text-zinc-600 shrink-0">{ LocalizeText('catalog.marketplace.search_price') }</span>
+                        <div className="flex flex-1 gap-2">
                             <input className="form-control form-control-sm" type="number" min={ 0 } value={ min } onChange={ event => setMin(event.target.valueAsNumber) } />
                             <input className="form-control form-control-sm" type="number" min={ 0 } value={ max } onChange={ event => setMax(event.target.valueAsNumber) } />
-                        </Flex>
-                    </Flex>
-                    <Button variant="secondary" className="mx-auto" onClick={ onClickSearch }>{ LocalizeText('generic.search') }</Button>
+                        </div>
+                    </div>
+                    <button className="mx-auto h-7 px-4 text-xs rounded-md border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 transition-colors" onClick={ onClickSearch }>{ LocalizeText('generic.search') }</button>
                 </> }
-        </Column>
+        </div>
     );
 }

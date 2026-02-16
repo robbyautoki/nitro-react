@@ -1,7 +1,7 @@
 import { ClubOfferData, GetClubOffersMessageComposer, PurchaseFromCatalogComposer } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { CatalogPurchaseState, LocalizeText, SendMessageComposer } from '../../../../../api';
-import { AutoGrid, Button, Column, Flex, Grid, LayoutCurrencyIcon, LayoutGridItem, LayoutLoadingSpinnerView, Text } from '../../../../../common';
+import { LayoutCurrencyIcon, LayoutLoadingSpinnerView } from '../../../../../common';
 import { CatalogEvent, CatalogPurchasedEvent, CatalogPurchaseFailureEvent } from '../../../../../events';
 import { useCatalog, usePurse, useUiEvent } from '../../../../../hooks';
 import { CatalogLayoutProps } from './CatalogLayout.types';
@@ -42,7 +42,7 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
         if(offer.extraDays > 0)
         {
             if(offerText !== '') offerText += ' ';
-            
+
             offerText += (' ' + LocalizeText('catalog.vip.item.header.days', [ 'num_days' ], [ offer.extraDays.toString() ]));
         }
 
@@ -101,25 +101,25 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
 
         if(pendingOffer.priceCredits > getCurrencyAmount(-1))
         {
-            return <Button fullWidth variant="danger">{ LocalizeText('catalog.alert.notenough.title') }</Button>;
+            return <button className="w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70">{ LocalizeText('catalog.alert.notenough.title') }</button>;
         }
 
         if(pendingOffer.priceActivityPoints > getCurrencyAmount(pendingOffer.priceActivityPointsType))
         {
-            return <Button fullWidth variant="danger">{ LocalizeText('catalog.alert.notenough.activitypoints.title.' + pendingOffer.priceActivityPointsType) }</Button>;
+            return <button className="w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70">{ LocalizeText('catalog.alert.notenough.activitypoints.title.' + pendingOffer.priceActivityPointsType) }</button>;
         }
 
         switch(purchaseState)
         {
             case CatalogPurchaseState.CONFIRM:
-                return <Button fullWidth variant="warning" onClick={ purchaseSubscription }>{ LocalizeText('catalog.marketplace.confirm_title') }</Button>;
+                return <button className="w-full h-8 rounded-lg bg-amber-500 text-white text-xs font-medium hover:bg-amber-600 transition-colors" onClick={ purchaseSubscription }>{ LocalizeText('catalog.marketplace.confirm_title') }</button>;
             case CatalogPurchaseState.PURCHASE:
-                return <Button fullWidth variant="primary" disabled><LayoutLoadingSpinnerView /></Button>;
+                return <button className="w-full h-8 rounded-lg bg-zinc-300 text-zinc-500 text-xs font-medium" disabled><LayoutLoadingSpinnerView /></button>;
             case CatalogPurchaseState.FAILED:
-                return <Button fullWidth variant="danger" disabled>{ LocalizeText('generic.failed') }</Button>;
+                return <button className="w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70" disabled>{ LocalizeText('generic.failed') }</button>;
             case CatalogPurchaseState.NONE:
             default:
-                return <Button fullWidth variant="success" onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('buy') }</Button>;
+                return <button className="w-full h-8 rounded-lg bg-zinc-900 text-white text-xs font-medium hover:bg-zinc-800 transition-colors" onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('buy') }</button>;
         }
     }, [ pendingOffer, purchaseState, purchaseSubscription, getCurrencyAmount ]);
 
@@ -129,63 +129,61 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
     }, [ clubOffers ]);
 
     return (
-        <Grid>
-            <Column fullHeight size={ 7 } overflow="hidden" justifyContent="between">
-                <AutoGrid columnCount={ 1 } className="nitro-catalog-layout-vip-buy-grid">
-                    { clubOffers && (clubOffers.length > 0) && clubOffers.map((offer, index) =>
-                    {
-                        return (
-                            <LayoutGridItem key={ index } column={ false } center={ false } alignItems="center" justifyContent="between" itemActive={ pendingOffer === offer } className="p-1" onClick={ () => setOffer(offer) }>
-                                <i className="icon-hc-banner" />
-                                <Column justifyContent="end" gap={ 0 }>
-                                    <Text textEnd>{ getOfferText(offer) }</Text>
-                                    <Flex justifyContent="end" gap={ 1 }>
-                                        { (offer.priceCredits > 0) &&
-                                        <Flex alignItems="center" justifyContent="end" gap={ 1 }>
-                                            <Text>{ offer.priceCredits }</Text>
-                                            <LayoutCurrencyIcon type={ -1 } />
-                                        </Flex> }
-                                        { (offer.priceActivityPoints > 0) &&
-                                        <Flex alignItems="center" justifyContent="end" gap={ 1 }>
-                                            <Text>{ offer.priceActivityPoints }</Text>
-                                            <LayoutCurrencyIcon type={ offer.priceActivityPointsType } />
-                                        </Flex> }
-                                    </Flex>
-                                </Column>
-                            </LayoutGridItem>
-                        );
-                    }) }
-                </AutoGrid>
-                <Text center dangerouslySetInnerHTML={ { __html: LocalizeText('catalog.vip.buy.hccenter') } }></Text>
-            </Column>
-            <Column size={ 5 } overflow="hidden">
-                <Column fullHeight center overflow="hidden">
-                    { currentPage.localization.getImage(1) && <img alt="" src={ currentPage.localization.getImage(1) } /> }
-                    <Text center overflow="auto" dangerouslySetInnerHTML={ { __html: getSubscriptionDetails } } />
-                </Column>
-                { pendingOffer &&
-                    <Column fullWidth grow justifyContent="end">
-                        <Flex alignItems="end">
-                            <Column grow gap={ 0 }>
-                                <Text fontWeight="bold">{ getPurchaseHeader() }</Text>
-                                <Text>{ getPurchaseValidUntil() }</Text>
-                            </Column>
-                            <Column gap={ 1 }>
-                                { (pendingOffer.priceCredits > 0) &&
-                                    <Flex alignItems="center" justifyContent="end" gap={ 1 }>
-                                        <Text>{ pendingOffer.priceCredits }</Text>
+        <div className="flex flex-col h-full gap-2">
+            <div className="flex flex-col gap-1.5 flex-1 min-h-0 overflow-auto">
+                { clubOffers && (clubOffers.length > 0) && clubOffers.map((offer, index) =>
+                {
+                    return (
+                        <div key={ index } className={ `flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors ${ pendingOffer === offer ? 'border-zinc-900 bg-white shadow-sm' : 'border-zinc-100 bg-zinc-50/50 hover:border-zinc-300' }` } onClick={ () => setOffer(offer) }>
+                            <i className="icon-hc-banner" />
+                            <div className="flex flex-col items-end ml-auto">
+                                <span className="text-sm text-zinc-900">{ getOfferText(offer) }</span>
+                                <div className="flex items-center justify-end gap-1">
+                                    { (offer.priceCredits > 0) &&
+                                    <div className="flex items-center justify-end gap-1">
+                                        <span className="text-xs text-zinc-700">{ offer.priceCredits }</span>
                                         <LayoutCurrencyIcon type={ -1 } />
-                                    </Flex> }
-                                { (pendingOffer.priceActivityPoints > 0) &&
-                                    <Flex alignItems="center" justifyContent="end" gap={ 1 }>
-                                        <Text>{ pendingOffer.priceActivityPoints }</Text>
-                                        <LayoutCurrencyIcon type={ pendingOffer.priceActivityPointsType } />
-                                    </Flex> }
-                            </Column>
-                        </Flex>
-                        { getPurchaseButton() }
-                    </Column> }
-            </Column>
-        </Grid>
+                                    </div> }
+                                    { (offer.priceActivityPoints > 0) &&
+                                    <div className="flex items-center justify-end gap-1">
+                                        <span className="text-xs text-zinc-700">{ offer.priceActivityPoints }</span>
+                                        <LayoutCurrencyIcon type={ offer.priceActivityPointsType } />
+                                    </div> }
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }) }
+            </div>
+            { /* Server localization text (trusted content from game server) */ }
+            <div className="catalog-page-text text-center" dangerouslySetInnerHTML={ { __html: LocalizeText('catalog.vip.buy.hccenter') } } />
+            <div className="flex flex-col items-center overflow-hidden">
+                { currentPage.localization.getImage(1) && <img alt="" src={ currentPage.localization.getImage(1) } /> }
+                { /* Server localization text (trusted content from game server) */ }
+                <div className="catalog-page-text text-center" dangerouslySetInnerHTML={ { __html: getSubscriptionDetails } } />
+            </div>
+            { pendingOffer &&
+                <div className="flex flex-col gap-2 p-2.5 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0">
+                    <div className="flex items-end">
+                        <div className="flex flex-col flex-1">
+                            <span className="text-sm font-medium text-zinc-900">{ getPurchaseHeader() }</span>
+                            <span className="text-xs text-zinc-500">{ getPurchaseValidUntil() }</span>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            { (pendingOffer.priceCredits > 0) &&
+                                <div className="flex items-center justify-end gap-1">
+                                    <span className="text-xs text-zinc-700">{ pendingOffer.priceCredits }</span>
+                                    <LayoutCurrencyIcon type={ -1 } />
+                                </div> }
+                            { (pendingOffer.priceActivityPoints > 0) &&
+                                <div className="flex items-center justify-end gap-1">
+                                    <span className="text-xs text-zinc-700">{ pendingOffer.priceActivityPoints }</span>
+                                    <LayoutCurrencyIcon type={ pendingOffer.priceActivityPointsType } />
+                                </div> }
+                        </div>
+                    </div>
+                    { getPurchaseButton() }
+                </div> }
+        </div>
     );
 }

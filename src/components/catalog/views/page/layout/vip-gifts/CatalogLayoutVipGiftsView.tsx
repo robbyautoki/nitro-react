@@ -1,7 +1,6 @@
 import { SelectClubGiftComposer } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useMemo } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../../api';
-import { AutoGrid, Text } from '../../../../../../common';
 import { useCatalog, useNotification, usePurse } from '../../../../../../hooks';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
 import { VipGiftItem } from './VipGiftItemView';
@@ -52,11 +51,11 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = props =>
     
     
     return (
-        <>
-            <Text truncate shrink fontWeight="bold">{ giftsAvailable() }</Text>
-            <AutoGrid columnCount={ 1 } className="nitro-catalog-layout-vip-gifts-grid">
+        <div className="flex flex-col h-full gap-2">
+            <span className="text-xs font-semibold text-zinc-900 truncate shrink-0">{ giftsAvailable() }</span>
+            <div className="flex flex-col gap-1.5 overflow-auto nitro-catalog-layout-vip-gifts-grid">
                 { (clubGifts.offers.length > 0) && sortGifts.map(offer => <VipGiftItem key={ offer.offerId } offer={ offer } isAvailable={ (clubGifts.getOfferExtraData(offer.offerId).isSelectable && (clubGifts.giftsAvailable > 0)) } onSelect={ selectGift } daysRequired={ clubGifts.getOfferExtraData(offer.offerId).daysRequired }/>) }
-            </AutoGrid>
-        </>
+            </div>
+        </div>
     )
 }

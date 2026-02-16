@@ -1,7 +1,6 @@
 import { CatalogPageMessageOfferData } from '@nitrots/nitro-renderer';
 import { FC, useCallback } from 'react';
 import { LocalizeText, ProductImageUtility } from '../../../../../../api';
-import { Button, LayoutGridItem, LayoutImage, Text } from '../../../../../../common';
 
 export interface VipGiftItemViewProps
 {
@@ -52,12 +51,12 @@ export const VipGiftItem : FC<VipGiftItemViewProps> = props =>
     },[ daysRequired ]);
 
     return (
-        <LayoutGridItem center={ false } column={ false } alignItems="center" className="p-1">
-            <LayoutImage imageUrl={ getImageUrlForOffer() } />
-            <Text grow fontWeight="bold">{ getItemTitle() }</Text>
-            <Button variant="secondary" onClick={ () => onSelect(offer.localizationId) } disabled={ !isAvailable }>
+        <div className="flex items-center gap-3 p-2 rounded-lg border border-zinc-100 bg-white">
+            <img src={getImageUrlForOffer()} alt="" className="w-10 h-10 object-contain shrink-0" />
+            <span className="flex-1 text-xs font-semibold text-zinc-900 truncate">{ getItemTitle() }</span>
+            <button className="h-7 px-3 text-xs rounded-md border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0" onClick={ () => onSelect(offer.localizationId) } disabled={ !isAvailable }>
                 { LocalizeText('catalog.club_gift.select') }
-            </Button>
-        </LayoutGridItem>
+            </button>
+        </div>
     );
 }

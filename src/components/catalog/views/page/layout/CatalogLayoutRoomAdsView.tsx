@@ -1,8 +1,8 @@
 import { GetRoomAdPurchaseInfoComposer, GetUserEventCatsMessageComposer, PurchaseRoomAdMessageComposer, RoomAdPurchaseInfoEvent, RoomEntryData } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Base, Button, Column, Text } from '../../../../../common';
 import { useCatalog, useMessageEvent, useNavigator, useRoomPromote } from '../../../../../hooks';
+import { Button } from '../../../../ui/button';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
@@ -26,10 +26,9 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
             setEventName(promoteInformation.data.eventName);
             setEventDesc(promoteInformation.data.eventDescription);
             setCategoryId(promoteInformation.data.categoryId);
-            setExtended(isExtended); // This is for sending to packet
-            setIsExtended(false); // This is from hook useRoomPromotte
+            setExtended(isExtended);
+            setIsExtended(false);
         }
-
     }, [ isExtended, eventName, eventDesc, categoryId ]);
 
     const resetData = () =>
@@ -58,51 +57,53 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
     useMessageEvent<RoomAdPurchaseInfoEvent>(RoomAdPurchaseInfoEvent, event =>
     {
         const parser = event.getParser();
-
         if(!parser) return;
-
         setAvailableRooms(parser.rooms);
     });
 
     useEffect(() =>
     {
         SendMessageComposer(new GetRoomAdPurchaseInfoComposer());
-        // TODO: someone needs to fix this for morningstar
         SendMessageComposer(new GetUserEventCatsMessageComposer());
     }, []);
 
-    return (<>
-        <Text bold center>{ LocalizeText('roomad.catalog_header') }</Text>
-        <Column size={ 12 } overflow="hidden" className="text-black">
-            <Base>{ LocalizeText('roomad.catalog_text', [ 'duration' ], [ '120' ]) }</Base>
-            <Base className="bg-muted rounded p-1">
-                <Column gap={ 2 }>
-                    <Text bold>{ LocalizeText('navigator.category') }</Text>
+    return (
+        <div className="flex flex-col h-full gap-2 overflow-auto">
+            <span className="text-sm font-semibold text-zinc-900 text-center">{ LocalizeText('roomad.catalog_header') }</span>
+            <span className="text-xs text-zinc-600">{ LocalizeText('roomad.catalog_text', [ 'duration' ], [ '120' ]) }</span>
+            <div className="flex flex-col gap-2 rounded-lg bg-zinc-50 border border-zinc-100 p-3">
+                <div className="flex flex-col gap-1">
+                    <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('navigator.category') }</span>
                     <select className="form-select form-select-sm" value={ categoryId } onChange={ event => setCategoryId(parseInt(event.target.value)) } disabled={ extended }>
                         { categories && categories.map((cat, index) => <option key={ index } value={ cat.id }>{ LocalizeText(cat.name) }</option>) }
                     </select>
-                </Column>
-                <Column gap={ 1 }>
-                    <Text bold>{ LocalizeText('roomad.catalog_name') }</Text>
+                </div>
+                <div className="flex flex-col gap-1">
+                    <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_name') }</span>
                     <input type="text" className="form-control form-control-sm" maxLength={ 64 } value={ eventName } onChange={ event => setEventName(event.target.value) } readOnly={ extended } />
-                </Column>
-                <Column gap={ 1 }>
-                    <Text bold>{ LocalizeText('roomad.catalog_description') }</Text>
+                </div>
+                <div className="flex flex-col gap-1">
+                    <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_description') }</span>
                     <textarea className="form-control form-control-sm" maxLength={ 64 } value={ eventDesc } onChange={ event => setEventDesc(event.target.value) } readOnly={ extended } />
-                </Column>
-                <Column gap={ 1 }>
-                    <Text bold>{ LocalizeText('roomad.catalog_roomname') }</Text>
+                </div>
+                <div className="flex flex-col gap-1">
+                    <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_roomname') }</span>
                     <select className="form-select form-select-sm" value={ roomId } onChange={ event => setRoomId(parseInt(event.target.value)) } disabled={ extended }>
                         <option value={ -1 } disabled>{ LocalizeText('roomad.catalog_roomname') }</option>
                         { availableRooms && availableRooms.map((room, index) => <option key={ index } value={ room.roomId }>{ room.roomName }</option>) }
                     </select>
-                </Column>
-                <Column gap={ 1 }>
-                    <Button variant={ (!eventName || !eventDesc || roomId === -1) ? 'danger' : 'success' } onClick={ purchaseAd } disabled={ (!eventName || !eventDesc || roomId === -1) }>{ extended ? LocalizeText('roomad.extend.event') : LocalizeText('buy') }</Button>
-                </Column>
-            </Base>
-        </Column>
-    </>
+                </div>
+                <Button
+                    variant={ (!eventName || !eventDesc || roomId === -1) ? 'destructive' : 'default' }
+                    size="sm"
+                    className="w-full h-8 text-xs"
+                    onClick={ purchaseAd }
+                    disabled={ (!eventName || !eventDesc || roomId === -1) }
+                >
+                    { extended ? LocalizeText('roomad.extend.event') : LocalizeText('buy') }
+                </Button>
+            </div>
+        </div>
     );
 }
 

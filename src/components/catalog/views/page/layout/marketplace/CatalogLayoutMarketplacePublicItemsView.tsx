@@ -1,7 +1,6 @@
 import { BuyMarketplaceOfferMessageComposer, GetMarketplaceOffersMessageComposer, MarketplaceBuyOfferResultEvent, MarketPlaceOffersEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useMemo, useState } from 'react';
 import { IMarketplaceSearchOptions, LocalizeText, MarketplaceOfferData, MarketplaceSearchType, NotificationAlertType, SendMessageComposer } from '../../../../../../api';
-import { Button, ButtonGroup, Column, Text } from '../../../../../../common';
 import { useMessageEvent, useNotification, usePurse } from '../../../../../../hooks';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
 import { CatalogLayoutMarketplaceItemView, PUBLIC_OFFER } from './CatalogLayoutMarketplaceItemView';
@@ -66,7 +65,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
         const parser = event.getParser();
 
         if(!parser) return;
-        
+
         const latestOffers = new Map<number, MarketplaceOfferData>();
         parser.offers.forEach(entry =>
         {
@@ -101,7 +100,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                 break;
             case 3:
             // our shit was updated
-            // todo: some dialogue modal 
+            // todo: some dialogue modal
                 setOffers( prev =>
                 {
                     const newVal = new Map(prev);
@@ -119,7 +118,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                     return newVal;
                 });
 
-                showConfirm(LocalizeText('catalog.marketplace.confirm_higher_header') + 
+                showConfirm(LocalizeText('catalog.marketplace.confirm_higher_header') +
                 '\n' + LocalizeText('catalog.marketplace.confirm_price', [ 'price' ], [ parser.newPrice.toString() ]), () =>
                 {
                     SendMessageComposer(new BuyMarketplaceOfferMessageComposer(parser.offerId));
@@ -131,31 +130,31 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                 break;
         }
     });
-    
+
     return (
-        <>
-            <ButtonGroup>
-                <Button active={ (searchType === MarketplaceSearchType.BY_ACTIVITY) } onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
+        <div className="flex flex-col h-full gap-2">
+            <div className="flex gap-1">
+                <button className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50' }`} onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
                     { LocalizeText('catalog.marketplace.search_by_activity') }
-                </Button>
-                <Button active={ (searchType === MarketplaceSearchType.BY_VALUE) } onClick={ () => setSearchType(MarketplaceSearchType.BY_VALUE) }>
+                </button>
+                <button className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${ searchType === MarketplaceSearchType.BY_VALUE ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50' }`} onClick={ () => setSearchType(MarketplaceSearchType.BY_VALUE) }>
                     { LocalizeText('catalog.marketplace.search_by_value') }
-                </Button>
-                <Button active={ (searchType === MarketplaceSearchType.ADVANCED) } onClick={ () => setSearchType(MarketplaceSearchType.ADVANCED) }>
+                </button>
+                <button className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${ searchType === MarketplaceSearchType.ADVANCED ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-50' }`} onClick={ () => setSearchType(MarketplaceSearchType.ADVANCED) }>
                     { LocalizeText('catalog.marketplace.search_advanced') }
-                </Button>
-            </ButtonGroup>
+                </button>
+            </div>
             <SearchFormView sortTypes={ getSortTypes } searchType={ searchType } onSearch={ requestOffers } />
-            <Column gap={ 1 } overflow="hidden">
-                <Text truncate shrink fontWeight="bold">
+            <div className="flex flex-col gap-1.5 flex-1 min-h-0">
+                <span className="text-xs font-semibold text-zinc-900 truncate shrink-0">
                     { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.size.toString() ]) }
-                </Text>
-                <Column className="nitro-catalog-layout-marketplace-grid" overflow="auto">
-                    { 
+                </span>
+                <div className="flex flex-col gap-1.5 overflow-auto nitro-catalog-layout-marketplace-grid">
+                    {
                         Array.from(offers.values()).map( (entry, index) => <CatalogLayoutMarketplaceItemView key={ index } offerData={ entry } type={ PUBLIC_OFFER } onClick={ purchaseItem } />)
                     }
-                </Column>
-            </Column>
-        </>
+                </div>
+            </div>
+        </div>
     );
 }

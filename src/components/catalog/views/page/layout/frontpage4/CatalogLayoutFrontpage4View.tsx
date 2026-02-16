@@ -1,7 +1,6 @@
 import { FrontPageItem } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect } from 'react';
 import { CreateLinkEvent } from '../../../../../../api';
-import { Column, Grid } from '../../../../../../common';
 import { useCatalog } from '../../../../../../hooks';
 import { CatalogRedeemVoucherView } from '../../common/CatalogRedeemVoucherView';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
@@ -31,12 +30,12 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
     }, [ page, hideNavigation ]);
 
     return (
-        <Grid>
-            <Column size={ 4 }>
+        <div className="flex gap-3 h-full">
+            <div className="w-1/3 shrink-0 flex flex-col">
                 { frontPageItems[0] &&
                     <CatalogLayoutFrontPageItemView item={ frontPageItems[0] } onClick={ event => selectItem(frontPageItems[0]) } /> }
-            </Column>
-            <Column size={ 8 }>
+            </div>
+            <div className="flex-1 flex flex-col gap-2">
                 { frontPageItems[1] &&
                     <CatalogLayoutFrontPageItemView item={ frontPageItems[1] } onClick={ event => selectItem(frontPageItems[1]) } /> }
                 { frontPageItems[2] &&
@@ -44,7 +43,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                 { frontPageItems[3] &&
                     <CatalogLayoutFrontPageItemView item={ frontPageItems[3] } onClick={ event => selectItem(frontPageItems[3]) } /> }
                 <CatalogRedeemVoucherView text={ page.localization.getText(1) } />
-            </Column>
-        </Grid>
+            </div>
+        </div>
     );
 }

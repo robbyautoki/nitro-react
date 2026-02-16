@@ -2,7 +2,7 @@ import { ApproveNameMessageComposer, ApproveNameMessageEvent, ColorConverter, Ge
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaFillDrip } from 'react-icons/fa';
 import { DispatchUiEvent, GetPetAvailableColors, GetPetIndexFromLocalization, LocalizeText, SendMessageComposer } from '../../../../../../api';
-import { AutoGrid, Base, Button, Column, Flex, Grid, LayoutGridItem, LayoutPetImageView, Text } from '../../../../../../common';
+import { LayoutPetImageView } from '../../../../../../common';
 import { CatalogPurchaseFailureEvent } from '../../../../../../events';
 import { useCatalog, useMessageEvent } from '../../../../../../hooks';
 import { CatalogAddOnBadgeWidgetView } from '../../widgets/CatalogAddOnBadgeWidgetView';
@@ -138,19 +138,19 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
             for(const paletteData of petPalettes)
             {
                 if(paletteData.breed !== productData.type) continue;
-    
+
                 const palettes: SellablePetPaletteData[] = [];
-    
+
                 for(const palette of paletteData.palettes)
                 {
                     if(!palette.sellable) continue;
-    
+
                     palettes.push(palette);
                 }
-    
+
                 setSelectedPaletteIndex((palettes.length ? 0 : -1));
                 setSellablePalettes(palettes);
-    
+
                 return;
             }
         }
@@ -174,7 +174,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
     useEffect(() =>
     {
         if(!roomPreviewer) return;
-        
+
         roomPreviewer.reset(false);
 
         if((petIndex === -1) || !sellablePalettes.length || (selectedPaletteIndex === -1)) return;
@@ -191,53 +191,51 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
         setApprovalResult(-1);
     }, [ petName ]);
 
-    if(!currentOffer) return null;
+    if(!currentOffer) return (
+        <div className="flex flex-col h-full gap-2">
+            { !!page.localization.getImage(1) && <img alt="" src={ page.localization.getImage(1) } /> }
+            <div className="catalog-page-text">
+                { /* Server localization text (trusted content from game server) */ }
+                <div className="text-center" dangerouslySetInnerHTML={ { __html: page.localization.getText(0) } } />
+            </div>
+        </div>
+    );
 
     return (
-        <Grid>
-            <Column size={ 7 } overflow="hidden">
-                <AutoGrid columnCount={ 5 }>
-                    { !colorsShowing && (sellablePalettes.length > 0) && sellablePalettes.map((palette, index) =>
-                    {
-                        return (
-                            <LayoutGridItem key={ index } itemActive={ (selectedPaletteIndex === index) } onClick={ event => setSelectedPaletteIndex(index) }>
-                                <LayoutPetImageView typeId={ petIndex } paletteId={ palette.paletteId } direction={ 2 } headOnly={ true } />
-                            </LayoutGridItem>
-                        );
-                    }) }
-                    { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <LayoutGridItem itemHighlight key={ index } itemActive={ (selectedColorIndex === index) } itemColor={ ColorConverter.int2rgb(colorSet[0]) } className="clear-bg" onClick={ event => setSelectedColorIndex(index) } />) }
-                </AutoGrid>
-            </Column>
-            <Column center={ !currentOffer } size={ 5 } overflow="hidden">
-                { !currentOffer &&
-                    <>
-                        { !!page.localization.getImage(1) && <img alt="" src={ page.localization.getImage(1) } /> }
-                        <Text center dangerouslySetInnerHTML={ { __html: page.localization.getText(0) } } />
-                    </> }
-                { currentOffer &&
-                    <>
-                        <Base position="relative" overflow="hidden">
-                            <CatalogViewProductWidgetView />
-                            <CatalogAddOnBadgeWidgetView position="absolute" className="bg-muted rounded bottom-1 end-1" />
-                            { ((petIndex > -1) && (petIndex <= 7)) &&
-                                <Button position="absolute" className="bottom-1 start-1" onClick={ event => setColorsShowing(!colorsShowing) }>
-                                    <FaFillDrip className="fa-icon" />
-                                </Button> }
-                        </Base>
-                        <Column grow gap={ 1 }>
-                            <Text truncate>{ petBreedName }</Text>
-                            <Column grow gap={ 1 }>
-                                <input type="text" className="form-control form-control-sm w-100" placeholder={ LocalizeText('widgets.petpackage.name.title') } value={ petName } onChange={ event => setPetName(event.target.value) } />
-                                { (approvalResult > 0) &&
-                                    <Base className="invalid-feedback d-block m-0">{ validationErrorMessage }</Base> }
-                            </Column>
-                            <Flex justifyContent="end">
-                                <CatalogTotalPriceWidget justifyContent="end" alignItems="end" />
-                            </Flex>
-                            <CatalogPurchaseWidgetView purchaseCallback={ purchasePet } />
-                        </Column>
-                    </> }
-            </Column>
-        </Grid>
+        <div className="flex flex-col h-full gap-2">
+            <div className="grid grid-cols-5 gap-1.5 flex-1 min-h-0 overflow-auto p-1">
+                { !colorsShowing && (sellablePalettes.length > 0) && sellablePalettes.map((palette, index) =>
+                {
+                    return (
+                        <div key={ index } className={ `flex items-center justify-center p-1 rounded-lg border cursor-pointer transition-colors ${ selectedPaletteIndex === index ? 'border-zinc-900 bg-white shadow-sm' : 'border-zinc-100 bg-zinc-50/50 hover:border-zinc-300' }` } onClick={ event => setSelectedPaletteIndex(index) }>
+                            <LayoutPetImageView typeId={ petIndex } paletteId={ palette.paletteId } direction={ 2 } headOnly={ true } />
+                        </div>
+                    );
+                }) }
+                { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <div key={ index } className={ `w-full aspect-square rounded-lg border-2 cursor-pointer transition-all ${ selectedColorIndex === index ? 'border-zinc-900 shadow-sm scale-105' : 'border-zinc-200 hover:border-zinc-400' }` } style={ { backgroundColor: ColorConverter.int2rgb(colorSet[0]) } } onClick={ event => setSelectedColorIndex(index) } />) }
+            </div>
+            <div className="flex flex-col gap-2 p-2.5 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0">
+                <div className="relative overflow-hidden">
+                    <CatalogViewProductWidgetView />
+                    <CatalogAddOnBadgeWidgetView position="absolute" className="bg-muted rounded bottom-1 end-1" />
+                    { ((petIndex > -1) && (petIndex <= 7)) &&
+                        <button className="absolute bottom-1 left-1 p-1.5 rounded-md bg-zinc-900 text-white hover:bg-zinc-800 transition-colors" onClick={ event => setColorsShowing(!colorsShowing) }>
+                            <FaFillDrip className="text-xs" />
+                        </button> }
+                </div>
+                <div className="flex flex-col flex-1 gap-1">
+                    <span className="truncate">{ petBreedName }</span>
+                    <div className="flex flex-col flex-1 gap-1">
+                        <input type="text" className="form-control form-control-sm w-100" placeholder={ LocalizeText('widgets.petpackage.name.title') } value={ petName } onChange={ event => setPetName(event.target.value) } />
+                        { (approvalResult > 0) &&
+                            <div className="invalid-feedback d-block m-0">{ validationErrorMessage }</div> }
+                    </div>
+                    <div className="flex justify-end">
+                        <CatalogTotalPriceWidget justifyContent="end" alignItems="end" />
+                    </div>
+                    <CatalogPurchaseWidgetView purchaseCallback={ purchasePet } />
+                </div>
+            </div>
+        </div>
     );
 }

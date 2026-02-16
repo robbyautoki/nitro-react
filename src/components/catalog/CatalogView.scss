@@ -142,7 +142,7 @@
         }
     }
 
-    // Grid items
+    // Grid items — product grid
     .layout-grid-item {
         border-color: #E4E4E7 !important;
         background-color: #FFFFFF;
@@ -155,9 +155,9 @@
         }
 
         &.active {
-            border-color: #3F3F46 !important;
-            background-color: #FFFFFF !important;
-            box-shadow: none;
+            border-color: #18181B !important;
+            background-color: #FAFAFA !important;
+            box-shadow: 0 0 0 1px #18181B;
         }
     }
 
@@ -169,6 +169,41 @@
     // Text overrides
     .text-black {
         color: #18181B !important;
+    }
+
+    // ─── Server HTML Content Reset ───
+    // Server localization texts contain old Habbo HTML with inline styles
+    // (gray backgrounds, old fonts, etc.) — neutralize them all
+    .catalog-page-text {
+        font-size: 12px;
+        color: #3F3F46;
+        line-height: 1.6;
+
+        * {
+            background-color: transparent !important;
+            background: transparent !important;
+            color: inherit !important;
+            font-family: inherit !important;
+            font-size: inherit !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        b, strong {
+            font-weight: 600;
+            color: #18181B !important;
+        }
+
+        a {
+            color: #2563EB !important;
+            text-decoration: underline;
+        }
+
+        br + br {
+            display: block;
+            content: '';
+            margin-top: 4px;
+        }
     }
 
     // Textarea

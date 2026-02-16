@@ -1,37 +1,31 @@
 import { FrontPageItem } from '@nitrots/nitro-renderer';
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { GetConfiguration } from '../../../../../../api';
-import { LayoutBackgroundImage, LayoutBackgroundImageProps } from '../../../../../../common';
-import { Text } from '../../../../../../common/Text';
 
-export interface CatalogLayoutFrontPageItemViewProps extends LayoutBackgroundImageProps
+export interface CatalogLayoutFrontPageItemViewProps
 {
     item: FrontPageItem;
+    onClick?: (event: React.MouseEvent) => void;
 }
 
 export const CatalogLayoutFrontPageItemView: FC<CatalogLayoutFrontPageItemViewProps> = props =>
 {
-    const { item = null, position = 'relative', pointer = true, overflow = 'hidden', fullHeight = true, classNames = [], children = null, ...rest } = props;
-
-    const getClassNames = useMemo(() =>
-    {
-        const newClassNames: string[] = [ 'rounded', 'nitro-front-page-item' ];
-
-        if(classNames.length) newClassNames.push(...classNames);
-
-        return newClassNames;
-    }, [ classNames ]);
+    const { item = null, onClick = null, children = null } = props;
 
     if(!item) return null;
 
     const imageUrl = (GetConfiguration<string>('image.library.url') + item.itemPromoImage);
 
     return (
-        <LayoutBackgroundImage imageUrl={ imageUrl } classNames={ getClassNames } position={ position } fullHeight={ fullHeight } pointer={ pointer } overflow={ overflow } { ...rest }>
-            <Text position="absolute" variant="white" className="bg-dark rounded p-2 m-2 bottom-0">
+        <div
+            className="relative flex-1 rounded-lg overflow-hidden cursor-pointer bg-cover bg-center min-h-[80px]"
+            style={{ backgroundImage: `url(${imageUrl})` }}
+            onClick={onClick}
+        >
+            <span className="absolute bottom-2 left-2 text-white text-xs font-medium bg-zinc-900/80 rounded px-2 py-1">
                 { item.itemName }
-            </Text>
+            </span>
             { children }
-        </LayoutBackgroundImage>
+        </div>
     );
 }

@@ -1,7 +1,6 @@
 import { CatalogGroupsComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { SendMessageComposer } from '../../../../../api';
-import { Base, Column, Flex, Grid, Text } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
 import { CatalogFirstProductSelectorWidgetView } from '../widgets/CatalogFirstProductSelectorWidgetView';
 import { CatalogGuildSelectorWidgetView } from '../widgets/CatalogGuildSelectorWidgetView';
@@ -20,30 +19,28 @@ export const CatalogLayouGuildForumView: FC<CatalogLayoutProps> = props =>
     {
         SendMessageComposer(new CatalogGroupsComposer());
     }, [ page ]);
-    
+
     return (
         <>
             <CatalogFirstProductSelectorWidgetView />
-            <Grid>
-                <Column className="bg-muted rounded p-2 text-black" size={ 7 } overflow="hidden">
-                    <Base className="overflow-auto" dangerouslySetInnerHTML={ { __html: page.localization.getText(1) } } />
-                </Column>
-                <Column size={ 5 } overflow="hidden" gap={ 1 }>
-                    { !!currentOffer &&
-                        <>
-                            <Column grow gap={ 1 }>
-                                <Text truncate>{ currentOffer.localizationName }</Text>
-                                <Base grow>
-                                    <CatalogGuildSelectorWidgetView />
-                                </Base>
-                                <Flex justifyContent="end">
-                                    <CatalogTotalPriceWidget alignItems="end" />
-                                </Flex>
+            <div className="flex flex-col h-full gap-2">
+                <div className="catalog-page-text flex-1 min-h-0 overflow-auto rounded-lg bg-zinc-50 border border-zinc-100 p-3">
+                    { /* Server localization text (trusted content from game server) */ }
+                    <div dangerouslySetInnerHTML={ { __html: page.localization.getText(1) } } />
+                </div>
+                { !!currentOffer && (
+                    <div className="flex items-center gap-3 p-2.5 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0">
+                        <div className="flex-1 min-w-0 flex flex-col gap-1">
+                            <span className="text-sm font-medium text-zinc-900 truncate">{ currentOffer.localizationName }</span>
+                            <CatalogGuildSelectorWidgetView />
+                            <div className="flex items-center justify-between gap-2">
+                                <CatalogTotalPriceWidget justifyContent="end" alignItems="end" />
                                 <CatalogPurchaseWidgetView noGiftOption={ true } />
-                            </Column>
-                        </> }
-                </Column>
-            </Grid>
+                            </div>
+                        </div>
+                    </div>
+                ) }
+            </div>
         </>
     );
 }

@@ -1,7 +1,6 @@
 import { CancelMarketplaceOfferMessageComposer, GetMarketplaceOwnOffersMessageComposer, MarketplaceCancelOfferResultEvent, MarketplaceOwnOffersEvent, RedeemMarketplaceOfferCreditsMessageComposer } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, MarketplaceOfferData, MarketPlaceOfferState, NotificationAlertType, SendMessageComposer } from '../../../../../../api';
-import { Button, Column, Text } from '../../../../../../common';
 import { useMessageEvent, useNotification } from '../../../../../../hooks';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
 import { CatalogLayoutMarketplaceItemView, OWN_OFFER } from './CatalogLayoutMarketplaceItemView';
@@ -28,7 +27,7 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = prop
         });
 
         setCreditsWaiting(parser.creditsWaiting);
-        setOffers(offers); 
+        setOffers(offers);
     });
 
     useMessageEvent<MarketplaceCancelOfferResultEvent>(MarketplaceCancelOfferResultEvent, event =>
@@ -51,7 +50,7 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = prop
     {
         return offers.filter(value => (value.status === MarketPlaceOfferState.SOLD));
     }, [ offers ]);
-    
+
     const redeemSoldOffers = useCallback(() =>
     {
         setOffers(prevValue =>
@@ -60,7 +59,7 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = prop
 
             return prevValue.filter(value => (idsToDelete.indexOf(value.offerId) === -1));
         })
-        
+
         SendMessageComposer(new RedeemMarketplaceOfferCreditsMessageComposer());
     }, [ soldOffers ]);
 
@@ -75,28 +74,28 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = prop
     }, []);
 
     return (
-        <Column overflow="hidden">
+        <div className="flex flex-col h-full gap-2 overflow-hidden">
             { (creditsWaiting <= 0) &&
-                <Text center className="bg-muted rounded p-1">
+                <div className="text-center text-xs bg-zinc-100 rounded-lg p-2 text-zinc-600">
                     { LocalizeText('catalog.marketplace.redeem.no_sold_items') }
-                </Text> }
+                </div> }
             { (creditsWaiting > 0) &&
-                <Column center gap={ 1 } className="bg-muted rounded p-2">
-                    <Text>
+                <div className="flex flex-col items-center gap-1.5 bg-zinc-100 rounded-lg p-3">
+                    <span className="text-xs text-zinc-700">
                         { LocalizeText('catalog.marketplace.redeem.get_credits', [ 'count', 'credits' ], [ soldOffers.length.toString(), creditsWaiting.toString() ]) }
-                    </Text>
-                    <Button className="mt-1" onClick={ redeemSoldOffers }>
+                    </span>
+                    <button className="mt-1 h-7 px-3 text-xs rounded-md bg-zinc-900 text-white hover:bg-zinc-800 transition-colors" onClick={ redeemSoldOffers }>
                         { LocalizeText('catalog.marketplace.offer.redeem') }
-                    </Button>
-                </Column> }
-            <Column gap={ 1 } overflow="hidden">
-                <Text truncate shrink fontWeight="bold">
+                    </button>
+                </div> }
+            <div className="flex flex-col gap-1.5 flex-1 min-h-0">
+                <span className="text-xs font-semibold text-zinc-900 truncate shrink-0">
                     { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.length.toString() ]) }
-                </Text>
-                <Column overflow="auto" className="nitro-catalog-layout-marketplace-grid">
+                </span>
+                <div className="flex flex-col gap-1.5 overflow-auto nitro-catalog-layout-marketplace-grid">
                     { (offers.length > 0) && offers.map(offer => <CatalogLayoutMarketplaceItemView key={ offer.offerId } offerData={ offer } type={ OWN_OFFER } onClick={ takeItemBack } />) }
-                </Column>
-            </Column>
-        </Column>
+                </div>
+            </div>
+        </div>
     );
 }

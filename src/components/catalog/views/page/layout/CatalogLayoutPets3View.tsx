@@ -1,7 +1,4 @@
 import { FC } from 'react';
-import { Base } from '../../../../../common/Base';
-import { Column } from '../../../../../common/Column';
-import { Flex } from '../../../../../common/Flex';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayoutPets3View: FC<CatalogLayoutProps> = props =>
@@ -9,19 +6,18 @@ export const CatalogLayoutPets3View: FC<CatalogLayoutProps> = props =>
     const { page = null } = props;
 
     const imageUrl = page.localization.getImage(1);
-    
+
     return (
-        <Column grow className="bg-muted rounded text-black p-2" overflow="hidden">
-            <Flex alignItems="center" gap={ 2 }>
+        <div className="catalog-page-text flex flex-col h-full gap-2 overflow-hidden">
+            <div className="flex items-center gap-2 shrink-0">
                 { imageUrl && <img alt="" src={ imageUrl } /> }
-                <Base className="fs-5" dangerouslySetInnerHTML={ { __html: page.localization.getText(1) } } />
-            </Flex>
-            <Column grow alignItems="center" overflow="auto">
-                <Base dangerouslySetInnerHTML={ { __html: page.localization.getText(2) } } />
-            </Column>
-            <Flex alignItems="center">
-                <Base className="fw-bold" dangerouslySetInnerHTML={ { __html: page.localization.getText(3) } } />
-            </Flex>
-        </Column>
+                { /* Server localization text (trusted content from game server) */ }
+                <div className="text-base font-semibold" dangerouslySetInnerHTML={ { __html: page.localization.getText(1) } } />
+            </div>
+            <div className="flex-1 overflow-auto">
+                <div dangerouslySetInnerHTML={ { __html: page.localization.getText(2) } } />
+            </div>
+            <div className="shrink-0 font-semibold" dangerouslySetInnerHTML={ { __html: page.localization.getText(3) } } />
+        </div>
     );
 }

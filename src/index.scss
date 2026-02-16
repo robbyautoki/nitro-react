@@ -1,6 +1,24 @@
-@import './tailwind.css';
-@import './assets/styles';
+// ─── SCSS Definitions (pre-import) ───────────────────────────────────────────
+// These produce minimal CSS output (~335 bytes) but make all Bootstrap
+// SCSS variables ($success, $white, $black, $border-radius, etc.)
+// globally available for App.scss and component SCSS files.
+// Required because dart-sass creates a new variable scope inside @layer {}.
+@import './assets/styles/bootstrap/functions';
+@import './assets/styles/bootstrap/variables';
+@import './assets/styles/bootstrap/mixins';
+@import './assets/styles/bootstrap/utilities';
 
+// ─── Bootstrap in CSS @layer ─────────────────────────────────────────────────
+// Per CSS spec, unlayered styles ALWAYS beat layered styles.
+// This makes Tailwind utilities and App SCSS automatically win over Bootstrap.
+@layer bootstrap {
+  @import './assets/styles';
+}
+
+// ─── Tailwind CSS (unlayered — beats @layer bootstrap) ───────────────────────
+@import './tailwind.css';
+
+// ─── App Styles (unlayered — highest priority) ──────────────────────────────
 html,
 body {
     padding: 0;

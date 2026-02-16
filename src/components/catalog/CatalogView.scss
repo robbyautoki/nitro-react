@@ -20,13 +20,8 @@
     }
 
     // ─── Scoped Bootstrap Overrides ───
-    // These restyle common components within the catalog scope
-
-    // shadcn Button reset — Bootstrap's button reboot conflicts with Tailwind sizing
-    // Only target buttons that DON'T have Bootstrap .btn class (i.e. shadcn buttons)
-    button:not(.btn):not([role="tab"]) {
-        border-radius: 8px !important;
-    }
+    // These restyle Bootstrap components within the catalog scope
+    // (Bootstrap is in @layer bootstrap, so these unlayered styles win automatically)
 
     // Form inputs
     .form-control {
@@ -199,8 +194,7 @@
     }
 }
 
-// Radix Tabs Override — Bootstrap resets button { border-radius: 0 }
-// so we need higher-specificity SCSS to restore the shadcn look
+// Radix Tabs — custom styling for catalog tab bar
 .nitro-catalog [role="tablist"] {
     display: flex;
     align-items: center;
@@ -217,8 +211,8 @@
     }
 
     button[role="tab"] {
-        border: none !important;
-        border-radius: 6px !important;
+        border: none;
+        border-radius: 6px;
         padding: 6px 12px;
         font-size: 11px;
         font-weight: 500;

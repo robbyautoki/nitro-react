@@ -4,8 +4,14 @@ import { FurniCategory, GetAvatarRenderManager, GetSessionDataManager, Offer, Pr
 import { AutoGrid, Column, LayoutGridItem, LayoutRoomPreviewerView } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
 
-export const CatalogViewProductWidgetView: FC<{}> = props =>
+interface CatalogViewProductWidgetViewProps
 {
+    height?: number;
+}
+
+export const CatalogViewProductWidgetView: FC<CatalogViewProductWidgetViewProps> = props =>
+{
+    const { height = 160 } = props;
     const { currentOffer = null, roomPreviewer = null, purchaseOptions = null } = useCatalog();
     const { previewStuffData = null } = purchaseOptions;
 
@@ -95,5 +101,5 @@ export const CatalogViewProductWidgetView: FC<{}> = props =>
         );
     }
     
-    return <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 160 } />;
+    return <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ height } />;
 }

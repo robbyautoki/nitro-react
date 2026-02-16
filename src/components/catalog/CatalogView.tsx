@@ -5,16 +5,27 @@ import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../
 import { useCatalog } from '../../hooks';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { CatalogIconView } from './views/catalog-icon/CatalogIconView';
+import { CatalogInspectorView } from './views/CatalogInspectorView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
 import { GetCatalogLayout } from './views/page/layout/GetCatalogLayout';
 import { MarketplacePostOfferView } from './views/page/layout/marketplace/MarketplacePostOfferView';
+
+const SELF_CONTAINED_LAYOUTS = new Set([
+    'frontpage4', 'frontpage_featured',
+    'pets', 'pets2', 'pets3',
+    'vip_buy', 'club_gifts',
+    'marketplace', 'marketplace_own_items',
+    'guild_frontpage', 'guild_forum',
+    'info_loyalty', 'roomads',
+]);
 
 export const CatalogView: FC<{}> = props =>
 {
     const { isVisible = false, setIsVisible = null, rootNode = null, currentPage = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById } = useCatalog();
 
     const activeTabId = useMemo(() => rootNode?.children?.find(c => c.isActive)?.pageId?.toString(), [ rootNode ]);
+    const showInspector = currentPage && !SELF_CONTAINED_LAYOUTS.has(currentPage.layoutCode);
 
     const onTabChange = (value: string) =>
     {
@@ -79,7 +90,7 @@ export const CatalogView: FC<{}> = props =>
     return (
         <>
             { isVisible &&
-                <NitroCardView uniqueKey="catalog" className="nitro-catalog" style={ GetConfiguration('catalog.headers') ? { width: 840 } : {} }>
+                <NitroCardView uniqueKey="catalog" className="nitro-catalog" style={ GetConfiguration('catalog.headers') ? { width: 940 } : {} }>
                     <NitroCardHeaderView headerText={ LocalizeText('catalog.title') } onCloseClick={ event => setIsVisible(false) } />
                     {/* Tab Navigation */}
                     { rootNode && (rootNode.children.length > 0) &&
@@ -105,12 +116,16 @@ export const CatalogView: FC<{}> = props =>
                     <NitroCardContentView>
                         <div className="flex h-full gap-3">
                             { !navigationHidden &&
-                                <div className="w-[200px] min-w-[200px] flex flex-col">
+                                <div className="w-[160px] min-w-[160px] flex flex-col">
                                     <CatalogNavigationView node={ activeNodes?.[0] } />
                                 </div> }
                             <div className="flex-1 min-w-0 overflow-hidden">
                                 { GetCatalogLayout(currentPage, () => setNavigationHidden(true)) }
                             </div>
+                            { showInspector &&
+                                <div className="w-[220px] min-w-[220px] flex flex-col">
+                                    <CatalogInspectorView />
+                                </div> }
                         </div>
                     </NitroCardContentView>
                 </NitroCardView> }

@@ -46,7 +46,7 @@ $yellow:  #ffc107 !default;
 $green:   #00800b !default;
 $teal:    #20c997 !default;
 $cyan:    #0dcaf0 !default;
-$muted:   #B6BEC5 !default;
+$muted:   #A1A1AA !default;
 // scss-docs-end color-variables
 
 // scss-docs-start colors-map
@@ -70,10 +70,10 @@ $colors: (
 // scss-docs-end colors-map
 
 // scss-docs-start theme-color-variables
-$primary:       #1E7295 !default;
-$secondary:     #185D79 !default;
-$tertiary:      #2DABC2 !default;
-$quaternary:    #2B91A7 !default;
+$primary:       #18181B !default;
+$secondary:     #27272A !default;
+$tertiary:      #3F3F46 !default;
+$quaternary:    #52525B !default;
 $mirage:        #131e25 !default;
 $aztec:         #0d171d !default;
 $cello-light:   #21516e !default;
@@ -91,7 +91,7 @@ $info:          $cyan !default;
 $warning:       $yellow !default;
 $danger:        $red !default;
 
-$light:         #DFDFDF !default;
+$light:         #FAFAFA !default;
 $dark:          rgba(28,28,32,.9803921568627451) !default;
 $light-dark:    $gray-800 !default;
 // scss-docs-end theme-color-variables
@@ -560,20 +560,20 @@ $border-widths: (
   5: 5px
 ) !default;
 
-$border-color:                #283F5D !default;
+$border-color:                #E4E4E7 !default;
 // scss-docs-end border-variables
 
 // scss-docs-start border-radius-variables
-$border-radius:               .25rem !default;
-$border-radius-sm:            .2rem !default;
-$border-radius-lg:            .3rem !default;
+$border-radius:               .5rem !default;
+$border-radius-sm:            .375rem !default;
+$border-radius-lg:            .5rem !default;
 $border-radius-pill:          50rem !default;
 // scss-docs-end border-radius-variables
 
 // scss-docs-start box-shadow-variables
-$box-shadow:                  0px 2px 0px rgba($black, 0.45) !default;
-$box-shadow-sm:               0 .125rem .25rem rgba($black, .075) !default;
-$box-shadow-lg:               0 1rem 3rem rgba($black, .175) !default;
+$box-shadow:                  0 1px 3px rgba($black, 0.1) !default;
+$box-shadow-sm:               0 1px 2px rgba($black, 0.05) !default;
+$box-shadow-lg:               0 4px 12px rgba($black, .1) !default;
 $box-shadow-inset:            inset 0px 0px 0px 2px rgba($white, 0.1) !default;
 // scss-docs-end box-shadow-variables
 
@@ -610,7 +610,7 @@ $aspect-ratios: (
 
 // scss-docs-start font-variables
 // stylelint-disable value-keyword-case
-$font-family-sans-serif:      Ubuntu !default;
+$font-family-sans-serif:      'Inter', system-ui, -apple-system, sans-serif !default;
 $font-family-monospace:       SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !default;
 // stylelint-enable value-keyword-case
 $font-family-base:            var(--#{$variable-prefix}font-sans-serif) !default;
@@ -1129,15 +1129,15 @@ $nav-link-hover-color:              null !default;
 $nav-link-transition:               color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out !default;
 $nav-link-disabled-color:           $gray-600 !default;
 
-$nav-tabs-border-color:             #283F5D !default;
+$nav-tabs-border-color:             #E4E4E7 !default;
 $nav-tabs-border-width:             $border-width !default;
 $nav-tabs-border-radius:            $border-radius !default;
-$nav-tabs-link-bg:                  $muted !default;
-$nav-tabs-link-hover-bg:            $light !default;
+$nav-tabs-link-bg:                  #F4F4F5 !default;
+$nav-tabs-link-hover-bg:            #FAFAFA !default;
 $nav-tabs-link-hover-border-color:  $nav-tabs-border-color !default;
 $nav-tabs-link-active-color:        $black !default;
-$nav-tabs-link-active-bg:           $light !default;
-$nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color $nav-tabs-link-active-bg !default;
+$nav-tabs-link-active-bg:           #FFFFFF !default;
+$nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color #FFFFFF !default;
 
 $nav-pills-border-radius:           $border-radius !default;
 $nav-pills-link-active-color:       $component-active-color !default;

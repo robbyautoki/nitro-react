@@ -19,7 +19,7 @@ $nitro-card-tabs-height: 33px;
 
             .nitro-card-header-text {
                 color: $white;
-                text-shadow: 0px 4px 4px rgba($black, 0.25);
+                text-shadow: none;
                 @include font-size($h4-font-size);
             }
 
@@ -28,21 +28,15 @@ $nitro-card-tabs-height: 33px;
                 padding: 2px 2px;
                 line-height: 1;
                 border-radius: $border-radius;
-                box-shadow: 0 0 0 1.6px $white;
-                border: 2px solid #921911;
-                background: repeating-linear-gradient(
-                    rgba(245, 80, 65, 1),
-                    rgba(245, 80, 65, 1) 50%,
-                    rgba(194, 48, 39, 1) 50%,
-                    rgba(194, 48, 39, 1) 100%
-                );
+                border: 1px solid rgba($white, 0.3);
+                background: rgba($white, 0.15);
 
                 &:hover {
-                    filter: brightness(1.2);
+                    background: rgba($white, 0.25);
                 }
 
                 &:active {
-                    filter: brightness(0.8);
+                    background: rgba($white, 0.1);
                 }
             }
 
@@ -51,39 +45,33 @@ $nitro-card-tabs-height: 33px;
                 padding: 1px 3px;
                 line-height: 1;
                 border-radius: $border-radius;
-                box-shadow: 0 0 0 1.6px $white;
-                border: 2px solid #921911;
-                background: repeating-linear-gradient(
-                    rgba(245, 80, 65, 1),
-                    rgba(245, 80, 65, 1) 50%,
-                    rgba(194, 48, 39, 1) 50%,
-                    rgba(194, 48, 39, 1) 100%
-                );
+                border: 1px solid rgba($white, 0.3);
+                background: rgba($white, 0.15);
 
                 &:hover {
-                    filter: brightness(1.2);
+                    background: rgba($white, 0.25);
                 }
 
                 &:active {
-                    filter: brightness(0.8);
+                    background: rgba($white, 0.1);
                 }
             }
         }
 
         .nitro-card-tabs {
-            background-color: $secondary;
+            background-color: #F4F4F5;
 
             .nav-item {
                 padding: $nav-link-padding-y $nav-link-padding-x;
-                background-color: $muted;
+                background-color: #E4E4E7;
                 color: $black;
                 z-index: 1;
                 margin-bottom: -1px;
 
                 &.active {
-                    background-color: $light;
-                    border-color: $border-color $border-color $light !important;
-                    border-bottom: 1px solid black;
+                    background-color: $white;
+                    border-color: $border-color $border-color $white !important;
+                    border-bottom: 1px solid $border-color;
 
                     &:before {
                         background: $white;
@@ -100,7 +88,7 @@ $nitro-card-tabs-height: 33px;
                     left: 0;
                     right: 0;
                     margin: auto;
-                    background: #c2c9d1;
+                    background: #D4D4D8;
                     z-index: 1;
                 }
             }
@@ -118,26 +106,20 @@ $nitro-card-tabs-height: 33px;
             position: relative;
             min-height: 28px;
             max-height: 28px;
-            background: repeating-linear-gradient($tertiary, $tertiary 50%, $quaternary 50%, $quaternary 100%);
-            border-bottom: 2px solid darken($quaternary, 5);
-            box-shadow: 0 2px white;
+            background: $primary;
+            border-bottom: 1px solid $border-color;
+            box-shadow: none;
             width: 100%;
             margin: 0;
             padding-top:2px;
 
             &:before {
-                position: absolute;
-                content: ' ';
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 2px;
-                background-color: rgba($white, 0.3);
+                display: none;
             }
 
             .nitro-card-header-text {
                 color: $white;
-                text-shadow: 0px 4px 4px rgba($black, 0.25);
+                text-shadow: none;
                 @include font-size($h5-font-size);
                 min-height: 21px;
             }
@@ -148,21 +130,15 @@ $nitro-card-tabs-height: 33px;
                 line-height: 1;
                 @include font-size($h7-font-size);
                 border-radius: $border-radius;
-                box-shadow: 0 0 0 1.6px $white;
-                border: 2px solid #921911;
-                background: repeating-linear-gradient(
-                    rgba(245, 80, 65, 1),
-                    rgba(245, 80, 65, 1) 50%,
-                    rgba(194, 48, 39, 1) 50%,
-                    rgba(194, 48, 39, 1) 100%
-                );
+                border: 1px solid rgba($white, 0.3);
+                background: rgba($white, 0.15);
 
                 &:hover {
-                    filter: brightness(1.2);
+                    background: rgba($white, 0.25);
                 }
 
                 &:active {
-                    filter: brightness(0.8);
+                    background: rgba($white, 0.1);
                 }
             }
 
@@ -173,27 +149,21 @@ $nitro-card-tabs-height: 33px;
                 line-height: 1;
                 @include font-size($h7-font-size);
                 border-radius: $border-radius;
-                box-shadow: 0 0 0 1.6px $white;
-                border: 2px solid #921911;
-                background: repeating-linear-gradient(
-                    rgba(245, 80, 65, 1),
-                    rgba(245, 80, 65, 1) 50%,
-                    rgba(194, 48, 39, 1) 50%,
-                    rgba(194, 48, 39, 1) 100%
-                );
+                border: 1px solid rgba($white, 0.3);
+                background: rgba($white, 0.15);
 
                 &:hover {
-                    filter: brightness(1.2);
+                    background: rgba($white, 0.25);
                 }
 
                 &:active {
-                    filter: brightness(0.8);
+                    background: rgba($white, 0.1);
                 }
             }
         }
 
         .nitro-card-tabs {
-            background-color: $secondary;
+            background-color: #F4F4F5;
         }
 
         .content-area {

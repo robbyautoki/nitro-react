@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { FaChevronRight } from 'react-icons/fa';
 import { ICatalogNode } from '../../../../api';
-import { Base, LayoutGridItem, Text } from '../../../../common';
 import { useCatalog } from '../../../../hooks';
 import { CatalogIconView } from '../catalog-icon/CatalogIconView';
 import { CatalogNavigationSetView } from './CatalogNavigationSetView';
@@ -18,15 +17,20 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
     const { activateNode = null } = useCatalog();
 
     return (
-        <Base className="nitro-catalog-navigation-section">
-            <LayoutGridItem gap={ 1 } column={ false } itemActive={ node.isActive } onClick={ event => activateNode(node) } className={ child ? 'inset' : '' }>
+        <div>
+            <div
+                className={ `flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer text-xs select-none transition-colors ${ node.isActive ? 'bg-white text-zinc-900 font-medium shadow-sm' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900' } ${ child ? 'ml-3' : '' }` }
+                onClick={ event => activateNode(node) }
+            >
                 <CatalogIconView icon={ node.iconId } />
-                <Text grow truncate>{ node.localization }</Text>
+                <span className="flex-1 truncate">{ node.localization }</span>
                 { node.isBranch &&
-                    <FaChevronRight className={ `fa-icon nav-chevron ${ node.isOpen ? 'expanded' : '' }` } /> }
-            </LayoutGridItem>
+                    <FaChevronRight className={ `text-[9px] text-zinc-400 transition-transform ${ node.isOpen ? 'rotate-90' : '' }` } /> }
+            </div>
             { node.isOpen && node.isBranch &&
-                <CatalogNavigationSetView node={ node } child={ true } /> }
-        </Base>
+                <div className="pl-2 ml-3 border-l border-zinc-200">
+                    <CatalogNavigationSetView node={ node } child={ true } />
+                </div> }
+        </div>
     );
 }

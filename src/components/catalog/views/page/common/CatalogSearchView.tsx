@@ -80,17 +80,17 @@ export const CatalogSearchView: FC<{}> = props =>
 
     return (
         <div className="relative">
-            <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 text-[10px] pointer-events-none" />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px] pointer-events-none" />
             <Input
                 type="text"
-                className="h-7 text-xs pl-7 pr-7"
+                className="h-9 text-xs pl-8 pr-8 rounded-xl border-input focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-all duration-200"
                 placeholder={ LocalizeText('generic.search') }
                 value={ searchValue }
                 onChange={ event => setSearchValue(event.target.value) }
             />
             { searchValue && !!searchValue.length &&
                 <button
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-zinc-400 hover:text-zinc-600 transition-colors"
+                    className="appearance-none border-0 bg-transparent absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
                     onClick={ () => setSearchValue('') }
                 >
                     <FaTimes className="text-[9px]" />

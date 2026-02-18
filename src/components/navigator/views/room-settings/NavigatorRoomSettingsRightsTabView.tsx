@@ -1,8 +1,10 @@
 import { FlatControllerAddedEvent, FlatControllerRemovedEvent, FlatControllersEvent, RemoveAllRightsMessageComposer, RoomTakeRightsComposer, RoomUsersWithRightsComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
-import { Button, Column, Flex, Grid, Text, UserProfileIconView } from '../../../../common';
+import { UserProfileIconView } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NavigatorRoomSettingsTabViewProps
 {
@@ -53,7 +55,7 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
             newValue.delete(parser.userId);
 
             return newValue;
-        }); 
+        });
     });
 
     useEffect(() =>
@@ -62,30 +64,41 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
     }, [ roomData.roomId ]);
 
     return (
-        <Grid>
-            <Column size={ 6 }>
-                <Text bold>
+        <div className="flex gap-3">
+            <div className="flex-1 flex flex-col gap-2">
+                <span className="text-xs font-medium text-zinc-200">
                     { LocalizeText('navigator.flatctrls.userswithrights', [ 'displayed', 'total' ], [ usersWithRights.size.toString(), usersWithRights.size.toString() ]) }
-                </Text>
-                <Flex overflow="hidden" className="bg-white rounded list-container p-2">
-                    <Column fullWidth overflow="auto" gap={ 1 }>
-                        { Array.from(usersWithRights.entries()).map(([ id, name ], index) =>
-                        {
-                            return (
-                                <Flex key={ index } shrink alignItems="center" gap={ 1 } overflow="hidden">
+                </span>
+                <div className="rounded-lg bg-white/5 border border-white/5 overflow-hidden" style={ { height: 100 } }>
+                    <ScrollArea className="h-full">
+                        <div className="flex flex-col gap-0.5 p-1.5">
+                            { usersWithRights.size === 0 && (
+                                <span className="text-[11px] text-zinc-600 text-center py-2">{ LocalizeText('navigator.flatctrls.userswithrights', [ 'displayed', 'total' ], [ '0', '0' ]) }</span>
+                            ) }
+                            { Array.from(usersWithRights.entries()).map(([ id, name ], index) => (
+                                <div
+                                    key={ index }
+                                    className="flex items-center gap-1.5 px-1.5 py-1 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
+                                    onClick={ () => SendMessageComposer(new RoomTakeRightsComposer(id)) }
+                                >
                                     <UserProfileIconView userName={ name } />
-                                    <Text pointer grow onClick={ event => SendMessageComposer(new RoomTakeRightsComposer(id)) }> { name }</Text>
-                                </Flex>
-                            );
-                        }) }
-                    </Column>
-                </Flex>
-            </Column>
-            <Column size={ 6 } justifyContent="end">
-                <Button variant="danger" disabled={ !usersWithRights.size } onClick={ event => SendMessageComposer(new RemoveAllRightsMessageComposer(roomData.roomId)) } >
+                                    <span className="text-xs text-zinc-300 truncate flex-1">{ name }</span>
+                                </div>
+                            )) }
+                        </div>
+                    </ScrollArea>
+                </div>
+            </div>
+            <div className="flex flex-col justify-end">
+                <Button
+                    variant="ghost"
+                    className="h-7 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    disabled={ !usersWithRights.size }
+                    onClick={ () => SendMessageComposer(new RemoveAllRightsMessageComposer(roomData.roomId)) }
+                >
                     { LocalizeText('navigator.flatctrls.clear') }
                 </Button>
-            </Column>
-        </Grid>
+            </div>
+        </div>
     );
 }

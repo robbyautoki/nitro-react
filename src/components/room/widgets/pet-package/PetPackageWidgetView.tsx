@@ -1,5 +1,4 @@
 import { FC } from 'react';
-import { Button } from 'react-bootstrap';
 import { GetConfiguration, LocalizeText } from '../../../../api';
 import { Base, Column, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
 import { usePetPackageWidget } from '../../../../hooks';
@@ -15,7 +14,7 @@ export const PetPackageWidgetView: FC<{}> = props =>
                     <NitroCardHeaderView center headerText={ objectType === 'gnome_box' ? LocalizeText('widgets.gnomepackage.name.title') : LocalizeText('furni.petpackage.open') } onCloseClick={ () => onClose() } />
                     <NitroCardContentView>
                         <Flex className="pet-package-container-top p-3">
-                            <div className={ `package-image-${ objectType } flex-shrink-0` }></div>
+                            <div className={ `package-image-${ objectType } shrink-0` }></div>
                             <div className="m-2">
                                 <Text variant="white" className="package-text-big">{ objectType === 'gnome_box' ? LocalizeText('widgets.gnomepackage.name.title') : LocalizeText('furni.petpackage') }</Text>
                             </div>
@@ -24,13 +23,13 @@ export const PetPackageWidgetView: FC<{}> = props =>
                             <Column gap={ 1 }>
                                 <Flex alignItems="center" className="bg-white rounded py-1 px-2 input-pet-package-container">
                                     <input type="text" className="form-control form-control-sm input-pet-package" maxLength={ GetConfiguration('pet.package.name.max.length') } placeholder={ objectType === 'gnome_box' ? LocalizeText('widgets.gnomepackage.name.select') : LocalizeText('widgets.petpackage.name.title') } value={ petName } onChange={ event => onChangePetName(event.target.value) } />
-                                    <div className="package-pencil-image flex-shrink-0 small fa-icon"></div>
+                                    <div className="package-pencil-image shrink-0 small fa-icon"></div>
                                 </Flex>
                                 { (errorResult.length > 0) &&
-                                        <Base className="invalid-feedback d-block m-0">{ errorResult }</Base> }
+                                        <Base className="invalid-feedback block m-0">{ errorResult }</Base> }
                                 <Flex className="mt-2" gap={ 5 } display="flex" justifyContent="center" alignItems="center">
                                     <Text pointer className="text-decoration" onClick={ () => onClose() }>{ LocalizeText('cancel') }</Text>
-                                    <Button variant={ petName.length < 3 ? 'danger' : 'success' } disabled={ petName.length < 3 } onClick={ () => onConfirm() }>{ objectType === 'gnome_box' ? LocalizeText('widgets.gnomepackage.name.pick') : LocalizeText('furni.petpackage.confirm') }</Button>
+                                    <button className={ `btn ${ petName.length < 3 ? 'btn-danger' : 'btn-success' }` } disabled={ petName.length < 3 } onClick={ () => onConfirm() }>{ objectType === 'gnome_box' ? LocalizeText('widgets.gnomepackage.name.pick') : LocalizeText('furni.petpackage.confirm') }</button>
                                 </Flex>
                             </Column>
                         </Flex>

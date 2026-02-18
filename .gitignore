@@ -31,3 +31,5 @@ public/renderer-config*
 public/ui-config*
 .yarn/
 node_modules/
+.vercel
+.env*.local

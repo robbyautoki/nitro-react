@@ -29,7 +29,7 @@ export const GuideToolUserFeedbackView: FC<GuideToolUserFeedbackViewProps> = pro
             </Column>
             { userName && (userName.length > 0) &&
                 <>
-                    <hr className="bg-dark m-0 mt-auto" />
+                    <hr className="bg-gray-900 m-0 mt-auto" />
                     <Column>
                         <Text center bold>{ LocalizeText('guide.help.request.user.feedback.question') }</Text>
                         <Flex gap={ 1 }>

@@ -60,7 +60,21 @@ const useNotificationState = () =>
 
         if(!type || !type.length) type = NotificationAlertType.DEFAULT;
 
-        const alertItem = new NotificationAlertItem([ cleanText(message) ], type, clickUrl, clickUrlText, title, imageUrl);
+        let figure: string = null;
+        let cleanMessage = message;
+
+        if(message)
+        {
+            const figureMatch = message.match(/^\[figure:([^\]]+)\]/);
+
+            if(figureMatch)
+            {
+                figure = figureMatch[1];
+                cleanMessage = message.replace(figureMatch[0], '');
+            }
+        }
+
+        const alertItem = new NotificationAlertItem([ cleanText(cleanMessage) ], type, clickUrl, clickUrlText, title, imageUrl, figure);
 
         setAlerts(prevValue => [ alertItem, ...prevValue ]);
     }, []);
@@ -334,6 +348,9 @@ const useNotificationState = () =>
     useMessageEvent<NotificationDialogMessageEvent>(NotificationDialogMessageEvent, event =>
     {
         const parser = event.getParser();
+
+        // Lottery events are handled by LotteryView
+        if(parser.type && parser.type.startsWith('lottery.')) return;
 
         showNotification(parser.type, parser.parameters);
     });

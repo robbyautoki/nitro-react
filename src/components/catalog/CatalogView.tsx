@@ -1,14 +1,14 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useMemo, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { AddEventLinkTracker, GetConfiguration, LocalizeText, RemoveLinkEventTracker } from '../../api';
+import { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import { FaTimes, FaList, FaInfoCircle } from 'react-icons/fa';
+import { AddEventLinkTracker, LocalizeText, RemoveLinkEventTracker } from '../../api';
 import { useCatalog } from '../../hooks';
-import { Drawer, DrawerClose, DrawerContent } from '../ui/drawer';
-import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
-import { CatalogIconView } from './views/catalog-icon/CatalogIconView';
+import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
+import { Button } from '../ui/button';
 import { CatalogInspectorView } from './views/CatalogInspectorView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
+import { CatalogSearchView } from './views/page/common/CatalogSearchView';
 import { GetCatalogLayout } from './views/page/layout/GetCatalogLayout';
 import { MarketplacePostOfferView } from './views/page/layout/marketplace/MarketplacePostOfferView';
 
@@ -23,18 +23,16 @@ const SELF_CONTAINED_LAYOUTS = new Set([
 
 export const CatalogView: FC<{}> = props =>
 {
-    const { isVisible = false, setIsVisible = null, rootNode = null, currentPage = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById } = useCatalog();
+    const { isVisible = false, setIsVisible = null, rootNode = null, currentPage = null, currentOffer = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById } = useCatalog();
 
-    const [ activeSnap, setActiveSnap ] = useState<number | string | null>(0.85);
-    const activeTabId = useMemo(() => rootNode?.children?.find(c => c.isActive)?.pageId?.toString(), [ rootNode ]);
+    const [ navOverlay, setNavOverlay ] = useState(false);
+    const [ inspectorOverlay, setInspectorOverlay ] = useState(false);
+
     const showInspector = currentPage && !SELF_CONTAINED_LAYOUTS.has(currentPage.layoutCode);
 
-    const onTabChange = (value: string) =>
-    {
-        if(searchResult) setSearchResult(null);
-        const node = rootNode?.children?.find(c => String(c.pageId) === value);
-        if(node) activateNode(node);
-    };
+    const breadcrumb = useMemo(() =>
+        activeNodes?.filter(n => n.localization).map(n => n.localization) ?? [],
+    [ activeNodes ]);
 
     useEffect(() =>
     {
@@ -89,67 +87,88 @@ export const CatalogView: FC<{}> = props =>
         return () => RemoveLinkEventTracker(linkTracker);
     }, [ setIsVisible, openPageByOfferId, openPageByName ]);
 
+    if(!isVisible) return (
+        <>
+            <CatalogGiftView />
+            <MarketplacePostOfferView />
+        </>
+    );
+
     return (
         <>
-            <Drawer
-                open={ isVisible }
-                onOpenChange={ setIsVisible }
-                modal={ false }
-                snapPoints={ [ 0.55, 0.85 ] }
-                activeSnapPoint={ activeSnap }
-                setActiveSnapPoint={ setActiveSnap }
-            >
-                <DrawerContent className="nitro-catalog">
-                    {/* Header: Title + Close */}
-                    <div className="flex items-center justify-between px-5 py-2 shrink-0">
-                        <h2 className="text-sm font-semibold text-zinc-900 tracking-tight">
-                            { LocalizeText('catalog.title') }
-                        </h2>
-                        <DrawerClose className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-colors">
-                            <FaTimes className="text-xs" />
-                        </DrawerClose>
+            <DraggableWindow uniqueKey="catalog" windowPosition={ DraggableWindowPosition.CENTER }>
+                <div
+                    className="nitro-catalog flex flex-col rounded-2xl border border-white/[0.09] bg-[rgba(10,10,14,0.98)] shadow-[0_24px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl overflow-hidden"
+                    style={ { width: 'min(1100px, calc(100vw - 32px))', height: '380px' } }
+                >
+                    {/* Header */}
+                    <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-11 cursor-move select-none">
+                        <div className="flex items-center gap-1.5 shrink-0 min-w-0 overflow-hidden">
+                            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/25 shrink-0">
+                                { LocalizeText('catalog.title') }
+                            </span>
+                            { breadcrumb.map((label, i) => (
+                                <Fragment key={ i }>
+                                    <span className="text-[10px] text-white/20 shrink-0">›</span>
+                                    <span className="text-[11px] text-white/50 truncate">{ label }</span>
+                                </Fragment>
+                            )) }
+                        </div>
+
+                        <div className="flex-1" />
+
+                        <div className="w-[220px] shrink-0" onMouseDown={ e => e.stopPropagation() }>
+                            <CatalogSearchView />
+                        </div>
+
+                        { !navigationHidden &&
+                            <Button variant="ghost" size="icon-sm" className="xl:hidden shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setNavOverlay(v => !v) }>
+                                <FaList className="size-3" />
+                            </Button> }
+                        { showInspector &&
+                            <Button variant="ghost" size="icon-sm" className="xl:hidden shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setInspectorOverlay(v => !v) }>
+                                <FaInfoCircle className="size-3" />
+                            </Button> }
+
+                        <button
+                            className="appearance-none border-0 bg-transparent rounded-md p-1 text-white/25 hover:bg-white/[0.06] hover:text-white/70 transition-colors shrink-0"
+                            onMouseDown={ e => e.stopPropagation() }
+                            onClick={ () => setIsVisible(false) }
+                        >
+                            <FaTimes className="text-[11px]" />
+                        </button>
                     </div>
 
-                    {/* Tab Navigation */}
-                    { rootNode && (rootNode.children.length > 0) &&
-                        <Tabs value={ activeTabId } onValueChange={ onTabChange }>
-                            <TabsList className="w-full justify-start gap-0.5 rounded-none border-b border-zinc-200 bg-zinc-50/80 px-3 h-auto py-1 shrink-0">
-                                { rootNode.children.map(child =>
-                                {
-                                    if(!child.isVisible) return null;
+                    {/* Content: Sidebar | Grid | Inspector */}
+                    <div className="flex-1 min-h-0 overflow-hidden flex relative">
 
-                                    return (
-                                        <TabsTrigger
-                                            key={ child.pageId }
-                                            value={ String(child.pageId) }
-                                            className="gap-1.5 rounded-md px-3 py-1.5 text-[11px] font-medium data-[state=active]:shadow-sm"
-                                        >
-                                            { GetConfiguration('catalog.tab.icons') && <CatalogIconView icon={ child.iconId } /> }
-                                            { child.localization }
-                                        </TabsTrigger>
-                                    );
-                                }) }
-                            </TabsList>
-                        </Tabs> }
+                        { !navigationHidden && (
+                            <div className={ `w-[185px] min-w-[185px] flex-col min-h-0 border-r border-white/[0.06] hidden xl:flex ${ navOverlay ? '!flex absolute inset-y-0 left-0 z-20 bg-[rgba(10,10,14,0.98)] border-r border-white/[0.08]' : '' }` }>
+                                <CatalogNavigationView />
+                            </div>
+                        ) }
 
-                    {/* Content — 3-column layout */}
-                    <div className="flex-1 min-h-0 overflow-hidden px-4 pb-4 pt-2">
-                        <div className="flex h-full gap-3 max-w-[1200px] mx-auto">
-                            { !navigationHidden &&
-                                <div className="w-[180px] min-w-[180px] flex flex-col">
-                                    <CatalogNavigationView node={ activeNodes?.[0] } />
-                                </div> }
-                            <div className="flex-1 min-w-0 overflow-hidden">
+                        <div className="flex-1 min-w-0 overflow-hidden flex flex-col">
+                            { currentPage?.offers && (
+                                <div className="px-3 py-1.5 border-b border-white/[0.04] flex items-center gap-1.5 shrink-0">
+                                    <span className="text-[9px] text-white/20">
+                                        { currentPage.offers.length } items
+                                    </span>
+                                </div>
+                            ) }
+                            <div className="flex-1 min-h-0 overflow-hidden">
                                 { GetCatalogLayout(currentPage, () => setNavigationHidden(true)) }
                             </div>
-                            { showInspector &&
-                                <div className="w-[220px] min-w-[220px] flex flex-col">
-                                    <CatalogInspectorView />
-                                </div> }
                         </div>
+
+                        { showInspector && (
+                            <div className={ `w-[260px] min-w-[260px] border-l border-white/[0.06] overflow-y-auto hidden xl:flex xl:flex-col ${ inspectorOverlay ? '!flex absolute inset-y-0 right-0 z-20 bg-[rgba(10,10,14,0.98)] border-l border-white/[0.08]' : '' }` }>
+                                <CatalogInspectorView />
+                            </div>
+                        ) }
                     </div>
-                </DrawerContent>
-            </Drawer>
+                </div>
+            </DraggableWindow>
             <CatalogGiftView />
             <MarketplacePostOfferView />
         </>

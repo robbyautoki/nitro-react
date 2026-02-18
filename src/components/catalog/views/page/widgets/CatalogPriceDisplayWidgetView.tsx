@@ -1,8 +1,9 @@
 import { FC } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import { IPurchasableOffer } from '../../../../../api';
-import { Flex, LayoutCurrencyIcon, Text } from '../../../../../common';
+import { LayoutCurrencyIcon } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
+import { Badge } from '../../../../ui/badge';
 
 interface CatalogPriceDisplayWidgetViewProps
 {
@@ -21,17 +22,17 @@ export const CatalogPriceDisplayWidgetView: FC<CatalogPriceDisplayWidgetViewProp
     return (
         <>
             { (offer.priceInCredits > 0) &&
-                <Flex alignItems="center" gap={ 1 }>
-                    <Text bold>{ (offer.priceInCredits * quantity) }</Text>
+                <Badge className="gap-1 bg-amber-100 text-amber-800 border-amber-200">
+                    <span className="font-bold">{ (offer.priceInCredits * quantity) }</span>
                     <LayoutCurrencyIcon type={ -1 } />
-                </Flex> }
+                </Badge> }
             { separator && (offer.priceInCredits > 0) && (offer.priceInActivityPoints > 0) &&
-                <FaPlus size="xs" color="black" className="fa-icon" /> }
+                <FaPlus size="xs" className="text-muted-foreground" /> }
             { (offer.priceInActivityPoints > 0) &&
-                <Flex alignItems="center" gap={ 1 }>
-                    <Text bold>{ (offer.priceInActivityPoints * quantity) }</Text>
+                <Badge className="gap-1 bg-teal-100 text-teal-800 border-teal-200">
+                    <span className="font-bold">{ (offer.priceInActivityPoints * quantity) }</span>
                     <LayoutCurrencyIcon type={ offer.activityPointType } />
-                </Flex> }
+                </Badge> }
         </>
     );
 }

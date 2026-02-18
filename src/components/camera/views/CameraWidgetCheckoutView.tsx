@@ -115,7 +115,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = props
                         { (picturesBought > 0) &&
                             <Text>
                                 <Text bold>{ LocalizeText('camera.purchase.count.info') }</Text> { picturesBought }
-                                <u className="ms-1 cursor-pointer" onClick={ () => CreateLinkEvent('inventory/toggle') }>{ LocalizeText('camera.open.inventory') }</u>
+                                <u className="ml-1 cursor-pointer" onClick={ () => CreateLinkEvent('inventory/toggle') }>{ LocalizeText('camera.open.inventory') }</u>
                             </Text> }
                     </Column>
                     <Flex alignItems="center">
@@ -140,10 +140,10 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = props
                                     <LayoutCurrencyIcon type={ 5 } />
                                 </Flex>
                             </Flex> }
-                        { (publishCooldown > 0) && <div className="mt-1 text-center fw-bold">{ LocalizeText('camera.publish.wait', [ 'minutes' ], [ Math.ceil( publishCooldown / 60).toString() ]) }</div> }
+                        { (publishCooldown > 0) && <div className="mt-1 text-center font-bold">{ LocalizeText('camera.publish.wait', [ 'minutes' ], [ Math.ceil( publishCooldown / 60).toString() ]) }</div> }
                     </Column>
                     { !wasPicturePublished &&
-                        <Flex className="d-flex align-items-end">
+                        <Flex className="flex items-end">
                             <Button variant="success" disabled={ (isWaiting || (publishCooldown > 0)) } onClick={ event => processAction('publish') }>
                                 { LocalizeText('camera.publish.button.text') }
                             </Button>

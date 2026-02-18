@@ -1,8 +1,8 @@
 import { FC, KeyboardEvent, useEffect, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
-import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions } from '../../../../api';
-import { Button, Flex } from '../../../../common';
+import { LocalizeText } from '../../../../api';
 import { useNavigator } from '../../../../hooks';
+import { Input } from '@/components/ui/input';
 
 export interface NavigatorSearchViewProps
 {
@@ -12,7 +12,6 @@ export interface NavigatorSearchViewProps
 export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
 {
     const { sendSearch = null } = props;
-    const [ searchFilterIndex, setSearchFilterIndex ] = useState(0);
     const [ searchValue, setSearchValue ] = useState('');
     const { topLevelContext = null, searchResult = null } = useNavigator();
 
@@ -20,13 +19,7 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
     {
         if(!topLevelContext) return;
 
-        let searchFilter = SearchFilterOptions[searchFilterIndex];
-
-        if(!searchFilter) searchFilter = SearchFilterOptions[0];
-
-        const searchQuery = ((searchFilter.query ? (searchFilter.query + ':') : '') + searchValue);
-
-        sendSearch((searchQuery || ''), topLevelContext.code);
+        sendSearch(searchValue || '', topLevelContext.code);
     }
 
     const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) =>
@@ -40,45 +33,20 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
     {
         if(!searchResult) return;
 
-        const split = searchResult.data.split(':');
-
-        let filter: INavigatorSearchFilter = null;
-        let value: string = '';
-
-        if(split.length >= 2)
-        {
-            const [ query, ...rest ] = split;
-
-            filter = SearchFilterOptions.find(option => (option.query === query));
-            value = rest.join(':');
-        }
-        else
-        {
-            value = searchResult.data;
-        }
-
-        if(!filter) filter = SearchFilterOptions[0];
-
-        setSearchFilterIndex(SearchFilterOptions.findIndex(option => (option === filter)));
-        setSearchValue(value);
+        setSearchValue(searchResult.data || '');
     }, [ searchResult ]);
 
     return (
-        <Flex fullWidth gap={ 1 }>
-            <Flex shrink>
-                <select className="form-select form-select-sm" value={ searchFilterIndex } onChange={ event => setSearchFilterIndex(parseInt(event.target.value)) }>
-                    { SearchFilterOptions.map((filter, index) =>
-                    {
-                        return <option key={ index } value={ index }>{ LocalizeText('navigator.filter.' + filter.name) }</option>
-                    }) }
-                </select>
-            </Flex>
-            <Flex fullWidth gap={ 1 }>
-                <input type="text" className="form-control form-control-sm" placeholder={ LocalizeText('navigator.filter.input.placeholder') } value={ searchValue } onChange={ event => setSearchValue(event.target.value) } onKeyDown={ event => handleKeyDown(event) } />
-                <Button variant="primary" onClick={ processSearch }>
-                    <FaSearch className="fa-icon" />
-                </Button>
-            </Flex>
-        </Flex>
+        <div className="relative">
+            <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-zinc-500" />
+            <Input
+                type="text"
+                placeholder={ LocalizeText('navigator.filter.input.placeholder') }
+                value={ searchValue }
+                onChange={ event => setSearchValue(event.target.value) }
+                onKeyDown={ event => handleKeyDown(event) }
+                className="h-8 text-xs pl-8 rounded-lg bg-white/10 border-0 text-white focus-visible:bg-white/15 focus-visible:ring-1 focus-visible:ring-white/20 transition-all duration-200 placeholder:text-zinc-500"
+            />
+        </div>
     );
 }

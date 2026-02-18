@@ -89,7 +89,7 @@ export const FurnitureMannequinView: FC<{}> = props =>
                         <Base position="relative" className="mannequin-preview">
                             <LayoutAvatarImageView position="absolute" figure={ renderedFigure } direction={ 2 } />
                             { (clubLevel > 0) &&
-                                <LayoutCurrencyIcon className="position-absolute end-2 bottom-2" type="hc" /> }
+                                <LayoutCurrencyIcon className="absolute right-2 bottom-2" type="hc" /> }
                         </Base>
                     </Column>
                     <Column grow justifyContent="between" overflow="auto">

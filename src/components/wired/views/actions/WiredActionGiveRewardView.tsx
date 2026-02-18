@@ -108,11 +108,11 @@ export const WiredActionGiveRewardView: FC<{}> = props =>
                     max={ 1000 }
                     value={ rewardsLimit }
                     onChange={ event => setRewardsLimit(event) } /> }
-            <hr className="m-0 bg-dark" />
+            <hr className="m-0 bg-gray-900" />
             <Column gap={ 1 }>
                 <Text bold>How often can a user be rewarded?</Text>
                 <Flex gap={ 1 }>
-                    <select className="form-select form-select-sm w-100" value={ rewardTime } onChange={ (e) => setRewardTime(Number(e.target.value)) }>
+                    <select className="form-select form-select-sm w-full" value={ rewardTime } onChange={ (e) => setRewardTime(Number(e.target.value)) }>
                         <option value="0">Once</option>
                         <option value="3">Once every { limitationInterval } minutes</option>
                         <option value="2">Once every { limitationInterval } hours</option>
@@ -121,7 +121,7 @@ export const WiredActionGiveRewardView: FC<{}> = props =>
                     { (rewardTime > 0) && <input type="number" className="form-control form-control-sm" value={ limitationInterval } onChange={ event => setLimitationInterval(Number(event.target.value)) } /> }
                 </Flex>
             </Column>
-            <hr className="m-0 bg-dark" />
+            <hr className="m-0 bg-gray-900" />
             <Flex alignItems="center" gap={ 1 }>
                 <input className="form-check-input" type="checkbox" id="uniqueRewards" checked={ uniqueRewards } onChange={ (e) => setUniqueRewards(e.target.checked) } />
                 <Text>Unique rewards</Text>
@@ -129,7 +129,7 @@ export const WiredActionGiveRewardView: FC<{}> = props =>
             <Text center small className="bg-muted rounded p-1">
                 If checked each reward will be given once to each user. This will disable the probabilities option.
             </Text>
-            <hr className="m-0 bg-dark" />
+            <hr className="m-0 bg-gray-900" />
             <Flex justifyContent="between" alignItems="center">
                 <Text bold>Rewards</Text>
                 <Button variant="success" onClick={ addReward }>

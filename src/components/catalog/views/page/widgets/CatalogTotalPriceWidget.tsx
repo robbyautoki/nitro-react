@@ -1,20 +1,19 @@
-import { FC } from 'react';
-import { Column, ColumnProps } from '../../../../../common';
+import { FC, HTMLAttributes } from 'react';
 import { useCatalog } from '../../../../../hooks';
 import { CatalogPriceDisplayWidgetView } from './CatalogPriceDisplayWidgetView';
 
-interface CatalogSimplePriceWidgetViewProps extends ColumnProps
+interface CatalogTotalPriceWidgetProps extends HTMLAttributes<HTMLDivElement>
 {
 
 }
-export const CatalogTotalPriceWidget: FC<CatalogSimplePriceWidgetViewProps> = props =>
+export const CatalogTotalPriceWidget: FC<CatalogTotalPriceWidgetProps> = props =>
 {
-    const { gap = 1, ...rest } = props;
+    const { className = '', ...rest } = props;
     const { currentOffer = null } = useCatalog();
 
     return (
-        <Column gap={ gap } { ...rest }>
+        <div className={ `flex flex-col gap-1 ${ className }` } { ...rest }>
             <CatalogPriceDisplayWidgetView offer={ currentOffer } />
-        </Column>
+        </div>
     );
 }

@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import { GetConfiguration, LocalizeText, SendMessageComposer } from '../../../../api';
 import { Base, Button, Column, Flex, LayoutCurrencyIcon, NitroCardContentView, NitroCardHeaderView, NitroCardSubHeaderView, NitroCardView, Text } from '../../../../common';
 import { usePurse } from '../../../../hooks';
+import { Input } from '../../../ui/input';
 
 export const OfferWindowView = (props: { offer: TargetedOfferData, setOpen: Dispatch<SetStateAction<boolean>> }) =>
 {
@@ -45,13 +46,13 @@ export const OfferWindowView = (props: { offer: TargetedOfferData, setOpen: Disp
 
     return <NitroCardView theme="primary-slim" uniqueKey="targeted-offer" className="nitro-targeted-offer">
         <NitroCardHeaderView headerText={ LocalizeText(offer.title) } onCloseClick={ event => setOpen(false) } />
-        <NitroCardSubHeaderView position="relative" className="justify-content-center align-items-center cursor-pointer" variant="danger" gap={ 3 }>
+        <NitroCardSubHeaderView position="relative" className="justify-center items-center cursor-pointer" variant="danger" gap={ 3 }>
             { LocalizeText('targeted.offer.timeleft',[ 'timeleft' ],[ expirationTime() ]) }
         </NitroCardSubHeaderView>
         <NitroCardContentView gap={ 1 }>
             <Flex gap={ 1 } fullHeight>
-                <Flex gap={ 1 } column className="w-75 text-black">
-                    <Column className="bg-warning p-2" fullHeight>
+                <Flex gap={ 1 } column className="w-3/4 text-white/90">
+                    <Column className="bg-yellow-500 p-2" fullHeight>
                         <h4>
                             { LocalizeText(offer.title) }
                         </h4>
@@ -60,14 +61,14 @@ export const OfferWindowView = (props: { offer: TargetedOfferData, setOpen: Disp
                     <Flex alignSelf="center" alignItems="center" justifyContent="center" gap={ 2 }>
                         { offer.purchaseLimit > 1 && <Flex gap={ 1 }>
                             <Text variant="muted">{ LocalizeText('catalog.bundlewidget.quantity') }</Text>
-                            <input type="number" value={ amount } onChange={ evt => setAmount(parseInt(evt.target.value)) } min={ 1 } max={ offer.purchaseLimit } />
+                            <Input type="number" className="h-8 w-20 text-xs" value={ amount } onChange={ evt => setAmount(parseInt(evt.target.value)) } min={ 1 } max={ offer.purchaseLimit } />
                         </Flex> }
                         <Button variant="primary" disabled={ !canPurchase } onClick={ () => buyOffer() }>{ LocalizeText('targeted.offer.button.buy') }</Button>
                     </Flex>
                 </Flex>
-                <Base className="w-50" fullHeight style={ { background: `url(${ GetConfiguration('image.library.url') + offer.imageUrl }) no-repeat center` } } />
+                <Base className="w-1/2" fullHeight style={ { background: `url(${ GetConfiguration('image.library.url') + offer.imageUrl }) no-repeat center` } } />
             </Flex>
-            <Flex className="price-ray position-absolute" alignItems="center" justifyContent="center" column>
+            <Flex className="price-ray absolute" alignItems="center" justifyContent="center" column>
                 <Text>{ LocalizeText('targeted.offer.price.label') }</Text>
                 { offer.priceInCredits > 0 && <Flex gap={ 1 }>
                     <Text variant="light">{ offer.priceInCredits }</Text>

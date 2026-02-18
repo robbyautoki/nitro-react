@@ -8,6 +8,8 @@
     background-color: transparent;
     background-repeat: no-repeat;
     background-position: center;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
 
     &.icon-nitro-light {
         background-image: url('@/assets/images/nitro/nitro-n-light.svg');

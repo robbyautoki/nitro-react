@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import { LocalizeText } from '../../../../../api';
-import { Flex, Text } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
+import { Button } from '../../../../ui/button';
 import { Input } from '../../../../ui/input';
 
 const MIN_VALUE: number = 1;
@@ -35,13 +35,29 @@ export const CatalogSpinnerWidgetView: FC<{}> = props =>
     if(!currentOffer || !currentOffer.bundlePurchaseAllowed) return null;
 
     return (
-        <>
-            <Text>{ LocalizeText('catalog.bundlewidget.spinner.select.amount') }</Text>
-            <Flex alignItems="center" gap={ 1 }>
-                <FaMinus className="text-black cursor-pointer fa-icon" onClick={ event => updateQuantity(quantity - 1) } />
-                <Input type="number" className="h-7 w-10 px-1 text-center text-xs" value={ quantity } onChange={ event => updateQuantity(event.target.valueAsNumber) } />
-                <FaPlus className="text-black cursor-pointer fa-icon" onClick={ event => updateQuantity(quantity + 1) } />
-            </Flex>
-        </>
+        <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-widest text-white/30 font-semibold flex-1">
+                { LocalizeText('catalog.bundlewidget.spinner.select.amount') }
+            </span>
+            <div className="flex items-center gap-1">
+                <Button
+                    variant="outline"
+                    size="icon-sm"
+                    className="rounded-md w-6 h-6 min-w-0"
+                    onClick={ event => updateQuantity(quantity - 1) }
+                >
+                    <FaMinus className="text-[9px]" />
+                </Button>
+                <Input type="number" className="h-6 w-10 px-1 text-center text-xs rounded-md" value={ quantity } onChange={ event => updateQuantity(event.target.valueAsNumber) } />
+                <Button
+                    variant="outline"
+                    size="icon-sm"
+                    className="rounded-md w-6 h-6 min-w-0"
+                    onClick={ event => updateQuantity(quantity + 1) }
+                >
+                    <FaPlus className="text-[9px]" />
+                </Button>
+            </div>
+        </div>
     );
 }

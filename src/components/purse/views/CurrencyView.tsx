@@ -1,7 +1,7 @@
 import { FC, useMemo } from 'react';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { LocalizeFormattedNumber, LocalizeShortNumber } from '../../../api';
-import { Flex, LayoutCurrencyIcon, Text } from '../../../common';
+import { LayoutCurrencyIcon } from '../../../common';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface CurrencyViewProps
 {
@@ -17,23 +17,25 @@ export const CurrencyView: FC<CurrencyViewProps> = props =>
     const element = useMemo(() =>
     {
         return (
-            <Flex justifyContent="end" pointer gap={ 1 } className="nitro-purse-button rounded">
-                <Text truncate textEnd variant="white" grow>{ short ? LocalizeShortNumber(amount) : LocalizeFormattedNumber(amount) }</Text>
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
+                <span className="text-xs font-medium text-white/90 tabular-nums">
+                    { short ? LocalizeShortNumber(amount) : LocalizeFormattedNumber(amount) }
+                </span>
                 <LayoutCurrencyIcon type={ type } />
-            </Flex>);
+            </div>
+        );
     }, [ amount, short, type ]);
 
     if(!short) return element;
-    
+
     return (
-        <OverlayTrigger
-            placement="left"
-            overlay={
-                <Tooltip id={ `tooltip-${ type }` }>
-                    { LocalizeFormattedNumber(amount) }
-                </Tooltip>
-            }>
-            { element }
-        </OverlayTrigger>
+        <Tooltip>
+            <TooltipTrigger asChild>
+                { element }
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                { LocalizeFormattedNumber(amount) }
+            </TooltipContent>
+        </Tooltip>
     );
 }

@@ -28,11 +28,11 @@ export const SongPlaylistView: FC<SongPlaylistViewProps> = props =>
     }
 
     return (<>
-        <div className="bg-primary py-3 container-fluid justify-content-center d-flex rounded">
+        <div className="bg-primary py-3 container-fluid justify-center flex rounded">
             <img src={ GetConfiguration('image.library.url') + 'playlist/title_playlist.gif' } className="playlist-img" />
-            <h2 className="ms-4">{ LocalizeText('playlist.editor.playlist') }</h2>
+            <h2 className="ml-6">{ LocalizeText('playlist.editor.playlist') }</h2>
         </div>
-        <div className="h-100 overflow-y-scroll py-2">
+        <div className="h-full overflow-y-scroll py-2">
             <Flex column gap={ 2 }>
                 { playlist && playlist.map( (songInfo, index) =>
                 {
@@ -45,7 +45,7 @@ export const SongPlaylistView: FC<SongPlaylistViewProps> = props =>
             </Flex>
         </div>
         { (!playlist || playlist.length === 0 ) &&
-        <><div className="playlist-bottom text-black p-1 ms-5">
+        <><div className="playlist-bottom text-white/90 p-1 ml-12">
             <h5>{ LocalizeText('playlist.editor.add.songs.to.your.playlist') }</h5>
             <div>{ LocalizeText('playlist.editor.text.click.song.to.choose.click.again.to.move') }</div>
         </div>

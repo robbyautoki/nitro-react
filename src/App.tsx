@@ -130,7 +130,7 @@ export const App: FC<{}> = props =>
     
     return (
         <Base fit overflow="hidden" className={ imageRendering && 'image-rendering-pixelated' }>
-            { (!isReady || isError) &&
+            { isError &&
                 <LoadingView isError={ isError } message={ message } percent={ percent } /> }
             <TransitionAnimation type={ TransitionAnimationTypes.FADE_IN } inProp={ (isReady) }>
                 <MainView />

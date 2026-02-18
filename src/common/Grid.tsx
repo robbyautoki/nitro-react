@@ -3,6 +3,15 @@ import { Base, BaseProps } from './Base';
 import { GridContextProvider } from './GridContext';
 import { AlignItemType, AlignSelfType, JustifyContentType, SpacingType } from './types';
 
+const GAP_MAP: Record<number, string> = {
+    0: 'gap-0',
+    1: 'gap-1',
+    2: 'gap-2',
+    3: 'gap-4',
+    4: 'gap-6',
+    5: 'gap-12',
+};
+
 export interface GridProps extends BaseProps<HTMLDivElement>
 {
     inline?: boolean;
@@ -26,34 +35,33 @@ export const Grid: FC<GridProps> = props =>
         if(inline) newClassNames.push('inline-grid');
         else newClassNames.push('grid');
 
-        if(gap) newClassNames.push('gap-' + gap);
-        else if(gap === 0) newClassNames.push('gap-0');
+        if(gap !== null && gap !== undefined) newClassNames.push(GAP_MAP[gap] || ('gap-' + gap));
+
+        if(columnCount) newClassNames.push(`grid-cols-${ columnCount }`);
 
         if(maxContent) newClassNames.push('flex-basis-max-content');
 
-        if(alignSelf) newClassNames.push('align-self-' + alignSelf);
+        if(alignSelf) newClassNames.push('self-' + alignSelf);
 
-        if(alignItems) newClassNames.push('align-items-' + alignItems);
+        if(alignItems) newClassNames.push('items-' + alignItems);
 
-        if(justifyContent) newClassNames.push('justify-content-' + justifyContent);
+        if(justifyContent) newClassNames.push('justify-' + justifyContent);
 
-        if(!alignItems && !justifyContent && center) newClassNames.push('align-items-center', 'justify-content-center');
+        if(!alignItems && !justifyContent && center) newClassNames.push('items-center', 'justify-center');
 
         if(classNames.length) newClassNames.push(...classNames);
 
         return newClassNames;
-    }, [ inline, gap, maxContent, alignSelf, alignItems, justifyContent, center, classNames ]);
+    }, [ inline, gap, maxContent, columnCount, alignSelf, alignItems, justifyContent, center, classNames ]);
 
     const getStyle = useMemo(() =>
     {
         let newStyle: CSSProperties = {};
 
-        if(columnCount) newStyle['--bs-columns'] = columnCount.toString();
-
         if(Object.keys(style).length) newStyle = { ...newStyle, ...style };
 
         return newStyle;
-    }, [ columnCount, style ]);
+    }, [ style ]);
 
     return (
         <GridContextProvider value={ { isCssGrid: true } }>

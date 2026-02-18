@@ -106,23 +106,7 @@
 }
 
 .friend-bar {
-
-    .friend-bar-button {
-        z-index: 2;
-    }
-
     .friend-bar-item {
-        width: 130px;
-        margin: 0 3px;
-        z-index: 0;
-        position: relative;
-        padding-left:38px;
-        text-align: left;
-
-        &.friend-bar-item-active {
-            margin-bottom:21px;
-        }
-
         .friend-bar-item-head {
             &.avatar {
                 top: -30px;

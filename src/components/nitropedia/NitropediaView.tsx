@@ -98,7 +98,7 @@ export const NitropediaView: FC<{}> = props =>
         <NitroCardView className="nitropedia" theme="primary-slim" style={ dimensions ? { width: dimensions.width, height: dimensions.height } : {} }>
             <NitroCardHeaderView headerText={ header } onCloseClick={ () => setContent(null) }/>
             <NitroCardContentView>
-                <Base fit innerRef={ elementRef } className="text-black" dangerouslySetInnerHTML={ { __html: content } } />
+                <Base fit innerRef={ elementRef } className="text-white/90" dangerouslySetInnerHTML={ { __html: content } } />
             </NitroCardContentView>
         </NitroCardView>
     );

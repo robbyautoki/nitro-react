@@ -26,7 +26,7 @@ export const WiredActionBaseView: FC<PropsWithChildren<WiredActionBaseViewProps>
     return (
         <WiredBaseView wiredType="action" requiresFurni={ requiresFurni } save={ save } hasSpecialInput={ hasSpecialInput }>
             { children }
-            { !!children && <hr className="m-0 bg-dark" /> }
+            { !!children && <hr className="m-0 bg-gray-900" /> }
             <Column>
                 <Text bold>{ LocalizeText('wiredfurni.params.delay', [ 'seconds' ], [ GetWiredTimeLocale(actionDelay) ]) }</Text>
                 <ReactSlider

@@ -96,11 +96,11 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = props =>
                     </Flex>
                     <Text small>{ wiredDescription }</Text>
                 </Column>
-                { !!children && <hr className="m-0 bg-dark" /> }
+                { !!children && <hr className="m-0 bg-gray-900" /> }
                 { children }
                 { (requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE) &&
                     <>
-                        <hr className="m-0 bg-dark" />
+                        <hr className="m-0 bg-gray-900" />
                         <WiredFurniSelectorView />
                     </> }
                 <Flex alignItems="center" gap={ 1 }>

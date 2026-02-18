@@ -6,7 +6,7 @@
     width: 240px;
 
     .username {
-        color: #1E7295;
+        color: rgba(56, 189, 248, 0.80);
         text-decoration: underline;
     }
 }
@@ -16,21 +16,21 @@
     height: 370px;
 
     .username {
-        color: #1E7295;
+        color: rgba(56, 189, 248, 0.80);
         text-decoration: underline;
     }
 
     .table {
-        color: $black;
+        color: rgba(255, 255, 255, 0.80);
 
         > :not(caption)>*>* {
             box-shadow: none;
-            border-bottom: 1px solid rgba(0, 0, 0, .2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         &.table-striped>tbody>tr:nth-of-type(odd) {
-            color: $black;
-            background: rgba(0, 0, 0, .05);
+            color: rgba(255, 255, 255, 0.80);
+            background: rgba(255, 255, 255, 0.04);
         }
     }
 }

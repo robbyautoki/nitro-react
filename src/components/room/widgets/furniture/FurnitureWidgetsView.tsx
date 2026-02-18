@@ -23,7 +23,7 @@ import { FurniturePlaylistEditorWidgetView } from './playlist-editor/FurniturePl
 export const FurnitureWidgetsView: FC<{}> = props =>
 {
     return (
-        <Base fit position="absolute" className="nitro-room-widgets top-0 start-0">
+        <Base fit position="absolute" className="nitro-room-widgets top-0 left-0">
             <FurnitureBackgroundColorView />
             <FurnitureBadgeDisplayView />
             <FurnitureCraftingView />

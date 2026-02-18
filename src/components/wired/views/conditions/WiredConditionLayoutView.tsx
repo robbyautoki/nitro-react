@@ -1,5 +1,6 @@
 import { WiredConditionlayout } from '../../../../api';
 import { WiredConditionActorHasHandItemView } from './WiredConditionActorHasHandItem';
+import { WiredConditionRandomChanceView } from './WiredConditionRandomChanceView';
 import { WiredConditionActorIsGroupMemberView } from './WiredConditionActorIsGroupMemberView';
 import { WiredConditionActorIsOnFurniView } from './WiredConditionActorIsOnFurniView';
 import { WiredConditionActorIsTeamMemberView } from './WiredConditionActorIsTeamMemberView';
@@ -58,6 +59,8 @@ export const WiredConditionLayoutView = (code: number) =>
         case WiredConditionlayout.USER_COUNT_IN:
         case WiredConditionlayout.NOT_USER_COUNT_IN:
             return <WiredConditionUserCountInRoomView />;
+        case WiredConditionlayout.RANDOM_CHANCE:
+            return <WiredConditionRandomChanceView />;
     }
 
     return null;

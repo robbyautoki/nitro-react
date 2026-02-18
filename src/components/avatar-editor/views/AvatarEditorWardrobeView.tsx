@@ -58,7 +58,7 @@ export const AvatarEditorWardrobeView: FC<AvatarEditorWardrobeViewProps> = props
                     { figureContainer &&
                     <LayoutAvatarImageView figure={ figureContainer.getFigureString() } gender={ gender } direction={ 2 } /> }
                     <Base className="avatar-shadow" />
-                    { !hcDisabled && (clubLevel > 0) && <LayoutCurrencyIcon className="position-absolute top-1 start-1" type="hc" /> }
+                    { !hcDisabled && (clubLevel > 0) && <LayoutCurrencyIcon className="absolute top-1 left-1" type="hc" /> }
                     <Flex gap={ 1 } className="button-container">
                         <Button variant="link" fullWidth onClick={ event => saveFigureAtWardrobeIndex(index) }>{ LocalizeText('avatareditor.wardrobe.save') }</Button>
                         { figureContainer &&

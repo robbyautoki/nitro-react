@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { LocalizeBadgeName, LocalizeText, UnseenItemCategory } from '../../../../api';
-import { AutoGrid, Button, Column, Flex, Grid, LayoutBadgeImageView, Text } from '../../../../common';
+import { AutoGrid, Button, Column, Flex, LayoutBadgeImageView, Text } from '../../../../common';
 import { useInventoryBadges, useInventoryUnseenTracker } from '../../../../hooks';
 import { InventoryBadgeItemView } from './InventoryBadgeItemView';
 
@@ -34,9 +34,16 @@ export const InventoryBadgeView: FC<{}> = props =>
     }, []);
 
     return (
-        <Grid>
-            <Column size={ 7 } overflow="hidden">
-                <AutoGrid columnCount={ 4 }>
+        <Column grow gap={ 0 } style={{ minHeight: 0 }}>
+            { activeBadgeCodes && activeBadgeCodes.length > 0 &&
+                <Column gap={ 1 } className="mb-2">
+                    <Text small variant="muted">{ LocalizeText('inventory.badges.activebadges') }</Text>
+                    <AutoGrid columnCount={ 7 }>
+                        { activeBadgeCodes.map((badgeCode, index) => <InventoryBadgeItemView key={ index } badgeCode={ badgeCode } />) }
+                    </AutoGrid>
+                </Column> }
+            <div className="inv-items-grid">
+                <AutoGrid columnCount={ 7 }>
                     { badgeCodes && (badgeCodes.length > 0) && badgeCodes.map((badgeCode, index) =>
                     {
                         if(isWearingBadge(badgeCode)) return null;
@@ -44,23 +51,21 @@ export const InventoryBadgeView: FC<{}> = props =>
                         return <InventoryBadgeItemView key={ index } badgeCode={ badgeCode } />
                     }) }
                 </AutoGrid>
-            </Column>
-            <Column className="justify-content-between" size={ 5 } overflow="auto">
-                <Column overflow="hidden" gap={ 2 }>
-                    <Text>{ LocalizeText('inventory.badges.activebadges') }</Text>
-                    <AutoGrid columnCount={ 3 }>
-                        { activeBadgeCodes && (activeBadgeCodes.length > 0) && activeBadgeCodes.map((badgeCode, index) => <InventoryBadgeItemView key={ index } badgeCode={ badgeCode } />) }
-                    </AutoGrid>
-                </Column>
-                { !!selectedBadgeCode &&
-                    <Column grow justifyContent="end" gap={ 2 }>
-                        <Flex alignItems="center" gap={ 2 }>
-                            <LayoutBadgeImageView shrink badgeCode={ selectedBadgeCode } />
-                            <Text>{ LocalizeBadgeName(selectedBadgeCode) }</Text>
-                        </Flex>
-                        <Button variant={ (isWearingBadge(selectedBadgeCode) ? 'danger' : 'success') } disabled={ !isWearingBadge(selectedBadgeCode) && !canWearBadges() } onClick={ event => toggleBadge(selectedBadgeCode) }>{ LocalizeText(isWearingBadge(selectedBadgeCode) ? 'inventory.badges.clearbadge' : 'inventory.badges.wearbadge') }</Button>
-                    </Column> }
-            </Column>
-        </Grid>
+            </div>
+            { !!selectedBadgeCode &&
+                <div className="inv-footer">
+                    <div className="inv-footer-preview">
+                        <LayoutBadgeImageView shrink badgeCode={ selectedBadgeCode } />
+                    </div>
+                    <div className="inv-footer-info">
+                        <div className="inv-footer-name">{ LocalizeBadgeName(selectedBadgeCode) }</div>
+                        <div className="inv-footer-actions">
+                            <Button variant={ (isWearingBadge(selectedBadgeCode) ? 'danger' : 'success') } size="sm" disabled={ !isWearingBadge(selectedBadgeCode) && !canWearBadges() } onClick={ event => toggleBadge(selectedBadgeCode) }>
+                                { LocalizeText(isWearingBadge(selectedBadgeCode) ? 'inventory.badges.clearbadge' : 'inventory.badges.wearbadge') }
+                            </Button>
+                        </div>
+                    </div>
+                </div> }
+        </Column>
     );
 }

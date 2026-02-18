@@ -150,7 +150,7 @@ export const GroupCreatorView: FC<GroupCreatorViewProps> = props =>
                             <GroupTabCreatorConfirmationView groupData={ groupData } setGroupData={ setGroupData } purchaseCost={ purchaseCost } /> }
                     </Column>
                     <Flex justifyContent="between">
-                        <Button variant="link" className="text-black" onClick={ previousStep }>
+                        <Button variant="link" className="text-white/90" onClick={ previousStep }>
                             { LocalizeText(currentTab === 1 ? 'generic.cancel' : 'group.create.previousstep') }
                         </Button>
                         <Button disabled={ ((currentTab === 4) && !HasHabboClub()) } variant={ ((currentTab === 4) ? HasHabboClub() ? 'success' : 'danger' : 'primary') } onClick={ nextStep }>

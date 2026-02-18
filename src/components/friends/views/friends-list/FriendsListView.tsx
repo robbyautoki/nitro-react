@@ -123,7 +123,7 @@ export const FriendsListView: FC<{}> = props =>
         <>
             <NitroCardView className="nitro-friends" uniqueKey="nitro-friends" theme="primary-slim">
                 <NitroCardHeaderView headerText={ LocalizeText('friendlist.friends') } onCloseClick={ event => setIsVisible(false) } />
-                <NitroCardContentView overflow="hidden" gap={ 1 } className="text-black p-0">
+                <NitroCardContentView overflow="hidden" gap={ 1 } className= "text-white/90 p-0">
                     <NitroCardAccordionView fullHeight overflow="hidden">
                         <NitroCardAccordionSetView headerText={ LocalizeText('friendlist.friends') + ` (${ onlineFriends.length })` } isExpanded={ true }>
                             <FriendsListGroupView list={ onlineFriends } selectedFriendsIds={ selectedFriendsIds } selectFriend={ selectFriend } />

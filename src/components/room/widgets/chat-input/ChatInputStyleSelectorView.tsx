@@ -1,6 +1,6 @@
-import { FC, MouseEvent, useEffect, useState } from 'react';
-import { Overlay, Popover } from 'react-bootstrap';
-import { Base, Flex, Grid, NitroCardContentView } from '../../../../common';
+import { FC, useState } from 'react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatInputStyleSelectorViewProps
 {
@@ -12,7 +12,6 @@ interface ChatInputStyleSelectorViewProps
 export const ChatInputStyleSelectorView: FC<ChatInputStyleSelectorViewProps> = props =>
 {
     const { chatStyleId = 0, chatStyleIds = null, selectChatStyleId = null } = props;
-    const [ target, setTarget ] = useState<(EventTarget & HTMLElement)>(null);
     const [ selectorVisible, setSelectorVisible ] = useState(false);
 
     const selectStyle = (styleId: number) =>
@@ -21,48 +20,36 @@ export const ChatInputStyleSelectorView: FC<ChatInputStyleSelectorViewProps> = p
         setSelectorVisible(false);
     }
 
-    const toggleSelector = (event: MouseEvent<HTMLElement>) =>
-    {
-        let visible = false;
-
-        setSelectorVisible(prevValue =>
-        {
-            visible = !prevValue;
-
-            return visible;
-        });
-
-        if(visible) setTarget((event.target as (EventTarget & HTMLElement)));
-    }
-
-    useEffect(() =>
-    {
-        if(selectorVisible) return;
-
-        setTarget(null);
-    }, [ selectorVisible ]);
-
     return (
-        <>
-            <Base pointer className="icon chatstyles-icon" onClick={ toggleSelector } />
-            <Overlay show={ selectorVisible } target={ target } placement="top">
-                <Popover className="nitro-chat-style-selector-container image-rendering-pixelated">
-                    <NitroCardContentView overflow="hidden" className="bg-transparent">
-                        <Grid columnCount={ 3 } overflow="auto">
-                            { chatStyleIds && (chatStyleIds.length > 0) && chatStyleIds.map((styleId) =>
-                            {
-                                return (
-                                    <Flex center pointer key={ styleId } className="bubble-parent-container" onClick={ event => selectStyle(styleId) }>
-                                        <Base key={ styleId } className="bubble-container">
-                                            <Base className={ `chat-bubble bubble-${ styleId }` }>&nbsp;</Base>
-                                        </Base>
-                                    </Flex>
-                                );
-                            }) }
-                        </Grid>
-                    </NitroCardContentView>
-                </Popover>
-            </Overlay>
-        </>
+        <Popover open={ selectorVisible } onOpenChange={ setSelectorVisible }>
+            <PopoverTrigger asChild>
+                <div className="icon chatstyles-icon shrink-0 ml-1 cursor-pointer transition-opacity hover:opacity-70" />
+            </PopoverTrigger>
+            <PopoverContent
+                side="top"
+                align="end"
+                sideOffset={ 8 }
+                className="w-[210px] max-h-[200px] p-0 bg-white/95 backdrop-blur-xl border border-gray-200 rounded-xl shadow-lg"
+            >
+                <ScrollArea className="h-full max-h-[200px]">
+                    <div className="nitro-chat-style-selector-container grid grid-cols-3 gap-1 p-2 image-rendering-pixelated">
+                        { chatStyleIds && (chatStyleIds.length > 0) && chatStyleIds.map((styleId) =>
+                        {
+                            return (
+                                <div
+                                    key={ styleId }
+                                    className="bubble-parent-container flex items-center justify-center rounded-lg cursor-pointer transition-colors hover:bg-gray-100"
+                                    onClick={ event => selectStyle(styleId) }
+                                >
+                                    <div className="bubble-container">
+                                        <div className={ `chat-bubble bubble-${ styleId }` }>&nbsp;</div>
+                                    </div>
+                                </div>
+                            );
+                        }) }
+                    </div>
+                </ScrollArea>
+            </PopoverContent>
+        </Popover>
     );
 }

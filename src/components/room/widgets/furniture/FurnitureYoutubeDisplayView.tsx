@@ -76,17 +76,17 @@ export const FurnitureYoutubeDisplayView: FC<{}> = FurnitureYoutubeDisplayViewPr
         <NitroCardView className="youtube-tv-widget">
 		<NitroCardHeaderView headerText={ LocalizeText('catalog.page.youtube_tvs') } onCloseClick={ onClose } />
             <NitroCardContentView>
-                <div className="row w-100 h-100">
+                <div className="row w-full h-full">
                     <div className="youtube-video-container col-9 overflow-hidden">
                         { (videoId && videoId.length > 0) &&
                             <YouTube videoId={ videoId } opts={ youtubeOptions } onReady={ event => setPlayer(event.target) } onStateChange={ onStateChange } containerClassName={ 'youtubeContainer' } />
                         }
                         { (!videoId || videoId.length === 0) &&
-                            <div className="empty-video w-100 h-100 justify-content-center align-items-center d-flex">{ LocalizeText('widget.furni.video_viewer.no_videos') }</div>
+                            <div className="empty-video w-full h-full justify-center items-center flex">{ LocalizeText('widget.furni.video_viewer.no_videos') }</div>
                         }
                     </div>
-                    <div className="playlist-container col-3 d-flex flex-column">
-                        <span className="playlist-controls justify-content-center d-flex">
+                    <div className="playlist-container col-3 flex flex-col">
+                        <span className="playlist-controls justify-center flex">
                             <i className="icon icon-youtube-prev cursor-pointer" onClick={ previous } />
                             <i className="icon icon-youtube-next cursor-pointer" onClick={ next } />
                         </span>

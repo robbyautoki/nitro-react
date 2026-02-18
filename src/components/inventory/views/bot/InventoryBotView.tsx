@@ -1,7 +1,7 @@
 import { IRoomSession, RoomObjectVariable, RoomPreviewer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { attemptBotPlacement, GetRoomEngine, LocalizeText, UnseenItemCategory } from '../../../../api';
-import { AutoGrid, Button, Column, Grid, LayoutRoomPreviewerView, Text } from '../../../../common';
+import { AutoGrid, Button, Column } from '../../../../common';
 import { useInventoryBots, useInventoryUnseenTracker } from '../../../../hooks';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryBotItemView } from './InventoryBotItemView';
@@ -67,25 +67,24 @@ export const InventoryBotView: FC<InventoryBotViewProps> = props =>
     if(!botItems || !botItems.length) return <InventoryCategoryEmptyView title={ LocalizeText('inventory.empty.bots.title') } desc={ LocalizeText('inventory.empty.bots.desc') } />;
 
     return (
-        <Grid>
-            <Column size={ 7 } overflow="hidden">
-                <AutoGrid columnCount={ 5 }>
+        <Column grow gap={ 0 } style={{ minHeight: 0 }}>
+            <div className="inv-items-grid">
+                <AutoGrid columnCount={ 7 }>
                     { botItems && (botItems.length > 0) && botItems.map(item => <InventoryBotItemView key={ item.botData.id } botItem={ item } />) }
                 </AutoGrid>
-            </Column>
-            <Column size={ 5 } overflow="auto">
-                <Column overflow="hidden" position="relative">
-                    <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 140 } />
-                </Column>
-                { selectedBot &&
-                    <Column grow justifyContent="between" gap={ 2 }>
-                        <Text grow truncate>{ selectedBot.botData.name }</Text>
-                        { !!roomSession &&
-                            <Button variant="success" onClick={ event => attemptBotPlacement(selectedBot) }>
-                                { LocalizeText('inventory.furni.placetoroom') }
-                            </Button> }
-                    </Column> }
-            </Column>
-        </Grid>
+            </div>
+            { selectedBot &&
+                <div className="inv-footer">
+                    <div className="inv-footer-info">
+                        <div className="inv-footer-name">{ selectedBot.botData.name }</div>
+                        <div className="inv-footer-actions">
+                            { !!roomSession &&
+                                <Button variant="success" size="sm" onClick={ event => attemptBotPlacement(selectedBot) }>
+                                    { LocalizeText('inventory.furni.placetoroom') }
+                                </Button> }
+                        </div>
+                    </div>
+                </div> }
+        </Column>
     );
 }

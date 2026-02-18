@@ -1,0 +1,52 @@
+// ─── Design Tokens ──────────────────────────────────────────────────────────
+// Extracted from Bootstrap _variables.scss — only values actually used by
+// component SCSS files.  Replaces the full Bootstrap SCSS tooling.
+
+// Colors
+$white:       #fff;
+$black:       #000;
+$red:         #a81a12;
+$green:       #00800b;
+$success:     $green;
+$primary:     #18181B;
+$secondary:   #27272A;
+$tertiary:    #3F3F46;
+$quaternary:  #52525B;
+$dark:        rgba(28, 28, 32, .98);
+$light-dark:  #343a40;
+$light:       #FAFAFA;
+
+// Context menu / room widget colors
+$pale-sky:    #677181;
+$gable-green: #1C323F;
+$william:     #3d5f6e;
+$mirage:      #131e25;
+$aztec:       #0d171d;
+$cello-light: #21516e;
+$cello-dark:  #1e465e;
+
+// Repeating gradient backgrounds
+$bg-mirage-split-background: repeating-linear-gradient($mirage, $mirage 50%, $aztec 50%, $aztec 100%);
+$bg-cello-split-background:  repeating-linear-gradient($cello-light, $cello-light 50%, $cello-dark 50%, $cello-dark 100%);
+$bg-tertiary-split-background: repeating-linear-gradient($tertiary, $tertiary 50%, $quaternary 50%, $quaternary 100%);
+
+// Layout
+$border-width:  1px;
+$border-radius: .5rem;
+
+// Typography
+$font-size-base: .9rem;
+$font-size-sm:   $font-size-base * .875;
+
+// Nav
+$nav-link-padding-y: .2rem;
+$nav-link-padding-x: .8rem;
+
+// Table
+$table-striped-bg: rgba($black, .05);
+
+// ─── Utility: divide() ──────────────────────────────────────────────────────
+// Used by bootstrap-compat.scss for col-* percentage widths.
+@function divide($dividend, $divisor, $precision: 10) {
+  @return $dividend / $divisor;
+}

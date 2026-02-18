@@ -1,17 +1,16 @@
-import { FC, useEffect, useRef } from 'react';
+import { FC, HTMLAttributes, useEffect, useRef } from 'react';
 import { IPurchasableOffer, ProductTypeEnum } from '../../../../../api';
-import { AutoGrid, AutoGridProps } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
 
-interface CatalogItemGridWidgetViewProps extends AutoGridProps
+interface CatalogItemGridWidgetViewProps extends HTMLAttributes<HTMLDivElement>
 {
 
 }
 
 export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = props =>
 {
-    const { columnCount = 7, children = null, ...rest } = props;
+    const { children = null, className = '', ...rest } = props;
     const { currentOffer = null, setCurrentOffer = null, currentPage = null, setPurchaseOptions = null } = useCatalog();
     const elementRef = useRef<HTMLDivElement>();
 
@@ -27,7 +26,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = pro
         offer.activate();
 
         if(offer.isLazy) return;
-        
+
         setCurrentOffer(offer);
 
         if(offer.product && (offer.product.productType === ProductTypeEnum.WALL))
@@ -35,18 +34,18 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = pro
             setPurchaseOptions(prevValue =>
             {
                 const newValue = { ...prevValue };
-    
+
                 newValue.extraData = (offer.product.extraParam || null);
-    
+
                 return newValue;
             });
         }
     }
 
     return (
-        <AutoGrid innerRef={ elementRef } columnCount={ columnCount } { ...rest }>
+        <div ref={ elementRef } className={ `grid grid-cols-[repeat(auto-fill,52px)] gap-0.5 overflow-y-auto p-1.5 ${ className }` } { ...rest }>
             { currentPage.offers && (currentPage.offers.length > 0) && currentPage.offers.map((offer, index) => <CatalogGridOfferView key={ index } itemActive={ (currentOffer && (currentOffer.offerId === offer.offerId)) } offer={ offer } selectOffer={ selectOffer } />) }
             { children }
-        </AutoGrid>
+        </div>
     );
 }

@@ -15,14 +15,14 @@ export const FurnitureFriendFurniView: FC<{}> = props =>
             <NitroCardView className="nitro-engraving-lock" theme="primary-slim">
                 <NitroCardHeaderView headerText={ LocalizeText('friend.furniture.confirm.lock.caption') } onCloseClick={ onClose } />
                 <NitroCardContentView>
-                    <h5 className="text-black text-center fw-bold mt-2 mb-2">
+                    <h5 className= "text-white/90 text-center font-bold mt-2 mb-2">
                         { LocalizeText('friend.furniture.confirm.lock.subtitle') }
                     </h5>
-                    <div className="d-flex justify-content-center mb-2">
+                    <div className="flex justify-center mb-2">
                         <div className={ `engraving-lock-stage-${ stage }` }></div>
                     </div>
                     { (stage === 2) &&
-                        <div className="text-small text-black text-center mb-2">{ LocalizeText('friend.furniture.confirm.lock.other.locked') }</div> }
+                        <div className="text-small text-white/90 text-center mb-2">{ LocalizeText('friend.furniture.confirm.lock.other.locked') }</div> }
                     <Flex gap={ 1 }>
                         <Button fullWidth onClick={ event => respond(false) }>{ LocalizeText('friend.furniture.confirm.lock.button.cancel') }</Button>
                         <Button fullWidth variant="success" onClick={ event => respond(true) }>{ LocalizeText('friend.furniture.confirm.lock.button.confirm') }</Button>

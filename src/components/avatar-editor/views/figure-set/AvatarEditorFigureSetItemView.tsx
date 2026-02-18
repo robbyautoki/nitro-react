@@ -26,9 +26,9 @@ export const AvatarEditorFigureSetItemView: FC<AvatarEditorFigureSetItemViewProp
 
     return (
         <LayoutGridItem itemImage={ (partItem.isClear ? undefined : partItem.imageUrl) } itemActive={ partItem.isSelected } { ...rest }>
-            { !hcDisabled && partItem.isHC && <LayoutCurrencyIcon className="position-absolute end-1 bottom-1" type="hc" /> }
+            { !hcDisabled && partItem.isHC && <LayoutCurrencyIcon className="absolute right-1 bottom-1" type="hc" /> }
             { partItem.isClear && <AvatarEditorIcon icon="clear" /> }
-            { partItem.isSellable && <AvatarEditorIcon icon="sellable" position="absolute" className="end-1 bottom-1" /> }
+            { partItem.isSellable && <AvatarEditorIcon icon="sellable" position="absolute" className="right-1 bottom-1" /> }
             { children }
         </LayoutGridItem>
     );

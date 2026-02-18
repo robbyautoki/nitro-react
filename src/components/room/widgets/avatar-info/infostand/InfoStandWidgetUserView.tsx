@@ -1,7 +1,8 @@
 import { RelationshipStatusInfoEvent, RelationshipStatusInfoMessageParser, RoomSessionFavoriteGroupUpdateEvent, RoomSessionUserBadgesEvent, RoomSessionUserFigureUpdateEvent, UserRelationshipsComposer } from '@nitrots/nitro-renderer';
-import { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useEffect, useMemo, useState } from 'react';
 import { FaPencilAlt, FaTimes } from 'react-icons/fa';
 import { AvatarInfoUser, CloneObject, GetConfiguration, GetGroupInformation, GetSessionDataManager, GetUserProfile, LocalizeText, SendMessageComposer } from '../../../../../api';
+import { getPrestigeFromBadges, getPrestigeInfo } from '../../../../../api/utils/PrestigeUtils';
 import { Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserProfileIconView } from '../../../../../common';
 import { useMessageEvent, useRoom, useRoomSessionManagerEvent } from '../../../../../hooks';
 import { InfoStandWidgetUserRelationshipsView } from './InfoStandWidgetUserRelationshipsView';
@@ -171,7 +172,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
                     <hr className="m-0" />
                 </Column>
                 <Column gap={ 1 }>
-                    <Flex alignItems="center" className="bg-light-dark rounded py-1 px-2">
+                    <Flex alignItems="center" className="bg-gray-100-dark rounded py-1 px-2">
                         { (avatarInfo.type !== AvatarInfoUser.OWN_USER) &&
                             <Flex grow alignItems="center" className="motto-content">
                                 <Text fullWidth pointer wrap textBreak small variant="white">{ motto }</Text>
@@ -193,6 +194,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
                     <Text variant="white" small wrap>
                         { LocalizeText('infostand.text.achievement_score') + ' ' + avatarInfo.achievementScore }
                     </Text>
+                    <PrestigeLevelText badges={ avatarInfo.badges } score={ avatarInfo.achievementScore } />
                     { (avatarInfo.carryItem > 0) &&
                         <>
                             <hr className="m-0" />
@@ -211,5 +213,18 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
                 }
             </Column>
         </Column>
+    );
+}
+
+const PrestigeLevelText: FC<{ badges: string[]; score: number }> = ({ badges, score }) =>
+{
+    const prestige = useMemo(() => getPrestigeFromBadges(badges), [ badges ]);
+    const info = useMemo(() => getPrestigeInfo(score, prestige), [ score, prestige ]);
+
+    return (
+        <Text variant="white" small wrap>
+            { prestige > 0 && <span>🌟 Prestige { prestige } — </span> }
+            Level { info.displayLevel }
+        </Text>
     );
 }

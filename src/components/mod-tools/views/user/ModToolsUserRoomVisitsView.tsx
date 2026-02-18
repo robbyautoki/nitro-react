@@ -34,10 +34,10 @@ export const ModToolsUserRoomVisitsView: FC<ModToolsUserRoomVisitsViewProps> = p
     return (
         <NitroCardView className="nitro-mod-tools-user-visits" theme="primary-slim" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
             <NitroCardHeaderView headerText={ 'User Visits' } onCloseClick={ onCloseClick } />
-            <NitroCardContentView className="text-black" gap={ 1 }>
+            <NitroCardContentView className="text-white/90" gap={ 1 }>
                 <Column fullHeight gap={ 0 } overflow="hidden">
                     <Column gap={ 2 }>
-                        <Grid gap={ 1 } className="text-black fw-bold border-bottom pb-1">
+                        <Grid gap={ 1 } className= "text-white/90 font-bold border-bottom pb-1">
                             <Base className="g-col-2">Time</Base>
                             <Base className="g-col-7">Room name</Base>
                             <Base className="g-col-3">Visit</Base>
@@ -46,7 +46,7 @@ export const ModToolsUserRoomVisitsView: FC<ModToolsUserRoomVisitsViewProps> = p
                     <InfiniteScroll rows={ roomVisitData?.rooms ?? [] } rowRender={ row =>
                     {
                         return (
-                            <Grid fullHeight={ false } gap={ 1 } alignItems="center" className="text-black py-1 border-bottom">
+                            <Grid fullHeight={ false } gap={ 1 } alignItems="center" className= "text-white/90 py-1 border-bottom">
                                 <Text className="g-col-2">{ row.enterHour.toString().padStart(2, '0') }: { row.enterMinute.toString().padStart(2, '0') }</Text>
                                 <Text className="g-col-7">{ row.roomName }</Text>
                                 <Text bold underline pointer variant="primary" className="g-col-3" onClick={ event => TryVisitRoom(row.roomId) }>Visit Room</Text>

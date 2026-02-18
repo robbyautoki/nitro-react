@@ -26,7 +26,7 @@ export const RoomPromoteEditWidgetView: FC<RoomPromoteEditWidgetViewProps> = pro
     return (
         <NitroCardView className="nitro-guide-tool" theme="primary-slim">
             <NitroCardHeaderView headerText={ LocalizeText('navigator.eventsettings.editcaption') } onCloseClick={ () => setIsEditingPromote(false) } />
-            <NitroCardContentView className="text-black">
+            <NitroCardContentView className="text-white/90">
                 <Column>
                     <Text bold>{ LocalizeText('navigator.eventsettings.name') }</Text>
                     <input type="text" className="form-control form-control-sm" placeholder={ LocalizeText('navigator.eventsettings.name') } maxLength={ 64 } value={ newEventName } onChange={ event => setNewEventName(event.target.value) } />

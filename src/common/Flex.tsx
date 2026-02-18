@@ -2,6 +2,15 @@ import { FC, useMemo } from 'react';
 import { Base, BaseProps } from './Base';
 import { AlignItemType, AlignSelfType, JustifyContentType, SpacingType } from './types';
 
+const GAP_MAP: Record<number, string> = {
+    0: 'gap-0',
+    1: 'gap-1',
+    2: 'gap-2',
+    3: 'gap-4',
+    4: 'gap-6',
+    5: 'gap-12',
+};
+
 export interface FlexProps extends BaseProps<HTMLDivElement>
 {
     column?: boolean;
@@ -23,23 +32,23 @@ export const Flex: FC<FlexProps> = props =>
 
         if(column)
         {
-            if(reverse) newClassNames.push('flex-column-reverse');
-            else newClassNames.push('flex-column');
+            if(reverse) newClassNames.push('flex-col-reverse');
+            else newClassNames.push('flex-col');
         }
         else
         {
             if(reverse) newClassNames.push('flex-row-reverse');
         }
 
-        if(gap) newClassNames.push('gap-' + gap);
+        if(gap !== null && gap !== undefined) newClassNames.push(GAP_MAP[gap] || ('gap-' + gap));
 
-        if(alignSelf) newClassNames.push('align-self-' + alignSelf);
+        if(alignSelf) newClassNames.push('self-' + alignSelf);
 
-        if(alignItems) newClassNames.push('align-items-' + alignItems);
+        if(alignItems) newClassNames.push('items-' + alignItems);
 
-        if(justifyContent) newClassNames.push('justify-content-' + justifyContent);
+        if(justifyContent) newClassNames.push('justify-' + justifyContent);
 
-        if(!alignItems && !justifyContent && center) newClassNames.push('align-items-center', 'justify-content-center');
+        if(!alignItems && !justifyContent && center) newClassNames.push('items-center', 'justify-center');
 
         if(classNames.length) newClassNames.push(...classNames);
 

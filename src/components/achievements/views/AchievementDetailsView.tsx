@@ -16,7 +16,7 @@ export const AchievementDetailsView: FC<AchievementDetailsViewProps> = props =>
     if(!achievement) return null;
 
     return (
-        <Flex shrink className="bg-muted rounded p-2 text-black" gap={ 2 } overflow="hidden">
+        <Flex shrink className="bg-muted rounded p-2 text-white/90" gap={ 2 } overflow="hidden">
             <Column center gap={ 1 }>
                 <AchievementBadgeView className="nitro-achievements-badge-image" achievement={ achievement } scale={ 2 } />
                 <Text fontWeight="bold">
@@ -39,7 +39,7 @@ export const AchievementDetailsView: FC<AchievementDetailsViewProps> = props =>
                                 <Text truncate className="small">
                                     { LocalizeText('achievements.details.reward') }
                                 </Text>
-                                <Flex center className="fw-bold small" gap={ 1 }>
+                                <Flex center className="font-bold small" gap={ 1 }>
                                     { achievement.levelRewardPoints }
                                     <LayoutCurrencyIcon type={ achievement.levelRewardPointType } />
                                 </Flex>

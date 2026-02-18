@@ -1,4 +1,6 @@
 .nitro-catalog {
+    height: 90vh !important;
+
     font[size='16'] {
         font-size: 20px;
     }
@@ -11,161 +13,35 @@
         text-align: right;
     }
 
-    // ─── Scoped Bootstrap Overrides ───
-    // These restyle Bootstrap components within the catalog scope
-    // (Bootstrap is in @layer bootstrap, so these unlayered styles win automatically)
+    // Chip scroll — hide scrollbar for horizontal subcategory navigation
+    .catalog-chip-scroll {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
 
-    // Form inputs
-    .form-control {
-        border: 1px solid #E4E4E7;
-        border-radius: 6px;
-        font-size: 12px;
-        background: #FFFFFF;
-        color: #18181B;
-        outline: none;
-        transition: border-color 0.15s ease;
-
-        &:focus {
-            border-color: #A1A1AA;
-            box-shadow: none;
-        }
-
-        &::placeholder {
-            color: #A1A1AA;
+        &::-webkit-scrollbar {
+            display: none;
         }
     }
 
-    .form-control-sm {
-        height: 32px;
-        padding: 0 10px;
+    // Bottom inspector panel slide-in animation
+    .catalog-inspector-enter {
+        animation: slideUpFade 0.2s ease-out;
     }
 
-    // Select dropdowns
-    .form-select {
-        border: 1px solid #E4E4E7;
-        border-radius: 6px;
-        font-size: 12px;
-        background-color: #FFFFFF;
-        color: #18181B;
-        transition: border-color 0.15s ease;
-
-        &:focus {
-            border-color: #A1A1AA;
-            box-shadow: none;
+    @keyframes slideUpFade {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
-    // Buttons
-    .btn {
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 500;
-        transition: all 0.15s ease;
-    }
-
-    .btn-primary {
-        background: #18181B;
-        border-color: #18181B;
-        color: #FFFFFF;
-
-        &:hover, &:focus {
-            background: #27272A;
-            border-color: #27272A;
-        }
-
-        &:disabled {
-            background: #E4E4E7;
-            border-color: #E4E4E7;
-            color: #A1A1AA;
-        }
-    }
-
-    .btn-success {
-        background: #18181B;
-        border-color: #18181B;
-        color: #FFFFFF;
-
-        &:hover, &:focus {
-            background: #27272A;
-            border-color: #27272A;
-        }
-    }
-
-    .btn-secondary {
-        background: #FFFFFF;
-        border: 1px solid #E4E4E7;
-        color: #3F3F46;
-
-        &:hover, &:focus {
-            background: #F4F4F5;
-            border-color: #A1A1AA;
-        }
-    }
-
-    .btn-warning {
-        background: #F59E0B;
-        border-color: #F59E0B;
-        color: #FFFFFF;
-        border-radius: 8px;
-
-        &:hover {
-            background: #D97706;
-            border-color: #D97706;
-        }
-    }
-
-    .btn-danger {
-        background: #EF4444;
-        border-color: #EF4444;
-        color: #FFFFFF;
-        border-radius: 8px;
-
-        &:hover {
-            background: #DC2626;
-            border-color: #DC2626;
-        }
-
-        &:disabled {
-            background: #FCA5A5;
-            border-color: #FCA5A5;
-        }
-    }
-
-    .btn-group {
-        gap: 4px;
-
-        .btn {
-            border-radius: 6px;
-        }
-    }
-
-    // Grid items — product grid
-    .layout-grid-item {
-        border-color: #E4E4E7 !important;
-        background-color: #FFFFFF;
-        border-radius: 8px;
-        transition: all 0.15s ease;
-
-        &:hover {
-            border-color: #A1A1AA !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
-        }
-
-        &.active {
-            border-color: #18181B !important;
-            background-color: #FAFAFA !important;
-            box-shadow: 0 0 0 1px #18181B;
-        }
-    }
-
-    // Background overrides
-    .bg-muted {
-        background-color: #F4F4F5 !important;
-    }
-
-    // Text overrides
-    .text-black {
-        color: #18181B !important;
+    // Hero preview: subtle inner-shadow to ground the 3D model
+    .catalog-inspector-hero {
+        box-shadow: inset 0 -1px 0 rgba(255,255,255,0.04), inset 0 0 40px rgba(0,0,0,0.3);
     }
 
     // ─── Server HTML Content Reset ───
@@ -173,7 +49,7 @@
     // (gray backgrounds, old fonts, etc.) — neutralize them all
     .catalog-page-text {
         font-size: 12px;
-        color: #3F3F46;
+        color: rgba(255, 255, 255, 0.70);
         line-height: 1.6;
 
         * {
@@ -188,11 +64,11 @@
 
         b, strong {
             font-weight: 600;
-            color: #18181B !important;
+            color: rgba(255, 255, 255, 0.95) !important;
         }
 
         a {
-            color: #2563EB !important;
+            color: rgba(56, 189, 248, 0.80) !important;
             text-decoration: underline;
         }
 
@@ -203,66 +79,6 @@
         }
     }
 
-    // Textarea
-    textarea.form-control {
-        border-radius: 6px;
-        resize: none;
-    }
-
-    // Form checks (checkboxes)
-    .form-check-input {
-        border-radius: 4px;
-        border-color: #D4D4D8;
-
-        &:checked {
-            background-color: #18181B;
-            border-color: #18181B;
-        }
-    }
-}
-
-// Radix Tabs — custom styling for catalog tab bar
-.nitro-catalog [role="tablist"] {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    padding: 5px 10px;
-    background: #FAFAFA;
-    border-bottom: 1px solid #E4E4E7;
-    overflow-x: auto;
-    min-height: 38px;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    button[role="tab"] {
-        border: none;
-        border-radius: 7px;
-        padding: 6px 14px;
-        font-size: 11px;
-        font-weight: 500;
-        white-space: nowrap;
-        cursor: pointer;
-        transition: all 0.15s ease;
-        background: transparent;
-        color: #71717A;
-        outline: none;
-        line-height: 1.4;
-
-        &:hover {
-            background: #F4F4F5;
-            color: #3F3F46;
-        }
-
-        &[data-state="active"] {
-            background: #FFFFFF;
-            color: #18181B;
-            font-weight: 600;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
-        }
-    }
 }
 
 // Gift Dialog
@@ -283,75 +99,6 @@
         height: 15px;
         border-radius: 6px;
     }
-
-    // Scoped overrides for gift dialog
-    .form-control {
-        border: 1px solid #E4E4E7;
-        border-radius: 6px;
-        font-size: 12px;
-        background: #FFFFFF;
-        color: #18181B;
-
-        &:focus {
-            border-color: #A1A1AA;
-            box-shadow: none;
-        }
-
-        &::placeholder {
-            color: #A1A1AA;
-        }
-    }
-
-    .form-check-input {
-        border-radius: 4px;
-        border-color: #D4D4D8;
-
-        &:checked {
-            background-color: #18181B;
-            border-color: #18181B;
-        }
-    }
-
-    .btn {
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 500;
-    }
-
-    .btn-primary {
-        background: #18181B;
-        border-color: #18181B;
-
-        &:hover {
-            background: #27272A;
-        }
-    }
-
-    .btn-success {
-        background: #18181B;
-        border-color: #18181B;
-        border-radius: 8px;
-
-        &:hover {
-            background: #27272A;
-        }
-    }
-
-    .btn-group {
-        gap: 4px;
-
-        .btn {
-            border-radius: 6px;
-        }
-    }
-
-    .btn-link.text-black {
-        color: #71717A !important;
-
-        &:hover {
-            color: #18181B !important;
-        }
-    }
 }
 
 // Layout info loyalty
@@ -370,41 +117,9 @@
     }
 }
 
-.nitro-catalog-layout-vip-buy-grid {
-    .layout-grid-item {
-        height: 50px !important;
-        max-height: 50px !important;
-
-        .icon-hc-banner {
-            width: 68px;
-            height: 40px;
-            background: url('@/assets/images/catalog/hc_big.png') center no-repeat;
-        }
-    }
-}
-
-.nitro-catalog-layout-marketplace-grid {
-    .layout-grid-item {
-        height: 75px !important;
-    }
-}
-
-.nitro-catalog-layout-vip-gifts-grid {
-    .layout-grid-item {
-        height: 55px !important;
-        max-height: 55px !important;
-    }
-}
-
 .nitro-catalog-layout-marketplace-post-offer {
     width: $marketplace-post-offer-width;
     height: $marketplace-post-offer-height;
-}
-
-.nitro-catalog-layout-bundle-grid {
-    .layout-grid-item {
-        background-color: transparent;
-    }
 }
 
 .nitro-catalog-header {
@@ -413,7 +128,7 @@
 }
 
 .autocomplete-gift-container {
-    background: #FFFFFF;
+    background: rgba(20, 20, 24, 0.95);
     padding: 8px;
     list-style-type: none;
     min-width: 307px;
@@ -422,13 +137,14 @@
     font-size: 12px;
     top: 81px;
     left: 8px;
-    border: 1px solid #E4E4E7;
+    border: 1px solid rgba(255, 255, 255, 0.10);
     margin: 0;
     box-sizing: border-box;
     max-height: 280px;
     overflow-y: auto;
     z-index: 1;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: rgba(255, 255, 255, 0.90);
 
     .autocomplete-gift-item {
         width: 100%;
@@ -437,7 +153,7 @@
         border-radius: 4px;
 
         &:hover {
-            background-color: #F4F4F5;
+            background-color: rgba(255, 255, 255, 0.08);
         }
     }
 }

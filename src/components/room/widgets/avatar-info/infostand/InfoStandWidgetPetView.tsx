@@ -98,21 +98,21 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = props =>
                                     </Column> }
                                 <Column alignItems="center" gap={ 1 }>
                                     <Text variant="white" small truncate>{ LocalizeText('infostand.pet.text.wellbeing') }</Text>
-                                    <Base fullWidth overflow="hidden" position="relative" className="bg-light-dark rounded">
+                                    <Base fullWidth overflow="hidden" position="relative" className="bg-gray-100-dark rounded">
                                         <Flex fit center position="absolute">
                                             <Text variant="white" small>{ avatarInfo.dead ? '00:00:00' : ConvertSeconds((remainingTimeToLive == 0 ? avatarInfo.remainingTimeToLive : remainingTimeToLive)).split(':')[1] + ':' + ConvertSeconds((remainingTimeToLive == null || remainingTimeToLive == undefined ? 0 : remainingTimeToLive)).split(':')[2] + ':' + ConvertSeconds((remainingTimeToLive == null || remainingTimeToLive == undefined ? 0 : remainingTimeToLive)).split(':')[3] }</Text>
                                         </Flex>
-                                        <Base className="bg-success rounded pet-stats" style={ { width: avatarInfo.dead ? '0' : Math.round((avatarInfo.maximumTimeToLive * 100) / (remainingTimeToLive)).toString() } } />
+                                        <Base className="bg-green-500 rounded pet-stats" style={ { width: avatarInfo.dead ? '0' : Math.round((avatarInfo.maximumTimeToLive * 100) / (remainingTimeToLive)).toString() } } />
                                     </Base>
                                 </Column>
                                 { remainingGrowTime != 0 && remainingGrowTime > 0 &&
                                     <Column alignItems="center" gap={ 1 }>
                                         <Text variant="white" small truncate>{ LocalizeText('infostand.pet.text.growth') }</Text>
-                                        <LayoutCounterTimeView className="top-2 end-2" day={ ConvertSeconds(remainingGrowTime).split(':')[0] } hour={ ConvertSeconds(remainingGrowTime).split(':')[1] } minutes={ ConvertSeconds(remainingGrowTime).split(':')[2] } seconds={ ConvertSeconds(remainingGrowTime).split(':')[3] } />
+                                        <LayoutCounterTimeView className="top-2 right-2" day={ ConvertSeconds(remainingGrowTime).split(':')[0] } hour={ ConvertSeconds(remainingGrowTime).split(':')[1] } minutes={ ConvertSeconds(remainingGrowTime).split(':')[2] } seconds={ ConvertSeconds(remainingGrowTime).split(':')[3] } />
                                     </Column> }
                                 <Column alignItems="center" gap={ 1 }>
                                     <Text variant="white" small truncate>{ LocalizeText('infostand.pet.text.raritylevel', [ 'level' ], [ LocalizeText(`infostand.pet.raritylevel.${ avatarInfo.rarityLevel }`) ]) }</Text>
-                                    <LayoutRarityLevelView className="top-2 end-2" level={ avatarInfo.rarityLevel } />
+                                    <LayoutRarityLevelView className="top-2 right-2" level={ avatarInfo.rarityLevel } />
                                 </Column>
                                 <hr className="m-0" />
                             </Column>
@@ -132,16 +132,16 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = props =>
                                         <Text variant="white" center small wrap>{ LocalizeText('pet.level', [ 'level', 'maxlevel' ], [ avatarInfo.level.toString(), avatarInfo.maximumLevel.toString() ]) }</Text>
                                         <Column alignItems="center" gap={ 1 }>
                                             <Text variant="white" small truncate>{ LocalizeText('infostand.pet.text.happiness') }</Text>
-                                            <Base fullWidth overflow="hidden" position="relative" className="bg-light-dark rounded">
+                                            <Base fullWidth overflow="hidden" position="relative" className="bg-gray-100-dark rounded">
                                                 <Flex fit center position="absolute">
                                                     <Text variant="white" small>{ avatarInfo.happyness + '/' + avatarInfo.maximumHappyness }</Text>
                                                 </Flex>
-                                                <Base className="bg-info rounded pet-stats" style={ { width: (avatarInfo.happyness / avatarInfo.maximumHappyness) * 100 + '%' } } />
+                                                <Base className="bg-blue-400 rounded pet-stats" style={ { width: (avatarInfo.happyness / avatarInfo.maximumHappyness) * 100 + '%' } } />
                                             </Base>
                                         </Column>
                                         <Column alignItems="center" gap={ 1 }>
                                             <Text variant="white" small truncate>{ LocalizeText('infostand.pet.text.experience') }</Text>
-                                            <Base fullWidth overflow="hidden" position="relative" className="bg-light-dark rounded">
+                                            <Base fullWidth overflow="hidden" position="relative" className="bg-gray-100-dark rounded">
                                                 <Flex fit center position="absolute">
                                                     <Text variant="white" small>{ avatarInfo.experience + '/' + avatarInfo.levelExperienceGoal }</Text>
                                                 </Flex>
@@ -150,11 +150,11 @@ export const InfoStandWidgetPetView: FC<InfoStandWidgetPetViewProps> = props =>
                                         </Column>
                                         <Column alignItems="center" gap={ 1 }>
                                             <Text variant="white" small truncate>{ LocalizeText('infostand.pet.text.energy') }</Text>
-                                            <Base fullWidth overflow="hidden" position="relative" className="bg-light-dark rounded">
+                                            <Base fullWidth overflow="hidden" position="relative" className="bg-gray-100-dark rounded">
                                                 <Flex fit center position="absolute">
                                                     <Text variant="white" small>{ avatarInfo.energy + '/' + avatarInfo.maximumEnergy }</Text>
                                                 </Flex>
-                                                <Base className="bg-success rounded pet-stats" style={ { width: (avatarInfo.energy / avatarInfo.maximumEnergy) * 100 + '%' } } />
+                                                <Base className="bg-green-500 rounded pet-stats" style={ { width: (avatarInfo.energy / avatarInfo.maximumEnergy) * 100 + '%' } } />
                                             </Base>
                                         </Column>
                                     </Column>

@@ -1,6 +1,5 @@
 import { ClubGiftInfoEvent, FriendlyTime, GetClubGiftInfo, ILinkEventTracker, ScrGetKickbackInfoMessageComposer, ScrKickbackData, ScrSendKickbackInfoMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
-import { OverlayTrigger, Popover } from 'react-bootstrap';
 import { AddEventLinkTracker, ClubStatus, CreateLinkEvent, GetClubBadge, GetConfiguration, LocalizeText, RemoveLinkEventTracker, SendMessageComposer } from '../../api';
 import { Base, Button, Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../common';
 import { useInventoryBadges, useMessageEvent, usePurse, useSessionInfo } from '../../hooks';
@@ -112,20 +111,18 @@ export const HcCenterView: FC<{}> = props =>
 
     if(!isVisible) return null;
 
-    const popover = (
-        <Popover id="popover-basic">
-            <Popover.Body className="text-black py-2 px-3">
-                <h5>{ LocalizeText('hccenter.breakdown.title') }</h5>
-                <div>{ LocalizeText('hccenter.breakdown.creditsspent', [ 'credits' ], [ kickbackData?.totalCreditsSpent.toString() ]) }</div>
-                <div>{ LocalizeText('hccenter.breakdown.paydayfactor.percent', [ 'percent' ], [ (kickbackData?.kickbackPercentage * 100).toString() ]) }</div>
-                <div>{ LocalizeText('hccenter.breakdown.streakbonus', [ 'credits' ], [ kickbackData?.creditRewardForStreakBonus.toString() ]) }</div>
-                <hr className="w-100 text-black my-1" />
-                <div>{ LocalizeText('hccenter.breakdown.total', [ 'credits', 'actual' ], [ getHcPaydayAmount(), ((((kickbackData?.kickbackPercentage * kickbackData?.totalCreditsSpent) + kickbackData?.creditRewardForStreakBonus) * 100) / 100).toString() ]) }</div>
-                <div className="btn btn-link text-primary p-0" onClick={ () => CreateLinkEvent('habbopages/' + GetConfiguration('hc.center')['payday.habbopage']) }>
-                    { LocalizeText('hccenter.special.infolink') }
-                </div>
-            </Popover.Body>
-        </Popover>
+    const popoverContent = (
+        <div className="absolute right-full top-0 mr-2 hidden group-hover:block w-64 bg-[rgba(12,12,16,0.95)] border border-white/10 rounded-xl backdrop-blur-xl shadow-lg p-3 text-sm text-white/90 z-50">
+            <h5>{ LocalizeText('hccenter.breakdown.title') }</h5>
+            <div>{ LocalizeText('hccenter.breakdown.creditsspent', [ 'credits' ], [ kickbackData?.totalCreditsSpent.toString() ]) }</div>
+            <div>{ LocalizeText('hccenter.breakdown.paydayfactor.percent', [ 'percent' ], [ (kickbackData?.kickbackPercentage * 100).toString() ]) }</div>
+            <div>{ LocalizeText('hccenter.breakdown.streakbonus', [ 'credits' ], [ kickbackData?.creditRewardForStreakBonus.toString() ]) }</div>
+            <hr className="w-full border-white/10 my-1" />
+            <div>{ LocalizeText('hccenter.breakdown.total', [ 'credits', 'actual' ], [ getHcPaydayAmount(), ((((kickbackData?.kickbackPercentage * kickbackData?.totalCreditsSpent) + kickbackData?.creditRewardForStreakBonus) * 100) / 100).toString() ]) }</div>
+            <div className="btn btn-link text-primary p-0" onClick={ () => CreateLinkEvent('habbopages/' + GetConfiguration('hc.center')['payday.habbopage']) }>
+                { LocalizeText('hccenter.special.infolink') }
+            </div>
+        </div>
     );
 
     return (
@@ -140,13 +137,13 @@ export const HcCenterView: FC<{}> = props =>
                         </Button>
                     </Flex>
                 </Column>
-                <Base position="absolute" className="end-0 p-4 top-0 habbo-avatar">
+                <Base position="absolute" className="right-0 p-4 top-0 habbo-avatar">
                     <LayoutAvatarImageView figure={ userFigure } direction={ 4 } scale={ 2 } />
                 </Base>
             </Flex>
             <NitroCardContentView>
                 <Flex gap={ 2 }>
-                    <LayoutBadgeImageView badgeCode={ badgeCode } className="align-self-center flex-shrink-0 me-1" />
+                    <LayoutBadgeImageView badgeCode={ badgeCode } className="self-center shrink-0 mr-1" />
                     <Column size={ 5 } className="streak-info" gap={ 0 }>
                         <Text>{ LocalizeText('hccenter.status.' + clubStatus) }</Text>
                         <Text dangerouslySetInnerHTML={ { __html: getInfoText() } } />
@@ -158,40 +155,41 @@ export const HcCenterView: FC<{}> = props =>
                         <Column className="rounded-start bg-primary p-2 payday-special mb-1">
                             <h4 className="mb-1">{ LocalizeText('hccenter.special.title') }</h4>
                             <div>{ LocalizeText('hccenter.special.info') }</div>
-                            <div className="btn btn-link text-white p-0 mt-auto align-self-baseline" onClick={ () => CreateLinkEvent('habbopages/' + GetConfiguration('hc.center')['payday.habbopage']) }>{ LocalizeText('hccenter.special.infolink') }</div>
+                            <div className="btn btn-link text-white p-0 mt-auto self-baseline" onClick={ () => CreateLinkEvent('habbopages/' + GetConfiguration('hc.center')['payday.habbopage']) }>{ LocalizeText('hccenter.special.infolink') }</div>
                         </Column>
-                        <div className="payday flex-shrink-0 p-2">
-                            <h5 className="mb-2 ms-2">{ LocalizeText('hccenter.special.time.title') }</h5>
-                            <div className="d-flex flex-row mb-2">
-                                <div className="clock me-2" />
-                                <h6 className="mb-0 align-self-center">{ getHcPaydayTime() }</h6>
+                        <div className="payday shrink-0 p-2">
+                            <h5 className="mb-2 ml-2">{ LocalizeText('hccenter.special.time.title') }</h5>
+                            <div className="flex flex-row mb-2">
+                                <div className="clock mr-2" />
+                                <h6 className="mb-0 self-center">{ getHcPaydayTime() }</h6>
                             </div>
                             { clubStatus === ClubStatus.ACTIVE &&
-                                <div className="pe-3">
-                                    <h5 className="ms-2 mb-1 bolder">{ LocalizeText('hccenter.special.amount.title') }</h5>
-                                    <div className="d-flex flex-column">
-                                        <div className="w-100 text-center ms-4n">{ getHcPaydayAmount() }</div>
-                                        <OverlayTrigger trigger={ [ 'hover', 'focus' ] } placement="left" overlay={ popover }>
-                                            <div className="btn btn-link align-self-end text-primary">
+                                <div className="pr-4">
+                                    <h5 className="ml-2 mb-1 bolder">{ LocalizeText('hccenter.special.amount.title') }</h5>
+                                    <div className="flex flex-col">
+                                        <div className="w-full text-center ml-6n">{ getHcPaydayAmount() }</div>
+                                        <div className="relative group self-end">
+                                            <div className="btn btn-link text-primary">
                                                 { LocalizeText('hccenter.breakdown.infolink') }
                                             </div>
-                                        </OverlayTrigger>
+                                            { popoverContent }
+                                        </div>
                                     </div>
                                 </div> }
                         </div>
                     </Flex> }
                 { GetConfiguration('hc.center')['gift.info'] &&
-                    <div className="rounded bg-success p-2 d-flex flex-row mb-0">
+                    <div className="rounded bg-green-500 p-2 flex flex-row mb-0">
                         <div>
                             <h4 className="mb-1">{ LocalizeText('hccenter.gift.title') }</h4>
                             <div dangerouslySetInnerHTML={ { __html: unclaimedGifts > 0 ? LocalizeText('hccenter.unclaimedgifts', [ 'unclaimedgifts' ], [ unclaimedGifts.toString() ]) : LocalizeText('hccenter.gift.info') } }></div>
                         </div>
-                        <button className="btn btn-primary btn-lg align-self-center ms-auto" onClick={ () => CreateLinkEvent('catalog/open/' + GetConfiguration('catalog.links')['hc.hc_gifts']) }>
+                        <button className="btn btn-primary btn-lg self-center ml-auto" onClick={ () => CreateLinkEvent('catalog/open/' + GetConfiguration('catalog.links')['hc.hc_gifts']) }>
                             { LocalizeText(clubStatus === ClubStatus.ACTIVE ? 'hccenter.btn.gifts.redeem' : 'hccenter.btn.gifts.view') }
                         </button>
                     </div> }
                 { GetConfiguration('hc.center')['benefits.info'] &&
-                    <div className="benefits text-black py-2">
+                    <div className="benefits text-white/90 py-2">
                         <h5 className="mb-1 text-primary">{ LocalizeText('hccenter.general.title') }</h5>
                         <div className="mb-2" dangerouslySetInnerHTML={ { __html: LocalizeText('hccenter.general.info') } } />
                         <button className="btn btn-link p-0 text-primary" onClick={ () => CreateLinkEvent('habbopages/' + GetConfiguration('hc.center')['benefits.habbopage']) }>

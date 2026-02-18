@@ -2,8 +2,9 @@ import { ColorConverter } from '@nitrots/nitro-renderer';
 import { FC, useMemo, useState } from 'react';
 import { FaFillDrip } from 'react-icons/fa';
 import { IPurchasableOffer } from '../../../../../api';
-import { AutoGrid, Button, LayoutGridItem } from '../../../../../common';
+import { cn } from '../../../../../lib/utils';
 import { useCatalog } from '../../../../../hooks';
+import { Button } from '../../../../ui/button';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
@@ -128,17 +129,32 @@ export const CatalogLayoutColorGroupingView : FC<CatalogLayoutColorGroupViewProp
         <div className="flex flex-col h-full gap-2">
             { currentOffer && currentOffer.product.furnitureData.hasIndexedColor &&
                 <div className="shrink-0">
-                    <Button className="btn-sm" onClick={ event => setColorsShowing(prev => !prev) }>
-                        <FaFillDrip className="fa-icon" />
+                    <Button variant="outline" size="sm" onClick={ event => setColorsShowing(prev => !prev) }>
+                        <FaFillDrip className="text-xs" />
                     </Button>
                 </div> }
             <div className="flex-1 min-h-0 overflow-auto">
-                <AutoGrid columnCount={ 5 }>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(56px,1fr))] gap-2">
                     { (!colorsShowing || !currentOffer || !colorableItems.has(currentOffer.product.furnitureData.className)) &&
                         offers.map((offer, index) => <CatalogGridOfferView key={ index } itemActive={ (currentOffer && (currentOffer.product.furnitureData.hasIndexedColor ? currentOffer.product.furnitureData.className === offer.product.furnitureData.className : currentOffer.offerId === offer.offerId)) } offer={ offer } selectOffer={ selectOffer }/>) }
                     { (colorsShowing && currentOffer && colorableItems.has(currentOffer.product.furnitureData.className)) &&
-                        colorableItems.get(currentOffer.product.furnitureData.className).map((color, index) => <LayoutGridItem itemHighlight key={ index } itemActive={ (currentOffer.product.furnitureData.colorIndex === index) } itemColor={ ColorConverter.int2rgb(color) } className="clear-bg" onClick={ event => selectColor(index, currentOffer.product.furnitureData.className) } />) }
-                </AutoGrid>
+                        colorableItems.get(currentOffer.product.furnitureData.className).map((color, index) =>
+                        {
+                            const isActive = currentOffer.product.furnitureData.colorIndex === index;
+
+                            return (
+                                <div
+                                    key={ index }
+                                    className={ cn(
+                                        'aspect-square rounded-lg border-2 cursor-pointer transition-all',
+                                        isActive ? 'border-primary ring-1 ring-ring scale-105' : 'border-border hover:border-border'
+                                    ) }
+                                    style={ { backgroundColor: ColorConverter.int2rgb(color) } }
+                                    onClick={ event => selectColor(index, currentOffer.product.furnitureData.className) }
+                                />
+                            );
+                        }) }
+                </div>
             </div>
         </div>
     );

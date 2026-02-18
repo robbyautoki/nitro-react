@@ -21,20 +21,13 @@ export const Column: FC<ColumnProps> = props =>
 
         if(size)
         {
-            let colClassName = `col-${ size }`;
-
-            if(isCssGrid) colClassName = `g-${ colClassName }`;
-
-            newClassNames.push(colClassName);
+            newClassNames.push(`col-span-${ size }`);
         }
 
         if(offset)
         {
-            let colClassName = `offset-${ offset }`;
-
-            if(isCssGrid) colClassName = `g-start-${ offset }`;
-
-            newClassNames.push(colClassName);
+            if(isCssGrid) newClassNames.push(`col-start-${ offset }`);
+            else newClassNames.push(`col-start-${ offset + 1 }`);
         }
 
         if(classNames.length) newClassNames.push(...classNames);

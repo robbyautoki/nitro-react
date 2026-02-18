@@ -39,8 +39,8 @@ export const NitroCardHeaderView: FC<NitroCardHeaderViewProps> = props =>
                         <FaFlag className="fa-icon" />
                     </Base>
                 }
-                <Flex center position="absolute" className="end-2 nitro-card-header-close" onMouseDownCapture={ onMouseDown } onClick={ onCloseClick }>
-                    <FaTimes className="fa-icon w-12 h-12" />
+                <Flex center position="absolute" className="right-2 nitro-card-header-close" onMouseDownCapture={ onMouseDown } onClick={ onCloseClick }>
+                    <FaTimes className="fa-icon size-3.5" />
                 </Flex>
             </Flex>
         </Column>

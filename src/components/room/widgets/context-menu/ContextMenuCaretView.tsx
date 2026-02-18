@@ -20,7 +20,7 @@ export const ContextMenuCaretView: FC<CaretViewProps> = props =>
     }, [ classNames ]);
 
     return <Flex justifyContent={ justifyContent } alignItems={ alignItems } classNames={ getClassNames } { ...rest }>
-        { !collapsed && <FaCaretDown className="fa-icon align-self-center" /> }
-        { collapsed && <FaCaretUp className="fa-icon align-self-center" /> }
+        { !collapsed && <FaCaretDown className="fa-icon self-center" /> }
+        { collapsed && <FaCaretUp className="fa-icon self-center" /> }
     </Flex>
 }

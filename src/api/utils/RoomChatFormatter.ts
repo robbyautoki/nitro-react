@@ -1,3 +1,5 @@
+import { emojiMap } from './EmojiRegistry';
+
 const allowedColours: Map<string, string> = new Map();
 
 allowedColours.set('r', 'red');
@@ -70,6 +72,13 @@ export const RoomChatFormatter = (content: string) =>
     {
         result = content;
     }
+
+    result = result.replace(/:([a-zA-Z0-9_-]+):/g, (match, code) =>
+    {
+        const url = emojiMap.get(code);
+        if(!url) return match;
+        return '<img src="' + url + '" class="chat-emoji" alt=":' + code + ':" />';
+    });
 
     return result;
 }

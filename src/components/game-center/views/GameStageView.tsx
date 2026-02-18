@@ -20,7 +20,7 @@ export const GameStageView = () =>
 
         frame.src = gameURL;
         frame.classList.add('game-center-stage');
-        frame.classList.add('h-100');
+        frame.classList.add('h-full');
 
         frame.onload = () => 
         {   

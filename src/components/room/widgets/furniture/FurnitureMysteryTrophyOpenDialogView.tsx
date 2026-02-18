@@ -27,7 +27,7 @@ export const FurnitureMysteryTrophyOpenDialogView: FC<FurnitureMysteryTrophyOpen
             <NitroCardHeaderView center headerText={ LocalizeText('mysterytrophy.header.title') } onCloseClick={ onClose } />
             <NitroCardContentView>
                 <Flex className="mysterytrophy-dialog-top p-3">
-                    <div className="mysterytrophy-image flex-shrink-0"></div>
+                    <div className="mysterytrophy-image shrink-0"></div>
                     <div className="m-2">
                         <Text variant="white" className="mysterytrophy-text-big">{ LocalizeText('mysterytrophy.header.description') }</Text>
                     </div>
@@ -36,7 +36,7 @@ export const FurnitureMysteryTrophyOpenDialogView: FC<FurnitureMysteryTrophyOpen
                     <Column gap={ 1 }>
                         <Flex alignItems="center" className="bg-white rounded py-1 px-2 input-mysterytrophy-dialog">
                             <textarea className="form-control form-control-sm input-mysterytrophy" value={ description } onChange={ event => setDescription(event.target.value) } />
-                            <div className="mysterytrophy-pencil-image flex-shrink-0 small fa-icon"></div>
+                            <div className="mysterytrophy-pencil-image shrink-0 small fa-icon"></div>
                         </Flex>
                         <Flex className="mt-2" gap={ 5 } display="flex" justifyContent="center" alignItems="center">
                             <Text pointer className="text-decoration" onClick={ () => onClose() }>{ LocalizeText('cancel') }</Text>

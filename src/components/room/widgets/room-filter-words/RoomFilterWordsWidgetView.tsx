@@ -50,8 +50,8 @@ export const RoomFilterWordsWidgetView: FC<{}> = props =>
     return (
         <NitroCardView className="nitro-guide-tool no-resize" theme="primary-slim">
             <NitroCardHeaderView headerText={ LocalizeText('navigator.roomsettings.roomfilter') } onCloseClick={ () => onClose() } />
-            <NitroCardContentView className="text-black">
-                <Grid className="d-flex align-items-center justify-content-end gap-2">
+            <NitroCardContentView className="text-white/90">
+                <Grid className="flex items-center justify-end gap-2">
                     <input type="text" className="form-control form-control-sm" maxLength={ 255 } value={ word } onChange={ event => onTyping(event.target.value) } />
                     <Button onClick={ () => processAction(true) }>{ LocalizeText('navigator.roomsettings.roomfilter.addword') }</Button>
                 </Grid>
@@ -65,7 +65,7 @@ export const RoomFilterWordsWidgetView: FC<{}> = props =>
                         )
                     }) }
                 </Column>
-                <Grid className="d-flex align-items-center justify-content-end gap-2">
+                <Grid className="flex items-center justify-end gap-2">
                     <Button variant="danger" onClick={ () => processAction(false) } disabled={ wordsFilter.length === 0 || !isSelectingWord }>{ LocalizeText('navigator.roomsettings.roomfilter.removeword') }</Button>
                 </Grid>
             </NitroCardContentView>

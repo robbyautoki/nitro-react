@@ -101,25 +101,25 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
 
         if(pendingOffer.priceCredits > getCurrencyAmount(-1))
         {
-            return <button className="w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70">{ LocalizeText('catalog.alert.notenough.title') }</button>;
+            return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70">{ LocalizeText('catalog.alert.notenough.title') }</button>;
         }
 
         if(pendingOffer.priceActivityPoints > getCurrencyAmount(pendingOffer.priceActivityPointsType))
         {
-            return <button className="w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70">{ LocalizeText('catalog.alert.notenough.activitypoints.title.' + pendingOffer.priceActivityPointsType) }</button>;
+            return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70">{ LocalizeText('catalog.alert.notenough.activitypoints.title.' + pendingOffer.priceActivityPointsType) }</button>;
         }
 
         switch(purchaseState)
         {
             case CatalogPurchaseState.CONFIRM:
-                return <button className="w-full h-8 rounded-lg bg-amber-500 text-white text-xs font-medium hover:bg-amber-600 transition-colors" onClick={ purchaseSubscription }>{ LocalizeText('catalog.marketplace.confirm_title') }</button>;
+                return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-amber-500 text-white text-xs font-medium hover:bg-amber-600 transition-colors" onClick={ purchaseSubscription }>{ LocalizeText('catalog.marketplace.confirm_title') }</button>;
             case CatalogPurchaseState.PURCHASE:
-                return <button className="w-full h-8 rounded-lg bg-zinc-300 text-zinc-500 text-xs font-medium" disabled><LayoutLoadingSpinnerView /></button>;
+                return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-zinc-300 text-zinc-500 text-xs font-medium" disabled><LayoutLoadingSpinnerView /></button>;
             case CatalogPurchaseState.FAILED:
-                return <button className="w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70" disabled>{ LocalizeText('generic.failed') }</button>;
+                return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70" disabled>{ LocalizeText('generic.failed') }</button>;
             case CatalogPurchaseState.NONE:
             default:
-                return <button className="w-full h-8 rounded-lg bg-zinc-900 text-white text-xs font-medium hover:bg-zinc-800 transition-colors" onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('buy') }</button>;
+                return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-zinc-900 text-white text-xs font-medium hover:bg-zinc-800 transition-colors" onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('buy') }</button>;
         }
     }, [ pendingOffer, purchaseState, purchaseSubscription, getCurrencyAmount ]);
 

@@ -1,4 +1,5 @@
 import { RoomChatSettings, RoomObjectCategory } from '@nitrots/nitro-renderer';
+import DOMPurify from 'dompurify';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatBubbleMessage, GetRoomEngine } from '../../../../api';
 
@@ -85,8 +86,8 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = props =>
                         <div className="user-image" style={ { backgroundImage: `url(${ chat.imageUrl })` } } /> }
                 </div>
                 <div className="chat-content">
-                    <b className="username mr-1" dangerouslySetInnerHTML={ { __html: `${ chat.username }: ` } } />
-                    <span className="message" dangerouslySetInnerHTML={ { __html: `${ chat.formattedText }` } } />
+                    <b className="username mr-1" dangerouslySetInnerHTML={ { __html: DOMPurify.sanitize(`${ chat.username }: `) } } />
+                    <span className="message" dangerouslySetInnerHTML={ { __html: DOMPurify.sanitize(`${ chat.formattedText }`, { ADD_TAGS: ['img'], ADD_ATTR: ['src', 'alt', 'class'] }) } } />
                 </div>
                 <div className="pointer" />
             </div>

@@ -14,7 +14,7 @@ export const LayoutRoomThumbnailView: FC<LayoutRoomThumbnailViewProps> = props =
 
     const getClassNames = useMemo(() =>
     {
-        const newClassNames: string[] = [ 'room-thumbnail', 'rounded', 'border' ];
+        const newClassNames: string[] = [ 'room-thumbnail' ];
 
         if(classNames.length) newClassNames.push(...classNames);
 

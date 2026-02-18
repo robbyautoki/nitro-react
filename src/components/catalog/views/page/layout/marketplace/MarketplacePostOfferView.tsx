@@ -4,6 +4,8 @@ import { FurnitureItem, LocalizeText, ProductTypeEnum, SendMessageComposer } fro
 import { LayoutFurniImageView, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../../../common';
 import { CatalogPostMarketplaceOfferEvent } from '../../../../../../events';
 import { useCatalog, useMessageEvent, useNotification, useUiEvent } from '../../../../../../hooks';
+import { Button } from '../../../../../ui/button';
+import { Input } from '../../../../../ui/input';
 
 export const MarketplacePostOfferView : FC<{}> = props =>
 {
@@ -94,8 +96,8 @@ export const MarketplacePostOfferView : FC<{}> = props =>
                             <span className="text-[11px] text-zinc-400 italic">
                                 { LocalizeText('inventory.marketplace.make_offer.expiration_info', [ 'time' ], [ marketplaceConfiguration.offerTime.toString() ]) }
                             </span>
-                            <div className="input-group has-validation">
-                                <input className="form-control form-control-sm" type="number" min={ 0 } value={ tempAskingPrice } onChange={ event => updateAskingPrice(event.target.value) } placeholder={ LocalizeText('inventory.marketplace.make_offer.price_request') } />
+                            <div className="flex flex-col gap-1">
+                                <Input className="h-8 text-xs" type="number" min={ 0 } value={ tempAskingPrice } onChange={ event => updateAskingPrice(event.target.value) } placeholder={ LocalizeText('inventory.marketplace.make_offer.price_request') } />
                                 { ((askingPrice < marketplaceConfiguration.minimumPrice) || isNaN(askingPrice)) &&
                                     <div className="text-[11px] text-red-500 mt-0.5">
                                         { LocalizeText('inventory.marketplace.make_offer.min_price', [ 'minprice' ], [ marketplaceConfiguration.minimumPrice.toString() ]) }
@@ -109,9 +111,9 @@ export const MarketplacePostOfferView : FC<{}> = props =>
                                         { LocalizeText('inventory.marketplace.make_offer.final_price', [ 'commission', 'finalprice' ], [ getCommission().toString(), (askingPrice + getCommission()).toString() ]) }
                                     </div> }
                             </div>
-                            <button className="w-full h-8 rounded-lg bg-zinc-900 text-white text-xs font-medium hover:bg-zinc-800 transition-colors disabled:bg-zinc-300 disabled:text-zinc-500" disabled={ ((askingPrice < marketplaceConfiguration.minimumPrice) || (askingPrice > marketplaceConfiguration.maximumPrice) || isNaN(askingPrice)) } onClick={ postItem }>
+                            <Button className="w-full h-8 text-xs" disabled={ ((askingPrice < marketplaceConfiguration.minimumPrice) || (askingPrice > marketplaceConfiguration.maximumPrice) || isNaN(askingPrice)) } onClick={ postItem }>
                                 { LocalizeText('inventory.marketplace.make_offer.post') }
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>

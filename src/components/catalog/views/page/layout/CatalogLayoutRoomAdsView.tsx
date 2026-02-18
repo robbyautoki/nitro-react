@@ -3,6 +3,9 @@ import { FC, useEffect, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
 import { useCatalog, useMessageEvent, useNavigator, useRoomPromote } from '../../../../../hooks';
 import { Button } from '../../../../ui/button';
+import { Input } from '../../../../ui/input';
+import { Textarea } from '../../../../ui/textarea';
+import { CatalogNativeSelect } from '../../CatalogNativeSelect';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
@@ -74,24 +77,24 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
             <div className="flex flex-col gap-2 rounded-lg bg-zinc-50 border border-zinc-100 p-3">
                 <div className="flex flex-col gap-1">
                     <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('navigator.category') }</span>
-                    <select className="form-select form-select-sm" value={ categoryId } onChange={ event => setCategoryId(parseInt(event.target.value)) } disabled={ extended }>
+                    <CatalogNativeSelect value={ categoryId } onChange={ event => setCategoryId(parseInt(event.target.value)) } disabled={ extended }>
                         { categories && categories.map((cat, index) => <option key={ index } value={ cat.id }>{ LocalizeText(cat.name) }</option>) }
-                    </select>
+                    </CatalogNativeSelect>
                 </div>
                 <div className="flex flex-col gap-1">
                     <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_name') }</span>
-                    <input type="text" className="form-control form-control-sm" maxLength={ 64 } value={ eventName } onChange={ event => setEventName(event.target.value) } readOnly={ extended } />
+                    <Input type="text" className="h-8 text-xs" maxLength={ 64 } value={ eventName } onChange={ event => setEventName(event.target.value) } readOnly={ extended } />
                 </div>
                 <div className="flex flex-col gap-1">
                     <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_description') }</span>
-                    <textarea className="form-control form-control-sm" maxLength={ 64 } value={ eventDesc } onChange={ event => setEventDesc(event.target.value) } readOnly={ extended } />
+                    <Textarea className="min-h-[60px] text-xs resize-none" maxLength={ 64 } value={ eventDesc } onChange={ event => setEventDesc(event.target.value) } readOnly={ extended } />
                 </div>
                 <div className="flex flex-col gap-1">
                     <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_roomname') }</span>
-                    <select className="form-select form-select-sm" value={ roomId } onChange={ event => setRoomId(parseInt(event.target.value)) } disabled={ extended }>
+                    <CatalogNativeSelect value={ roomId } onChange={ event => setRoomId(parseInt(event.target.value)) } disabled={ extended }>
                         <option value={ -1 } disabled>{ LocalizeText('roomad.catalog_roomname') }</option>
                         { availableRooms && availableRooms.map((room, index) => <option key={ index } value={ room.roomId }>{ room.roomName }</option>) }
-                    </select>
+                    </CatalogNativeSelect>
                 </div>
                 <Button
                     variant={ (!eventName || !eventDesc || roomId === -1) ? 'destructive' : 'default' }

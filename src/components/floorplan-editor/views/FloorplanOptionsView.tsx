@@ -168,7 +168,7 @@ export const FloorplanOptionsView: FC<{}> = props =>
                 </Column>
                 <Column size={ 6 }>
                     <Text bold>{ LocalizeText('floor.plan.editor.room.options') }</Text>
-                    <Flex className="align-items-center">
+                    <Flex className="items-center">
                         <select className="form-control form-control-sm" value={ visualizationSettings.thicknessWall } onChange={ event => onWallThicknessChange(parseInt(event.target.value)) }>
                             <option value={ 0 }>{ LocalizeText('navigator.roomsettings.wall_thickness.thinnest') }</option>
                             <option value={ 1 }>{ LocalizeText('navigator.roomsettings.wall_thickness.thin') }</option>

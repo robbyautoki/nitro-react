@@ -2,8 +2,9 @@ import { RedeemVoucherMessageComposer, VoucherRedeemErrorMessageEvent, VoucherRe
 import { FC, useState } from 'react';
 import { FaTag } from 'react-icons/fa';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Button, Flex } from '../../../../../common';
 import { useMessageEvent, useNotification } from '../../../../../hooks';
+import { Button } from '../../../../ui/button';
+import { Input } from '../../../../ui/input';
 
 export interface CatalogRedeemVoucherViewProps
 {
@@ -50,11 +51,11 @@ export const CatalogRedeemVoucherView: FC<CatalogRedeemVoucherViewProps> = props
     });
 
     return (
-        <Flex gap={ 1 }>
-            <input type="text" className="form-control form-control-sm" placeholder={ text } value={ voucher } onChange={ event => setVoucher(event.target.value) } />
-            <Button variant="primary" onClick={ redeemVoucher } disabled={ isWaiting }>
-                <FaTag className="fa-icon" />
+        <div className="flex gap-1">
+            <Input type="text" className="h-8 text-xs" placeholder={ text } value={ voucher } onChange={ event => setVoucher(event.target.value) } />
+            <Button size="icon-sm" onClick={ redeemVoucher } disabled={ isWaiting }>
+                <FaTag className="text-xs" />
             </Button>
-        </Flex>
+        </div>
     );
 }

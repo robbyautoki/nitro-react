@@ -190,16 +190,18 @@ export const NavigatorRoomSettingsView: FC<{}> = props =>
                 }) }
             </NitroCardTabsView>
             <NitroCardContentView>
-                { (currentTab === TABS[0]) &&
-                    <NavigatorRoomSettingsBasicTabView roomData={ roomData } handleChange={ handleChange } onClose={ onClose } /> }
-                { (currentTab === TABS[1]) &&
-                    <NavigatorRoomSettingsAccessTabView roomData={ roomData } handleChange={ handleChange } /> }
-                { (currentTab === TABS[2]) &&
-                    <NavigatorRoomSettingsRightsTabView roomData={ roomData } handleChange={ handleChange } /> }
-                { (currentTab === TABS[3]) &&
-                    <NavigatorRoomSettingsVipChatTabView roomData={ roomData } handleChange={ handleChange } /> }
-                { (currentTab === TABS[4]) &&
-                    <NavigatorRoomSettingsModTabView roomData={ roomData } handleChange={ handleChange } /> }
+                <div className="text-white">
+                    { (currentTab === TABS[0]) &&
+                        <NavigatorRoomSettingsBasicTabView roomData={ roomData } handleChange={ handleChange } onClose={ onClose } /> }
+                    { (currentTab === TABS[1]) &&
+                        <NavigatorRoomSettingsAccessTabView roomData={ roomData } handleChange={ handleChange } /> }
+                    { (currentTab === TABS[2]) &&
+                        <NavigatorRoomSettingsRightsTabView roomData={ roomData } handleChange={ handleChange } /> }
+                    { (currentTab === TABS[3]) &&
+                        <NavigatorRoomSettingsVipChatTabView roomData={ roomData } handleChange={ handleChange } /> }
+                    { (currentTab === TABS[4]) &&
+                        <NavigatorRoomSettingsModTabView roomData={ roomData } handleChange={ handleChange } /> }
+                </div>
             </NitroCardContentView>
         </NitroCardView>
     );

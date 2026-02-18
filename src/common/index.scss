@@ -2,21 +2,21 @@
     height: var(--nitro-grid-column-min-height, unset);
     background-position: center;
     background-repeat: no-repeat;
-    background-color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.06);
     border-radius: 8px;
     transition: all 0.15s ease;
 
     &:hover {
-        border-color: #A1A1AA !important;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        border-color: rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     &.active {
-        border-color: #3F3F46 !important;
+        border-color: rgba(255, 255, 255, 0.20) !important;
         box-shadow: none;
 
         &:not(.clear-bg) {
-            background-color: #FFFFFF !important;
+            background-color: rgba(255, 255, 255, 0.10) !important;
         }
     }
 
@@ -219,7 +219,7 @@
     pointer-events: none;
     overflow: hidden;
 
-    @include media-breakpoint-down(lg) {
+    @media (max-width: 991.98px) {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -270,16 +270,17 @@
         user-select: none;
         width: 210px;
         border-radius: $border-radius;
-        background: $white;
+        background: rgba(20, 20, 24, 0.95);
         left: -220px;
         z-index: 100;
+        color: rgba(255, 255, 255, 0.90);
 
         &:before {
             position: absolute;
             content: ' ';
             width: 0;
             height: 0;
-            border-left: 10px solid $white;
+            border-left: 10px solid rgba(20, 20, 24, 0.95);
             border-bottom: 10px solid transparent;
             border-top: 10px solid transparent;
             top: 10px;
@@ -304,7 +305,7 @@
     div {
         line-height: 28px;
         text-align: center;
-        color: $black;
+        color: $white;
         font-weight: bold;
     }
 }
@@ -350,11 +351,11 @@
         height: 100%;
         width: 100%;
         border-radius: 8px;
-        background-color: #FAFAFA;
+        background-color: #111114;
         background-repeat: no-repeat;
         background-position: center;
         overflow: hidden;
-        border: 1px solid #E4E4E7;
+        border: 1px solid rgba(255, 255, 255, 0.10);
 
         &.border-0 {
             &::after {
@@ -424,7 +425,7 @@
         font-weight: bold;
         margin-top: 5px;
         margin-right: 17px;
-        color: #000;
+        color: rgba(255, 255, 255, 0.90);
     }
 }
 
@@ -457,7 +458,7 @@
         margin-left: 45px;
         width: 100px;
         font-size: 10px;
-        color: black;
+        color: rgba(255, 255, 255, 0.90);
 
         > :first-child {
             margin-bottom: 2px;

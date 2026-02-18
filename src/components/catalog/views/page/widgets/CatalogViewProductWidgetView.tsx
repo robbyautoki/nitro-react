@@ -1,7 +1,7 @@
 import { Vector3d } from '@nitrots/nitro-renderer';
 import { FC, useEffect } from 'react';
 import { FurniCategory, GetAvatarRenderManager, GetSessionDataManager, Offer, ProductTypeEnum } from '../../../../../api';
-import { AutoGrid, Column, LayoutGridItem, LayoutRoomPreviewerView } from '../../../../../common';
+import { LayoutRoomPreviewerView } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
 
 interface CatalogViewProductWidgetViewProps
@@ -90,14 +90,23 @@ export const CatalogViewProductWidgetView: FC<CatalogViewProductWidgetViewProps>
     if(currentOffer.pricingModel === Offer.PRICING_MODEL_BUNDLE)
     {
         return (
-            <Column fit overflow="hidden" className="bg-muted p-2 rounded">
-                <AutoGrid fullWidth columnCount={ 4 } className="nitro-catalog-layout-bundle-grid">
+            <div className="w-full h-full overflow-hidden bg-muted p-2 rounded">
+                <div className="grid grid-cols-4 gap-1.5">
                     { (currentOffer.products.length > 0) && currentOffer.products.map((product, index) =>
                     {
-                        return <LayoutGridItem key={ index } itemImage={ product.getIconUrl(currentOffer) } itemCount={ product.productCount } />;
+                        const imageUrl = product.getIconUrl(currentOffer);
+
+                        return (
+                            <div key={ index } className="relative flex items-center justify-center rounded-lg border bg-card overflow-hidden aspect-square bg-center bg-no-repeat" style={ imageUrl ? { backgroundImage: `url(${ imageUrl })` } : undefined }>
+                                { (product.productCount > 1) &&
+                                    <span className="absolute top-0.5 right-0.5 text-[9px] font-bold bg-primary text-primary-foreground rounded px-1 leading-tight">
+                                        { product.productCount }
+                                    </span> }
+                            </div>
+                        );
                     }) }
-                </AutoGrid>
-            </Column>
+                </div>
+            </div>
         );
     }
     

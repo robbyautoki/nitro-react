@@ -34,7 +34,7 @@ export const DescribeReportView: FC<{}> = props =>
                 <Text fontSize={ 4 }>{ LocalizeText('help.emergency.chat_report.subtitle') }</Text>
                 <Text>{ LocalizeText('help.cfh.input.text') }</Text>
             </Column>
-            <textarea className="form-control h-100" value={ message } onChange={ event => setMessage(event.target.value) } />
+            <textarea className="form-control h-full" value={ message } onChange={ event => setMessage(event.target.value) } />
             <Flex gap={ 2 } justifyContent="between">
                 <Button variant="secondary" disabled={ !(activeReport.reportType === ReportType.BULLY || activeReport.reportType === ReportType.EMERGENCY) } onClick={ back }>
                     { LocalizeText('generic.back') }

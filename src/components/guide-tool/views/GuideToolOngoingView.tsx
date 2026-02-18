@@ -95,15 +95,15 @@ export const GuideToolOngoingView: FC<GuideToolOngoingViewProps> = props =>
                                     { (!isOwnChat(group.userId)) &&
                                     <LayoutAvatarImageView figure={ userFigure } direction={ 2 } /> }
                                 </Base>
-                                <Base className={ 'bg-light text-black border-radius mb-2 rounded py-1 px-2 messages-group-' + (isOwnChat(group.userId) ? 'right' : 'left') }>
+                                <Base className={ 'bg-gray-100 text-white/90 border-radius mb-2 rounded py-1 px-2 messages-group-' + (isOwnChat(group.userId) ? 'right' : 'left') }>
                                     <Text bold>
                                         { (isOwnChat(group.userId)) && GetSessionDataManager().userName }
                                         { (!isOwnChat(group.userId)) && userName }
                                     </Text>
-                                    { group.messages.map((chat, index) => <Base key={ index } pointer={ chat.roomId ? true : false } className={ chat.roomId ? 'text-break text-underline' : 'text-break' } onClick={ () => chat.roomId ? TryVisitRoom(chat.roomId) : null }>{ chat.message }</Base>) }
+                                    { group.messages.map((chat, index) => <Base key={ index } pointer={ chat.roomId ? true : false } className={ chat.roomId ? 'break-all text-underline' : 'break-all' } onClick={ () => chat.roomId ? TryVisitRoom(chat.roomId) : null }>{ chat.message }</Base>) }
                                 </Base>
                                 { (isOwnChat(group.userId)) &&
-                                <Base className="message-avatar flex-shrink-0">
+                                <Base className="message-avatar shrink-0">
                                     <LayoutAvatarImageView figure={ GetSessionDataManager().figure } direction={ 4 } />
                                 </Base> }
                             </Flex>

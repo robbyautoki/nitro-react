@@ -50,12 +50,12 @@ export const MysteryBoxExtensionView: FC<{}> = props =>
                         <Text variant="white">{ LocalizeText('mysterybox.tracker.description') }</Text>
                         <Flex justifyContent="center" alignItems="center" gap={ 2 }>
                             <LayoutGridItem className="mysterybox-container">
-                                <div className="box-image flex-shrink-0" style={ { backgroundColor: getRgbColor(boxColor) } }>
+                                <div className="box-image shrink-0" style={ { backgroundColor: getRgbColor(boxColor) } }>
                                     <div className="chain-overlay-image" />
                                 </div>
                             </LayoutGridItem>
                             <LayoutGridItem className="mysterybox-container">
-                                <div className="key-image flex-shrink-0" style={ { backgroundColor: getRgbColor(keyColor ) } }>
+                                <div className="key-image shrink-0" style={ { backgroundColor: getRgbColor(keyColor ) } }>
                                     <div className="key-overlay-image" />
                                 </div>
                             </LayoutGridItem>

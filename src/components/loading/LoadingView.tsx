@@ -14,7 +14,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
     
     return (
         <Column fullHeight position="relative" className="nitro-loading">
-            <Base fullHeight className="container h-100">
+            <Base fullHeight className="container h-full">
                 <Column fullHeight alignItems="center" justifyContent="end">
                     <Base className="connecting-duck" />
                     <Column size={ 6 } className="text-center py-4">

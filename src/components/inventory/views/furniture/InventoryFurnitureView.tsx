@@ -1,7 +1,7 @@
 import { IRoomSession, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { attemptItemPlacement, DispatchUiEvent, FurniCategory, GetRoomEngine, GetSessionDataManager, GroupItem, LocalizeText, UnseenItemCategory } from '../../../../api';
-import { AutoGrid, Button, Column, Grid, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, LayoutRoomPreviewerView, Text } from '../../../../common';
+import { AutoGrid, Button, Column } from '../../../../common';
 import { CatalogPostMarketplaceOfferEvent } from '../../../../events';
 import { useInventoryFurni, useInventoryUnseenTracker } from '../../../../hooks';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
@@ -111,36 +111,32 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
     if(!groupItems || !groupItems.length) return <InventoryCategoryEmptyView title={ LocalizeText('inventory.empty.title') } desc={ LocalizeText('inventory.empty.desc') } />;
 
     return (
-        <Grid>
-            <Column size={ 7 } overflow="hidden">
-                <InventoryFurnitureSearchView groupItems={ groupItems } setGroupItems={ setFilteredGroupItems } />
-                <AutoGrid columnCount={ 5 }>
+        <Column grow gap={ 0 } style={{ minHeight: 0 }}>
+            <InventoryFurnitureSearchView groupItems={ groupItems } setGroupItems={ setFilteredGroupItems } />
+            <div className="inv-items-grid mt-2">
+                <AutoGrid columnCount={ 7 }>
                     { filteredGroupItems && (filteredGroupItems.length > 0) && filteredGroupItems.map((item, index) => <InventoryFurnitureItemView key={ index } groupItem={ item } />) }
                 </AutoGrid>
-            </Column>
-            <Column size={ 5 } overflow="auto">
-                <Column overflow="hidden" position="relative">
-                    <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 140 } />
-                    { selectedItem && selectedItem.stuffData.isUnique &&
-                        <LayoutLimitedEditionCompactPlateView className="top-2 end-2" position="absolute" uniqueNumber={ selectedItem.stuffData.uniqueNumber } uniqueSeries={ selectedItem.stuffData.uniqueSeries } /> }
-                    { (selectedItem && selectedItem.stuffData.rarityLevel > -1) &&
-                        <LayoutRarityLevelView className="top-2 end-2" position="absolute" level={ selectedItem.stuffData.rarityLevel } /> }
-                </Column>
-                { selectedItem &&
-                    <Column grow justifyContent="between" gap={ 2 }>
-                        <Text grow truncate>{ selectedItem.name }</Text>
-                        <Column gap={ 1 }>
+            </div>
+            { selectedItem &&
+                <div className="inv-footer">
+                    <div className="inv-footer-preview">
+                        { selectedItem.iconUrl && <img src={ selectedItem.iconUrl } alt="" /> }
+                    </div>
+                    <div className="inv-footer-info">
+                        <div className="inv-footer-name">{ selectedItem.name }</div>
+                        <div className="inv-footer-actions">
                             { !!roomSession &&
-                                <Button variant="success" onClick={ event => attemptItemPlacement(selectedItem) }>
+                                <Button variant="success" size="sm" onClick={ event => attemptItemPlacement(selectedItem) }>
                                     { LocalizeText('inventory.furni.placetoroom') }
                                 </Button> }
-                            { (selectedItem && selectedItem.isSellable) &&
-                                <Button onClick={ event => attemptPlaceMarketplaceOffer(selectedItem) }>
+                            { selectedItem.isSellable &&
+                                <Button size="sm" onClick={ event => attemptPlaceMarketplaceOffer(selectedItem) }>
                                     { LocalizeText('inventory.marketplace.sell') }
                                 </Button> }
-                        </Column>
-                    </Column> }
-            </Column>
-        </Grid>
+                        </div>
+                    </div>
+                </div> }
+        </Column>
     );
 }

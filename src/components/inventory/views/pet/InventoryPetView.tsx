@@ -1,7 +1,7 @@
 import { IRoomSession, RoomObjectVariable, RoomPreviewer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { attemptPetPlacement, GetRoomEngine, LocalizeText, UnseenItemCategory } from '../../../../api';
-import { AutoGrid, Button, Column, Grid, LayoutRoomPreviewerView, Text } from '../../../../common';
+import { AutoGrid, Button, Column } from '../../../../common';
 import { useInventoryPets, useInventoryUnseenTracker } from '../../../../hooks';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryPetItemView } from './InventoryPetItemView';
@@ -66,25 +66,24 @@ export const InventoryPetView: FC<InventoryPetViewProps> = props =>
     if(!petItems || !petItems.length) return <InventoryCategoryEmptyView title={ LocalizeText('inventory.empty.pets.title') } desc={ LocalizeText('inventory.empty.pets.desc') } />;
 
     return (
-        <Grid>
-            <Column size={ 7 } overflow="hidden">
-                <AutoGrid columnCount={ 5 }>
+        <Column grow gap={ 0 } style={{ minHeight: 0 }}>
+            <div className="inv-items-grid">
+                <AutoGrid columnCount={ 7 }>
                     { petItems && (petItems.length > 0) && petItems.map(item => <InventoryPetItemView key={ item.petData.id } petItem={ item } />) }
                 </AutoGrid>
-            </Column>
-            <Column size={ 5 } overflow="auto">
-                <Column overflow="hidden" position="relative">
-                    <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 140 } />
-                </Column>
-                { selectedPet && selectedPet.petData &&
-                    <Column grow justifyContent="between" gap={ 2 }>
-                        <Text grow truncate>{ selectedPet.petData.name }</Text>
-                        { !!roomSession &&
-                            <Button variant="success" onClick={ event => attemptPetPlacement(selectedPet) }>
-                                { LocalizeText('inventory.furni.placetoroom') }
-                            </Button> }
-                    </Column> }
-            </Column>
-        </Grid>
+            </div>
+            { selectedPet && selectedPet.petData &&
+                <div className="inv-footer">
+                    <div className="inv-footer-info">
+                        <div className="inv-footer-name">{ selectedPet.petData.name }</div>
+                        <div className="inv-footer-actions">
+                            { !!roomSession &&
+                                <Button variant="success" size="sm" onClick={ event => attemptPetPlacement(selectedPet) }>
+                                    { LocalizeText('inventory.furni.placetoroom') }
+                                </Button> }
+                        </div>
+                    </div>
+                </div> }
+        </Column>
     );
 }

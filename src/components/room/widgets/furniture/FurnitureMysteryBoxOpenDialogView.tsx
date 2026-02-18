@@ -69,7 +69,7 @@ export const FurnitureMysteryBoxOpenDialogView: FC<FurnitureMysteryBoxOpenDialog
                 }
                 { mode === ViewMode.PRIZE && prizeData && <>
                     <Text variant="black"> { LocalizeText('mysterybox.reward.text') } </Text>
-                    <Flex className="prize-container justify-content-center mx-auto">
+                    <Flex className="prize-container justify-center mx-auto">
                         <LayoutPrizeProductImageView classId={ prizeData.classId } productType={ prizeData.contentType }/>
                     </Flex>
                     <Button variant="success" onClick={ close } className="mt-auto"> { LocalizeText('mysterybox.reward.close') } </Button>

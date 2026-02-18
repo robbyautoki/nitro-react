@@ -84,7 +84,7 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = prop
                     <span className="text-xs text-zinc-700">
                         { LocalizeText('catalog.marketplace.redeem.get_credits', [ 'count', 'credits' ], [ soldOffers.length.toString(), creditsWaiting.toString() ]) }
                     </span>
-                    <button className="mt-1 h-7 px-3 text-xs rounded-md bg-zinc-900 text-white hover:bg-zinc-800 transition-colors" onClick={ redeemSoldOffers }>
+                    <button className="appearance-none border-0 mt-1 h-7 px-3 text-xs rounded-md bg-zinc-900 text-white hover:bg-zinc-800 transition-colors" onClick={ redeemSoldOffers }>
                         { LocalizeText('catalog.marketplace.offer.redeem') }
                     </button>
                 </div> }

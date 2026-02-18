@@ -1,7 +1,10 @@
 import { FC, useEffect, useState } from 'react';
+import { FaBell, FaKey } from 'react-icons/fa';
 import { CreateRoomSession, DoorStateType, GoToDesktop, LocalizeText } from '../../../api';
-import { Button, Column, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../common';
+import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../common';
 import { useNavigator } from '../../../hooks';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const VISIBLE_STATES = [ DoorStateType.START_DOORBELL, DoorStateType.STATE_WAITING, DoorStateType.STATE_NO_ANSWER, DoorStateType.START_PASSWORD, DoorStateType.STATE_WRONG_PASSWORD ];
 const DOORBELL_STATES = [ DoorStateType.START_DOORBELL, DoorStateType.STATE_WAITING, DoorStateType.STATE_NO_ANSWER ];
@@ -24,7 +27,7 @@ export const NavigatorDoorStateView: FC<{}> = props =>
         if(!doorData || !doorData.roomInfo) return;
 
         CreateRoomSession(doorData.roomInfo.roomId);
-        
+
         setDoorData(prevValue =>
         {
             const newValue = { ...prevValue };
@@ -66,44 +69,64 @@ export const NavigatorDoorStateView: FC<{}> = props =>
         <NitroCardView className="nitro-navigator-doorbell" theme="primary-slim">
             <NitroCardHeaderView headerText={ LocalizeText(isDoorbell ? 'navigator.doorbell.title' : 'navigator.password.title') } onCloseClick={ onClose } />
             <NitroCardContentView>
-                <Column gap={ 1 }>
-                    <Text bold>{ doorData && doorData.roomInfo && doorData.roomInfo.roomName }</Text>
-                    { (doorData.state === DoorStateType.START_DOORBELL) &&
-                        <Text>{ LocalizeText('navigator.doorbell.info') }</Text> }
-                    { (doorData.state === DoorStateType.STATE_WAITING) &&
-                        <Text>{ LocalizeText('navigator.doorbell.waiting') }</Text> }
-                    { (doorData.state === DoorStateType.STATE_NO_ANSWER) &&
-                        <Text>{ LocalizeText('navigator.doorbell.no.answer') }</Text> }
-                    { (doorData.state === DoorStateType.START_PASSWORD) &&
-                        <Text>{ LocalizeText('navigator.password.info') }</Text> }
-                    { (doorData.state === DoorStateType.STATE_WRONG_PASSWORD) &&
-                        <Text>{ LocalizeText('navigator.password.retryinfo') }</Text> }
-                </Column>
-                { isDoorbell &&
-                    <Column gap={ 1 }>
-                        { (doorData.state === DoorStateType.START_DOORBELL) &&
-                            <Button variant="success" onClick={ ring }>
-                                { LocalizeText('navigator.doorbell.button.ring') }
-                            </Button> }
-                        <Button variant="danger" onClick={ onClose }>
-                            { LocalizeText('generic.cancel') }
-                        </Button>
-                    </Column> }
-                { !isDoorbell &&
-                    <>
-                        <Column gap={ 1 }>
-                            <Text>{ LocalizeText('navigator.password.enter') }</Text>
-                            <input type="password" className="form-control form-control-sm" onChange={ event => setPassword(event.target.value) } />
-                        </Column>
-                        <Column gap={ 1 }>
-                            <Button variant="success" onClick={ tryEntering }>
-                                { LocalizeText('navigator.password.button.try') }
-                            </Button>
-                            <Button variant="danger" onClick={ onClose }>
+                <div className="flex flex-col gap-3 p-1">
+                    <div className="flex items-center gap-2">
+                        { isDoorbell
+                            ? <FaBell className="size-4 text-amber-400 shrink-0" />
+                            : <FaKey className="size-4 text-sky-400 shrink-0" /> }
+                        <span className="text-sm font-medium text-white truncate">
+                            { doorData && doorData.roomInfo && doorData.roomInfo.roomName }
+                        </span>
+                    </div>
+
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                        { (doorData.state === DoorStateType.START_DOORBELL) && LocalizeText('navigator.doorbell.info') }
+                        { (doorData.state === DoorStateType.STATE_WAITING) && (
+                            <span className="inline-flex items-center gap-1.5">
+                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                { LocalizeText('navigator.doorbell.waiting') }
+                            </span>
+                        ) }
+                        { (doorData.state === DoorStateType.STATE_NO_ANSWER) && LocalizeText('navigator.doorbell.no.answer') }
+                        { (doorData.state === DoorStateType.START_PASSWORD) && LocalizeText('navigator.password.info') }
+                        { (doorData.state === DoorStateType.STATE_WRONG_PASSWORD) && (
+                            <span className="text-red-400">{ LocalizeText('navigator.password.retryinfo') }</span>
+                        ) }
+                    </p>
+
+                    { isDoorbell && (
+                        <div className="flex flex-col gap-1.5">
+                            { (doorData.state === DoorStateType.START_DOORBELL) &&
+                                <Button className="w-full h-8 text-xs bg-sky-500 hover:bg-sky-400 text-white" onClick={ ring }>
+                                    { LocalizeText('navigator.doorbell.button.ring') }
+                                </Button> }
+                            <Button variant="ghost" className="w-full h-8 text-xs text-zinc-400 hover:text-white hover:bg-white/10" onClick={ onClose }>
                                 { LocalizeText('generic.cancel') }
                             </Button>
-                        </Column>
-                    </> }
+                        </div>
+                    ) }
+
+                    { !isDoorbell && (
+                        <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs text-zinc-400">{ LocalizeText('navigator.password.enter') }</label>
+                                <Input
+                                    type="password"
+                                    className="h-8 text-xs rounded-lg bg-white/10 border-0 text-white placeholder:text-zinc-500 focus-visible:bg-white/15"
+                                    onChange={ event => setPassword(event.target.value) }
+                                />
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Button className="w-full h-8 text-xs bg-sky-500 hover:bg-sky-400 text-white" onClick={ tryEntering }>
+                                    { LocalizeText('navigator.password.button.try') }
+                                </Button>
+                                <Button variant="ghost" className="w-full h-8 text-xs text-zinc-400 hover:text-white hover:bg-white/10" onClick={ onClose }>
+                                    { LocalizeText('generic.cancel') }
+                                </Button>
+                            </div>
+                        </div>
+                    ) }
+                </div>
             </NitroCardContentView>
         </NitroCardView>
     );

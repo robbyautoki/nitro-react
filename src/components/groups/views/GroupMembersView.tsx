@@ -151,11 +151,11 @@ export const GroupMembersView: FC<{}> = props =>
             <NitroCardContentView overflow="hidden">
                 <Flex gap={ 2 }>
                     <Flex center className="group-badge">
-                        <LayoutBadgeImageView badgeCode={ membersData.badge } isGroup={ true } className="mx-auto d-block"/>
+                        <LayoutBadgeImageView badgeCode={ membersData.badge } isGroup={ true } className="mx-auto block"/>
                     </Flex>
                     <Column fullWidth gap={ 1 }>
-                        <input type="text" className="form-control form-control-sm w-100" placeholder={ LocalizeText('group.members.searchinfo') } value={ searchQuery } onChange={ event => setSearchQuery(event.target.value) } />
-                        <select className="form-select form-select-sm w-100" value={ levelId } onChange={ event => setLevelId(parseInt(event.target.value)) }>
+                        <input type="text" className="form-control form-control-sm w-full" placeholder={ LocalizeText('group.members.searchinfo') } value={ searchQuery } onChange={ event => setSearchQuery(event.target.value) } />
+                        <select className="form-select form-select-sm w-full" value={ levelId } onChange={ event => setLevelId(parseInt(event.target.value)) }>
                             <option value="0">{ LocalizeText('group.members.search.all') }</option>
                             <option value="1">{ LocalizeText('group.members.search.admins') }</option>
                             <option value="2">{ LocalizeText('group.members.search.pending') }</option>

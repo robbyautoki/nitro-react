@@ -6,6 +6,7 @@ import { Base, ButtonGroup, classNames, Column, Flex, FormGroup, LayoutCurrencyI
 import { CatalogEvent, CatalogInitGiftEvent, CatalogPurchasedEvent } from '../../../../events';
 import { useCatalog, useFriends, useMessageEvent, useUiEvent } from '../../../../hooks';
 import { Button } from '../../../ui/button';
+import { Checkbox } from '../../../ui/checkbox';
 import { Input } from '../../../ui/input';
 
 export const CatalogGiftView: FC<{}> = props =>
@@ -214,7 +215,7 @@ export const CatalogGiftView: FC<{}> = props =>
     return (
         <NitroCardView uniqueKey="catalog-gift" className="nitro-catalog-gift" theme="primary-slim">
             <NitroCardHeaderView headerText={ LocalizeText('catalog.gift_wrapping.title') } onCloseClick={ onClose } />
-            <NitroCardContentView className="text-black">
+            <NitroCardContentView className="text-white/90">
                 <FormGroup column>
                     <Text>{ LocalizeText('catalog.gift_wrapping.receiver') }</Text>
                     <Input type="text" className={ classNames('h-8 text-xs', receiverNotFound && 'border-red-500') } value={ receiverName } onChange={ (e) => onTextChanged(e) } />
@@ -226,13 +227,13 @@ export const CatalogGiftView: FC<{}> = props =>
                         </Column>
                     }
                     { receiverNotFound &&
-                        <Base className="invalid-feedback">{ LocalizeText('catalog.gift_wrapping.receiver_not_found.title') }</Base> }
+                        <div className="text-xs text-red-500">{ LocalizeText('catalog.gift_wrapping.receiver_not_found.title') }</div> }
                 </FormGroup>
                 <LayoutGiftTagView figure={ GetSessionDataManager().figure } userName={ GetSessionDataManager().userName } message={ message } editable={ true } onChange={ (value) => setMessage(value) } />
-                <Base className="form-check">
-                    <input className="form-check-input" type="checkbox" name="showMyFace" checked={ showMyFace } onChange={ (e) => setShowMyFace(value => !value) } />
-                    <label className="form-check-label">{ LocalizeText('catalog.gift_wrapping.show_face.title') }</label>
-                </Base>
+                <div className="flex items-center gap-2">
+                    <Checkbox id="showMyFace" checked={ showMyFace } onCheckedChange={ () => setShowMyFace(value => !value) } />
+                    <label htmlFor="showMyFace" className="text-sm cursor-pointer select-none">{ LocalizeText('catalog.gift_wrapping.show_face.title') }</label>
+                </div>
                 <Flex alignItems="center" gap={ 2 }>
                     { selectedColorId &&
                         <Base className="gift-preview">

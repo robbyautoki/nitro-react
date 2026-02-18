@@ -71,7 +71,7 @@ export const FurnitureCraftingView: FC<{}> = props =>
                         </Column>
                     </Flex>
                     <Flex column fullWidth gap={ 2 }>
-                        { !selectedRecipe && <Column center fullHeight className="text-black text-center">{ LocalizeText('crafting.info.start') }</Column> }
+                        { !selectedRecipe && <Column center fullHeight className= "text-white/90 text-center">{ LocalizeText('crafting.info.start') }</Column> }
                         { selectedRecipe && <>
                             <Column overflow="hidden" fullHeight>
                                 <div className="bg-muted rounded py-1 text-center">{ LocalizeText('crafting.current_recipe') }</div>
@@ -98,7 +98,7 @@ export const FurnitureCraftingView: FC<{}> = props =>
                                         <Column fullHeight>
                                             <img src={ selectedRecipe.iconUrl } />
                                         </Column>
-                                        <div className="text-black">{ selectedRecipe.localizedName }</div>
+                                        <div className="text-white/90">{ selectedRecipe.localizedName }</div>
                                     </Flex>
                                 </Flex>
                                 <Button variant={ !isOwner || !canCraft ? 'danger' : waitingToConfirm ? 'warning' : isCrafting ? 'primary' : 'success' } disabled={ !isOwner || !canCraft || isCrafting } onClick={ tryCraft }>

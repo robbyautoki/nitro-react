@@ -1,13 +1,9 @@
 @import './fonts';
-@import './bootstrap/bootstrap';
+@import './bootstrap-compat';
 @import './scrollbars';
 @import './slider';
 @import './icons';
 @import './utils';
-
-.btn-sm {
-  min-height: 28px;
-}
 
 textarea {
   resize: none;

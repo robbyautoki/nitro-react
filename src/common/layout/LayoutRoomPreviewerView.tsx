@@ -45,7 +45,11 @@ export const LayoutRoomPreviewerView: FC<LayoutRoomPreviewerViewProps> = props =
 
                 let backgroundColor = computed.backgroundColor;
 
-                backgroundColor = ColorConverter.rgbStringToHex(backgroundColor);
+                try {
+                    backgroundColor = ColorConverter.rgbStringToHex(backgroundColor);
+                } catch {
+                    backgroundColor = '#111114';
+                }
                 backgroundColor = backgroundColor.replace('#', '0x');
 
                 roomPreviewer.backgroundColor = parseInt(backgroundColor, 16);

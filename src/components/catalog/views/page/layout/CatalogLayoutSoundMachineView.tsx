@@ -1,7 +1,7 @@
 import { GetOfficialSongIdMessageComposer, MusicPriorities, OfficialSongIdMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { GetConfiguration, GetNitroInstance, LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Button } from '../../../../../common';
+import { Button } from '../../../../ui/button';
 import { useCatalog, useMessageEvent } from '../../../../../hooks';
 import { CatalogHeaderView } from '../../catalog-header/CatalogHeaderView';
 import { CatalogItemGridWidgetView } from '../widgets/CatalogItemGridWidgetView';

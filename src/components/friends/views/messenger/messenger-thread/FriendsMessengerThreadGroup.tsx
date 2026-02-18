@@ -29,15 +29,15 @@ export const FriendsMessengerThreadGroup: FC<{ thread: MessengerThread, group: M
                 {
                     return (
                         <Flex key={ index } fullWidth gap={ 2 } justifyContent="start">
-                            <Base className="w-100 text-break">
+                            <Base className="w-full break-all">
                                 { (chat.type === MessengerThreadChat.SECURITY_NOTIFICATION) &&
-                                    <Flex gap={ 2 } alignItems="center" className="bg-light rounded mb-2 px-2 py-1 small text-muted">
-                                        <Base className="nitro-friends-spritesheet icon-warning flex-shrink-0" />
+                                    <Flex gap={ 2 } alignItems="center" className="bg-gray-100 rounded mb-2 px-2 py-1 small text-muted">
+                                        <Base className="nitro-friends-spritesheet icon-warning shrink-0" />
                                         <Base>{ chat.message }</Base>
                                     </Flex> }
                                 { (chat.type === MessengerThreadChat.ROOM_INVITE) &&
-                                    <Flex gap={ 2 } alignItems="center" className="bg-light rounded mb-2 px-2 py-1 small text-black">
-                                        <Base className="messenger-notification-icon flex-shrink-0" />
+                                    <Flex gap={ 2 } alignItems="center" className="bg-gray-100 rounded mb-2 px-2 py-1 small text-white/90">
+                                        <Base className="messenger-notification-icon shrink-0" />
                                         <Base>{ (LocalizeText('messenger.invitation') + ' ') }{ chat.message }</Base>
                                     </Flex> }
                             </Base>
@@ -56,12 +56,12 @@ export const FriendsMessengerThreadGroup: FC<{ thread: MessengerThread, group: M
                 { (groupChatData && !isOwnChat) &&
                     <LayoutAvatarImageView figure={ groupChatData.figure } direction={ 2 } /> }
             </Base>
-            <Base className={ 'bg-light text-black border-radius mb-2 rounded py-1 px-2 messages-group-' + (isOwnChat ? 'right' : 'left') }>
-                <Base className="fw-bold">
+            <Base className={ 'bg-gray-100 text-white/90 border-radius mb-2 rounded py-1 px-2 messages-group-' + (isOwnChat ? 'right' : 'left') }>
+                <Base className="font-bold">
                     { isOwnChat && GetSessionDataManager().userName }
                     { !isOwnChat && (groupChatData ? groupChatData.username : thread.participant.name) }
                 </Base>
-                { group.chats.map((chat, index) => <Base key={ index } className="text-break">{ chat.message }</Base>) }
+                { group.chats.map((chat, index) => <Base key={ index } className="break-all">{ chat.message }</Base>) }
             </Base>
             { isOwnChat &&
                 <Base shrink className="message-avatar">

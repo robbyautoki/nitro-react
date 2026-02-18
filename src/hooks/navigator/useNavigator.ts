@@ -289,7 +289,9 @@ const useNavigatorState = () =>
         const parser = event.getParser();
 
         setTopLevelContexts(parser.topLevelContexts);
-        setTopLevelContext(parser.topLevelContexts.length ? parser.topLevelContexts[0] : null);
+
+        const preferred = parser.topLevelContexts.find(c => c.code === 'hotel_view');
+        setTopLevelContext(preferred || (parser.topLevelContexts.length ? parser.topLevelContexts[0] : null));
     });
 
     useMessageEvent<NavigatorSearchEvent>(NavigatorSearchEvent, event =>

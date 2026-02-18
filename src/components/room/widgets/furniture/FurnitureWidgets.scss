@@ -58,13 +58,13 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        color: black;
+        color: rgba(255, 255, 255, 0.90);
     }
 
     .picture-preview-buttons-previous,
     .picture-preview-buttons-next {
-        color: #222;
-        background-color: white;
+        color: rgba(255, 255, 255, 0.90);
+        background-color: rgba(255, 255, 255, 0.10);
         padding: 10px;
         border-radius: 50%;
     }
@@ -329,7 +329,7 @@
     .playlist-container {
         overflow-y: auto;
         margin-right: -10px;
-        color: black;
+        color: rgba(255, 255, 255, 0.90);
         height: 100%;
 
         .playlist-controls {
@@ -494,12 +494,12 @@
         width: 400px;
         height: 120px;
         border-radius: 2px;
-        background-color: #E9E9E1;
+        background-color: rgba(20, 20, 24, 0.90);
 
         .input-mysterytrophy-dialog
         {
             width: 380px;
-            border: 1px solid black;
+            border: 1px solid rgba(255, 255, 255, 0.10);
 
             .input-mysterytrophy
             {

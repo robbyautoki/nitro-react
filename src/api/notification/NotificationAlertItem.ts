@@ -11,8 +11,9 @@ export class NotificationAlertItem
     private _clickUrlText: string;
     private _title: string;
     private _imageUrl: string;
+    private _figure: string;
 
-    constructor(messages: string[], alertType: string = NotificationAlertType.DEFAULT, clickUrl: string = null, clickUrlText: string = null, title: string = null, imageUrl: string = null)
+    constructor(messages: string[], alertType: string = NotificationAlertType.DEFAULT, clickUrl: string = null, clickUrlText: string = null, title: string = null, imageUrl: string = null, figure: string = null)
     {
         NotificationAlertItem.ITEM_ID += 1;
 
@@ -23,6 +24,7 @@ export class NotificationAlertItem
         this._clickUrlText = clickUrlText;
         this._title = title;
         this._imageUrl = imageUrl;
+        this._figure = figure;
     }
 
     public get id(): number
@@ -63,5 +65,10 @@ export class NotificationAlertItem
     public get imageUrl(): string
     {
         return this._imageUrl;
+    }
+
+    public get figure(): string
+    {
+        return this._figure;
     }
 }

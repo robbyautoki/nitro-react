@@ -1,42 +1,49 @@
 import { RoomDataParser } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent } from 'react';
-import { FaUser } from 'react-icons/fa';
+import { FaLock, FaKey, FaEyeSlash, FaThumbtack } from 'react-icons/fa';
 import { CreateRoomSession, DoorStateType, GetSessionDataManager, TryVisitRoom } from '../../../../api';
-import { Column, Flex, LayoutBadgeImageView, LayoutGridItemProps, LayoutRoomThumbnailView, Text } from '../../../../common';
+import { LayoutRoomThumbnailView } from '../../../../common';
 import { useNavigator } from '../../../../hooks';
+import { cn } from '@/lib/utils';
 import { NavigatorSearchResultItemInfoView } from './NavigatorSearchResultItemInfoView';
 
-export interface NavigatorSearchResultItemViewProps extends LayoutGridItemProps
+export interface NavigatorSearchResultItemViewProps
 {
-    roomData: RoomDataParser
-    thumbnail?: boolean
+    roomData: RoomDataParser;
+    isPinned?: boolean;
 }
 
 export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProps> = props =>
 {
-    const { roomData = null, children = null, thumbnail = false, ...rest } = props;
+    const { roomData = null, isPinned = false } = props;
     const { setDoorData = null } = useNavigator();
 
-    const getUserCounterColor = () =>
+    const getUserCountBadge = () =>
     {
-        const num: number = (100 * (roomData.userCount / roomData.maxUserCount));
+        const pct = 100 * (roomData.userCount / roomData.maxUserCount);
+        const count = `${ roomData.userCount }/${ roomData.maxUserCount }`;
 
-        let bg = 'bg-primary';
+        if(roomData.userCount <= 0)
+            return <span className="text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-white/5 text-zinc-500">{ count }</span>;
+        if(pct >= 92)
+            return <span className="inline-flex items-center text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 font-medium shadow-[0_0_8px_rgba(239,68,68,0.2)]"><span className="inline-block w-1.5 h-1.5 rounded-full bg-red-400 mr-1 animate-pulse" />{ count }</span>;
+        if(pct >= 50)
+            return <span className="inline-flex items-center text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-medium shadow-[0_0_8px_rgba(245,158,11,0.2)]"><span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 mr-1" />{ count }</span>;
 
-        if(num >= 92)
-        {
-            bg = 'bg-danger';
-        }
-        else if(num >= 50)
-        {
-            bg = 'bg-warning';
-        }
-        else if(num > 0)
-        {
-            bg = 'bg-success';
-        }
+        return <span className="inline-flex items-center text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400 font-medium shadow-[0_0_8px_rgba(34,197,94,0.2)]"><span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 mr-1" />{ count }</span>;
+    }
 
-        return bg;
+    const isEmpty = roomData.userCount <= 0;
+
+    const getHashIcon = (): React.ReactNode =>
+    {
+        if(isPinned) return <FaThumbtack className="size-2 text-white drop-shadow-sm" />;
+
+        if(roomData.doorMode === RoomDataParser.DOORBELL_STATE) return <FaLock className="size-2 text-white drop-shadow-sm" />;
+        if(roomData.doorMode === RoomDataParser.PASSWORD_STATE) return <FaKey className="size-2 text-white drop-shadow-sm" />;
+        if(roomData.doorMode === RoomDataParser.INVISIBLE_STATE) return <FaEyeSlash className="size-2 text-white drop-shadow-sm" />;
+
+        return null;
     }
 
     const visitRoom = (event: MouseEvent) =>
@@ -56,10 +63,10 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
                     setDoorData(prevValue =>
                     {
                         const newValue = { ...prevValue };
-        
+
                         newValue.roomInfo = roomData;
                         newValue.state = DoorStateType.START_DOORBELL;
-        
+
                         return newValue;
                     });
                     return;
@@ -67,55 +74,60 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
                     setDoorData(prevValue =>
                     {
                         const newValue = { ...prevValue };
-        
+
                         newValue.roomInfo = roomData;
                         newValue.state = DoorStateType.START_PASSWORD;
-        
+
                         return newValue;
                     });
                     return;
             }
         }
-        
+
         CreateRoomSession(roomData.roomId);
     }
 
-    if(thumbnail) return (
-        <Column pointer overflow="hidden" alignItems="center" onClick={ visitRoom } gap={ 0 } className="navigator-item p-1 bg-light rounded-3 small mb-1 flex-column border border-muted" { ...rest }>
-            <LayoutRoomThumbnailView roomId={ roomData.roomId } customUrl={ roomData.officialRoomPicRef } className="d-flex flex-column align-items-center justify-content-end mb-1">
-                { roomData.habboGroupId > 0 && <LayoutBadgeImageView badgeCode={ roomData.groupBadgeCode } isGroup={ true } className={ 'position-absolute top-0 start-0 m-1' } /> }
-                <Flex center className={ 'badge p-1 position-absolute m-1 ' + getUserCounterColor() } gap={ 1 }>
-                    <FaUser className="fa-icon" />
-                    { roomData.userCount }
-                </Flex>
-                { (roomData.doorMode !== RoomDataParser.OPEN_STATE) && 
-                <i className={ ('position-absolute end-0 mb-1 me-1 icon icon-navigator-room-' + ((roomData.doorMode === RoomDataParser.DOORBELL_STATE) ? 'locked' : (roomData.doorMode === RoomDataParser.PASSWORD_STATE) ? 'password' : (roomData.doorMode === RoomDataParser.INVISIBLE_STATE) ? 'invisible' : '')) } /> }
-            </LayoutRoomThumbnailView>
-            <Flex className="w-100">
-                <Text truncate className="flex-grow-1">{ roomData.roomName }</Text>
-                <Flex reverse alignItems="center" gap={ 1 }>
-                    <NavigatorSearchResultItemInfoView roomData={ roomData } />
-                </Flex>
-                { children } 
-            </Flex>
-
-        </Column>
-    );
+    const hashIcon = getHashIcon();
 
     return (
-        <Flex pointer overflow="hidden" alignItems="center" onClick={ visitRoom } gap={ 2 } className="navigator-item px-2 py-1 small" { ...rest }>
-            <Flex center className={ 'badge p-1 ' + getUserCounterColor() } gap={ 1 }>
-                <FaUser className="fa-icon" />
-                { roomData.userCount }
-            </Flex>
-            <Text truncate grow>{ roomData.roomName }</Text>
-            <Flex reverse alignItems="center" gap={ 1 }>
+        <div
+            className={ cn(
+                'group/room flex items-center gap-3 px-3 py-1.5 cursor-pointer transition-colors duration-150',
+                'hover:bg-white/[0.04]',
+                isEmpty && 'opacity-40 hover:opacity-60'
+            ) }
+            onClick={ visitRoom }
+        >
+            { /* Thumbnail — compact left */ }
+            <LayoutRoomThumbnailView
+                roomId={ roomData.roomId }
+                customUrl={ roomData.officialRoomPicRef }
+                className="shrink-0 !w-[48px] !h-[36px] !rounded-[4px] overflow-hidden"
+            >
+                { hashIcon && (
+                    <div className="absolute bottom-0 right-0 p-px bg-black/50 backdrop-blur-sm rounded-tl-sm">
+                        { hashIcon }
+                    </div>
+                ) }
+            </LayoutRoomThumbnailView>
+
+            { /* Info — center */ }
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <p className="text-[12px] font-medium text-white/85 truncate leading-tight">
+                    { roomData.roomName }
+                </p>
+                <span className="text-[10px] text-white/30 truncate">{ roomData.ownerName }</span>
+            </div>
+
+            { /* User count — right */ }
+            <div className="shrink-0 ml-auto pl-2">
+                { getUserCountBadge() }
+            </div>
+
+            { /* Info popover — on hover */ }
+            <div className="opacity-0 group-hover/room:opacity-100 transition-opacity">
                 <NavigatorSearchResultItemInfoView roomData={ roomData } />
-                { roomData.habboGroupId > 0 && <i className="icon icon-navigator-room-group" /> }
-                { (roomData.doorMode !== RoomDataParser.OPEN_STATE) && 
-                    <i className={ ('icon icon-navigator-room-' + ((roomData.doorMode === RoomDataParser.DOORBELL_STATE) ? 'locked' : (roomData.doorMode === RoomDataParser.PASSWORD_STATE) ? 'password' : (roomData.doorMode === RoomDataParser.INVISIBLE_STATE) ? 'invisible' : '')) } /> }
-            </Flex>
-            { children }
-        </Flex>
+            </div>
+        </div>
     );
 }

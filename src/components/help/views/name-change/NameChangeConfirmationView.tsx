@@ -29,15 +29,15 @@ export const NameChangeConfirmationView:FC<NameChangeLayoutViewProps> = props =>
     });
 
     return (
-        <div className="d-flex flex-column gap-4 h-100">
+        <div className="flex flex-col gap-4 h-full">
             <div className="bg-muted rounded p-2 text-center">{ LocalizeText('tutorial.name_change.info.confirm') }</div>
-            <div className="d-flex flex-column align-items-center gap-1 h-100">
+            <div className="flex flex-col items-center gap-1 h-full">
                 <div>{ LocalizeText('tutorial.name_change.confirm') }</div>
-                <div className="fw-bold">{ username }</div>
+                <div className="font-bold">{ username }</div>
             </div>
-            <div className="d-flex gap-2">
-                <button className="btn btn-success w-100" disabled={ isConfirming } onClick={ confirm }>{ LocalizeText('generic.ok') }</button>
-                <button className="btn btn-primary w-100" onClick={ () => onAction('close') }>{ LocalizeText('cancel') }</button>
+            <div className="flex gap-2">
+                <button className="btn btn-success w-full" disabled={ isConfirming } onClick={ confirm }>{ LocalizeText('generic.ok') }</button>
+                <button className="btn btn-primary w-full" onClick={ () => onAction('close') }>{ LocalizeText('cancel') }</button>
             </div>
         </div>
     );

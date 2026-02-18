@@ -1,9 +1,11 @@
 import { FriendlyTime, HabboClubLevelEnum } from '@nitrots/nitro-renderer';
 import { FC, useMemo } from 'react';
 import { CreateLinkEvent, GetConfiguration, LocalizeText } from '../../api';
-import { Column, Flex, Grid, LayoutCurrencyIcon, Text } from '../../common';
+import { LayoutCurrencyIcon } from '../../common';
 import { usePurse } from '../../hooks';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CurrencyView } from './views/CurrencyView';
+import { LevelView } from './views/LevelView';
 import { SeasonalView } from './views/SeasonalView';
 
 export const PurseView: FC<{}> = props =>
@@ -23,7 +25,7 @@ export const PurseView: FC<{}> = props =>
         if(purse.clubLevel === HabboClubLevelEnum.NO_CLUB) return LocalizeText('purse.clubdays.zero.amount.text');
 
         else if((minutesUntilExpiration > -1) && (minutesUntilExpiration < (60 * 24))) return FriendlyTime.shortFormat(minutesUntilExpiration * 60);
-        
+
         else return FriendlyTime.shortFormat(totalDays * 86400);
     })();
 
@@ -62,29 +64,64 @@ export const PurseView: FC<{}> = props =>
     if(!purse) return null;
 
     return (
-        <Column alignItems="end" className="nitro-purse-container" gap={ 1 }>
-            <Flex className="nitro-purse rounded-bottom p-1">
-                <Grid fullWidth gap={ 1 }>
-                    <Column justifyContent="center" size={ hcDisabled ? 10 : 6 } gap={ 0 }>
-                        <CurrencyView type={ -1 } amount={ purse.credits } short={ currencyDisplayNumberShort } />
-                        { getCurrencyElements(0, 2) }
-                    </Column>
-                    { !hcDisabled &&
-                        <Column center pointer size={ 4 } gap={ 1 } className="nitro-purse-subscription rounded" onClick={ event => CreateLinkEvent('habboUI/open/hccenter') }>
-                            <LayoutCurrencyIcon type="hc" />
-                            <Text variant="white">{ getClubText }</Text>
-                        </Column> }
-                    <Column justifyContent="center" size={ 2 } gap={ 0 }>
-                        <Flex center pointer fullHeight className="nitro-purse-button p-1 rounded" onClick={ event => CreateLinkEvent('help/show') }>
-                            <i className="icon icon-help"/>
-                        </Flex>
-                        <Flex center pointer fullHeight className="nitro-purse-button p-1 rounded" onClick={ event => CreateLinkEvent('user-settings/toggle') } >
-                            <i className="icon icon-cog"/>
-                        </Flex>
-                    </Column>
-                </Grid>
-            </Flex>
-            { getCurrencyElements(2, -1, true) }
-        </Column>
+        <TooltipProvider delayDuration={ 400 }>
+            <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[69] pointer-events-auto flex items-center gap-1 py-1.5 px-3 texture-panel backdrop-blur-2xl rounded-2xl">
+                <CurrencyView type={ -1 } amount={ purse.credits } short={ currencyDisplayNumberShort } />
+                { getCurrencyElements(0, 2) }
+                { getCurrencyElements(2, -1, true) }
+
+                <div className="w-px h-6 bg-white/[0.06] mx-1" />
+                <LevelView />
+
+                { !hcDisabled && <div className="w-px h-6 bg-white/[0.06] mx-1" /> }
+                { !hcDisabled && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div
+                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                                onClick={ () => CreateLinkEvent('habboUI/open/hccenter') }
+                            >
+                                <LayoutCurrencyIcon type="hc" />
+                                <span className="text-xs font-medium text-white/90">{ getClubText }</span>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                            Habbo Club
+                        </TooltipContent>
+                    </Tooltip>
+                ) }
+
+                <div className="w-px h-6 bg-white/[0.06] mx-1" />
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => CreateLinkEvent('help/show') }
+                        >
+                            <i className="icon icon-help" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        Help
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => CreateLinkEvent('user-settings/toggle') }
+                        >
+                            <i className="icon icon-cog" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        Settings
+                    </TooltipContent>
+                </Tooltip>
+                <div id="toolbar-room-tools-container" className="flex items-center" />
+            </div>
+        </TooltipProvider>
     );
 }

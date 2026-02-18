@@ -1,6 +1,7 @@
 import { FC, useCallback, useMemo } from 'react';
 import { GetImageIconUrlForProduct, LocalizeText, MarketplaceOfferData, MarketPlaceOfferState, ProductTypeEnum } from '../../../../../../api';
-import { LayoutGridItem } from '../../../../../../common';
+import { Button } from '../../../../../ui/button';
+import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '../../../../../ui/item';
 
 export interface MarketplaceItemViewProps
 {
@@ -20,7 +21,6 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
     {
         if(!offerData) return '';
 
-        // desc
         return LocalizeText(((offerData.furniType === 2) ? 'wallItem' : 'roomItem') + `.name.${ offerData.furniId }`);
     }, [ offerData ]);
 
@@ -46,38 +46,41 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
     }, [ offerData ]);
 
     return (
-        <div className="flex items-center gap-3 p-2 rounded-lg border border-zinc-100 bg-white">
-            <div className="w-10 h-10 shrink-0">
-                <LayoutGridItem column={ false } itemImage={ GetImageIconUrlForProduct(((offerData.furniType === MarketplaceOfferData.TYPE_FLOOR) ? ProductTypeEnum.FLOOR : ProductTypeEnum.WALL), offerData.furniId, offerData.extraData) } itemUniqueNumber={ offerData.isUniqueLimitedItem ? offerData.stuffData.uniqueNumber : 0 } />
-            </div>
-            <div className="flex-1 min-w-0 flex flex-col">
-                <span className="text-xs font-semibold text-zinc-900 truncate">{ getMarketplaceOfferTitle }</span>
+        <Item variant="outline" className="rounded-xl hover:shadow-md transition-all duration-200">
+            <ItemMedia variant="image" className="w-12 h-12 rounded-lg border bg-muted">
+                <div className="w-full h-full bg-center bg-no-repeat"
+                    style={ { backgroundImage: `url(${ GetImageIconUrlForProduct(((offerData.furniType === MarketplaceOfferData.TYPE_FLOOR) ? ProductTypeEnum.FLOOR : ProductTypeEnum.WALL), offerData.furniId, offerData.extraData) })` } } />
+            </ItemMedia>
+            <ItemContent>
+                <ItemTitle className="text-xs">{ getMarketplaceOfferTitle }</ItemTitle>
                 { (type === OWN_OFFER) &&
-                    <>
-                        <span className="text-[11px] text-zinc-500">{ LocalizeText('catalog.marketplace.offer.price_own_item', [ 'price' ], [ offerData.price.toString() ]) }</span>
-                        <span className="text-[11px] text-zinc-500">{ offerTime() }</span>
-                    </> }
+                    <ItemDescription className="text-[11px]">
+                        { LocalizeText('catalog.marketplace.offer.price_own_item', [ 'price' ], [ offerData.price.toString() ]) }
+                        <br />
+                        { offerTime() }
+                    </ItemDescription> }
                 { (type === PUBLIC_OFFER) &&
-                    <>
-                        <span className="text-[11px] text-zinc-500">{ LocalizeText('catalog.marketplace.offer.price_public_item', [ 'price', 'average' ], [ offerData.price.toString(), ((offerData.averagePrice > 0) ? offerData.averagePrice.toString() : '-') ]) }</span>
-                        <span className="text-[11px] text-zinc-500">{ LocalizeText('catalog.marketplace.offer_count', [ 'count' ], [ offerData.offerCount.toString() ]) }</span>
-                    </> }
-            </div>
-            <div className="flex flex-col gap-1 shrink-0">
+                    <ItemDescription className="text-[11px]">
+                        { LocalizeText('catalog.marketplace.offer.price_public_item', [ 'price', 'average' ], [ offerData.price.toString(), ((offerData.averagePrice > 0) ? offerData.averagePrice.toString() : '-') ]) }
+                        <br />
+                        { LocalizeText('catalog.marketplace.offer_count', [ 'count' ], [ offerData.offerCount.toString() ]) }
+                    </ItemDescription> }
+            </ItemContent>
+            <ItemActions className="flex-col">
                 { ((type === OWN_OFFER) && (offerData.status !== MarketPlaceOfferState.SOLD)) &&
-                    <button className="h-7 px-3 text-xs rounded-md border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 transition-colors" onClick={ () => onClick(offerData) }>
+                    <Button size="sm" onClick={ () => onClick(offerData) }>
                         { LocalizeText('catalog.marketplace.offer.pick') }
-                    </button> }
+                    </Button> }
                 { type === PUBLIC_OFFER &&
                     <>
-                        <button className="h-7 px-3 text-xs rounded-md border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 transition-colors" onClick={ () => onClick(offerData) }>
+                        <Button size="sm" onClick={ () => onClick(offerData) }>
                             { LocalizeText('buy') }
-                        </button>
-                        <button className="h-7 px-3 text-xs rounded-md border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 transition-colors" disabled>
+                        </Button>
+                        <Button variant="outline" size="sm" disabled>
                             { LocalizeText('catalog.marketplace.view_more') }
-                        </button>
+                        </Button>
                     </> }
-            </div>
-        </div>
+            </ItemActions>
+        </Item>
     );
 }

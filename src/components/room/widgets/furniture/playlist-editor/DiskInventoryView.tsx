@@ -52,11 +52,11 @@ export const DiskInventoryView: FC<DiskInventoryViewProps> = props =>
     }, []);
 
     return (<>
-        <div className="bg-success py-3 container-fluid justify-content-center d-flex rounded">
+        <div className="bg-green-500 py-3 container-fluid justify-center flex rounded">
             <img src={ GetConfiguration('image.library.url') + 'playlist/title_mymusic.gif' } className="my-music" />
-            <h2 className="ms-4">{ LocalizeText('playlist.editor.my.music') }</h2>
+            <h2 className="ml-6">{ LocalizeText('playlist.editor.my.music') }</h2>
         </div>
-        <div className="h-100 overflow-y-scroll mt-4 py-2">
+        <div className="h-full overflow-y-scroll mt-4 py-2">
             <AutoGrid columnCount={ 3 } columnMinWidth={ 95 } gap={ 1 }>
                 { diskInventory && diskInventory.getKeys().map( (key, index) =>
                 {
@@ -66,7 +66,7 @@ export const DiskInventoryView: FC<DiskInventoryViewProps> = props =>
 
                     return (
                         <LayoutGridItem key={ index } itemActive={ (selectedItem === index) } onClick={ () => setSelectedItem(prev => prev === index ? -1 : index) } classNames={ [ 'text-black' ] }>
-                            <div className="disk-image flex-shrink-0 mb-n2" style={ { backgroundColor: GetDiskColor(songInfo?.songData) } }>
+                            <div className="disk-image shrink-0 -mb-2" style={ { backgroundColor: GetDiskColor(songInfo?.songData) } }>
                             </div>
                             <Text truncate fullWidth className="text-center">{ songInfo?.name }</Text>
                             { (selectedItem === index) &&
@@ -83,7 +83,7 @@ export const DiskInventoryView: FC<DiskInventoryViewProps> = props =>
                 }) }
             </AutoGrid>
         </div>
-        <div className="playlist-bottom text-black p-1">
+        <div className="playlist-bottom text-white/90 p-1">
             <h5>{ LocalizeText('playlist.editor.text.get.more.music') }</h5>
             <div>{ LocalizeText('playlist.editor.text.you.have.no.songdisks.available') }</div>
             <div>{ LocalizeText('playlist.editor.text.you.can.buy.some.from.the.catalogue') }</div>

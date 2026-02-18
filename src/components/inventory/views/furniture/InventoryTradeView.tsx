@@ -115,11 +115,11 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = props =>
     {
         if(accepts)
         {
-            return <FaLock className="text-success fa-icon" />
+            return <FaLock className="text-green-500 fa-icon" />
         }
         else
         {
-            return <FaUnlock className="text-danger fa-icon" />
+            return <FaUnlock className="text-red-500 fa-icon" />
         }
     }
 
@@ -189,7 +189,7 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = props =>
                             return (
                                 <LayoutGridItem key={ index } className={ !count ? 'opacity-0-5 ' : '' } itemImage={ item.iconUrl } itemCount={ count } itemActive={ (groupItem === item) } itemUniqueNumber={ item.stuffData.uniqueNumber } onClick={ event => (count && setGroupItem(item)) } onDoubleClick={ event => attemptItemOffer(1) }>
                                     { ((count > 0) && (groupItem === item)) &&
-                                        <Button position="absolute" variant="success" className="trade-button bottom-1 end-1" onClick={ event => attemptItemOffer(1) }>
+                                        <Button position="absolute" variant="success" className="trade-button bottom-1 right-1" onClick={ event => attemptItemOffer(1) }>
                                             <FaChevronRight className="fa-icon" />
                                         </Button>
                                     }
@@ -229,7 +229,7 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = props =>
                                 return (
                                     <LayoutGridItem key={ i } itemActive={ (ownGroupItem === item) } itemImage={ item.iconUrl } itemCount={ item.getTotalCount() } itemUniqueNumber={ item.stuffData.uniqueNumber } onClick={ event => setOwnGroupItem(item) } onDoubleClick={ event => removeItem(item) }>
                                         { (ownGroupItem === item) &&
-                                            <Button position="absolute" variant="danger" className="trade-button bottom-1 start-1" onClick={ event => removeItem(item) }>
+                                            <Button position="absolute" variant="danger" className="trade-button bottom-1 left-1" onClick={ event => removeItem(item) }>
                                                 <FaChevronLeft className="fa-icon" />
                                             </Button> }
                                     </LayoutGridItem>
@@ -255,7 +255,7 @@ export const InventoryTradeView: FC<InventoryTradeViewProps> = props =>
                                 return <LayoutGridItem key={ i } itemActive={ (otherGroupItem === item) } itemImage={ item.iconUrl } itemCount={ item.getTotalCount() } itemUniqueNumber={ item.stuffData.uniqueNumber } onClick={ event => setOtherGroupItem(item) } />;
                             }) }
                         </AutoGrid>
-                        <Base fullWidth className="badge bg-muted w-100">
+                        <Base fullWidth className="badge bg-muted w-full">
                             { otherGroupItem ? otherGroupItem.name : LocalizeText('catalog_selectproduct') }
                         </Base>
                     </Column>

@@ -21,7 +21,7 @@ export const GameListView = () =>
         return `url(${ game.assetUrl }${ game.gameNameId }_icon.png)`
     }
 
-    return <Base fullWidth className="gameList-container bg-dark p-1">
+    return <Base fullWidth className="gameList-container bg-gray-900 p-1">
         { LocalizeText('gamecenter.game_list_title') }
         <Flex gap={ 3 }>
             { games && games.map((game,index) => 

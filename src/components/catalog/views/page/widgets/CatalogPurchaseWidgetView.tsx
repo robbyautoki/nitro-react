@@ -124,41 +124,110 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
 
     if(!currentOffer) return null;
 
+    const priceCredits = (currentOffer.priceInCredits * purchaseOptions.quantity);
+    const pricePoints = (currentOffer.priceInActivityPoints * purchaseOptions.quantity);
+
+    const getPriceLabel = () =>
+    {
+        const parts: string[] = [];
+        if(priceCredits > 0) parts.push(`${ priceCredits } Credits`);
+        if(pricePoints > 0) parts.push(`${ pricePoints } Diamonds`);
+        return parts.join(' + ');
+    };
+
+    const buyLabel = LocalizeText('catalog.purchase_confirmation.' + (currentOffer.isRentOffer ? 'rent' : 'buy'));
+    const priceLabel = getPriceLabel();
+
     const PurchaseButton = () =>
     {
-        const priceCredits = (currentOffer.priceInCredits * purchaseOptions.quantity);
-        const pricePoints = (currentOffer.priceInActivityPoints * purchaseOptions.quantity);
+        if(GetClubMemberLevel() < currentOffer.clubLevel)
+            return (
+                <Button variant="destructive" className="w-full" size="sm" disabled>
+                    { LocalizeText('catalog.alert.hc.required') }
+                </Button>
+            );
 
-        if(GetClubMemberLevel() < currentOffer.clubLevel) return <Button variant="destructive" size="sm" className="h-7 text-xs px-3" disabled>{ LocalizeText('catalog.alert.hc.required') }</Button>;
+        if(isLimitedSoldOut)
+            return (
+                <Button variant="destructive" className="w-full" size="sm" disabled>
+                    { LocalizeText('catalog.alert.limited_edition_sold_out.title') }
+                </Button>
+            );
 
-        if(isLimitedSoldOut) return <Button variant="destructive" size="sm" className="h-7 text-xs px-3" disabled>{ LocalizeText('catalog.alert.limited_edition_sold_out.title') }</Button>;
+        if(priceCredits > getCurrencyAmount(-1))
+            return (
+                <Button variant="destructive" className="w-full" size="sm" disabled>
+                    { LocalizeText('catalog.alert.notenough.title') }
+                </Button>
+            );
 
-        if(priceCredits > getCurrencyAmount(-1)) return <Button variant="destructive" size="sm" className="h-7 text-xs px-3" disabled>{ LocalizeText('catalog.alert.notenough.title') }</Button>;
-
-        if(pricePoints > getCurrencyAmount(currentOffer.activityPointType)) return <Button variant="destructive" size="sm" className="h-7 text-xs px-3" disabled>{ LocalizeText('catalog.alert.notenough.activitypoints.title.' + currentOffer.activityPointType) }</Button>;
+        if(pricePoints > getCurrencyAmount(currentOffer.activityPointType))
+            return (
+                <Button variant="destructive" className="w-full" size="sm" disabled>
+                    { LocalizeText('catalog.alert.notenough.activitypoints.title.' + currentOffer.activityPointType) }
+                </Button>
+            );
 
         switch(purchaseState)
         {
             case CatalogPurchaseState.CONFIRM:
-                return <Button variant="warning" size="sm" className="h-7 text-xs px-3" onClick={ event => purchase() }>{ LocalizeText('catalog.marketplace.confirm_title') }</Button>;
+                return (
+                    <Button variant="warning" className="w-full" size="sm" onClick={ () => purchase() }>
+                        <span className="flex flex-col items-center leading-none gap-0.5">
+                            <span className="text-xs font-semibold">{ LocalizeText('catalog.marketplace.confirm_title') }</span>
+                            { priceLabel && <span className="text-[10px] opacity-70">{ priceLabel }</span> }
+                        </span>
+                    </Button>
+                );
             case CatalogPurchaseState.PURCHASE:
-                return <Button size="sm" className="h-7 text-xs px-3" disabled><LayoutLoadingSpinnerView /></Button>;
+                return (
+                    <Button variant="success" className="w-full" size="sm" disabled>
+                        <LayoutLoadingSpinnerView />
+                    </Button>
+                );
             case CatalogPurchaseState.FAILED:
-                return <Button variant="destructive" size="sm" className="h-7 text-xs px-3">{ LocalizeText('generic.failed') }</Button>;
+                return (
+                    <Button variant="destructive" className="w-full" size="sm" disabled>
+                        { LocalizeText('generic.failed') }
+                    </Button>
+                );
             case CatalogPurchaseState.SOLD_OUT:
-                return <Button variant="destructive" size="sm" className="h-7 text-xs px-3">{ LocalizeText('generic.failed') + ' - ' + LocalizeText('catalog.alert.limited_edition_sold_out.title') }</Button>;
+                return (
+                    <Button variant="destructive" className="w-full" size="sm" disabled>
+                        { LocalizeText('catalog.alert.limited_edition_sold_out.title') }
+                    </Button>
+                );
             case CatalogPurchaseState.NONE:
             default:
-                return <Button size="sm" className="h-7 text-xs px-3" disabled={ (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length)) } onClick={ event => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('catalog.purchase_confirmation.' + (currentOffer.isRentOffer ? 'rent' : 'buy')) }</Button>;
+                return (
+                    <Button
+                        variant="success"
+                        className="w-full"
+                        size="sm"
+                        disabled={ (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length)) }
+                        onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }
+                    >
+                        <span className="flex flex-col items-center leading-none gap-0.5">
+                            <span className="text-xs font-semibold">{ buyLabel }</span>
+                            { priceLabel && <span className="text-[10px] opacity-70">{ priceLabel }</span> }
+                        </span>
+                    </Button>
+                );
         }
     }
 
     return (
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-col gap-1.5 w-full">
             <PurchaseButton />
             { (!noGiftOption && !currentOffer.isRentOffer) &&
-                <Button variant="outline" size="sm" className="h-7 text-xs px-3" disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) } onClick={ event => purchase(true) }>
-                    { LocalizeText('catalog.purchase_confirmation.gift') }
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-xs text-white/50 hover:text-white/80"
+                    disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
+                    onClick={ () => purchase(true) }
+                >
+                    { LocalizeText('catalog.purchase_confirmation.gift') } →
                 </Button> }
         </div>
     );

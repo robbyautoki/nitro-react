@@ -1,8 +1,10 @@
 import { GetGuestRoomResultEvent, NavigatorSearchComposer, RateFlatMessageComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CreateLinkEvent, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../../api';
-import { Base, classNames, Column, Flex, Text, TransitionAnimation, TransitionAnimationTypes } from '../../../../common';
+import { classNames } from '../../../../common';
 import { useMessageEvent, useNavigator, useRoom } from '../../../../hooks';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const RoomToolsWidgetView: FC<{}> = props =>
 {
@@ -10,7 +12,6 @@ export const RoomToolsWidgetView: FC<{}> = props =>
     const [ roomName, setRoomName ] = useState<string>(null);
     const [ roomOwner, setRoomOwner ] = useState<string>(null);
     const [ roomTags, setRoomTags ] = useState<string[]>(null);
-    const [ isOpen, setIsOpen ] = useState<boolean>(false);
     const { navigatorData = null } = useNavigator();
     const { roomSession = null } = useRoom();
 
@@ -61,40 +62,71 @@ export const RoomToolsWidgetView: FC<{}> = props =>
         if(roomTags !== parser.data.tags) setRoomTags(parser.data.tags);
     });
 
-    useEffect(() =>
-    {
-        setIsOpen(true);
+    const portalTarget = document.getElementById('toolbar-room-tools-container');
 
-        const timeout = setTimeout(() => setIsOpen(false), 5000);
+    if(!portalTarget) return null;
 
-        return () => clearTimeout(timeout);
-    }, [ roomName, roomOwner, roomTags ]);
+    const settingsTooltip = [ roomName, roomOwner ].filter(Boolean).join(' - ');
 
-    return (
-        <Flex className="nitro-room-tools-container" gap={ 2 }>
-            <Column center className="nitro-room-tools p-2">
-                <Base pointer title={ LocalizeText('room.settings.button.text') } className="icon icon-cog" onClick={ () => handleToolClick('settings') } />
-                <Base pointer title={ LocalizeText('room.zoom.button.text') } onClick={ () => handleToolClick('zoom') } className={ classNames('icon', (!isZoomedIn && 'icon-zoom-less'), (isZoomedIn && 'icon-zoom-more')) } />
-                <Base pointer title={ LocalizeText('room.chathistory.button.text') } onClick={ () => handleToolClick('chat_history') } className="icon icon-chat-history" />
+    return createPortal(
+        <TooltipProvider delayDuration={ 400 }>
+            <div className="flex items-center">
+                <div className="w-px h-6 bg-white/[0.06] mx-1" />
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => handleToolClick('settings') }
+                        >
+                            <i className="icon icon-cog" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm max-w-[200px]">
+                        { settingsTooltip || LocalizeText('room.settings.button.text') }
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => handleToolClick('zoom') }
+                        >
+                            <i className={ classNames('icon', (!isZoomedIn && 'icon-zoom-less'), (isZoomedIn && 'icon-zoom-more')) } />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        { LocalizeText('room.zoom.button.text') }
+                    </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => handleToolClick('chat_history') }
+                        >
+                            <i className="icon icon-chat-history" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        { LocalizeText('room.chathistory.button.text') }
+                    </TooltipContent>
+                </Tooltip>
                 { navigatorData.canRate &&
-                    <Base pointer title={ LocalizeText('room.like.button.text') } onClick={ () => handleToolClick('like_room') } className="icon icon-like-room" /> }
-            </Column>
-            <Column justifyContent="center">
-                <TransitionAnimation type={ TransitionAnimationTypes.SLIDE_LEFT } inProp={ isOpen } timeout={ 300 }>
-                    <Column center>
-                        <Column className="nitro-room-tools-info rounded py-2 px-3">
-                            <Column gap={ 1 }>
-                                <Text wrap variant="white" fontSize={ 4 }>{ roomName }</Text>
-                                <Text variant="muted" fontSize={ 5 }>{ roomOwner }</Text>
-                            </Column>
-                            { roomTags && roomTags.length > 0 &&
-                                <Flex gap={ 2 }>
-                                    { roomTags.map((tag, index) => <Text key={ index } small pointer variant="white" className="rounded bg-primary p-1" onClick={ () => handleToolClick('navigator_search_tag', tag) }>#{ tag }</Text>) }
-                                </Flex> }
-                        </Column>
-                    </Column>
-                </TransitionAnimation>
-            </Column>
-        </Flex>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div
+                                className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                                onClick={ () => handleToolClick('like_room') }
+                            >
+                                <i className="icon icon-like-room" />
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                            { LocalizeText('room.like.button.text') }
+                        </TooltipContent>
+                    </Tooltip> }
+            </div>
+        </TooltipProvider>,
+        portalTarget
     );
 }

@@ -5,6 +5,7 @@ import { DispatchUiEvent, GetPetAvailableColors, GetPetIndexFromLocalization, Lo
 import { LayoutPetImageView } from '../../../../../../common';
 import { CatalogPurchaseFailureEvent } from '../../../../../../events';
 import { useCatalog, useMessageEvent } from '../../../../../../hooks';
+import { Input } from '../../../../../ui/input';
 import { CatalogAddOnBadgeWidgetView } from '../../widgets/CatalogAddOnBadgeWidgetView';
 import { CatalogPurchaseWidgetView } from '../../widgets/CatalogPurchaseWidgetView';
 import { CatalogTotalPriceWidget } from '../../widgets/CatalogTotalPriceWidget';
@@ -203,32 +204,32 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
 
     return (
         <div className="flex flex-col h-full gap-2">
-            <div className="grid grid-cols-5 gap-1.5 flex-1 min-h-0 overflow-auto p-1">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(56px,1fr))] gap-2 flex-1 min-h-0 overflow-auto p-1">
                 { !colorsShowing && (sellablePalettes.length > 0) && sellablePalettes.map((palette, index) =>
                 {
                     return (
-                        <div key={ index } className={ `flex items-center justify-center p-1 rounded-lg border cursor-pointer transition-colors ${ selectedPaletteIndex === index ? 'border-zinc-900 bg-white shadow-sm' : 'border-zinc-100 bg-zinc-50/50 hover:border-zinc-300' }` } onClick={ event => setSelectedPaletteIndex(index) }>
+                        <div key={ index } className={ `flex items-center justify-center p-1 rounded-lg border cursor-pointer transition-colors ${ selectedPaletteIndex === index ? 'border-primary bg-card shadow-sm' : 'border-border/60 bg-muted/30 hover:border-border' }` } onClick={ event => setSelectedPaletteIndex(index) }>
                             <LayoutPetImageView typeId={ petIndex } paletteId={ palette.paletteId } direction={ 2 } headOnly={ true } />
                         </div>
                     );
                 }) }
-                { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <div key={ index } className={ `w-full aspect-square rounded-lg border-2 cursor-pointer transition-all ${ selectedColorIndex === index ? 'border-zinc-900 shadow-sm scale-105' : 'border-zinc-200 hover:border-zinc-400' }` } style={ { backgroundColor: ColorConverter.int2rgb(colorSet[0]) } } onClick={ event => setSelectedColorIndex(index) } />) }
+                { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <div key={ index } className={ `w-full aspect-square rounded-lg border-2 cursor-pointer transition-all ${ selectedColorIndex === index ? 'border-primary shadow-sm scale-105' : 'border-border hover:border-border' }` } style={ { backgroundColor: ColorConverter.int2rgb(colorSet[0]) } } onClick={ event => setSelectedColorIndex(index) } />) }
             </div>
-            <div className="flex flex-col gap-2 p-2.5 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0">
+            <div className="flex flex-col gap-2 p-2.5 bg-muted rounded-lg border shrink-0">
                 <div className="relative overflow-hidden">
                     <CatalogViewProductWidgetView />
-                    <CatalogAddOnBadgeWidgetView position="absolute" className="bg-muted rounded bottom-1 end-1" />
+                    <CatalogAddOnBadgeWidgetView position="absolute" className="bg-muted rounded bottom-1 right-1" />
                     { ((petIndex > -1) && (petIndex <= 7)) &&
-                        <button className="absolute bottom-1 left-1 p-1.5 rounded-md bg-zinc-900 text-white hover:bg-zinc-800 transition-colors" onClick={ event => setColorsShowing(!colorsShowing) }>
+                        <button className="appearance-none border-0 absolute bottom-1 left-1 p-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" onClick={ event => setColorsShowing(!colorsShowing) }>
                             <FaFillDrip className="text-xs" />
                         </button> }
                 </div>
                 <div className="flex flex-col flex-1 gap-1">
                     <span className="truncate">{ petBreedName }</span>
                     <div className="flex flex-col flex-1 gap-1">
-                        <input type="text" className="form-control form-control-sm w-100" placeholder={ LocalizeText('widgets.petpackage.name.title') } value={ petName } onChange={ event => setPetName(event.target.value) } />
+                        <Input type="text" className="h-8 w-full text-xs" placeholder={ LocalizeText('widgets.petpackage.name.title') } value={ petName } onChange={ event => setPetName(event.target.value) } />
                         { (approvalResult > 0) &&
-                            <div className="invalid-feedback d-block m-0">{ validationErrorMessage }</div> }
+                            <div className="text-xs text-red-500">{ validationErrorMessage }</div> }
                     </div>
                     <div className="flex justify-end">
                         <CatalogTotalPriceWidget justifyContent="end" alignItems="end" />

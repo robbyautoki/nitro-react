@@ -41,7 +41,7 @@ export const FriendsSearchView: FC<FriendsSearchViewProps> = props =>
 
     return (
         <NitroCardAccordionSetView { ...rest }>
-            <input type="text" className="search-input form-control form-control-sm w-100 rounded-0" placeholder={ LocalizeText('generic.search') } value={ searchValue } maxLength={ 50 } onChange={ event => setSearchValue(event.target.value) } />
+            <input type="text" className="search-input form-control form-control-sm w-full rounded-0" placeholder={ LocalizeText('generic.search') } value={ searchValue } maxLength={ 50 } onChange={ event => setSearchValue(event.target.value) } />
             <Column>
                 { friendResults &&
                     <>
@@ -50,7 +50,7 @@ export const FriendsSearchView: FC<FriendsSearchViewProps> = props =>
                         { (friendResults.length > 0) &&
                             <Column gap={ 0 }>
                                 <Text bold small className="px-2 py-1">{ LocalizeText('friendlist.search.friendscaption', [ 'cnt' ], [ friendResults.length.toString() ]) }</Text>
-                                <hr className="mx-2 mt-0 mb-1 text-black" />
+                                <hr className="mx-2 mt-0 mb-1 text-white/90" />
                                 <Column gap={ 0 }>
                                     { friendResults.map(result =>
                                     {
@@ -77,7 +77,7 @@ export const FriendsSearchView: FC<FriendsSearchViewProps> = props =>
                         { (otherResults.length > 0) &&
                             <Column gap={ 0 }>
                                 <Text bold small className="px-2 py-1">{ LocalizeText('friendlist.search.otherscaption', [ 'cnt' ], [ otherResults.length.toString() ]) }</Text>
-                                <hr className="mx-2 mt-0 mb-1 text-black" />
+                                <hr className="mx-2 mt-0 mb-1 text-white/90" />
                                 <Column gap={ 0 }>
                                     { otherResults.map(result =>
                                     {

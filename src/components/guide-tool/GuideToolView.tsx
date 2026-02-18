@@ -331,7 +331,7 @@ export const GuideToolView: FC<{}> = props =>
     return (
         <NitroCardView className="nitro-guide-tool" theme="primary-slim">
             <NitroCardHeaderView headerText={ headerText } onCloseClick={ event => processAction('close') } noCloseButton={ noCloseButton } />
-            <NitroCardContentView className="text-black">
+            <NitroCardContentView className="text-white/90">
                 { (sessionState === GuideSessionState.GUIDE_TOOL_MENU) &&
                     <GuideToolMenuView isOnDuty={ isOnDuty } isHandlingGuideRequests={ isHandlingGuideRequests } setIsHandlingGuideRequests={ setIsHandlingGuideRequests } isHandlingHelpRequests={ isHandlingHelpRequests } setIsHandlingHelpRequests={ setIsHandlingHelpRequests } isHandlingBullyReports={ isHandlingBullyReports } setIsHandlingBullyReports={ setIsHandlingBullyReports } guidesOnDuty={ guidesOnDuty } helpersOnDuty={ helpersOnDuty } guardiansOnDuty={ guardiansOnDuty } processAction={ processAction } /> }
                 { (sessionState === GuideSessionState.GUIDE_ACCEPT) &&

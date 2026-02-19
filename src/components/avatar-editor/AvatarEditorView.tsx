@@ -26,7 +26,7 @@ export const AvatarEditorView: FC<{}> = props =>
     const [ lastGender, setLastGender ] = useState<string>(null);
     const [ needsReset, setNeedsReset ] = useState(true);
     const [ isInitalized, setIsInitalized ] = useState(false);
-    const [ editorSize, setEditorSize ] = useState({ width: 600, height: 480 });
+    const [ editorSize, setEditorSize ] = useState({ width: 500, height: 480 });
 
     const resizingRef = useRef(false);
     const resizeStartRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -42,7 +42,7 @@ export const AvatarEditorView: FC<{}> = props =>
         const onMouseMove = (ev: MouseEvent) =>
         {
             if(!resizingRef.current) return;
-            const newW = Math.max(450, Math.min(1200, resizeStartRef.current.w + (ev.clientX - resizeStartRef.current.x)));
+            const newW = Math.max(400, Math.min(1200, resizeStartRef.current.w + (ev.clientX - resizeStartRef.current.x)));
             const newH = Math.max(350, Math.min(window.innerHeight - 32, resizeStartRef.current.h + (ev.clientY - resizeStartRef.current.y)));
             setEditorSize({ width: newW, height: newH });
         };

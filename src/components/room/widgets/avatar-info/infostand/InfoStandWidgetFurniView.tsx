@@ -1,9 +1,11 @@
-import { CrackableDataType, GroupInformationComposer, GroupInformationEvent, NowPlayingEvent, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter, RoomWidgetFurniInfoUsagePolicyEnum, SetObjectDataMessageComposer, SongInfoReceivedEvent, StringDataType } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
-import { FaTimes, FaUser, FaAlignLeft, FaMusic, FaUserAlt } from 'react-icons/fa';
+import { CrackableDataType, FurnitureFloorUpdateComposer, FurnitureStackHeightComposer, GroupInformationComposer, GroupInformationEvent, NowPlayingEvent, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter, RoomWidgetFurniInfoUsagePolicyEnum, SetObjectDataMessageComposer, SongInfoReceivedEvent, StringDataType } from '@nitrots/nitro-renderer';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FaTimes, FaUser, FaMusic, FaUserAlt, FaShoppingCart, FaListUl, FaWrench, FaUndo, FaRedo } from 'react-icons/fa';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AvatarInfoFurni, CreateLinkEvent, GetGroupInformation, GetNitroInstance, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { Base, Button, Column, Flex, LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, Text, UserProfileIconView } from '../../../../../common';
 import { useMessageEvent, useRoom, useSoundEvent } from '../../../../../hooks';
+import { useFurnitureRarity } from '../../../../../hooks/rooms/widgets/useFurnitureRarity';
 
 interface InfoStandWidgetFurniViewProps
 {
@@ -15,11 +17,28 @@ const PICKUP_MODE_NONE: number = 0;
 const PICKUP_MODE_EJECT: number = 1;
 const PICKUP_MODE_FULL: number = 2;
 
+const RARITY_CSS_MAP: Record<string, string> = {
+    'og_rare': 'rarity-og',
+    'weekly_rare': 'rarity-weekly',
+    'monthly_rare': 'rarity-monthly',
+    'cashshop_rare': 'rarity-cashshop',
+    'bonzen_rare': 'rarity-bonzen',
+};
+
+const SEAL_CSS_MAP: Record<string, string> = {
+    'og_rare': 'seal-og',
+    'weekly_rare': 'seal-weekly',
+    'monthly_rare': 'seal-monthly',
+    'cashshop_rare': 'seal-cashshop',
+    'bonzen_rare': 'seal-bonzen',
+};
+
 export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props =>
 {
     const { avatarInfo = null, onClose = null } = props;
     const { roomSession = null } = useRoom();
-    
+    const { rarityData } = useFurnitureRarity(avatarInfo?.typeId ?? 0);
+
     const [ pickupMode, setPickupMode ] = useState(0);
     const [ canMove, setCanMove ] = useState(false);
     const [ canRotate, setCanRotate ] = useState(false);
@@ -28,6 +47,8 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     const [ furniValues, setFurniValues ] = useState<string[]>([]);
     const [ customKeys, setCustomKeys ] = useState<string[]>([]);
     const [ customValues, setCustomValues ] = useState<string[]>([]);
+    const [ isEditorOpen, setIsEditorOpen ] = useState(false);
+    const [ livePos, setLivePos ] = useState({ x: 0, y: 0, z: 0 });
     const [ isCrackable, setIsCrackable ] = useState(false);
     const [ crackableHits, setCrackableHits ] = useState(0);
     const [ crackableTarget, setCrackableTarget ] = useState(0);
@@ -40,6 +61,16 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     const [ songName, setSongName ] = useState<string>('');
     const [ songCreator, setSongCreator ] = useState<string>('');
 
+    const isLtd = avatarInfo?.stuffData?.isUnique ?? false;
+    const isRarity = !!rarityData;
+
+    const panelClass = useMemo(() =>
+    {
+        if(rarityData) return RARITY_CSS_MAP[rarityData.rarityType.name] || '';
+        if(isLtd) return 'rarity-ltd';
+        return '';
+    }, [ rarityData, isLtd ]);
+
     useSoundEvent<NowPlayingEvent>(NowPlayingEvent.NPE_SONG_CHANGED, event =>
     {
         setSongId(event.id);
@@ -48,7 +79,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     useSoundEvent<NowPlayingEvent>(SongInfoReceivedEvent.SIR_TRAX_SONG_INFO_RECEIVED, event =>
     {
         if(event.id !== songId) return;
-        
+
         const songInfo = GetNitroInstance().soundManager.musicController.getSongInfo(event.id);
 
         if(!songInfo) return;
@@ -75,7 +106,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         let furniIsJukebox = false;
         let furniIsSongDisk = false;
         let furniSongId = -1;
-        
+
         const isValidController = (avatarInfo.roomControllerLevel >= RoomControllerLevel.GUEST);
 
         if(isValidController || avatarInfo.isOwner || avatarInfo.isRoomOwner || avatarInfo.isAnyRoomController)
@@ -90,7 +121,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         {
             canSeeFurniId = true;
         }
-        
+
         if((((avatarInfo.usagePolicy === RoomWidgetFurniInfoUsagePolicyEnum.EVERYBODY) || ((avatarInfo.usagePolicy === RoomWidgetFurniInfoUsagePolicyEnum.CONTROLLER) && isValidController)) || ((avatarInfo.extraParam === RoomWidgetEnumItemExtradataParameter.JUKEBOX) && isValidController)) || ((avatarInfo.extraParam === RoomWidgetEnumItemExtradataParameter.USABLE_PRODUCT) && isValidController)) canUse = true;
 
         if(avatarInfo.extraParam)
@@ -120,7 +151,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
             else if(avatarInfo.extraParam.indexOf(RoomWidgetEnumItemExtradataParameter.SONGDISK) === 0)
             {
                 furniSongId = parseInt(avatarInfo.extraParam.substr(RoomWidgetEnumItemExtradataParameter.SONGDISK.length));
-                
+
                 furniIsSongDisk = true;
             }
 
@@ -189,7 +220,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         setIsJukeBox(furniIsJukebox);
         setIsSongDisk(furniIsSongDisk);
         setSongId(furniSongId);
-        
+
         if(avatarInfo.groupId) SendMessageComposer(new GroupInformationComposer(avatarInfo.groupId, false));
     }, [ roomSession, avatarInfo ]);
 
@@ -255,8 +286,6 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     {
         if(!action || (action === '')) return;
 
-        let objectData: string = null;
-
         switch(action)
         {
             case 'buy_one':
@@ -290,7 +319,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     for(const part of dataParts)
                     {
                         const [ key, value ] = part.split('=', 2);
-                        
+
                         mapData.set(key, value);
                     }
                 }
@@ -315,6 +344,62 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         }
     }, [ avatarInfo, pickupMode, customKeys, customValues, getFurniSettingsAsString ]);
 
+    useEffect(() =>
+    {
+        if(!isEditorOpen || !roomSession || !avatarInfo || avatarInfo.isWallItem) return;
+
+        const refresh = () =>
+        {
+            const obj = GetRoomEngine().getRoomObject(roomSession.roomId, avatarInfo.id, RoomObjectCategory.FLOOR);
+
+            if(obj)
+            {
+                const loc = obj.getLocation();
+
+                setLivePos({ x: Math.floor(loc.x), y: Math.floor(loc.y), z: Math.round(loc.z * 100) / 100 });
+            }
+        };
+
+        refresh();
+        const interval = setInterval(refresh, 300);
+
+        return () => clearInterval(interval);
+    }, [ isEditorOpen, roomSession, avatarInfo ]);
+
+    const handleMoveDirection = useCallback((deltaX: number, deltaY: number) =>
+    {
+        if(!canMove || !roomSession) return;
+
+        const obj = GetRoomEngine().getRoomObject(roomSession.roomId, avatarInfo.id, RoomObjectCategory.FLOOR);
+
+        if(!obj) return;
+
+        const loc = obj.getLocation();
+        const dir = Math.trunc((obj.getDirection().x % 360) / 45);
+
+        SendMessageComposer(new FurnitureFloorUpdateComposer(avatarInfo.id, Math.floor(loc.x) + deltaX, Math.floor(loc.y) + deltaY, dir));
+    }, [ avatarInfo, canMove, roomSession ]);
+
+    const handleRotate = useCallback((positive: boolean) =>
+    {
+        if(!canRotate) return;
+
+        GetRoomEngine().processRoomObjectOperation(avatarInfo.id, avatarInfo.category, positive ? RoomObjectOperationType.OBJECT_ROTATE_POSITIVE : RoomObjectOperationType.OBJECT_ROTATE_NEGATIVE);
+    }, [ avatarInfo, canRotate ]);
+
+    const handleHeightChange = useCallback((delta: number) =>
+    {
+        if(!canMove || !roomSession) return;
+
+        const obj = GetRoomEngine().getRoomObject(roomSession.roomId, avatarInfo.id, RoomObjectCategory.FLOOR);
+
+        if(!obj) return;
+
+        const newH = Math.max(0, Math.min(40, Math.round((obj.getLocation().z + delta) * 100) / 100));
+
+        SendMessageComposer(new FurnitureStackHeightComposer(avatarInfo.id, ~~(newH * 100)));
+    }, [ avatarInfo, canMove, roomSession ]);
+
     const getGroupBadgeCode = useCallback(() =>
     {
         const stringDataType = (avatarInfo.stuffData as StringDataType);
@@ -337,33 +422,86 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
     return (
         <Column gap={ 0 } alignItems="end">
-            <Column className="nitro-infostand furni-compact rounded" overflow="visible">
+            <Column className={ `nitro-infostand furni-compact rounded ${ panelClass }` } overflow="visible">
+                { /* Preview area */ }
                 <Flex position="relative" justifyContent="center" alignItems="center" className="furni-preview">
                     <FaTimes className="cursor-pointer furni-close" onClick={ onClose } />
-                    { avatarInfo.stuffData.isUnique &&
+                    { /* LTD plate */ }
+                    { isLtd &&
                         <div className="absolute left-1 top-1">
                             <LayoutLimitedEditionCompactPlateView uniqueNumber={ avatarInfo.stuffData.uniqueNumber } uniqueSeries={ avatarInfo.stuffData.uniqueSeries } />
                         </div> }
-                    { (avatarInfo.stuffData.rarityLevel > -1) &&
+                    { /* Rarity level badge (non-LTD) */ }
+                    { (!isLtd && avatarInfo.stuffData.rarityLevel > -1) &&
                         <div className="absolute left-1 top-1">
                             <LayoutRarityLevelView level={ avatarInfo.stuffData.rarityLevel } />
+                        </div> }
+                    { /* Rarity seal badge */ }
+                    { isRarity &&
+                        <div className="absolute right-8 top-2">
+                            <span className={ `furni-seal ${ SEAL_CSS_MAP[rarityData.rarityType.name] || '' }` }>
+                                { rarityData.rarityType.displayName }
+                            </span>
                         </div> }
                     { avatarInfo.image && avatarInfo.image.src.length &&
                         <img src={ avatarInfo.image.src } alt="" /> }
                 </Flex>
+
+                { /* Info area */ }
                 <Column className="furni-info" gap={ 0 }>
-                    <Text variant="white" className="furni-name">{ avatarInfo.name }</Text>
+                    { /* Name */ }
+                    <Text variant="white" className="furni-name" style={ isRarity ? { color: rarityData.rarityType.colorPrimary } : undefined }>
+                        { avatarInfo.name }
+                    </Text>
                     { avatarInfo.description &&
                         <Text variant="white" className="furni-desc">{ avatarInfo.description }</Text> }
+
+                    { /* Set name seal */ }
+                    { isRarity && rarityData.setName &&
+                        <Flex className="pb-1">
+                            <span className="furni-seal seal-set">{ rarityData.setName }</span>
+                        </Flex> }
+
+                    { /* OG seal */ }
+                    { isRarity && rarityData.isOg &&
+                        <Flex className="pb-1">
+                            <span className="furni-seal seal-og">OG</span>
+                        </Flex> }
+
+                    { /* Owner */ }
                     <Flex alignItems="center" gap={ 1 } className="furni-meta">
                         <FaUser className="furni-meta-icon" />
                         <UserProfileIconView userId={ avatarInfo.ownerId } />
                         <Text variant="white" small wrap>{ avatarInfo.ownerName }</Text>
-                        { (avatarInfo.purchaseOfferId > 0) &&
-                            <Text variant="white" small underline pointer className="ml-auto" onClick={ event => processButtonAction('buy_one') }>
-                                { LocalizeText('infostand.button.buy') }
-                            </Text> }
                     </Flex>
+
+                    { /* Coordinates & height + editor toggle */ }
+                    { !avatarInfo.isWallItem &&
+                        <div className="furni-coords">
+                            <span>X: { isEditorOpen ? livePos.x : avatarInfo.posX }</span>
+                            <span>Y: { isEditorOpen ? livePos.y : avatarInfo.posY }</span>
+                            <span>H: { (isEditorOpen ? livePos.z : avatarInfo.posZ).toFixed(2) }</span>
+                            { canMove &&
+                                <FaWrench className={ `furni-edit-toggle ${ isEditorOpen ? 'active' : '' }` } onClick={ () => setIsEditorOpen(prev => !prev) } /> }
+                        </div> }
+
+                    { /* Circulation (rarity only) */ }
+                    { isRarity && rarityData.circulation > 0 &&
+                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
+                            <Text variant="white" small style={ { color: 'rgba(255,255,255,0.45)', fontSize: '10px' } }>
+                                Umlauf: { rarityData.circulation.toLocaleString() } Stk.
+                            </Text>
+                        </Flex> }
+
+                    { /* Trade value (if available) */ }
+                    { isRarity && rarityData.tradeValue !== null && rarityData.tradeValue > 0 &&
+                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
+                            <Text variant="white" small style={ { color: 'rgba(255,255,255,0.45)', fontSize: '10px' } }>
+                                Wert: { rarityData.tradeValue.toLocaleString() } Credits
+                            </Text>
+                        </Flex> }
+
+                    { /* Jukebox / Songdisk */ }
                     { (isJukeBox || isSongDisk) &&
                         <>
                             { (songId === -1) &&
@@ -416,6 +554,43 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                             }) }
                         </Column> }
                 </Column>
+
+                { /* Furniture Editor Panel */ }
+                { isEditorOpen && canMove && !avatarInfo.isWallItem &&
+                    <div className="furni-editor">
+                        <div className="editor-row">
+                            { /* Position (diamond arrows) */ }
+                            <div className="editor-section">
+                                <span className="editor-label">Position</span>
+                                <div className="diamond-grid">
+                                    <div className="diamond-btn nw" onClick={ () => handleMoveDirection(0, -1) }><ChevronUp size={ 14 } /></div>
+                                    <div className="diamond-btn ne" onClick={ () => handleMoveDirection(1, 0) }><ChevronRight size={ 14 } /></div>
+                                    <div className="diamond-btn sw" onClick={ () => handleMoveDirection(-1, 0) }><ChevronLeft size={ 14 } /></div>
+                                    <div className="diamond-btn se" onClick={ () => handleMoveDirection(0, 1) }><ChevronDown size={ 14 } /></div>
+                                </div>
+                                <span className="editor-label" style={ { marginTop: '6px' } }>Drehen</span>
+                                <div className="rotate-controls">
+                                    <div className="rotate-btn" onClick={ () => handleRotate(false) }><FaUndo /></div>
+                                    <div className="rotate-btn" onClick={ () => handleRotate(true) }><FaRedo /></div>
+                                </div>
+                            </div>
+                            { /* Height controls */ }
+                            <div className="editor-section">
+                                <span className="editor-label">Höhe</span>
+                                <div className="height-display">{ livePos.z.toFixed(2) }</div>
+                                <div className="height-grid">
+                                    <div className="height-btn plus" onClick={ () => handleHeightChange(1) }>+1</div>
+                                    <div className="height-btn plus" onClick={ () => handleHeightChange(0.1) }>+0.1</div>
+                                    <div className="height-btn plus" onClick={ () => handleHeightChange(0.01) }>+0.01</div>
+                                    <div className="height-btn minus" onClick={ () => handleHeightChange(-1) }>-1</div>
+                                    <div className="height-btn minus" onClick={ () => handleHeightChange(-0.1) }>-0.1</div>
+                                    <div className="height-btn minus" onClick={ () => handleHeightChange(-0.01) }>-0.01</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> }
+
+                { /* Action buttons */ }
                 { actionButtons.length > 0 &&
                     <Flex alignItems="stretch" className="furni-actions">
                         { actionButtons.map((btn, i) =>
@@ -427,6 +602,21 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                             );
                         }) }
                     </Flex> }
+
+                { /* Bottom links: catalog + price list */ }
+                { (avatarInfo.purchaseOfferId > 0 || isRarity) &&
+                    <div className="furni-links">
+                        { avatarInfo.purchaseOfferId > 0 &&
+                            <div className="furni-link" onClick={ () => processButtonAction('buy_one') }>
+                                <FaShoppingCart className="link-icon" />
+                                <span>Kaufen</span>
+                            </div> }
+                        { isRarity &&
+                            <div className="furni-link" onClick={ () => CreateLinkEvent('pricelist/toggle') }>
+                                <FaListUl className="link-icon" />
+                                <span>Preisliste</span>
+                            </div> }
+                    </div> }
             </Column>
         </Column>
     );

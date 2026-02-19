@@ -157,6 +157,16 @@ export class AvatarInfoUtilities
         furniInfo.ownerName = model.getValue<string>(RoomObjectVariable.FURNITURE_OWNER_NAME);
         furniInfo.usagePolicy = model.getValue<number>(RoomObjectVariable.FURNITURE_USAGE_POLICY);
 
+        const location = roomObject.getLocation();
+        if(location)
+        {
+            furniInfo.posX = Math.floor(location.x);
+            furniInfo.posY = Math.floor(location.y);
+            furniInfo.posZ = Math.round(location.z * 100) / 100;
+        }
+
+        furniInfo.typeId = model.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID);
+
         const guildId = model.getValue<number>(RoomObjectVariable.FURNITURE_GUILD_CUSTOMIZED_GUILD_ID);
 
         if(guildId !== 0)

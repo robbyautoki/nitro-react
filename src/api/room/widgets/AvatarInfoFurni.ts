@@ -32,6 +32,10 @@ export class AvatarInfoFurni implements IAvatarInfo
     public availableForBuildersClub: boolean = false;
     public tileSizeX: number = 1;
     public tileSizeY: number = 1;
+    public posX: number = 0;
+    public posY: number = 0;
+    public posZ: number = 0;
+    public typeId: number = 0;
 
     constructor(public readonly type: string)
     {}

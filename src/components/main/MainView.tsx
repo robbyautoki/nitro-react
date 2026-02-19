@@ -30,6 +30,7 @@ import { UserProfileView } from '../user-profile/UserProfileView';
 import { UserSettingsView } from '../user-settings/UserSettingsView';
 import { LotteryView } from '../lottery/LotteryView';
 import { WelcomeToastView } from '../welcome/WelcomeToastView';
+import { PriceListView } from '../pricelist/PriceListView';
 import { WiredView } from '../wired/WiredView';
 
 export const MainView: FC<{}> = props =>
@@ -102,6 +103,7 @@ export const MainView: FC<{}> = props =>
             <InventoryView />
             <CatalogView />
             <MarketplaceView />
+            <PriceListView />
             <FriendsView />
             <RightSideView />
             <UserSettingsView />

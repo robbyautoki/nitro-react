@@ -1,25 +1,17 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 export const useSharedVisibility = () =>
 {
     const [ activeIds, setActiveIds ] = useState<number[]>([]);
+    const nextId = useRef(0);
 
     const isVisible = useMemo(() => !!activeIds.length, [ activeIds ]);
 
     const activate = useCallback(() =>
     {
-        let id = -1;
+        const id = nextId.current++;
 
-        setActiveIds(prevValue =>
-        {
-            const newValue = [ ...prevValue ];
-
-            id = newValue.length ? (newValue[(newValue.length - 1)] + 1) : 0;
-
-            newValue.push(id);
-
-            return newValue;
-        });
+        setActiveIds(prevValue => [ ...prevValue, id ]);
 
         return id;
     }, []);

@@ -73,3 +73,8 @@ Diese Dateien liegen in `client/custom/` (nicht hier) und werden beim Docker-Bui
 
 `dist/` wird via `client/Dockerfile` in nginx-Image kopiert und auf Port 3080 served.
 `client/config/*.json` werden zur Laufzeit gemountet (kein rebuild nötig für Config).
+
+## Production Deployment (Vercel)
+
+Production URL: `play.bahhos.de`
+Deployment: Automatisch via Vercel bei Git push.

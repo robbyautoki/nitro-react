@@ -1,14 +1,18 @@
 import { MouseEventType } from '@nitrots/nitro-renderer';
-import { FC, MouseEvent, useState } from 'react';
+import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { attemptItemPlacement, GroupItem } from '../../../../api';
 import { LayoutGridItem } from '../../../../common';
 import { useInventoryFurni } from '../../../../hooks';
+import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
 
 export const InventoryFurnitureItemView: FC<{ groupItem: GroupItem }> = props =>
 {
     const { groupItem = null, ...rest } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
+    const [ contextMenu, setContextMenu ] = useState<{ x: number; y: number } | null>(null);
     const { selectedItem = null, setSelectedItem = null } = useInventoryFurni();
+    const { categories, getItemCategories, toggleAssignment } = useInventoryCategories();
+    const contextRef = useRef<HTMLDivElement>(null);
 
     const onMouseEvent = (event: MouseEvent) =>
     {
@@ -32,7 +36,78 @@ export const InventoryFurnitureItemView: FC<{ groupItem: GroupItem }> = props =>
         }
     }
 
-    const count = groupItem.getUnlockedCount();
+    const onContextMenu = useCallback((e: MouseEvent) =>
+    {
+        e.preventDefault();
+        e.stopPropagation();
 
-    return <LayoutGridItem className={ !count ? 'opacity-0-5 ' : '' } itemImage={ groupItem.iconUrl } itemCount={ groupItem.getUnlockedCount() } itemActive={ (groupItem === selectedItem) } itemUniqueNumber={ groupItem.stuffData.uniqueNumber } itemUnseen={ groupItem.hasUnseenItems } onMouseDown={ onMouseEvent } onMouseUp={ onMouseEvent } onMouseOut={ onMouseEvent } onDoubleClick={ onMouseEvent } { ...rest } />;
+        if(!categories.length) return;
+
+        setSelectedItem(groupItem);
+        setContextMenu({ x: e.clientX, y: e.clientY });
+    }, [ categories, groupItem, setSelectedItem ]);
+
+    const onToggleCategory = useCallback((categoryId: number) =>
+    {
+        toggleAssignment(groupItem.type, categoryId);
+    }, [ groupItem, toggleAssignment ]);
+
+    useEffect(() =>
+    {
+        if(!contextMenu) return;
+
+        const handleClick = (e: globalThis.MouseEvent) =>
+        {
+            if(contextRef.current && !contextRef.current.contains(e.target as Node))
+            {
+                setContextMenu(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClick);
+
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, [ contextMenu ]);
+
+    const count = groupItem.getUnlockedCount();
+    const itemCategories = getItemCategories(groupItem.type);
+
+    return (
+        <>
+            <LayoutGridItem
+                className={ !count ? 'opacity-0-5 ' : '' }
+                itemImage={ groupItem.iconUrl }
+                itemCount={ groupItem.getUnlockedCount() }
+                itemActive={ (groupItem === selectedItem) }
+                itemUniqueNumber={ groupItem.stuffData.uniqueNumber }
+                itemUnseen={ groupItem.hasUnseenItems }
+                onMouseDown={ onMouseEvent }
+                onMouseUp={ onMouseEvent }
+                onMouseOut={ onMouseEvent }
+                onDoubleClick={ onMouseEvent }
+                onContextMenu={ onContextMenu }
+                { ...rest }
+            />
+            { contextMenu && categories.length > 0 && (
+                <div
+                    ref={ contextRef }
+                    className="inv-category-context"
+                    style={{ left: contextMenu.x, top: contextMenu.y }}
+                >
+                    <div className="context-header">Kategorie</div>
+                    { categories.map(cat => (
+                        <div
+                            key={ cat.id }
+                            className="context-item"
+                            onClick={ () => onToggleCategory(cat.id) }
+                        >
+                            <span className="color-dot" style={{ backgroundColor: cat.color }} />
+                            <span>{ cat.name }</span>
+                            { itemCategories.includes(cat.id) && <span className="context-check">&#10003;</span> }
+                        </div>
+                    )) }
+                </div>
+            ) }
+        </>
+    );
 }

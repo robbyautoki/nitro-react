@@ -6,6 +6,7 @@ export * from './useDoorbellWidget';
 export * from './useFilterWordsWidget';
 export * from './useFriendRequestWidget';
 export * from './useFurniChooserWidget';
+export * from './useFurnitureRarity';
 export * from './usePetPackageWidget';
 export * from './usePollWidget';
 export * from './useUserChooserWidget';

@@ -1,3 +1,4 @@
+export * from './CategoryApi';
 export * from './FurniCategory';
 export * from './FurnitureItem';
 export * from './FurnitureUtilities';

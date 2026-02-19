@@ -78,7 +78,7 @@ const useInventoryBadgesState = () =>
 
                 badgesToAdd.push(code);
             });
-            
+
             return newValue;
         });
 
@@ -134,6 +134,7 @@ const useInventoryBadgesState = () =>
         return () =>
         {
             resetCategory(UnseenItemCategory.BADGE);
+            setNeedsUpdate(true);
         }
     }, [ isVisible, resetCategory ]);
 

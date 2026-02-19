@@ -4,7 +4,9 @@ import { attemptItemPlacement, DispatchUiEvent, FurniCategory, GetRoomEngine, Ge
 import { AutoGrid, Button, Column } from '../../../../common';
 import { CatalogPostMarketplaceOfferEvent } from '../../../../events';
 import { useInventoryFurni, useInventoryUnseenTracker } from '../../../../hooks';
+import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
+import { InventoryCategoryBar } from './InventoryCategoryBar';
 import { InventoryFurnitureItemView } from './InventoryFurnitureItemView';
 import { InventoryFurnitureSearchView } from './InventoryFurnitureSearchView';
 
@@ -32,6 +34,9 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
     const [ filteredGroupItems, setFilteredGroupItems ] = useState<GroupItem[]>([]);
     const { groupItems = [], selectedItem = null, activate = null, deactivate = null } = useInventoryFurni();
     const { resetItems = null } = useInventoryUnseenTracker();
+    const { activeCategory, filterByCategory } = useInventoryCategories();
+
+    const categoryFilteredItems = filterByCategory(groupItems, activeCategory);
 
     useEffect(() =>
     {
@@ -112,7 +117,8 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 
     return (
         <Column grow gap={ 0 } style={{ minHeight: 0 }}>
-            <InventoryFurnitureSearchView groupItems={ groupItems } setGroupItems={ setFilteredGroupItems } />
+            <InventoryFurnitureSearchView groupItems={ categoryFilteredItems } setGroupItems={ setFilteredGroupItems } />
+            <InventoryCategoryBar groupItems={ groupItems } />
             <div className="inv-items-grid mt-2">
                 <AutoGrid columnCount={ 7 }>
                     { filteredGroupItems && (filteredGroupItems.length > 0) && filteredGroupItems.map((item, index) => <InventoryFurnitureItemView key={ index } groupItem={ item } />) }

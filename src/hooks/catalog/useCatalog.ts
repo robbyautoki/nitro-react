@@ -34,6 +34,7 @@ const useCatalogState = () =>
     const [ catalogSkipPurchaseConfirmation, setCatalogSkipPurchaseConfirmation ] = useCatalogSkipPurchaseConfirmation();
     const [ purchasableOffer, setPurchaseableOffer ] = useState<IPurchasableOffer>(null);
     const [ placedObjectPurchaseData, setPlacedObjectPurchaseData ] = useState<PlacedObjectPurchaseData>(null);
+    const [ catalogSize, setCatalogSize ] = useState({ width: 780, height: 420 });
     const [ furniCount, setFurniCount ] = useState(0);
     const [ furniLimit, setFurniLimit ] = useState(0);
     const [ maxFurniLimit, setMaxFurniLimit ] = useState(0);
@@ -907,7 +908,7 @@ const useCatalogState = () =>
         }
     }, []);
 
-    return { isVisible, setIsVisible, isBusy, pageId, previousPageId, currentType, rootNode, offersToNodes, currentPage, setCurrentPage, currentOffer, setCurrentOffer, activeNodes, searchResult, setSearchResult, frontPageItems, roomPreviewer, navigationHidden, setNavigationHidden, purchaseOptions, setPurchaseOptions, catalogOptions, setCatalogOptions, getNodeById, getNodeByName, activateNode, openPageById, openPageByName, openPageByOfferId, requestOfferToMover };
+    return { isVisible, setIsVisible, isBusy, pageId, previousPageId, currentType, rootNode, offersToNodes, currentPage, setCurrentPage, currentOffer, setCurrentOffer, activeNodes, searchResult, setSearchResult, frontPageItems, roomPreviewer, navigationHidden, setNavigationHidden, purchaseOptions, setPurchaseOptions, catalogOptions, setCatalogOptions, catalogSize, setCatalogSize, getNodeById, getNodeByName, activateNode, openPageById, openPageByName, openPageByOfferId, requestOfferToMover };
 }
 
 export const useCatalog = () => useBetween(useCatalogState);

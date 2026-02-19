@@ -1,6 +1,4 @@
 .nitro-catalog {
-    height: 90vh !important;
-
     font[size='16'] {
         font-size: 20px;
     }
@@ -79,6 +77,30 @@
         }
     }
 
+    .catalog-resize-handle {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 20px;
+        height: 20px;
+        cursor: nwse-resize;
+        z-index: 10;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            right: 6px;
+            width: 6px;
+            height: 6px;
+            border-right: 2px solid rgba(255, 255, 255, 0.15);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+        }
+
+        &:hover::after {
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+    }
 }
 
 // Gift Dialog

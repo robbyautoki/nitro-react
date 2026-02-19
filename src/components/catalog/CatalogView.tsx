@@ -1,5 +1,5 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
-import { FC, Fragment, useEffect, useMemo, useState } from 'react';
+import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaTimes, FaList, FaInfoCircle } from 'react-icons/fa';
 import { AddEventLinkTracker, LocalizeText, RemoveLinkEventTracker } from '../../api';
 import { useCatalog } from '../../hooks';
@@ -23,10 +23,52 @@ const SELF_CONTAINED_LAYOUTS = new Set([
 
 export const CatalogView: FC<{}> = props =>
 {
-    const { isVisible = false, setIsVisible = null, rootNode = null, currentPage = null, currentOffer = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById } = useCatalog();
+    const { isVisible = false, setIsVisible = null, rootNode = null, currentPage = null, currentOffer = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById, catalogSize, setCatalogSize } = useCatalog();
 
     const [ navOverlay, setNavOverlay ] = useState(false);
     const [ inspectorOverlay, setInspectorOverlay ] = useState(false);
+
+    const resizingRef = useRef(false);
+    const resizeStartRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
+    const resizeListenersRef = useRef<{ move: ((ev: MouseEvent) => void) | null, up: (() => void) | null }>({ move: null, up: null });
+
+    const onResizeStart = useCallback((e: React.MouseEvent) =>
+    {
+        e.preventDefault();
+        e.stopPropagation();
+        resizingRef.current = true;
+        resizeStartRef.current = { x: e.clientX, y: e.clientY, w: catalogSize.width, h: catalogSize.height };
+
+        const onMouseMove = (ev: MouseEvent) =>
+        {
+            if(!resizingRef.current) return;
+            const newW = Math.max(580, Math.min(1200, resizeStartRef.current.w + (ev.clientX - resizeStartRef.current.x)));
+            const newH = Math.max(300, Math.min(window.innerHeight - 32, resizeStartRef.current.h + (ev.clientY - resizeStartRef.current.y)));
+            setCatalogSize({ width: newW, height: newH });
+        };
+
+        const onMouseUp = () =>
+        {
+            resizingRef.current = false;
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            resizeListenersRef.current = { move: null, up: null };
+        };
+
+        resizeListenersRef.current = { move: onMouseMove, up: onMouseUp };
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }, [ catalogSize, setCatalogSize ]);
+
+    useEffect(() =>
+    {
+        return () =>
+        {
+            const { move, up } = resizeListenersRef.current;
+            if(move) document.removeEventListener('mousemove', move);
+            if(up) document.removeEventListener('mouseup', up);
+        };
+    }, []);
 
     const showInspector = currentPage && !SELF_CONTAINED_LAYOUTS.has(currentPage.layoutCode);
 
@@ -98,8 +140,8 @@ export const CatalogView: FC<{}> = props =>
         <>
             <DraggableWindow uniqueKey="catalog" windowPosition={ DraggableWindowPosition.CENTER }>
                 <div
-                    className="nitro-catalog flex flex-col rounded-2xl border border-white/[0.09] bg-[rgba(10,10,14,0.98)] shadow-[0_24px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl overflow-hidden"
-                    style={ { width: 'min(1100px, calc(100vw - 32px))', height: '380px' } }
+                    className="nitro-catalog relative flex flex-col rounded-2xl border border-white/[0.09] bg-[rgba(10,10,14,0.98)] shadow-[0_24px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl overflow-hidden"
+                    style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `${ catalogSize.height }px` } }
                 >
                     {/* Header */}
                     <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-11 cursor-move select-none">
@@ -167,6 +209,8 @@ export const CatalogView: FC<{}> = props =>
                             </div>
                         ) }
                     </div>
+
+                    <div className="catalog-resize-handle" onMouseDown={ onResizeStart } />
                 </div>
             </DraggableWindow>
             <CatalogGiftView />

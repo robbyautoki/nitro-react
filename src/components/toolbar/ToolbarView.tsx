@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { TextGif } from '@/components/ui/text-gif';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Store } from 'lucide-react';
 
 export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 {
@@ -146,16 +145,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                     </TooltipTrigger>
                     <TooltipContent side="right" className="bg-black/80 text-white text-xs shadow-sm backdrop-blur-sm">
                         Catalog
-                    </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <div className="navigation-item relative shrink-0 cursor-pointer flex items-center justify-center w-[38px] h-[36px]" onClick={ event => CreateLinkEvent('marketplace/toggle') }>
-                            <Store className="size-5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" strokeWidth={ 2.5 } />
-                        </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="bg-black/80 text-white text-xs shadow-sm backdrop-blur-sm">
-                        Marketplace
                     </TooltipContent>
                 </Tooltip>
                 <Tooltip>

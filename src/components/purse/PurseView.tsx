@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { CurrencyView } from './views/CurrencyView';
 import { LevelView } from './views/LevelView';
 import { SeasonalView } from './views/SeasonalView';
+import { Store, ClipboardList } from 'lucide-react';
 
 export const PurseView: FC<{}> = props =>
 {
@@ -90,6 +91,36 @@ export const PurseView: FC<{}> = props =>
                         </TooltipContent>
                     </Tooltip>
                 ) }
+
+                <div className="w-px h-6 bg-white/[0.06] mx-1" />
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => CreateLinkEvent('marketplace/toggle') }
+                        >
+                            <Store className="size-4 text-white/90" strokeWidth={ 2 } />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        Marketplace
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => CreateLinkEvent('pricelist/toggle') }
+                        >
+                            <ClipboardList className="size-4 text-white/90" strokeWidth={ 2 } />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        Preisliste
+                    </TooltipContent>
+                </Tooltip>
 
                 <div className="w-px h-6 bg-white/[0.06] mx-1" />
 

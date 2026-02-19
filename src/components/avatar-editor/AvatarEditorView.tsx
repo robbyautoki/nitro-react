@@ -308,7 +308,7 @@ export const AvatarEditorView: FC<{}> = props =>
     if(!isVisible || !figureData) return null;
 
     return (
-        <DraggableWindow uniqueKey="avatar-editor" windowPosition={ DraggableWindowPosition.CENTER }>
+        <DraggableWindow uniqueKey="avatar-editor-v2" windowPosition={ DraggableWindowPosition.CENTER }>
             <div
                 className="nitro-avatar-editor relative flex flex-col rounded-2xl border border-white/[0.09] bg-[rgba(10,10,14,0.98)] shadow-[0_24px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl overflow-hidden"
                 style={ { width: `${ editorSize.width }px`, height: `${ editorSize.height }px` } }

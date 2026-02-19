@@ -1,6 +1,5 @@
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { CategoryData, FigureData, IAvatarEditorCategoryModel } from '../../../api';
-import { Column, Flex, Grid } from '../../../common';
 import { AvatarEditorIcon } from './AvatarEditorIcon';
 import { AvatarEditorFigureSetView } from './figure-set/AvatarEditorFigureSetView';
 import { AvatarEditorPaletteSetView } from './palette-set/AvatarEditorPaletteSetView';
@@ -52,37 +51,45 @@ export const AvatarEditorModelView: FC<AvatarEditorModelViewProps> = props =>
     if(!model || !activeCategory) return null;
 
     return (
-        <Grid>
-            <Column size={ 2 }>
+        <div className="flex flex-col flex-1 min-h-0">
+            {/* Category icons - horizontal row */}
+            <div className="flex gap-1 px-3 py-2 shrink-0 border-b border-white/[0.06]">
                 { model.canSetGender &&
                     <>
-                        <Flex center pointer className="category-item" onClick={ event => setGender(FigureData.MALE) }>
+                        <div className={ `category-item-h ${ gender === FigureData.MALE ? 'active' : '' }` } onClick={ () => setGender(FigureData.MALE) }>
                             <AvatarEditorIcon icon="male" selected={ (gender === FigureData.MALE) } />
-                        </Flex>
-                        <Flex center pointer className="category-item" onClick={ event => setGender(FigureData.FEMALE) }>
+                        </div>
+                        <div className={ `category-item-h ${ gender === FigureData.FEMALE ? 'active' : '' }` } onClick={ () => setGender(FigureData.FEMALE) }>
                             <AvatarEditorIcon icon="female" selected={ (gender === FigureData.FEMALE) } />
-                        </Flex>
+                        </div>
                     </> }
                 { !model.canSetGender && model.categories && (model.categories.size > 0) && Array.from(model.categories.keys()).map(name =>
                 {
                     const category = model.categories.get(name);
 
                     return (
-                        <Flex center pointer key={ name } className="category-item" onClick={ event => selectCategory(name) }>
+                        <div key={ name } className={ `category-item-h ${ activeCategory === category ? 'active' : '' }` } onClick={ () => selectCategory(name) }>
                             <AvatarEditorIcon icon={ category.name } selected={ (activeCategory === category) } />
-                        </Flex>
+                        </div>
                     );
                 }) }
-            </Column>
-            <Column size={ 5 } overflow="hidden">
-                <AvatarEditorFigureSetView model={ model } category={ activeCategory } setMaxPaletteCount={ setMaxPaletteCount } />
-            </Column>
-            <Column size={ 5 } overflow="hidden">
+            </div>
+
+            {/* Items + Colors split */}
+            <div className="flex-1 min-h-0 flex flex-col">
+                {/* Item Grid - scrollable */}
+                <div className="flex-1 min-h-0 overflow-y-auto p-2">
+                    <AvatarEditorFigureSetView model={ model } category={ activeCategory } setMaxPaletteCount={ setMaxPaletteCount } />
+                </div>
+
+                {/* Color Palette - fixed at bottom */}
                 { (maxPaletteCount >= 1) &&
-                    <AvatarEditorPaletteSetView model={ model } category={ activeCategory } paletteSet={ activeCategory.getPalette(0) } paletteIndex={ 0 } /> }
-                { (maxPaletteCount === 2) &&
-                    <AvatarEditorPaletteSetView model={ model } category={ activeCategory } paletteSet={ activeCategory.getPalette(1) } paletteIndex={ 1 } /> }
-            </Column>
-        </Grid>
+                    <div className="shrink-0 max-h-[120px] overflow-y-auto p-2 pt-0 border-t border-white/[0.06]">
+                        <AvatarEditorPaletteSetView model={ model } category={ activeCategory } paletteSet={ activeCategory.getPalette(0) } paletteIndex={ 0 } />
+                        { (maxPaletteCount === 2) &&
+                            <AvatarEditorPaletteSetView model={ model } category={ activeCategory } paletteSet={ activeCategory.getPalette(1) } paletteIndex={ 1 } /> }
+                    </div> }
+            </div>
+        </div>
     );
 }

@@ -1,8 +1,8 @@
 import { AvatarEditorFigureCategory, FigureSetIdsMessageEvent, GetWardrobeMessageComposer, IAvatarFigureContainer, ILinkEventTracker, UserFigureComposer, UserWardrobePageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaDice, FaTrash, FaUndo } from 'react-icons/fa';
+import { FaDice, FaTimes, FaTrash, FaUndo } from 'react-icons/fa';
 import { AddEventLinkTracker, AvatarEditorAction, AvatarEditorUtilities, BodyModel, FigureData, generateRandomFigure, GetAvatarRenderManager, GetClubMemberLevel, GetConfiguration, GetSessionDataManager, HeadModel, IAvatarEditorCategoryModel, LegModel, LocalizeText, RemoveLinkEventTracker, SendMessageComposer, TorsoModel } from '../../api';
-import { Button, ButtonGroup, Column, Grid, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView } from '../../common';
+import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
 import { useMessageEvent } from '../../hooks';
 import { AvatarEditorFigurePreviewView } from './views/AvatarEditorFigurePreviewView';
 import { AvatarEditorModelView } from './views/AvatarEditorModelView';
@@ -64,7 +64,7 @@ export const AvatarEditorView: FC<{}> = props =>
     const selectCategory = useCallback((name: string) =>
     {
         if(!categories) return;
-        
+
         setActiveCategory(categories.get(name));
     }, [ categories ]);
 
@@ -154,9 +154,9 @@ export const AvatarEditorView: FC<{}> = props =>
             linkReceived: (url: string) =>
             {
                 const parts = url.split('/');
-        
+
                 if(parts.length < 2) return;
-        
+
                 switch(parts[1])
                 {
                     case 'show':
@@ -265,52 +265,98 @@ export const AvatarEditorView: FC<{}> = props =>
     if(!isVisible || !figureData) return null;
 
     return (
-        <NitroCardView uniqueKey="avatar-editor" className="nitro-avatar-editor">
-            <NitroCardHeaderView headerText={ LocalizeText('avatareditor.title') } onCloseClick={ event => setIsVisible(false) } />
-            <NitroCardTabsView>
-                { categories && (categories.size > 0) && Array.from(categories.keys()).map(category =>
-                {
-                    const isActive = (activeCategory && (activeCategory.name === category));
+        <DraggableWindow uniqueKey="avatar-editor" windowPosition={ DraggableWindowPosition.CENTER }>
+            <div
+                className="nitro-avatar-editor relative flex flex-col rounded-2xl border border-white/[0.09] bg-[rgba(10,10,14,0.98)] shadow-[0_24px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl overflow-hidden"
+                style={ { width: '700px', height: '480px' } }
+            >
+                {/* Header */}
+                <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-11 cursor-move select-none">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/25">
+                        { LocalizeText('avatareditor.title') }
+                    </span>
+                    <div className="flex-1" />
+                    <button
+                        className="appearance-none border-0 bg-transparent rounded-md p-1 text-white/25 hover:bg-white/[0.06] hover:text-white/70 transition-colors shrink-0"
+                        onMouseDown={ e => e.stopPropagation() }
+                        onClick={ () => setIsVisible(false) }
+                    >
+                        <FaTimes className="text-[11px]" />
+                    </button>
+                </div>
 
-                    return (
-                        <NitroCardTabsItemView key={ category } isActive={ isActive } onClick={ event => selectCategory(category) }>
-                            { LocalizeText(`avatareditor.category.${ category }`) }
-                        </NitroCardTabsItemView>
-                    );
-                }) }
-                <NitroCardTabsItemView isActive={ isWardrobeVisible } onClick={ event => setIsWardrobeVisible(true) }>
-                    { LocalizeText('avatareditor.category.wardrobe') }
-                </NitroCardTabsItemView>
-            </NitroCardTabsView>
-            <NitroCardContentView>
-                <Grid>
-                    <Column size={ 9 } overflow="hidden">
+                {/* Tabs */}
+                <div className="flex gap-1 px-3 py-1.5 border-b border-white/[0.06] shrink-0">
+                    { categories && (categories.size > 0) && Array.from(categories.keys()).map(category =>
+                    {
+                        const isActive = (activeCategory && !isWardrobeVisible && (activeCategory.name === category));
+
+                        return (
+                            <button
+                                key={ category }
+                                className={ `appearance-none border-0 px-3 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${ isActive ? 'bg-white/[0.12] text-white/90' : 'bg-transparent text-white/50 hover:bg-white/[0.06] hover:text-white/70' }` }
+                                onMouseDown={ e => e.stopPropagation() }
+                                onClick={ () => selectCategory(category) }
+                            >
+                                { LocalizeText(`avatareditor.category.${ category }`) }
+                            </button>
+                        );
+                    }) }
+                    <button
+                        className={ `appearance-none border-0 px-3 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${ isWardrobeVisible ? 'bg-white/[0.12] text-white/90' : 'bg-transparent text-white/50 hover:bg-white/[0.06] hover:text-white/70' }` }
+                        onMouseDown={ e => e.stopPropagation() }
+                        onClick={ () => setIsWardrobeVisible(true) }
+                    >
+                        { LocalizeText('avatareditor.category.wardrobe') }
+                    </button>
+                </div>
+
+                {/* Content: Left Preview | Right Editor */}
+                <div className="flex-1 min-h-0 flex">
+                    {/* Left Panel: Preview + Buttons */}
+                    <div className="w-[200px] min-w-[200px] flex flex-col border-r border-white/[0.06]">
+                        <AvatarEditorFigurePreviewView figureData={ figureData } />
+                        <div className="p-2 flex flex-col gap-1.5 shrink-0 border-t border-white/[0.06]">
+                            <div className="flex gap-1">
+                                <button
+                                    className="flex-1 appearance-none border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/90 rounded-md py-1.5 text-[11px] transition-colors cursor-pointer flex items-center justify-center"
+                                    onClick={ () => processAction(AvatarEditorAction.ACTION_RESET) }
+                                >
+                                    <FaUndo className="text-[10px]" />
+                                </button>
+                                <button
+                                    className="flex-1 appearance-none border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/90 rounded-md py-1.5 text-[11px] transition-colors cursor-pointer flex items-center justify-center"
+                                    onClick={ () => processAction(AvatarEditorAction.ACTION_CLEAR) }
+                                >
+                                    <FaTrash className="text-[10px]" />
+                                </button>
+                                <button
+                                    className="flex-1 appearance-none border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/90 rounded-md py-1.5 text-[11px] transition-colors cursor-pointer flex items-center justify-center"
+                                    onClick={ () => processAction(AvatarEditorAction.ACTION_RANDOMIZE) }
+                                >
+                                    <FaDice className="text-[10px]" />
+                                </button>
+                            </div>
+                            <button
+                                className="appearance-none border-0 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-md py-2 text-[12px] transition-colors cursor-pointer"
+                                onClick={ () => processAction(AvatarEditorAction.ACTION_SAVE) }
+                            >
+                                { LocalizeText('avatareditor.save') }
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Right Panel: Editor */}
+                    <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                         { (activeCategory && !isWardrobeVisible) &&
                             <AvatarEditorModelView model={ activeCategory } gender={ figureData.gender } setGender={ setGender } /> }
                         { isWardrobeVisible &&
-                            <AvatarEditorWardrobeView figureData={ figureData } savedFigures={ savedFigures } setSavedFigures={ setSavedFigures } loadAvatarInEditor={ loadAvatarInEditor } /> }
-                    </Column>
-                    <Column size={ 3 } overflow="hidden">
-                        <AvatarEditorFigurePreviewView figureData={ figureData } />
-                        <Column grow gap={ 1 }>
-                            <ButtonGroup>
-                                <Button variant="secondary" onClick={ event => processAction(AvatarEditorAction.ACTION_RESET) }>
-                                    <FaUndo className="fa-icon" />
-                                </Button>
-                                <Button variant="secondary" onClick={ event => processAction(AvatarEditorAction.ACTION_CLEAR) }>
-                                    <FaTrash className="fa-icon" />
-                                </Button>
-                                <Button variant="secondary" onClick={ event => processAction(AvatarEditorAction.ACTION_RANDOMIZE) }>
-                                    <FaDice className="fa-icon" />
-                                </Button>
-                            </ButtonGroup>
-                            <Button className="w-full" variant="success" onClick={ event => processAction(AvatarEditorAction.ACTION_SAVE) }>
-                                { LocalizeText('avatareditor.save') }
-                            </Button>
-                        </Column>
-                    </Column>
-                </Grid>
-            </NitroCardContentView>
-        </NitroCardView>
+                            <div className="flex-1 min-h-0 overflow-y-auto p-2">
+                                <AvatarEditorWardrobeView figureData={ figureData } savedFigures={ savedFigures } setSavedFigures={ setSavedFigures } loadAvatarInEditor={ loadAvatarInEditor } />
+                            </div> }
+                    </div>
+                </div>
+            </div>
+        </DraggableWindow>
     );
 }

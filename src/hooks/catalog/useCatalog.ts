@@ -34,7 +34,7 @@ const useCatalogState = () =>
     const [ catalogSkipPurchaseConfirmation, setCatalogSkipPurchaseConfirmation ] = useCatalogSkipPurchaseConfirmation();
     const [ purchasableOffer, setPurchaseableOffer ] = useState<IPurchasableOffer>(null);
     const [ placedObjectPurchaseData, setPlacedObjectPurchaseData ] = useState<PlacedObjectPurchaseData>(null);
-    const [ catalogSize, setCatalogSize ] = useState({ width: 780, height: 420 });
+    const [ catalogSize, setCatalogSize ] = useState({ width: 850, height: 480 });
     const [ furniCount, setFurniCount ] = useState(0);
     const [ furniLimit, setFurniLimit ] = useState(0);
     const [ maxFurniLimit, setMaxFurniLimit ] = useState(0);

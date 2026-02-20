@@ -114,12 +114,12 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
             case CatalogPurchaseState.CONFIRM:
                 return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-amber-500 text-white text-xs font-medium hover:bg-amber-600 transition-colors" onClick={ purchaseSubscription }>{ LocalizeText('catalog.marketplace.confirm_title') }</button>;
             case CatalogPurchaseState.PURCHASE:
-                return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-zinc-300 text-zinc-500 text-xs font-medium" disabled><LayoutLoadingSpinnerView /></button>;
+                return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-white/20 text-white/40 text-xs font-medium" disabled><LayoutLoadingSpinnerView /></button>;
             case CatalogPurchaseState.FAILED:
                 return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-red-500 text-white text-xs font-medium cursor-not-allowed opacity-70" disabled>{ LocalizeText('generic.failed') }</button>;
             case CatalogPurchaseState.NONE:
             default:
-                return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-zinc-900 text-white text-xs font-medium hover:bg-zinc-800 transition-colors" onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('buy') }</button>;
+                return <button className="appearance-none border-0 w-full h-8 rounded-lg bg-white/[0.15] text-white text-xs font-medium hover:bg-white/20 transition-colors" onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('buy') }</button>;
         }
     }, [ pendingOffer, purchaseState, purchaseSubscription, getCurrencyAmount ]);
 
@@ -134,19 +134,19 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
                 { clubOffers && (clubOffers.length > 0) && clubOffers.map((offer, index) =>
                 {
                     return (
-                        <div key={ index } className={ `flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors ${ pendingOffer === offer ? 'border-zinc-900 bg-white shadow-sm' : 'border-zinc-100 bg-zinc-50/50 hover:border-zinc-300' }` } onClick={ () => setOffer(offer) }>
+                        <div key={ index } className={ `flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors ${ pendingOffer === offer ? 'border-white/30 bg-white/[0.06]' : 'border-white/[0.07] bg-white/[0.04] hover:border-white/[0.12]' }` } onClick={ () => setOffer(offer) }>
                             <i className="icon-hc-banner" />
                             <div className="flex flex-col items-end ml-auto">
-                                <span className="text-sm text-zinc-900">{ getOfferText(offer) }</span>
+                                <span className="text-sm text-white/90">{ getOfferText(offer) }</span>
                                 <div className="flex items-center justify-end gap-1">
                                     { (offer.priceCredits > 0) &&
                                     <div className="flex items-center justify-end gap-1">
-                                        <span className="text-xs text-zinc-700">{ offer.priceCredits }</span>
+                                        <span className="text-xs text-white/60">{ offer.priceCredits }</span>
                                         <LayoutCurrencyIcon type={ -1 } />
                                     </div> }
                                     { (offer.priceActivityPoints > 0) &&
                                     <div className="flex items-center justify-end gap-1">
-                                        <span className="text-xs text-zinc-700">{ offer.priceActivityPoints }</span>
+                                        <span className="text-xs text-white/60">{ offer.priceActivityPoints }</span>
                                         <LayoutCurrencyIcon type={ offer.priceActivityPointsType } />
                                     </div> }
                                 </div>
@@ -163,21 +163,21 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
                 <div className="catalog-page-text text-center" dangerouslySetInnerHTML={ { __html: getSubscriptionDetails } } />
             </div>
             { pendingOffer &&
-                <div className="flex flex-col gap-2 p-2.5 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0">
+                <div className="flex flex-col gap-2 p-2.5 bg-white/[0.05] rounded-lg border border-white/[0.07] shrink-0">
                     <div className="flex items-end">
                         <div className="flex flex-col flex-1">
-                            <span className="text-sm font-medium text-zinc-900">{ getPurchaseHeader() }</span>
-                            <span className="text-xs text-zinc-500">{ getPurchaseValidUntil() }</span>
+                            <span className="text-sm font-medium text-white/90">{ getPurchaseHeader() }</span>
+                            <span className="text-xs text-white/50">{ getPurchaseValidUntil() }</span>
                         </div>
                         <div className="flex flex-col gap-1">
                             { (pendingOffer.priceCredits > 0) &&
                                 <div className="flex items-center justify-end gap-1">
-                                    <span className="text-xs text-zinc-700">{ pendingOffer.priceCredits }</span>
+                                    <span className="text-xs text-white/60">{ pendingOffer.priceCredits }</span>
                                     <LayoutCurrencyIcon type={ -1 } />
                                 </div> }
                             { (pendingOffer.priceActivityPoints > 0) &&
                                 <div className="flex items-center justify-end gap-1">
-                                    <span className="text-xs text-zinc-700">{ pendingOffer.priceActivityPoints }</span>
+                                    <span className="text-xs text-white/60">{ pendingOffer.priceActivityPoints }</span>
                                     <LayoutCurrencyIcon type={ pendingOffer.priceActivityPointsType } />
                                 </div> }
                         </div>

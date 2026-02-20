@@ -24,14 +24,14 @@ export const CatalogLayouGuildForumView: FC<CatalogLayoutProps> = props =>
         <>
             <CatalogFirstProductSelectorWidgetView />
             <div className="flex flex-col h-full gap-2">
-                <div className="catalog-page-text flex-1 min-h-0 overflow-auto rounded-lg bg-zinc-50 border border-zinc-100 p-3">
+                <div className="catalog-page-text flex-1 min-h-0 overflow-auto rounded-lg bg-white/[0.05] border border-white/[0.07] p-3">
                     { /* Server localization text (trusted content from game server) */ }
                     <div dangerouslySetInnerHTML={ { __html: page.localization.getText(1) } } />
                 </div>
                 { !!currentOffer && (
-                    <div className="flex items-center gap-3 p-2.5 bg-zinc-50 rounded-lg border border-zinc-100 shrink-0">
+                    <div className="flex items-center gap-3 p-2.5 bg-white/[0.05] rounded-lg border border-white/[0.07] shrink-0">
                         <div className="flex-1 min-w-0 flex flex-col gap-1">
-                            <span className="text-sm font-medium text-zinc-900 truncate">{ currentOffer.localizationName }</span>
+                            <span className="text-sm font-medium text-white/90 truncate">{ currentOffer.localizationName }</span>
                             <CatalogGuildSelectorWidgetView />
                             <div className="flex items-center justify-between gap-2">
                                 <CatalogTotalPriceWidget justifyContent="end" alignItems="end" />

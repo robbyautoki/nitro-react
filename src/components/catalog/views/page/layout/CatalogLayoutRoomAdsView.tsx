@@ -72,25 +72,25 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
 
     return (
         <div className="flex flex-col h-full gap-2 overflow-auto">
-            <span className="text-sm font-semibold text-zinc-900 text-center">{ LocalizeText('roomad.catalog_header') }</span>
-            <span className="text-xs text-zinc-600">{ LocalizeText('roomad.catalog_text', [ 'duration' ], [ '120' ]) }</span>
-            <div className="flex flex-col gap-2 rounded-lg bg-zinc-50 border border-zinc-100 p-3">
+            <span className="text-sm font-semibold text-white/90 text-center">{ LocalizeText('roomad.catalog_header') }</span>
+            <span className="text-xs text-white/50">{ LocalizeText('roomad.catalog_text', [ 'duration' ], [ '120' ]) }</span>
+            <div className="flex flex-col gap-2 rounded-lg bg-white/[0.05] border border-white/[0.07] p-3">
                 <div className="flex flex-col gap-1">
-                    <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('navigator.category') }</span>
+                    <span className="text-xs font-semibold text-white/90">{ LocalizeText('navigator.category') }</span>
                     <CatalogNativeSelect value={ categoryId } onChange={ event => setCategoryId(parseInt(event.target.value)) } disabled={ extended }>
                         { categories && categories.map((cat, index) => <option key={ index } value={ cat.id }>{ LocalizeText(cat.name) }</option>) }
                     </CatalogNativeSelect>
                 </div>
                 <div className="flex flex-col gap-1">
-                    <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_name') }</span>
+                    <span className="text-xs font-semibold text-white/90">{ LocalizeText('roomad.catalog_name') }</span>
                     <Input type="text" className="h-8 text-xs" maxLength={ 64 } value={ eventName } onChange={ event => setEventName(event.target.value) } readOnly={ extended } />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_description') }</span>
+                    <span className="text-xs font-semibold text-white/90">{ LocalizeText('roomad.catalog_description') }</span>
                     <Textarea className="min-h-[60px] text-xs resize-none" maxLength={ 64 } value={ eventDesc } onChange={ event => setEventDesc(event.target.value) } readOnly={ extended } />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <span className="text-xs font-semibold text-zinc-900">{ LocalizeText('roomad.catalog_roomname') }</span>
+                    <span className="text-xs font-semibold text-white/90">{ LocalizeText('roomad.catalog_roomname') }</span>
                     <CatalogNativeSelect value={ roomId } onChange={ event => setRoomId(parseInt(event.target.value)) } disabled={ extended }>
                         <option value={ -1 } disabled>{ LocalizeText('roomad.catalog_roomname') }</option>
                         { availableRooms && availableRooms.map((room, index) => <option key={ index } value={ room.roomId }>{ room.roomName }</option>) }

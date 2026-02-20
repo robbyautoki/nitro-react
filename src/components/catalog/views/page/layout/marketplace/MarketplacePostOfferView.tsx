@@ -84,16 +84,16 @@ export const MarketplacePostOfferView : FC<{}> = props =>
             <NitroCardHeaderView headerText={ LocalizeText('inventory.marketplace.make_offer.title') } onCloseClick={ event => setItem(null) } />
             <NitroCardContentView overflow="hidden">
                 <div className="flex gap-3 h-full">
-                    <div className="flex items-center justify-center w-1/3 shrink-0 bg-zinc-100 rounded-lg p-3">
+                    <div className="flex items-center justify-center w-1/3 shrink-0 bg-white/[0.05] rounded-lg p-3">
                         <LayoutFurniImageView productType={ item.isWallItem ? ProductTypeEnum.WALL : ProductTypeEnum.FLOOR } productClassId={ item.type } extraData={ item.extra.toString() } />
                     </div>
                     <div className="flex-1 flex flex-col justify-between min-w-0">
                         <div className="flex flex-col gap-1 flex-1">
-                            <span className="text-sm font-semibold text-zinc-900">{ getFurniTitle }</span>
-                            <span className="text-xs text-zinc-500 truncate">{ getFurniDescription }</span>
+                            <span className="text-sm font-semibold text-white/90">{ getFurniTitle }</span>
+                            <span className="text-xs text-white/50 truncate">{ getFurniDescription }</span>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <span className="text-[11px] text-zinc-400 italic">
+                            <span className="text-[11px] text-white/40 italic">
                                 { LocalizeText('inventory.marketplace.make_offer.expiration_info', [ 'time' ], [ marketplaceConfiguration.offerTime.toString() ]) }
                             </span>
                             <div className="flex flex-col gap-1">
@@ -107,7 +107,7 @@ export const MarketplacePostOfferView : FC<{}> = props =>
                                         { LocalizeText('inventory.marketplace.make_offer.max_price', [ 'maxprice' ], [ marketplaceConfiguration.maximumPrice.toString() ]) }
                                     </div> }
                                 { (!((askingPrice < marketplaceConfiguration.minimumPrice) || (askingPrice > marketplaceConfiguration.maximumPrice) || isNaN(askingPrice))) &&
-                                    <div className="text-[11px] text-zinc-500 mt-0.5">
+                                    <div className="text-[11px] text-white/50 mt-0.5">
                                         { LocalizeText('inventory.marketplace.make_offer.final_price', [ 'commission', 'finalprice' ], [ getCommission().toString(), (askingPrice + getCommission()).toString() ]) }
                                     </div> }
                             </div>

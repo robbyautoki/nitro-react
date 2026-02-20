@@ -75,6 +75,22 @@
             content: '';
             margin-top: 4px;
         }
+
+        img {
+            max-width: 100% !important;
+            height: auto !important;
+            border-radius: 8px;
+            margin: 4px 0 8px !important;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        td {
+            padding: 2px 4px !important;
+            vertical-align: top;
+        }
     }
 
     .catalog-resize-handle {

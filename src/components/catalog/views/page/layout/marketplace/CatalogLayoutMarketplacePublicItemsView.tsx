@@ -146,7 +146,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
             </div>
             <SearchFormView sortTypes={ getSortTypes } searchType={ searchType } onSearch={ requestOffers } />
             <div className="flex flex-col gap-1.5 flex-1 min-h-0">
-                <span className="text-xs font-semibold text-zinc-900 truncate shrink-0">
+                <span className="text-xs font-semibold text-white/90 truncate shrink-0">
                     { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.size.toString() ]) }
                 </span>
                 <div className="flex flex-col gap-1.5 overflow-auto nitro-catalog-layout-marketplace-grid">

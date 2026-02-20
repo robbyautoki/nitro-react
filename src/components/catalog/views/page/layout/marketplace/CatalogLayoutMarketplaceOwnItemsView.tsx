@@ -76,20 +76,20 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = prop
     return (
         <div className="flex flex-col h-full gap-2 overflow-hidden">
             { (creditsWaiting <= 0) &&
-                <div className="text-center text-xs bg-zinc-100 rounded-lg p-2 text-zinc-600">
+                <div className="text-center text-xs bg-white/[0.05] rounded-lg p-2 text-white/50">
                     { LocalizeText('catalog.marketplace.redeem.no_sold_items') }
                 </div> }
             { (creditsWaiting > 0) &&
-                <div className="flex flex-col items-center gap-1.5 bg-zinc-100 rounded-lg p-3">
-                    <span className="text-xs text-zinc-700">
+                <div className="flex flex-col items-center gap-1.5 bg-white/[0.05] rounded-lg p-3">
+                    <span className="text-xs text-white/60">
                         { LocalizeText('catalog.marketplace.redeem.get_credits', [ 'count', 'credits' ], [ soldOffers.length.toString(), creditsWaiting.toString() ]) }
                     </span>
-                    <button className="appearance-none border-0 mt-1 h-7 px-3 text-xs rounded-md bg-zinc-900 text-white hover:bg-zinc-800 transition-colors" onClick={ redeemSoldOffers }>
+                    <button className="appearance-none border-0 mt-1 h-7 px-3 text-xs rounded-md bg-white/[0.15] text-white hover:bg-white/20 transition-colors" onClick={ redeemSoldOffers }>
                         { LocalizeText('catalog.marketplace.offer.redeem') }
                     </button>
                 </div> }
             <div className="flex flex-col gap-1.5 flex-1 min-h-0">
-                <span className="text-xs font-semibold text-zinc-900 truncate shrink-0">
+                <span className="text-xs font-semibold text-white/90 truncate shrink-0">
                     { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.length.toString() ]) }
                 </span>
                 <div className="flex flex-col gap-1.5 overflow-auto nitro-catalog-layout-marketplace-grid">

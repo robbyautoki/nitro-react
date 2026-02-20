@@ -275,7 +275,7 @@ export const CatalogGiftView: FC<{}> = props =>
                         { LocalizeText('catalog.gift_wrapping.pick_color') }
                     </Text>
                     <ButtonGroup fullWidth>
-                        { colors.map(color => <Button key={ color.id } size="icon" className={ `h-6 w-6 rounded-full border-2 ${ color.id === selectedColorId ? 'border-zinc-900 ring-2 ring-zinc-900/20' : 'border-transparent' }` } disabled={ !isColorable } style={ { backgroundColor: color.color } } onClick={ () => setSelectedColorId(color.id) } />) }
+                        { colors.map(color => <Button key={ color.id } size="icon" className={ `h-6 w-6 rounded-full border-2 ${ color.id === selectedColorId ? 'border-white/80 ring-2 ring-white/20' : 'border-transparent' }` } disabled={ !isColorable } style={ { backgroundColor: color.color } } onClick={ () => setSelectedColorId(color.id) } />) }
                     </ButtonGroup>
                 </Column>
                 <Flex justifyContent="between" alignItems="center">

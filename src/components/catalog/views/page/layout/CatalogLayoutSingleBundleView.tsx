@@ -16,7 +16,7 @@ export const CatalogLayoutSingleBundleView: FC<CatalogLayoutProps> = props =>
                         {/* Server localization text (trusted content from game server) */}
                         <div dangerouslySetInnerHTML={ { __html: page.localization.getText(2) } } />
                     </div> }
-                <div className="flex-1 min-h-0 overflow-auto rounded-lg bg-zinc-100 p-2">
+                <div className="flex-1 min-h-0 overflow-auto rounded-lg bg-white/[0.05] p-2">
                     <CatalogBundleGridWidgetView fullWidth className="nitro-catalog-layout-bundle-grid" />
                 </div>
             </div>

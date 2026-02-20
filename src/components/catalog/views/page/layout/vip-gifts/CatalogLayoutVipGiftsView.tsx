@@ -52,7 +52,7 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = props =>
     
     return (
         <div className="flex flex-col h-full gap-2">
-            <span className="text-xs font-semibold text-zinc-900 truncate shrink-0">{ giftsAvailable() }</span>
+            <span className="text-xs font-semibold text-white/90 truncate shrink-0">{ giftsAvailable() }</span>
             <div className="flex flex-col gap-1.5 overflow-auto nitro-catalog-layout-vip-gifts-grid">
                 { (clubGifts.offers.length > 0) && sortGifts.map(offer => <VipGiftItem key={ offer.offerId } offer={ offer } isAvailable={ (clubGifts.getOfferExtraData(offer.offerId).isSelectable && (clubGifts.giftsAvailable > 0)) } onSelect={ selectGift } daysRequired={ clubGifts.getOfferExtraData(offer.offerId).daysRequired }/>) }
             </div>

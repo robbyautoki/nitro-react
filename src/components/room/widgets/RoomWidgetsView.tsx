@@ -15,6 +15,7 @@ import { RoomFilterWordsWidgetView } from './room-filter-words/RoomFilterWordsWi
 import { RoomThumbnailWidgetView } from './room-thumbnail/RoomThumbnailWidgetView';
 import { RoomToolsWidgetView } from './room-tools/RoomToolsWidgetView';
 import { WordQuizWidgetView } from './word-quiz/WordQuizWidgetView';
+import { MultiPlaceCounterView } from './furniture/MultiPlaceCounterView';
 
 export const RoomWidgetsView: FC<{}> = props =>
 {
@@ -167,6 +168,7 @@ export const RoomWidgetsView: FC<{}> = props =>
             <UserChooserWidgetView />
             <WordQuizWidgetView />
             <FriendRequestWidgetView />
+            <MultiPlaceCounterView />
         </>
     );
 }

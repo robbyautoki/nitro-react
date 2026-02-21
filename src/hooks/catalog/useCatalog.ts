@@ -41,6 +41,7 @@ const useCatalogState = () =>
     const [ secondsLeft, setSecondsLeft ] = useState(0);
     const [ updateTime, setUpdateTime ] = useState(0);
     const [ secondsLeftWithGrace, setSecondsLeftWithGrace ] = useState(0);
+    const [ multiPlaceCount, setMultiPlaceCount ] = useState(0);
     const { simpleAlert = null } = useNotification();
     const requestedPage = useRef(new RequestedPage());
 
@@ -99,7 +100,7 @@ const useCatalogState = () =>
         return false;
     }, [ currentType, getBuilderFurniPlaceableStatus ]);
 
-    const requestOfferToMover = useCallback((offer: IPurchasableOffer) =>
+    const requestOfferToMover = useCallback((offer: IPurchasableOffer, isMultiContinue: boolean = false) =>
     {
         if(!isDraggable(offer)) return;
 
@@ -123,6 +124,8 @@ const useCatalogState = () =>
         {
             setPurchaseableOffer(offer);
             setObjectMoverRequested(true);
+
+            if(!isMultiContinue) setMultiPlaceCount(0);
 
             setIsVisible(false);
         }
@@ -298,18 +301,15 @@ const useCatalogState = () =>
     {
         cancelObjectMover();
 
-        if(targetNode.parent.pageName === 'root')
+        if(targetNode.isBranch)
         {
-            if(targetNode.children.length)
+            for(const child of targetNode.children)
             {
-                for(const child of targetNode.children)
-                {
-                    if(!child.isVisible) continue;
+                if(!child.isVisible) continue;
 
-                    targetNode = child;
+                targetNode = child;
 
-                    break;
-                }
+                break;
             }
         }
 
@@ -762,13 +762,21 @@ const useCatalogState = () =>
                 {
                     SendMessageComposer(new PurchaseFromCatalogComposer(pageId, purchasableOffer.offerId, product.extraParam, 1));
 
-                    if(catalogPlaceMultipleObjects) requestOfferToMover(purchasableOffer);
+                    if(catalogPlaceMultipleObjects)
+                    {
+                        setMultiPlaceCount(prev => prev + 1);
+                        requestOfferToMover(purchasableOffer, true);
+                    }
                 }
                 else
                 {
                     // confirm
 
-                    if(catalogPlaceMultipleObjects) requestOfferToMover(purchasableOffer);
+                    if(catalogPlaceMultipleObjects)
+                    {
+                        setMultiPlaceCount(prev => prev + 1);
+                        requestOfferToMover(purchasableOffer, true);
+                    }
                 }
                 break;
             }
@@ -790,7 +798,11 @@ const useCatalogState = () =>
                         break;
                 }
 
-                if(catalogPlaceMultipleObjects) requestOfferToMover(purchasableOffer);
+                if(catalogPlaceMultipleObjects)
+                {
+                    setMultiPlaceCount(prev => prev + 1);
+                    requestOfferToMover(purchasableOffer, true);
+                }
                 break;
             }
         }
@@ -908,7 +920,38 @@ const useCatalogState = () =>
         }
     }, []);
 
-    return { isVisible, setIsVisible, isBusy, pageId, previousPageId, currentType, rootNode, offersToNodes, currentPage, setCurrentPage, currentOffer, setCurrentOffer, activeNodes, searchResult, setSearchResult, frontPageItems, roomPreviewer, navigationHidden, setNavigationHidden, purchaseOptions, setPurchaseOptions, catalogOptions, setCatalogOptions, catalogSize, setCatalogSize, getNodeById, getNodeByName, activateNode, openPageById, openPageByName, openPageByOfferId, requestOfferToMover };
+    // ESC + right-click to exit multi-placement mode
+    useEffect(() =>
+    {
+        if(!objectMoverRequested || !catalogPlaceMultipleObjects) return;
+
+        const onKeyDown = (e: KeyboardEvent) =>
+        {
+            if(e.key === 'Escape')
+            {
+                cancelObjectMover();
+                setMultiPlaceCount(0);
+            }
+        };
+
+        const onContextMenu = (e: MouseEvent) =>
+        {
+            e.preventDefault();
+            cancelObjectMover();
+            setMultiPlaceCount(0);
+        };
+
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('contextmenu', onContextMenu);
+
+        return () =>
+        {
+            document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('contextmenu', onContextMenu);
+        };
+    }, [ objectMoverRequested, catalogPlaceMultipleObjects, cancelObjectMover ]);
+
+    return { isVisible, setIsVisible, isBusy, pageId, previousPageId, currentType, rootNode, offersToNodes, currentPage, setCurrentPage, currentOffer, setCurrentOffer, activeNodes, searchResult, setSearchResult, frontPageItems, roomPreviewer, navigationHidden, setNavigationHidden, purchaseOptions, setPurchaseOptions, catalogOptions, setCatalogOptions, catalogSize, setCatalogSize, getNodeById, getNodeByName, activateNode, openPageById, openPageByName, openPageByOfferId, requestOfferToMover, multiPlaceCount, objectMoverRequested };
 }
 
 export const useCatalog = () => useBetween(useCatalogState);

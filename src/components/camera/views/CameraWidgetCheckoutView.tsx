@@ -21,6 +21,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = props
     const [ wasPicturePublished, setWasPicturePublished ] = useState(false);
     const [ isWaiting, setIsWaiting ] = useState(false);
     const [ publishCooldown, setPublishCooldown ] = useState(0);
+    const [ isPublic, setIsPublic ] = useState(true);
 
     const publishDisabled = useMemo(() => GetConfiguration<boolean>('camera.publish.disabled', false), []);
 
@@ -128,6 +129,11 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = props
                         <Text bold>
                             { LocalizeText(wasPicturePublished ? 'camera.publish.successful' : 'camera.publish.explanation') }
                         </Text>
+                        { !wasPicturePublished &&
+                            <Flex alignItems="center" gap={ 1 } className="mt-1">
+                                <input type="checkbox" checked={ isPublic } onChange={ e => setIsPublic(e.target.checked) } className="form-check-input" />
+                                <Text className="text-xs">{ isPublic ? 'Öffentlich (in Galerie sichtbar)' : 'Privat (nur für dich sichtbar)' }</Text>
+                            </Flex> }
                         <Text>
                             { LocalizeText(wasPicturePublished ? 'camera.publish.success.short.info' : 'camera.publish.detailed.explanation') }
                         </Text>

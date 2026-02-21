@@ -1,6 +1,6 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { Heart, ArrowLeft, MessageCircle, Eye, Handshake, Swords, Mail, Trophy, Info } from 'lucide-react';
+import { Heart, ArrowLeft, MessageCircle, Eye, Handshake, Swords, Mail, Trophy, Info, Users } from 'lucide-react';
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { AddEventLinkTracker, GetConfiguration, GetSessionDataManager, RemoveLinkEventTracker, getAuthHeaders } from '../../api';
 import { LayoutAvatarImageView } from '../../common';
@@ -23,6 +23,7 @@ interface RelData
     action_points: number;
     pm_points: number;
     event_points: number;
+    friends_since?: number | null;
 }
 
 const getCmsUrl = () => GetConfiguration<string>('url.prefix', '');
@@ -237,7 +238,7 @@ export const RelationshipView: FC<{}> = () =>
                                     <ArrowLeft className="size-4" />
                                 </button>
                             ) : (
-                                <Heart className="size-4 text-pink-400/70" />
+                                <Users className="size-4 text-pink-400/70" />
                             ) }
                             <span className="text-sm font-semibold text-white/90 tracking-tight">
                                 { selectedRel ? selectedRel.other_username : 'Beziehungen' }
@@ -287,6 +288,13 @@ export const RelationshipView: FC<{}> = () =>
                                         <span className="text-[11px] text-white/50">{ selectedRel.other_username }</span>
                                     </div>
                                 </div>
+
+                                {/* Friendship date */}
+                                { selectedRel.friends_since && (
+                                    <div className="text-center text-[11px] text-white/40">
+                                        Freunde seit { new Date(selectedRel.friends_since * 1000).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' }) }
+                                    </div>
+                                ) }
 
                                 {/* Progress */}
                                 <div className="px-2">

@@ -80,5 +80,7 @@ export const RoomChatFormatter = (content: string) =>
         return '<img src="' + url + '" class="chat-emoji" alt=":' + code + ':" />';
     });
 
+    result = result.replace(/@([a-zA-Z0-9_-]+)/g, '<span style="color: #fbbf24; font-weight: bold;">@$1</span>');
+
     return result;
 }

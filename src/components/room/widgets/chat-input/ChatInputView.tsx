@@ -38,6 +38,7 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':sets claim', description: 'Belohnung abholen [ID]', minRank: 0, category: 'Allgemein' },
     { command: ':sets preview', description: 'SET-Möbel im Raum platzieren [ITEM_ID]', minRank: 0, category: 'Allgemein' },
     { command: ':send', description: 'Währung senden [name] [taler/pixel/punkte] [anzahl]', minRank: 0, category: 'Allgemein' },
+    { command: '@', description: 'Person markieren [name] / Nachricht senden [name] [text]', minRank: 0, category: 'Allgemein' },
     { command: ':win', description: 'Event-Win vergeben [name]', minRank: 7, category: 'GameX' },
     { command: ':sit', description: 'Hinsetzen', minRank: 0, category: 'Allgemein' },
     { command: ':stand', description: 'Aufstehen', minRank: 0, category: 'Allgemein' },
@@ -320,10 +321,10 @@ export const ChatInputView: FC<{}> = props =>
             setIsIdle(true);
         }
 
-        if(value.startsWith(':'))
+        if(value.startsWith(':') || value.startsWith('@'))
         {
             setShowCommands(true);
-            setCommandFilter(value.slice(1).toLowerCase());
+            setCommandFilter(value.toLowerCase());
         }
         else
         {
@@ -455,7 +456,7 @@ export const ChatInputView: FC<{}> = props =>
                 { showCommands && (() => {
                     const filtered = CHAT_COMMANDS
                         .filter(cmd => cmd.minRank === 0 || GetSessionDataManager().hasSecurity(cmd.minRank))
-                        .filter(cmd => cmd.command.startsWith(':') ? cmd.command.slice(1).startsWith(commandFilter) : cmd.command.startsWith(commandFilter));
+                        .filter(cmd => cmd.command.toLowerCase().startsWith(commandFilter));
                     if(filtered.length === 0) return null;
                     let lastCategory = '';
                     return (

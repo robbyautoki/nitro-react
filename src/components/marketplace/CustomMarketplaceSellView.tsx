@@ -15,6 +15,7 @@ const DURATIONS = [
     { value: 3, label: '3 Tage' },
     { value: 7, label: '7 Tage' },
     { value: 14, label: '14 Tage' },
+    { value: 21, label: '21 Tage' },
     { value: 30, label: '30 Tage' },
 ];
 
@@ -263,6 +264,11 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
                             onChange={ e => setNote(e.target.value) }
                         />
                     </div>
+                    { price && parseInt(price) > 0 && (
+                        <div className="text-[10px] text-white/30 text-center">
+                            2% Marktplatz-Gebühr · Du erhältst: { Math.floor(parseInt(price) * 0.98) } { CURRENCIES.find(c => c.value === currency)?.label ?? currency }
+                        </div>
+                    ) }
                     <button
                         className="mt-1 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 text-[11px] font-semibold hover:bg-emerald-500/30 transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
                         onClick={ handleSubmit }

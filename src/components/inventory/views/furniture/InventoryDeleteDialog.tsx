@@ -35,7 +35,7 @@ export const InventoryDeleteDialog: FC<InventoryDeleteDialogProps> = ({ groupIte
                     { maxCount > 1 && (
                         <>
                             <div className="inv-delete-label">
-                                Wie viele löschen? (max. { maxCount })
+                                Wie viele löschen? <span style={{ opacity: 0.6 }}>(du besitzt: { maxCount } Stück)</span>
                             </div>
                             <div className="inv-delete-input-row">
                                 <button
@@ -63,6 +63,13 @@ export const InventoryDeleteDialog: FC<InventoryDeleteDialogProps> = ({ groupIte
                                 >
                                     +
                                 </button>
+                                <button
+                                    className="inv-delete-btn"
+                                    onClick={ () => setCount(maxCount) }
+                                    style={{ fontSize: '10px', minWidth: '36px' }}
+                                >
+                                    Alle
+                                </button>
                             </div>
                             <input
                                 type="range"
@@ -72,6 +79,9 @@ export const InventoryDeleteDialog: FC<InventoryDeleteDialogProps> = ({ groupIte
                                 value={ count }
                                 onChange={ e => setCount(parseInt(e.target.value)) }
                             />
+                            <div style={{ textAlign: 'center', fontSize: '11px', opacity: 0.5, marginTop: '2px' }}>
+                                { count } von { maxCount } löschen
+                            </div>
                         </>
                     ) }
                     { maxCount === 1 && (

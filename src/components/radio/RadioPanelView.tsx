@@ -351,7 +351,10 @@ export const RadioPanelView: FC<{}> = () =>
                 const message = params?.get('message') || '';
                 const djName = params?.get('dj_name') || 'DJ';
                 const duckMs = parseInt(params?.get('duck_ms') || '5000', 10);
-                const audioUrl = params?.get('audio_url') || '';
+                const audioChunks = parseInt(params?.get('audio_chunks') || '0', 10);
+                const audioUrl = audioChunks > 0
+                    ? 'data:audio/mpeg;base64,' + Array.from({ length: audioChunks }, (_, i) => params?.get('audio_chunk_' + i) || '').join('')
+                    : (params?.get('audio_url') || '');
 
                 if(message)
                 {

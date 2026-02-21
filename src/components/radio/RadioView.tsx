@@ -262,7 +262,10 @@ export const RadioView: FC<{}> = () =>
             }
             case 'radio.tts.preview':
             {
-                const ttsUrl = params?.get('tts_url') || '';
+                const audioChunks = parseInt(params?.get('audio_chunks') || '0', 10);
+                const ttsUrl = audioChunks > 0
+                    ? 'data:audio/mpeg;base64,' + Array.from({ length: audioChunks }, (_, i) => params?.get('audio_chunk_' + i) || '').join('')
+                    : (params?.get('tts_url') || '');
                 const ttsMsg = params?.get('tts_text') || '';
                 if(ttsUrl)
                 {

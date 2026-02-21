@@ -280,6 +280,14 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                         </span>
                     ) }
                 </Button>
+                <Button
+                    variant={ purchaseOptions?.multiSelectMode ? 'default' : 'ghost' }
+                    size="sm"
+                    className={ 'w-full text-xs ' + (purchaseOptions?.multiSelectMode ? 'text-white' : 'text-white/50 hover:text-white/80') }
+                    onClick={ () => setPurchaseOptions(prev => ({ ...prev, multiSelectMode: !prev.multiSelectMode })) }
+                >
+                    Mehrfach auswählen { purchaseOptions?.multiSelectMode ? '✓' : '' }
+                </Button>
             </div>
         );
     }

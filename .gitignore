@@ -27,8 +27,7 @@ Thumbs.db
 /build
 *.zip
 .env
-public/renderer-config*
-public/ui-config*
+
 .yarn/
 node_modules/
 .vercel

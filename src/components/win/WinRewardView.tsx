@@ -1,7 +1,7 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
-import { GetConfiguration, GetSessionDataManager } from '../../api';
+import { GetConfiguration, GetRoomSession, GetSessionDataManager } from '../../api';
 import { useMessageEvent } from '../../hooks';
 
 interface WinItem {
@@ -75,26 +75,18 @@ export const WinRewardView: FC<{}> = () =>
 
     const handleClaim = useCallback(async () =>
     {
-        if(!selectedCurrency || !selectedItem || claiming) return;
+        if(!selectedCurrency || claiming) return;
         setClaiming(true);
 
         try
         {
-            const res = await fetch(`${ getCmsUrl() }/api/wins`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Habbo-User-Id': String(getUserId()),
-                },
-                body: JSON.stringify({
-                    action: 'claim',
-                    win_id: winId,
-                    currency: selectedCurrency,
-                    item_base_id: selectedItem.item_base_id,
-                }),
-            });
-            const data = await res.json();
-            if(data.ok) setClaimed(true);
+            const session = GetRoomSession();
+            if(session)
+            {
+                const itemPart = selectedItem ? ` ${ selectedItem.item_base_id }` : '';
+                session.sendChatMessage(`:winclaim ${ winId } ${ selectedCurrency }${ itemPart }`, 0);
+                setClaimed(true);
+            }
         }
         catch(e) {}
         finally { setClaiming(false); }
@@ -203,12 +195,12 @@ export const WinRewardView: FC<{}> = () =>
                                 <button
                                     className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all"
                                     style={{
-                                        background: (selectedCurrency && selectedItem) ? ORANGE : 'rgba(255,255,255,0.05)',
-                                        color: (selectedCurrency && selectedItem) ? WHITE : 'rgba(255,255,255,0.2)',
-                                        cursor: (selectedCurrency && selectedItem) ? 'pointer' : 'not-allowed',
+                                        background: selectedCurrency ? ORANGE : 'rgba(255,255,255,0.05)',
+                                        color: selectedCurrency ? WHITE : 'rgba(255,255,255,0.2)',
+                                        cursor: selectedCurrency ? 'pointer' : 'not-allowed',
                                         border: 'none',
                                     }}
-                                    disabled={ !selectedCurrency || !selectedItem || claiming }
+                                    disabled={ !selectedCurrency || claiming }
                                     onClick={ handleClaim }>
                                     { claiming ? 'Wird eingelöst...' : '🎁 Belohnung einlösen' }
                                 </button>

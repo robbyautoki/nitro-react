@@ -12,36 +12,41 @@ interface LoadingViewProps
 }
 
 const LOADING_TIPS = [
-    { text: 'Willkommen bei Bahhos!', image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=300&fit=crop' },
-    { text: 'Gestalte deinen eigenen Raum', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=300&fit=crop' },
-    { text: 'Triff neue Freunde im Hotel', image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop' },
-    { text: 'Sammle seltene Möbel', image: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=300&fit=crop' },
-    { text: 'Erstelle deine eigene Gruppe', image: 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&h=300&fit=crop' },
-    { text: 'Entdecke Events und Spiele', image: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=400&h=300&fit=crop' },
-    { text: 'Handle mit anderen Habbos', image: 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?w=400&h=300&fit=crop' },
-    { text: 'Werde kreativ mit Wired', image: 'https://images.unsplash.com/photo-1535223289827-42f1e9919769?w=400&h=300&fit=crop' },
+    'Willkommen bei Bahhos!',
+    'Gestalte deinen eigenen Raum',
+    'Triff neue Freunde im Hotel',
+    'Sammle seltene Möbel',
+    'Erstelle deine eigene Gruppe',
+    'Entdecke Events und Spiele',
+    'Handle mit anderen Habbos',
+    'Werde kreativ mit Wired',
 ];
 
-function ensureMinCards(tips: typeof LOADING_TIPS, min: number)
+function getCmsBaseUrl(): string
 {
-    if(tips.length >= min) return tips;
-    const result = [ ...tips ];
-    while(result.length < min) result.push(...tips);
+    const host = window.location.hostname;
+    if(host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3030';
+    return 'https://bahhos.de';
+}
+
+function ensureMinCards(urls: string[], min: number): string[]
+{
+    if(urls.length === 0) return [];
+    const result = [ ...urls ];
+    while(result.length < min) result.push(...urls);
     return result.slice(0, min);
 }
 
-function TipCard({ text, image }: { text: string; image: string })
+function PhotoCard({ url }: { url: string })
 {
     return (
-        <div className="relative w-[220px] h-[160px] rounded-xl overflow-hidden border border-white/10 shadow-lg shrink-0">
-            <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={ { backgroundImage: `url(${ image })` } }
+        <div className="relative w-[200px] h-[150px] rounded-xl overflow-hidden border border-white/10 shadow-lg shrink-0">
+            <img
+                src={ url }
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="eager"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-3">
-                <p className="text-white text-xs font-semibold leading-tight drop-shadow-lg">{ text }</p>
-            </div>
         </div>
     );
 }
@@ -50,7 +55,22 @@ export const LoadingView: FC<LoadingViewProps> = props =>
 {
     const { isError = false, message = '', percent = 0 } = props;
     const [ tipIndex, setTipIndex ] = useState(0);
-    const cards = ensureMinCards(LOADING_TIPS, 12);
+    const [ photoUrls, setPhotoUrls ] = useState<string[]>([]);
+
+    useEffect(() =>
+    {
+        const url = getCmsBaseUrl() + '/api/photos/public';
+        fetch(url)
+            .then(res => res.json())
+            .then((data: { url: string }[]) =>
+            {
+                if(Array.isArray(data) && data.length > 0)
+                {
+                    setPhotoUrls(data.map(p => p.url));
+                }
+            })
+            .catch(() => {});
+    }, []);
 
     useEffect(() =>
     {
@@ -59,6 +79,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
         return () => clearInterval(interval);
     }, [ isError ]);
 
+    const cards = ensureMinCards(photoUrls, 16);
     const col1 = cards.filter((_, i) => i % 4 === 0);
     const col2 = cards.filter((_, i) => i % 4 === 1);
     const col3 = cards.filter((_, i) => i % 4 === 2);
@@ -67,29 +88,31 @@ export const LoadingView: FC<LoadingViewProps> = props =>
     return (
         <div className="nitro-loading">
             { /* 3D Gallery Background */ }
-            <div className="absolute inset-0 overflow-hidden">
-                <div
-                    className="flex flex-row items-center gap-4 h-full justify-center"
-                    style={ {
-                        transform: 'translateX(-60px) translateZ(-100px) rotateX(15deg) rotateY(-8deg) rotateZ(15deg)',
-                        perspective: '300px',
-                        opacity: 0.35,
-                    } }
-                >
-                    <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:35s] h-full">
-                        { col1.map((tip, i) => <TipCard key={ `c1-${ i }` } { ...tip } />) }
-                    </Marquee>
-                    <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:40s] h-full">
-                        { col2.map((tip, i) => <TipCard key={ `c2-${ i }` } { ...tip } />) }
-                    </Marquee>
-                    <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:32s] h-full">
-                        { col3.map((tip, i) => <TipCard key={ `c3-${ i }` } { ...tip } />) }
-                    </Marquee>
-                    <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:45s] h-full">
-                        { col4.map((tip, i) => <TipCard key={ `c4-${ i }` } { ...tip } />) }
-                    </Marquee>
+            { cards.length > 0 && (
+                <div className="absolute inset-0 overflow-hidden">
+                    <div
+                        className="flex flex-row items-center gap-4 h-full justify-center"
+                        style={ {
+                            transform: 'translateX(-60px) translateZ(-100px) rotateX(15deg) rotateY(-8deg) rotateZ(15deg)',
+                            perspective: '300px',
+                            opacity: 0.35,
+                        } }
+                    >
+                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:35s] h-full">
+                            { col1.map((url, i) => <PhotoCard key={ `c1-${ i }` } url={ url } />) }
+                        </Marquee>
+                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:40s] h-full">
+                            { col2.map((url, i) => <PhotoCard key={ `c2-${ i }` } url={ url } />) }
+                        </Marquee>
+                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:32s] h-full">
+                            { col3.map((url, i) => <PhotoCard key={ `c3-${ i }` } url={ url } />) }
+                        </Marquee>
+                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:45s] h-full">
+                            { col4.map((url, i) => <PhotoCard key={ `c4-${ i }` } url={ url } />) }
+                        </Marquee>
+                    </div>
                 </div>
-            </div>
+            ) }
 
             { /* Gradient Overlays */ }
             <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/90 to-transparent z-[1]" />
@@ -102,7 +125,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                 <motion.img
                     src={ bahhosSvg }
                     alt="Bahhos"
-                    className="w-[200px] drop-shadow-2xl"
+                    className="max-w-[280px] w-[60vw] object-contain drop-shadow-2xl"
                     initial={ { opacity: 0, scale: 0.8 } }
                     animate={ { opacity: 1, scale: 1 } }
                     transition={ { duration: 0.8, ease: 'easeOut' } }
@@ -150,7 +173,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                             exit={ { opacity: 0, y: -8 } }
                             transition={ { duration: 0.4 } }
                         >
-                            { LOADING_TIPS[tipIndex].text }
+                            { LOADING_TIPS[tipIndex] }
                         </motion.p>
                     </>
                 ) }

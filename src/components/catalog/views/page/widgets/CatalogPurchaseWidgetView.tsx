@@ -4,7 +4,7 @@ import { CatalogPurchaseState, CreateLinkEvent, DispatchUiEvent, GetClubMemberLe
 import { LayoutLoadingSpinnerView } from '../../../../../common';
 import { Button } from '../../../../ui/button';
 import { CatalogEvent, CatalogInitGiftEvent, CatalogPurchasedEvent, CatalogPurchaseFailureEvent, CatalogPurchaseNotAllowedEvent, CatalogPurchaseSoldOutEvent } from '../../../../../events';
-import { useCatalog, useLocalStorage, usePurse, useUiEvent } from '../../../../../hooks';
+import { useCatalog, useCatalogPlaceMultipleItems, useLocalStorage, usePurse, useUiEvent } from '../../../../../hooks';
 
 interface CatalogPurchaseWidgetViewProps
 {
@@ -22,6 +22,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     const batchActiveRef = useRef(false);
     const { currentOffer = null, currentPage = null, purchaseOptions = null, setPurchaseOptions = null } = useCatalog();
     const { getCurrencyAmount = null } = usePurse();
+    const [ catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjects ] = useCatalogPlaceMultipleItems();
 
     const onCatalogEvent = useCallback((event: CatalogEvent) =>
     {
@@ -288,6 +289,14 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                 >
                     Mehrfach auswählen { purchaseOptions?.multiSelectMode ? '✓' : '' }
                 </Button>
+                <Button
+                    variant={ catalogPlaceMultipleObjects ? 'default' : 'ghost' }
+                    size="sm"
+                    className={ 'w-full text-xs ' + (catalogPlaceMultipleObjects ? 'text-white' : 'text-white/50 hover:text-white/80') }
+                    onClick={ () => setCatalogPlaceMultipleObjects(!catalogPlaceMultipleObjects) }
+                >
+                    Mehrfach platzieren { catalogPlaceMultipleObjects ? '✓' : '' }
+                </Button>
             </div>
         );
     }
@@ -312,6 +321,14 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                 onClick={ () => setPurchaseOptions(prev => ({ ...prev, multiSelectMode: !prev.multiSelectMode })) }
             >
                 Mehrfach auswählen { purchaseOptions?.multiSelectMode ? '✓' : '' }
+            </Button>
+            <Button
+                variant={ catalogPlaceMultipleObjects ? 'default' : 'ghost' }
+                size="sm"
+                className={ 'w-full text-xs ' + (catalogPlaceMultipleObjects ? 'text-white' : 'text-white/50 hover:text-white/80') }
+                onClick={ () => setCatalogPlaceMultipleObjects(!catalogPlaceMultipleObjects) }
+            >
+                Mehrfach platzieren { catalogPlaceMultipleObjects ? '✓' : '' }
             </Button>
         </div>
     );

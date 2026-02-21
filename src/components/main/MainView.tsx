@@ -37,6 +37,8 @@ import { RadioView } from '../radio/RadioView';
 import { PriceListView } from '../pricelist/PriceListView';
 import { WiredView } from '../wired/WiredView';
 import { RelationshipView } from '../relationship/RelationshipView';
+import { WinRewardView } from '../win/WinRewardView';
+import { WinNotification } from '../win/WinNotification';
 
 export const MainView: FC<{}> = props =>
 {
@@ -101,6 +103,8 @@ export const MainView: FC<{}> = props =>
             <RadioPanelView />
             <RadioView />
             <LotteryView />
+            <WinRewardView />
+            <WinNotification />
             <ModToolsView />
             <RoomView />
             <ChatHistoryView />

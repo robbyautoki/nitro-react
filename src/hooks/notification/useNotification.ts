@@ -358,6 +358,9 @@ const useNotificationState = () =>
         // Radio events are handled by RadioPanelView
         if(parser.type && parser.type.startsWith('radio.')) return;
 
+        // Win events are handled by WinRewardView / WinNotification
+        if(parser.type && parser.type.startsWith('win.')) return;
+
         showNotification(parser.type, parser.parameters);
     });
 

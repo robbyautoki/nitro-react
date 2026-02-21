@@ -1,5 +1,6 @@
 import { ConfigurationEvent, GetAssetManager, HabboWebTools, LegacyExternalInterface, Nitro, NitroCommunicationDemoEvent, NitroConfiguration, NitroEvent, NitroLocalizationEvent, NitroVersion, RoomEngineEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import { GetCommunication, GetConfiguration, GetNitroInstance, GetUIVersion, initSessionToken } from './api';
 import { Base, TransitionAnimation, TransitionAnimationTypes } from './common';
 import { DisconnectOverlayView } from './components/disconnect-overlay/DisconnectOverlayView';
@@ -18,6 +19,7 @@ export const App: FC<{}> = props =>
     const [ message, setMessage ] = useState('Getting Ready');
     const [ percent, setPercent ] = useState(0);
     const [ imageRendering, setImageRendering ] = useState<boolean>(true);
+    const [ showLoading, setShowLoading ] = useState(true);
     const isReadyRef = useRef(false);
 
     if(!GetNitroInstance())
@@ -156,7 +158,19 @@ export const App: FC<{}> = props =>
     
     return (
         <Base fit overflow="hidden" className={ imageRendering && 'image-rendering-pixelated' }>
-            { !isReady && <LoadingView isError={ isError } message={ message } percent={ percent } /> }
+            <AnimatePresence onExitComplete={ () => setShowLoading(false) }>
+                { !isReady && showLoading && (
+                    <motion.div
+                        key="loading"
+                        initial={ { opacity: 1 } }
+                        exit={ { opacity: 0 } }
+                        transition={ { duration: 1, ease: 'easeInOut' } }
+                        style={ { position: 'fixed', inset: 0, zIndex: 100 } }
+                    >
+                        <LoadingView isError={ isError } message={ message } percent={ percent } />
+                    </motion.div>
+                ) }
+            </AnimatePresence>
             <TransitionAnimation type={ TransitionAnimationTypes.FADE_IN } inProp={ isReady }>
                 <MainView />
             </TransitionAnimation>

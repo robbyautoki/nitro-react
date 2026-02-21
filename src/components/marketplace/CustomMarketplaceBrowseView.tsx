@@ -2,6 +2,7 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { GetSessionDataManager } from '../../api';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { CustomListingCard } from './CustomListingCard';
+import { ItemInfoModal } from './ItemInfoModal';
 import { CustomListing } from './CustomMarketplaceTypes';
 import { Search, Package, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 
@@ -19,6 +20,9 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
 
     const [ error, setError ] = useState('');
     const myUserId = GetSessionDataManager().userId;
+
+    // Info modal
+    const [ infoTarget, setInfoTarget ] = useState<CustomListing | null>(null);
 
     // Offer dialog
     const [ offerTarget, setOfferTarget ] = useState<CustomListing | null>(null);
@@ -175,10 +179,14 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
                             isMine={ listing.seller_id === myUserId }
                             onBuy={ () => handleBuy(listing) }
                             onOffer={ () => { setOfferTarget(listing); setOfferPrice(''); } }
+                            onInfo={ () => setInfoTarget(listing) }
                         />
                     )) }
                 </div>
             ) }
+
+            {/* Info Modal */}
+            { infoTarget && <ItemInfoModal listing={ infoTarget } onClose={ () => setInfoTarget(null) } /> }
 
             {/* Offer Dialog */}
             { offerTarget && (

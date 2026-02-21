@@ -78,7 +78,10 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             const response = await fetch(`${ cmsUrl }/api/inventory/items`, {
                 method: 'DELETE',
                 credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Habbo-User-Id': String(GetSessionDataManager().userId),
+                },
                 body: JSON.stringify({ itemIds }),
             });
 
@@ -120,7 +123,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
         {
             console.error('[Inventory] Delete failed:', err);
         }
-    }, [ selectedItem, setSelectedItem ]);
+    }, [ selectedItem, setSelectedItem, setGroupItems ]);
 
     const handleBatchAssign = useCallback(async (categoryId: number) =>
     {
@@ -406,12 +409,13 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                                 <Button size="sm" onClick={ event => attemptPlaceMarketplaceOffer(selectedItem) }>
                                     { LocalizeText('inventory.marketplace.sell') }
                                 </Button> }
-                            <Button variant="danger" size="sm" onClick={ () => {
-                                setDeleteTarget({ groupItem: selectedItem, maxCount: selectedItem.getUnlockedCount() });
-                                setShowDeleteDialog(true);
-                            } }>
-                                <FaTrash />
-                            </Button>
+                            { selectedItem.getUnlockedCount() > 0 &&
+                                <Button variant="danger" size="sm" onClick={ () => {
+                                    setDeleteTarget({ groupItem: selectedItem, maxCount: selectedItem.getUnlockedCount() });
+                                    setShowDeleteDialog(true);
+                                } }>
+                                    <FaTrash />
+                                </Button> }
                         </div>
                     </div>
                 </div> }

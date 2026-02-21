@@ -5,6 +5,20 @@ export interface CustomListingItem
     public_name: string;
     item_name: string;
     icon?: string;
+    limited_data?: string;
+}
+
+export interface ItemInfo
+{
+    item_base_id: number;
+    public_name: string;
+    item_name: string;
+    limited_data: string;
+    rarity_type: string | null;
+    in_circulation: number;
+    last_sale_price: number | null;
+    avg_price: number | null;
+    total_sales: number;
 }
 
 export interface CustomListing

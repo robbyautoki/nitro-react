@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { CustomListingCard } from './CustomListingCard';
+import { ItemInfoModal } from './ItemInfoModal';
 import { CustomListing } from './CustomMarketplaceTypes';
 import { Package, ShoppingBag } from 'lucide-react';
 
@@ -8,6 +9,7 @@ export const CustomMarketplaceMyListingsView: FC<{}> = () =>
 {
     const [ listings, setListings ] = useState<CustomListing[]>([]);
     const [ loading, setLoading ] = useState(true);
+    const [ infoTarget, setInfoTarget ] = useState<CustomListing | null>(null);
 
     const loadListings = useCallback(() =>
     {
@@ -53,9 +55,12 @@ export const CustomMarketplaceMyListingsView: FC<{}> = () =>
                         listing={ listing }
                         mode="own"
                         onCancel={ () => handleCancel(listing) }
+                        onInfo={ () => setInfoTarget(listing) }
                     />
                 )) }
             </div>
+
+            { infoTarget && <ItemInfoModal listing={ infoTarget } onClose={ () => setInfoTarget(null) } /> }
         </div>
     );
 };

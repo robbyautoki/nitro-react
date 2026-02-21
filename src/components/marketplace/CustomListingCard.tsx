@@ -1,7 +1,7 @@
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { GetConfiguration } from '../../api';
 import { CustomListing } from './CustomMarketplaceTypes';
-import { Coins, Clock, MessageSquare, Package, User } from 'lucide-react';
+import { Coins, Clock, MessageSquare, Package, User, Info } from 'lucide-react';
 
 const CURRENCY_COLORS: Record<string, string> = {
     credits: 'text-amber-400/80',
@@ -32,6 +32,16 @@ function timeLeft(expiresAt: string): string
     return hours > 0 ? `${ hours }h ${ mins }m` : `${ mins }m`;
 }
 
+function parseLtd(limitedData?: string): { num: number; total: number } | null
+{
+    if(!limitedData || limitedData === '0:0') return null;
+    const parts = limitedData.split(':');
+    if(parts.length !== 2) return null;
+    const num = parseInt(parts[0]);
+    const total = parseInt(parts[1]);
+    return (num > 0 && total > 0) ? { num, total } : null;
+}
+
 interface Props
 {
     listing: CustomListing;
@@ -40,17 +50,19 @@ interface Props
     onBuy?: () => void;
     onCancel?: () => void;
     onOffer?: () => void;
+    onInfo?: () => void;
 }
 
-export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onCancel, onOffer }) =>
+export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onCancel, onOffer, onInfo }) =>
 {
     const mainItem = listing.items[0];
+    const ltd = mainItem ? parseLtd(mainItem.limited_data) : null;
     const currColor = CURRENCY_COLORS[listing.currency] || 'text-white/60';
 
     return (
         <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all group">
             {/* Item Image */}
-            <div className="w-11 h-11 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="relative w-11 h-11 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0 overflow-hidden">
                 { mainItem ? (
                     <img
                         src={ getFurniIcon(mainItem.item_name) }
@@ -60,6 +72,11 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
                     />
                 ) : (
                     <Package className="size-4 text-white/20" />
+                ) }
+                { ltd && (
+                    <div className="absolute -top-1 -right-1 px-1 py-0.5 rounded text-[8px] font-bold bg-amber-500/90 text-black leading-none">
+                        { ltd.num }/{ ltd.total }
+                    </div>
                 ) }
             </div>
 
@@ -117,6 +134,15 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
 
             {/* Actions */}
             <div className="flex items-center gap-1.5 shrink-0">
+                { onInfo && (
+                    <button
+                        className="h-7 w-7 rounded-lg bg-white/[0.06] text-white/40 hover:text-white/80 hover:bg-white/10 transition-all flex items-center justify-center"
+                        onClick={ onInfo }
+                        title="Info"
+                    >
+                        <Info className="size-3.5" />
+                    </button>
+                ) }
                 { mode === 'browse' && isMine && (
                     <span className="h-7 px-2.5 rounded-lg bg-white/[0.06] text-white/30 text-[11px] font-medium flex items-center">
                         Dein Angebot

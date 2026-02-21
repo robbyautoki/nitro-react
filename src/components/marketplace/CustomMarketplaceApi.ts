@@ -71,4 +71,11 @@ export const CustomMarketplaceApi = {
             headers: headers(),
             body: JSON.stringify({ action: 'reject-offer', offer_id }),
         }).then(r => r.json()),
+
+    itemInfo: (item_base_id: number, item_id?: number) =>
+    {
+        const sp = new URLSearchParams({ action: 'item-info', item_base_id: String(item_base_id) });
+        if(item_id) sp.set('item_id', String(item_id));
+        return fetch(`${ getCmsUrl() }/api/marketplace?${ sp }`, { headers: headers() }).then(r => r.json());
+    },
 };

@@ -1,7 +1,8 @@
 import { ConfigurationEvent, GetAssetManager, HabboWebTools, LegacyExternalInterface, Nitro, NitroCommunicationDemoEvent, NitroConfiguration, NitroEvent, NitroLocalizationEvent, NitroVersion, RoomEngineEvent } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { GetCommunication, GetConfiguration, GetNitroInstance, GetUIVersion, initSessionToken } from './api';
 import { Base, TransitionAnimation, TransitionAnimationTypes } from './common';
+import { DisconnectOverlayView } from './components/disconnect-overlay/DisconnectOverlayView';
 import { LoadingView } from './components/loading/LoadingView';
 import { MainView } from './components/main/MainView';
 import { useConfigurationEvent, useLocalizationEvent, useMainEvent, useRoomEngineEvent } from './hooks';
@@ -13,9 +14,11 @@ export const App: FC<{}> = props =>
 {
     const [ isReady, setIsReady ] = useState(false);
     const [ isError, setIsError ] = useState(false);
+    const [ isDisconnected, setIsDisconnected ] = useState(false);
     const [ message, setMessage ] = useState('Getting Ready');
     const [ percent, setPercent ] = useState(0);
     const [ imageRendering, setImageRendering ] = useState<boolean>(true);
+    const isReadyRef = useRef(false);
 
     if(!GetNitroInstance())
     {
@@ -62,20 +65,37 @@ export const App: FC<{}> = props =>
                 if(LegacyExternalInterface.available) LegacyExternalInterface.call('legacyTrack', 'authentication', 'authok', []);
                 return;
             case NitroCommunicationDemoEvent.CONNECTION_ERROR:
-                setIsError(true);
-                setMessage('Connection Error');
+                if(isReadyRef.current)
+                {
+                    setIsDisconnected(true);
+                }
+                else
+                {
+                    setIsError(true);
+                    setMessage('Verbindungsfehler');
+                }
                 return;
             case NitroCommunicationDemoEvent.CONNECTION_CLOSED:
-                //if(GetNitroInstance().roomEngine) GetNitroInstance().roomEngine.dispose();
-                //setIsError(true);
-                setMessage('Connection Error');
+                if(isReadyRef.current)
+                {
+                    setIsDisconnected(true);
+                }
+                else
+                {
+                    setIsError(true);
+                    setMessage('Verbindung geschlossen');
+                }
 
                 HabboWebTools.send(-1, 'client.init.handshake.fail');
                 return;
             case RoomEngineEvent.ENGINE_INITIALIZED:
                 setPercent(prevValue => (prevValue + 20));
 
-                setTimeout(() => setIsReady(true), 300);
+                setTimeout(() =>
+                {
+                    isReadyRef.current = true;
+                    setIsReady(true);
+                }, 300);
                 return;
             case NitroLocalizationEvent.FAILED:
                 setIsError(true);
@@ -136,11 +156,11 @@ export const App: FC<{}> = props =>
     
     return (
         <Base fit overflow="hidden" className={ imageRendering && 'image-rendering-pixelated' }>
-            { isError &&
-                <LoadingView isError={ isError } message={ message } percent={ percent } /> }
-            <TransitionAnimation type={ TransitionAnimationTypes.FADE_IN } inProp={ (isReady) }>
+            { !isReady && <LoadingView isError={ isError } message={ message } percent={ percent } /> }
+            <TransitionAnimation type={ TransitionAnimationTypes.FADE_IN } inProp={ isReady }>
                 <MainView />
             </TransitionAnimation>
+            { isDisconnected && <DisconnectOverlayView /> }
             <Base id="draggable-windows-container" />
         </Base>
     );

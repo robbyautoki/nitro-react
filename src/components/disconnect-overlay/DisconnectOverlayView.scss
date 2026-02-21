@@ -1,0 +1,44 @@
+.nitro-disconnect-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .disconnect-box {
+        background: #1a1a2e;
+        border: 2px solid #e94560;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        color: white;
+        max-width: 400px;
+
+        .disconnect-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .disconnect-message {
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+
+        .disconnect-button {
+            background: #e94560;
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+
+            &:hover {
+                background: #c73a52;
+            }
+        }
+    }
+}

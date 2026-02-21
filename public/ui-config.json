@@ -3,7 +3,7 @@
     "achievements.images.url": "${image.library.url}Quests/%image%.png",
     "camera.url": "https://fedpajjcwqaqtifd.public.blob.vercel-storage.com/camera",
     "thumbnails.url": "https://assets.bahhos.de/usercontent/thumbnails/%thumbnail%.png",
-    "url.prefix": "https://bahhos.de",
+    "url.prefix": "https://www.bahhos.de",
     "habbopages.url": "${url.prefix}/",
     "group.homepage.url": "${url.prefix}/groups/%groupid%/id",
     "guide.help.alpha.groupid": 0,

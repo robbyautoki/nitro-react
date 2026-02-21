@@ -892,7 +892,7 @@ const useCatalogState = () =>
     {
         if(!currentOffer) return;
 
-        setPurchaseOptions({ quantity: 1, extraData: null, extraParamRequired: false, previewStuffData: null });
+        setPurchaseOptions(prev => ({ quantity: 1, extraData: null, extraParamRequired: false, previewStuffData: null, multiSelectMode: prev.multiSelectMode }));
     }, [ currentOffer ]);
 
     useEffect(() =>

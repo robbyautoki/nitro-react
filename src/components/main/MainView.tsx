@@ -37,6 +37,7 @@ import { RadioView } from '../radio/RadioView';
 import { PriceListView } from '../pricelist/PriceListView';
 import { WiredView } from '../wired/WiredView';
 import { RelationshipView } from '../relationship/RelationshipView';
+import { SetsView } from '../sets/SetsView';
 import { WinRewardView } from '../win/WinRewardView';
 import { WinNotification } from '../win/WinNotification';
 
@@ -118,6 +119,7 @@ export const MainView: FC<{}> = props =>
             <RelationshipView />
             <PriceListView />
             <WorkshopView />
+            <SetsView />
             <FriendsView />
             <RightSideView />
             <UserSettingsView />

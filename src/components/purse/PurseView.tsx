@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { CurrencyView } from './views/CurrencyView';
 import { LevelView } from './views/LevelView';
 import { SeasonalView } from './views/SeasonalView';
-import { Store, ClipboardList, Wrench } from 'lucide-react';
+import { Store, ClipboardList, Wrench, Trophy } from 'lucide-react';
 
 export const PurseView: FC<{}> = props =>
 {
@@ -165,6 +165,20 @@ export const PurseView: FC<{}> = props =>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
                         Werkstatt
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => CreateLinkEvent('sets/toggle') }
+                        >
+                            <Trophy className="size-4 text-white/90" strokeWidth={ 2 } />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        Sets
                     </TooltipContent>
                 </Tooltip>
 

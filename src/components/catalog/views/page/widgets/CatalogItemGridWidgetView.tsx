@@ -11,7 +11,7 @@ interface CatalogItemGridWidgetViewProps extends HTMLAttributes<HTMLDivElement>
 export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = props =>
 {
     const { children = null, className = '', ...rest } = props;
-    const { currentOffer = null, setCurrentOffer = null, currentPage = null, setPurchaseOptions = null } = useCatalog();
+    const { currentOffer = null, setCurrentOffer = null, currentPage = null, purchaseOptions = null, setPurchaseOptions = null } = useCatalog();
     const elementRef = useRef<HTMLDivElement>();
     const [ multiSelected, setMultiSelected ] = useState<Set<number>>(new Set());
 
@@ -54,7 +54,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = pro
 
         if(offer.isLazy) return;
 
-        if(event && (event.metaKey || event.ctrlKey))
+        if(purchaseOptions?.multiSelectMode || (event && (event.metaKey || event.ctrlKey)))
         {
             // Multi-select: toggle this offer
             setMultiSelected(prev =>

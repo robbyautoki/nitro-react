@@ -8,4 +8,5 @@ export interface IPurchaseOptions
     extraParamRequired?: boolean;
     previewStuffData?: IObjectData;
     selectedOffers?: IPurchasableOffer[];
+    multiSelectMode?: boolean;
 }

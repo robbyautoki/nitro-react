@@ -4,7 +4,7 @@ import { CatalogPurchaseState, CreateLinkEvent, DispatchUiEvent, GetClubMemberLe
 import { LayoutLoadingSpinnerView } from '../../../../../common';
 import { Button } from '../../../../ui/button';
 import { CatalogEvent, CatalogInitGiftEvent, CatalogPurchasedEvent, CatalogPurchaseFailureEvent, CatalogPurchaseNotAllowedEvent, CatalogPurchaseSoldOutEvent } from '../../../../../events';
-import { useCatalog, useCatalogPlaceMultipleItems, useLocalStorage, usePurse, useUiEvent } from '../../../../../hooks';
+import { useCatalog, useLocalStorage, usePurse, useUiEvent } from '../../../../../hooks';
 
 interface CatalogPurchaseWidgetViewProps
 {
@@ -22,7 +22,6 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     const batchActiveRef = useRef(false);
     const { currentOffer = null, currentPage = null, purchaseOptions = null, setPurchaseOptions = null } = useCatalog();
     const { getCurrencyAmount = null } = usePurse();
-    const [ catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjects ] = useCatalogPlaceMultipleItems();
 
     const onCatalogEvent = useCallback((event: CatalogEvent) =>
     {
@@ -299,12 +298,12 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                     { LocalizeText('catalog.purchase_confirmation.gift') } →
                 </Button> }
             <Button
-                variant={ catalogPlaceMultipleObjects ? 'default' : 'ghost' }
+                variant={ purchaseOptions?.multiSelectMode ? 'default' : 'ghost' }
                 size="sm"
-                className={ 'w-full text-xs ' + (catalogPlaceMultipleObjects ? 'text-white' : 'text-white/50 hover:text-white/80') }
-                onClick={ () => setCatalogPlaceMultipleObjects(!catalogPlaceMultipleObjects) }
+                className={ 'w-full text-xs ' + (purchaseOptions?.multiSelectMode ? 'text-white' : 'text-white/50 hover:text-white/80') }
+                onClick={ () => setPurchaseOptions(prev => ({ ...prev, multiSelectMode: !prev.multiSelectMode })) }
             >
-                Mehrfach auswählen { catalogPlaceMultipleObjects ? '✓' : '' }
+                Mehrfach auswählen { purchaseOptions?.multiSelectMode ? '✓' : '' }
             </Button>
         </div>
     );

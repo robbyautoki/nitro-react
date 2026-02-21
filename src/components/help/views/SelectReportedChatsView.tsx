@@ -1,10 +1,10 @@
 import { RoomObjectType } from '@nitrots/nitro-renderer';
 import { FC, useMemo, useState } from 'react';
+import { MessageSquare, Check } from 'lucide-react';
 import { ChatEntryType, IChatEntry, LocalizeText, ReportState, ReportType } from '../../../api';
-import { AutoGrid, Button, Column, Flex, LayoutGridItem, Text } from '../../../common';
 import { useChatHistory, useHelp } from '../../../hooks';
 
-export const SelectReportedChatsView: FC<{}> = props =>
+export const SelectReportedChatsView: FC<{}> = () =>
 {
     const [ selectedChats, setSelectedChats ] = useState<IChatEntry[]>([]);
     const { activeReport = null, setActiveReport = null } = useHelp();
@@ -26,9 +26,9 @@ export const SelectReportedChatsView: FC<{}> = props =>
 
     const selectChat = (chatEntry: IChatEntry) =>
     {
-        setSelectedChats(prevValue =>
+        setSelectedChats(prev =>
         {
-            const newValue = [ ...prevValue ];
+            const newValue = [ ...prev ];
             const index = newValue.indexOf(chatEntry);
 
             if(index >= 0) newValue.splice(index, 1);
@@ -36,55 +36,73 @@ export const SelectReportedChatsView: FC<{}> = props =>
 
             return newValue;
         });
-    }
+    };
 
     const submitChats = () =>
     {
-        if(!selectedChats || (selectedChats.length <= 0)) return;
+        if(!selectedChats || selectedChats.length <= 0) return;
 
-        setActiveReport(prevValue =>
-        {
-            return { ...prevValue, reportedChats: selectedChats, currentStep: ReportState.SELECT_TOPICS };
-        });
-    }
-
-    const back = () =>
-    {
-        setActiveReport(prevValue =>
-        {
-            return { ...prevValue, currentStep: (prevValue.currentStep - 1) };
-        });
-    }
+        setActiveReport(prev => ({
+            ...prev,
+            reportedChats: selectedChats,
+            currentStep: ReportState.SELECT_TOPICS,
+        }));
+    };
 
     return (
-        <>
-            <Column gap={ 1 }>
-                <Text fontSize={ 4 }>{ LocalizeText('help.emergency.chat_report.subtitle') }</Text>
-                <Text>{ LocalizeText('help.emergency.chat_report.description') }</Text>
-            </Column>
-            <Column gap={ 1 } overflow="hidden">
-                { !userChats || !userChats.length &&
-                    <Text>{ LocalizeText('help.cfh.error.no_user_data') }</Text> }
-                { (userChats.length > 0) &&
-                    <AutoGrid gap={ 1 } columnCount={ 1 } columnMinHeight={ 25 } overflow="auto">
-                        { userChats.map((chat, index) =>
-                        {
-                            return (
-                                <LayoutGridItem key={ chat.id } onClick={ event => selectChat(chat) } itemActive={ (selectedChats.indexOf(chat) >= 0) }>
-                                    <Text>{ chat.message }</Text>
-                                </LayoutGridItem>
-                            );
-                        }) }
-                    </AutoGrid> }
-            </Column>
-            <Flex gap={ 2 } justifyContent="between">
-                <Button variant="secondary" onClick={ back } disabled={ (activeReport.reportType === ReportType.IM) }>
-                    { LocalizeText('generic.back') }
-                </Button>
-                <Button disabled={ (selectedChats.length <= 0) } onClick={ submitChats }>
-                    { LocalizeText('help.emergency.main.submit.button') }
-                </Button>
-            </Flex>
-        </>
+        <div className="space-y-4">
+            <div>
+                <p className="text-xs text-white/40 mb-3">Waehle die Nachrichten, die du melden moechtest</p>
+            </div>
+
+            { (!userChats || !userChats.length) && (
+                <div className="px-4 py-6 rounded-xl border border-white/[0.06] bg-white/[0.03] text-center">
+                    <p className="text-sm text-white/40">Keine Nachrichten gefunden.</p>
+                </div>
+            ) }
+
+            { userChats.length > 0 && (
+                <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
+                    { userChats.map(chat =>
+                    {
+                        const isSelected = selectedChats.indexOf(chat) >= 0;
+
+                        return (
+                            <button
+                                key={ chat.id }
+                                className={ `w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all text-left ${
+                                    isSelected
+                                        ? 'border-blue-500/30 bg-blue-500/10'
+                                        : 'border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.1]'
+                                }` }
+                                onClick={ () => selectChat(chat) }
+                            >
+                                <div className={ `shrink-0 size-5 rounded-md border flex items-center justify-center transition-all ${
+                                    isSelected
+                                        ? 'border-blue-500/50 bg-blue-500/20 text-blue-400'
+                                        : 'border-white/[0.1] bg-white/[0.03]'
+                                }` }>
+                                    { isSelected && <Check className="size-3" /> }
+                                </div>
+                                <div className="flex items-center gap-2 min-w-0">
+                                    <MessageSquare className="size-3.5 text-white/30 shrink-0" />
+                                    <span className="text-sm text-white/70 truncate">{ chat.message }</span>
+                                </div>
+                            </button>
+                        );
+                    }) }
+                </div>
+            ) }
+
+            <div className="flex justify-end pt-2">
+                <button
+                    className="px-4 py-2 rounded-xl text-sm font-medium transition-all bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:bg-blue-500/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                    disabled={ selectedChats.length <= 0 }
+                    onClick={ submitChats }
+                >
+                    Weiter
+                </button>
+            </div>
+        </div>
     );
-}
+};

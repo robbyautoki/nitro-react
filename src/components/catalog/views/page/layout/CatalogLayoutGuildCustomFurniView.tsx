@@ -4,7 +4,7 @@ import { CatalogGuildSelectorWidgetView } from '../widgets/CatalogGuildSelectorW
 import { CatalogItemGridWidgetView } from '../widgets/CatalogItemGridWidgetView';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
-export const CatalogLayouGuildCustomFurniView: FC<CatalogLayoutProps> = props =>
+export const CatalogLayoutGuildCustomFurniView: FC<CatalogLayoutProps> = props =>
 {
     const { page = null } = props;
     const { currentOffer = null } = useCatalog();

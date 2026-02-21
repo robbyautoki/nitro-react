@@ -5,9 +5,17 @@ import { LayoutGridItem } from '../../../../common';
 import { useInventoryFurni } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
 
-export const InventoryFurnitureItemView: FC<{ groupItem: GroupItem }> = props =>
+interface InventoryFurnitureItemViewProps
 {
-    const { groupItem = null, ...rest } = props;
+    groupItem: GroupItem;
+    multiSelectMode?: boolean;
+    isMultiSelected?: boolean;
+    onMultiToggle?: (type: number) => void;
+}
+
+export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = props =>
+{
+    const { groupItem = null, multiSelectMode = false, isMultiSelected = false, onMultiToggle = null, ...rest } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
     const [ contextMenu, setContextMenu ] = useState<{ x: number; y: number } | null>(null);
     const { selectedItem = null, setSelectedItem = null } = useInventoryFurni();
@@ -16,6 +24,16 @@ export const InventoryFurnitureItemView: FC<{ groupItem: GroupItem }> = props =>
 
     const onMouseEvent = (event: MouseEvent) =>
     {
+        if(multiSelectMode)
+        {
+            if(event.type === MouseEventType.MOUSE_DOWN && onMultiToggle)
+            {
+                onMultiToggle(groupItem.type);
+            }
+
+            return;
+        }
+
         switch(event.type)
         {
             case MouseEventType.MOUSE_DOWN:
@@ -75,19 +93,24 @@ export const InventoryFurnitureItemView: FC<{ groupItem: GroupItem }> = props =>
     return (
         <>
             <LayoutGridItem
-                className={ !count ? 'opacity-0-5 ' : '' }
+                className={ (!count ? 'opacity-0-5 ' : '') + (multiSelectMode && isMultiSelected ? 'inv-multi-selected ' : '') }
                 itemImage={ groupItem.iconUrl }
                 itemCount={ groupItem.getUnlockedCount() }
-                itemActive={ (groupItem === selectedItem) }
+                itemActive={ multiSelectMode ? isMultiSelected : (groupItem === selectedItem) }
                 itemUniqueNumber={ groupItem.stuffData.uniqueNumber }
                 itemUnseen={ groupItem.hasUnseenItems }
                 onMouseDown={ onMouseEvent }
                 onMouseUp={ onMouseEvent }
                 onMouseOut={ onMouseEvent }
                 onDoubleClick={ onMouseEvent }
-                onContextMenu={ onContextMenu }
+                onContextMenu={ multiSelectMode ? undefined : onContextMenu }
                 { ...rest }
-            />
+            >
+                { multiSelectMode &&
+                    <div className={ 'inv-multi-check' + (isMultiSelected ? ' checked' : '') }>
+                        { isMultiSelected && '✓' }
+                    </div> }
+            </LayoutGridItem>
             { contextMenu && categories.length > 0 && (
                 <div
                     ref={ contextRef }

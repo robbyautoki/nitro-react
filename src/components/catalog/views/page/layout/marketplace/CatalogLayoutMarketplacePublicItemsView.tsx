@@ -134,13 +134,13 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     return (
         <div className="flex flex-col h-full gap-2">
             <div className="flex gap-1">
-                <button className={`appearance-none px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'bg-foreground text-background' : 'bg-transparent border border-border text-muted-foreground hover:bg-accent' }`} onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
+                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'bg-white/[0.12] text-white/90 border-white/[0.15]' : 'bg-transparent text-white/40 border-transparent hover:text-white/60 hover:bg-white/[0.05]' }` } onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
                     { LocalizeText('catalog.marketplace.search_by_activity') }
                 </button>
-                <button className={`appearance-none px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${ searchType === MarketplaceSearchType.BY_VALUE ? 'bg-foreground text-background' : 'bg-transparent border border-border text-muted-foreground hover:bg-accent' }`} onClick={ () => setSearchType(MarketplaceSearchType.BY_VALUE) }>
+                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.BY_VALUE ? 'bg-white/[0.12] text-white/90 border-white/[0.15]' : 'bg-transparent text-white/40 border-transparent hover:text-white/60 hover:bg-white/[0.05]' }` } onClick={ () => setSearchType(MarketplaceSearchType.BY_VALUE) }>
                     { LocalizeText('catalog.marketplace.search_by_value') }
                 </button>
-                <button className={`appearance-none px-3 py-1.5 text-xs rounded-lg font-medium transition-colors ${ searchType === MarketplaceSearchType.ADVANCED ? 'bg-foreground text-background' : 'bg-transparent border border-border text-muted-foreground hover:bg-accent' }`} onClick={ () => setSearchType(MarketplaceSearchType.ADVANCED) }>
+                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.ADVANCED ? 'bg-white/[0.12] text-white/90 border-white/[0.15]' : 'bg-transparent text-white/40 border-transparent hover:text-white/60 hover:bg-white/[0.05]' }` } onClick={ () => setSearchType(MarketplaceSearchType.ADVANCED) }>
                     { LocalizeText('catalog.marketplace.search_advanced') }
                 </button>
             </div>

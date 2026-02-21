@@ -68,6 +68,11 @@
         a {
             color: rgba(56, 189, 248, 0.80) !important;
             text-decoration: underline;
+            cursor: pointer;
+
+            &:hover {
+                color: rgba(56, 189, 248, 1) !important;
+            }
         }
 
         br + br {

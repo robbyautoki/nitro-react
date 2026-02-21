@@ -2,7 +2,8 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { ClipboardList, Search, Loader2 } from 'lucide-react';
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
-import { AddEventLinkTracker, GetConfiguration, RemoveLinkEventTracker } from '../../api';
+import { AddEventLinkTracker, GetConfiguration, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
+import { LayoutFurniImageView } from '../../common';
 
 interface PriceListItem
 {
@@ -15,6 +16,7 @@ interface PriceListItem
     rarityDisplayName: string | null;
     circulation: number;
     setName: string | null;
+    productType: string;
 }
 
 const RARITY_TABS = [
@@ -85,7 +87,17 @@ export const PriceListView: FC<{}> = () =>
             const response = await fetch(`${ cmsUrl }/api/pricelist?${ params.toString() }`);
             const data = await response.json();
 
-            setItems(data.items || []);
+            const resolvedItems = (data.items || []).map((item: PriceListItem) =>
+            {
+                const floorData = GetSessionDataManager().getFloorItemData(item.itemBaseId);
+                const wallData = !floorData ? GetSessionDataManager().getWallItemData(item.itemBaseId) : null;
+                const displayName = floorData?.name || wallData?.name || item.name;
+                const productType = floorData ? 's' : 'i';
+
+                return { ...item, name: displayName, productType };
+            });
+
+            setItems(resolvedItems);
             setTotalPages(data.totalPages || 1);
         }
         catch
@@ -173,6 +185,9 @@ export const PriceListView: FC<{}> = () =>
                             <div className="space-y-1">
                                 { items.map(item => (
                                     <div key={ item.itemBaseId } className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.04] transition-colors">
+                                        <div className="w-10 h-10 shrink-0 flex items-center justify-center bg-white/[0.06] rounded-md overflow-hidden">
+                                            <LayoutFurniImageView productType={ item.productType } productClassId={ item.spriteId } scale={ 0.5 } />
+                                        </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="text-sm font-medium text-white/90 truncate">{ item.name }</div>
                                             <div className="flex items-center gap-2 mt-0.5">

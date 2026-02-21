@@ -6,11 +6,11 @@ import { Search, TrendingUp, TrendingDown, Minus, Coins, BarChart3 } from 'lucid
 
 const priceChartConfig: ChartConfig = {
     averagePrice: {
-        label: 'Avg Price',
+        label: 'Ø Preis',
         color: 'rgb(52, 211, 153)',
     },
     soldAmount: {
-        label: 'Sold',
+        label: 'Verkauft',
         color: 'rgb(96, 165, 250)',
     },
 };
@@ -54,21 +54,21 @@ export const MarketplacePriceChartView: FC<{}> = () =>
         <div className="flex flex-col gap-4">
             {/* Search */}
             <div className="flex flex-col gap-2">
-                <span className="text-[11px] text-white/40">Look up price history for a furniture item</span>
+                <span className="text-[11px] text-white/40">Preisverlauf für ein Möbelstück nachschlagen</span>
                 <div className="flex items-center gap-2">
                     <select
                         className="h-7 px-2 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 outline-none"
                         value={ furniType }
                         onChange={ e => setFurniType(parseInt(e.target.value)) }
                     >
-                        <option value={ 1 } className="bg-zinc-900">Floor Item</option>
-                        <option value={ 2 } className="bg-zinc-900">Wall Item</option>
+                        <option value={ 1 } className="bg-zinc-900">Bodenmöbel</option>
+                        <option value={ 2 } className="bg-zinc-900">Wandmöbel</option>
                     </select>
                     <input
                         className="flex-1 h-7 px-2.5 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 placeholder-white/30 outline-none focus:border-white/20"
                         type="number"
                         min={ 1 }
-                        placeholder="Furniture ID"
+                        placeholder="Möbel-ID"
                         value={ furniIdInput }
                         onChange={ e => setFurniIdInput(e.target.value) }
                         onKeyDown={ e => e.key === 'Enter' && doSearch() }
@@ -78,7 +78,7 @@ export const MarketplacePriceChartView: FC<{}> = () =>
                         onClick={ doSearch }
                     >
                         <Search className="size-3" />
-                        Lookup
+                        Suchen
                     </button>
                 </div>
             </div>
@@ -86,7 +86,7 @@ export const MarketplacePriceChartView: FC<{}> = () =>
             { !itemStats && (
                 <div className="flex flex-col items-center justify-center py-12 text-white/20">
                     <BarChart3 className="size-10 mb-2" />
-                    <span className="text-xs">Enter a furniture ID to see price history</span>
+                    <span className="text-xs">Gib eine Möbel-ID ein um den Preisverlauf zu sehen</span>
                 </div>
             ) }
 
@@ -97,11 +97,11 @@ export const MarketplacePriceChartView: FC<{}> = () =>
                         <div className="flex flex-col items-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                             <Coins className="size-4 text-amber-400/60 mb-1" />
                             <span className="text-sm font-semibold text-white/90">{ itemStats.averagePrice.toLocaleString() }</span>
-                            <span className="text-[10px] text-white/30">Avg Price</span>
+                            <span className="text-[10px] text-white/30">Ø Preis</span>
                         </div>
                         <div className="flex flex-col items-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                             <span className="text-sm font-semibold text-white/90">{ itemStats.offerCount }</span>
-                            <span className="text-[10px] text-white/30 mt-1">Active Offers</span>
+                            <span className="text-[10px] text-white/30 mt-1">Aktive Angebote</span>
                         </div>
                         <div className="flex flex-col items-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
                             { trend > 0 && <TrendingUp className="size-4 text-emerald-400/60 mb-1" /> }
@@ -117,7 +117,7 @@ export const MarketplacePriceChartView: FC<{}> = () =>
                     {/* Price Chart */}
                     { chartData.length > 0 && (
                         <div className="flex flex-col gap-2">
-                            <span className="text-[11px] font-medium text-white/50">Price History</span>
+                            <span className="text-[11px] font-medium text-white/50">Preisverlauf</span>
                             <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3">
                                 <ChartContainer config={ priceChartConfig } className="h-[200px] w-full">
                                     <AreaChart data={ chartData } margin={ { top: 5, right: 5, left: 0, bottom: 0 } }>
@@ -147,7 +147,7 @@ export const MarketplacePriceChartView: FC<{}> = () =>
                     {/* Volume Chart */}
                     { chartData.length > 0 && (
                         <div className="flex flex-col gap-2">
-                            <span className="text-[11px] font-medium text-white/50">Sales Volume</span>
+                            <span className="text-[11px] font-medium text-white/50">Verkaufsvolumen</span>
                             <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3">
                                 <ChartContainer config={ priceChartConfig } className="h-[120px] w-full">
                                     <BarChart data={ chartData } margin={ { top: 5, right: 5, left: 0, bottom: 0 } }>

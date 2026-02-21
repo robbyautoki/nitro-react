@@ -4,7 +4,7 @@ import { LayoutImage } from '../../../../../common/layout/LayoutImage';
 import { Button } from '../../../../ui/button';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
-export const CatalogLayouGuildFrontpageView: FC<CatalogLayoutProps> = props =>
+export const CatalogLayoutGuildFrontpageView: FC<CatalogLayoutProps> = props =>
 {
     const { page = null } = props;
 

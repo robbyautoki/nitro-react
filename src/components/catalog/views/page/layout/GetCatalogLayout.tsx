@@ -3,9 +3,9 @@ import { CatalogLayoutProps } from './CatalogLayout.types';
 import { CatalogLayoutBadgeDisplayView } from './CatalogLayoutBadgeDisplayView';
 import { CatalogLayoutColorGroupingView } from './CatalogLayoutColorGroupingView';
 import { CatalogLayoutDefaultView } from './CatalogLayoutDefaultView';
-import { CatalogLayouGuildCustomFurniView } from './CatalogLayoutGuildCustomFurniView';
-import { CatalogLayouGuildForumView } from './CatalogLayoutGuildForumView';
-import { CatalogLayouGuildFrontpageView } from './CatalogLayoutGuildFrontpageView';
+import { CatalogLayoutGuildCustomFurniView } from './CatalogLayoutGuildCustomFurniView';
+import { CatalogLayoutGuildForumView } from './CatalogLayoutGuildForumView';
+import { CatalogLayoutGuildFrontpageView } from './CatalogLayoutGuildFrontpageView';
 import { CatalogLayoutInfoLoyaltyView } from './CatalogLayoutInfoLoyaltyView';
 import { CatalogLayoutPets2View } from './CatalogLayoutPets2View';
 import { CatalogLayoutPets3View } from './CatalogLayoutPets3View';
@@ -20,6 +20,7 @@ import { CatalogLayoutFrontpage4View } from './frontpage4/CatalogLayoutFrontpage
 import { CatalogLayoutMarketplaceOwnItemsView } from './marketplace/CatalogLayoutMarketplaceOwnItemsView';
 import { CatalogLayoutMarketplacePublicItemsView } from './marketplace/CatalogLayoutMarketplacePublicItemsView';
 import { CatalogLayoutPetView } from './pets/CatalogLayoutPetView';
+import { CatalogLayoutSetsStartView, CatalogLayoutSetsDetailView } from './CatalogLayoutSetsView';
 import { CatalogLayoutVipGiftsView } from './vip-gifts/CatalogLayoutVipGiftsView';
 
 export const GetCatalogLayout = (page: ICatalogPage, hideNavigation: () => void) =>
@@ -28,10 +29,19 @@ export const GetCatalogLayout = (page: ICatalogPage, hideNavigation: () => void)
 
     const layoutProps: CatalogLayoutProps = { page, hideNavigation };
 
+    // Sets overview page (ID 9998) - first child, auto-selected
+    if(page.pageId === 9998) return <CatalogLayoutSetsStartView { ...layoutProps } />;
+
+    // Sets detail pages (ID >= 10000, children of 9999)
+    if(page.pageId >= 10000)
+    {
+        const text1 = page.localization?.getText(0) || '';
+        if(text1 && !isNaN(Number(text1))) return <CatalogLayoutSetsDetailView { ...layoutProps } />;
+    }
+
     switch(page.layoutCode)
     {
         case 'frontpage_featured':
-            return null
         case 'frontpage4':
             return <CatalogLayoutFrontpage4View { ...layoutProps } />;
         case 'pets':
@@ -43,11 +53,11 @@ export const GetCatalogLayout = (page: ICatalogPage, hideNavigation: () => void)
         case 'vip_buy':
             return <CatalogLayoutVipBuyView { ...layoutProps } />;
         case 'guild_frontpage':
-            return <CatalogLayouGuildFrontpageView { ...layoutProps } />;
+            return <CatalogLayoutGuildFrontpageView { ...layoutProps } />;
         case 'guild_forum':
-            return <CatalogLayouGuildForumView { ...layoutProps } />;
+            return <CatalogLayoutGuildForumView { ...layoutProps } />;
         case 'guild_custom_furni':
-            return <CatalogLayouGuildCustomFurniView { ...layoutProps } />;
+            return <CatalogLayoutGuildCustomFurniView { ...layoutProps } />;
         case 'club_gifts':
             return <CatalogLayoutVipGiftsView { ...layoutProps } />;
         case 'marketplace_own_items':

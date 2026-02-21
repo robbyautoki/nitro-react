@@ -1,5 +1,5 @@
 import { PurchaseFromCatalogComposer } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CatalogPurchaseState, CreateLinkEvent, DispatchUiEvent, GetClubMemberLevel, LocalizeText, LocalStorageKeys, Offer, SendMessageComposer } from '../../../../../api';
 import { LayoutLoadingSpinnerView } from '../../../../../common';
 import { Button } from '../../../../ui/button';
@@ -18,6 +18,8 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     const [ purchaseWillBeGift, setPurchaseWillBeGift ] = useState(false);
     const [ purchaseState, setPurchaseState ] = useState(CatalogPurchaseState.NONE);
     const [ catalogSkipPurchaseConfirmation, setCatalogSkipPurchaseConfirmation ] = useLocalStorage(LocalStorageKeys.CATALOG_SKIP_PURCHASE_CONFIRMATION, false);
+    const [ batchProgress, setBatchProgress ] = useState<{ total: number; sent: number } | null>(null);
+    const batchActiveRef = useRef(false);
     const { currentOffer = null, currentPage = null, purchaseOptions = null, setPurchaseOptions = null } = useCatalog();
     const { getCurrencyAmount = null } = usePurse();
 
@@ -26,7 +28,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
         switch(event.type)
         {
             case CatalogPurchasedEvent.PURCHASE_SUCCESS:
-                setPurchaseState(CatalogPurchaseState.NONE);
+                if(!batchActiveRef.current) setPurchaseState(CatalogPurchaseState.NONE);
                 return;
             case CatalogPurchaseFailureEvent.PURCHASE_FAILED:
                 setPurchaseState(CatalogPurchaseState.FAILED);
@@ -122,6 +124,34 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
         }
     }, [ purchaseState ]);
 
+    const selectedOffers = purchaseOptions?.selectedOffers;
+    const isMultiBuy = selectedOffers && selectedOffers.length > 1;
+
+    const batchPurchase = () =>
+    {
+        if(!selectedOffers || !currentPage) return;
+
+        setPurchaseState(CatalogPurchaseState.PURCHASE);
+        batchActiveRef.current = true;
+        setBatchProgress({ total: selectedOffers.length, sent: 0 });
+
+        selectedOffers.forEach((offer, index) =>
+        {
+            setTimeout(() =>
+            {
+                SendMessageComposer(new PurchaseFromCatalogComposer(offer.page.pageId, offer.offerId, '', 1));
+                setBatchProgress(prev => prev ? { ...prev, sent: prev.sent + 1 } : null);
+            }, index * 500);
+        });
+
+        setTimeout(() =>
+        {
+            setPurchaseState(CatalogPurchaseState.NONE);
+            setBatchProgress(null);
+            batchActiveRef.current = false;
+        }, selectedOffers.length * 500 + 500);
+    };
+
     if(!currentOffer) return null;
 
     const priceCredits = (currentOffer.priceInCredits * purchaseOptions.quantity);
@@ -130,8 +160,8 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     const getPriceLabel = () =>
     {
         const parts: string[] = [];
-        if(priceCredits > 0) parts.push(`${ priceCredits } Credits`);
-        if(pricePoints > 0) parts.push(`${ pricePoints } Diamonds`);
+        if(priceCredits > 0) parts.push(`${ priceCredits } ${ LocalizeText('catalog.purchase.credits') }`);
+        if(pricePoints > 0) parts.push(`${ pricePoints } ${ LocalizeText('catalog.purchase.diamonds') }`);
         return parts.join(' + ');
     };
 
@@ -214,6 +244,44 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                     </Button>
                 );
         }
+    }
+
+    if(isMultiBuy)
+    {
+        const totalCredits = selectedOffers.reduce((sum, o) => sum + o.priceInCredits, 0);
+        const totalPoints = selectedOffers.reduce((sum, o) => sum + o.priceInActivityPoints, 0);
+
+        const batchPriceLabel = () =>
+        {
+            const parts: string[] = [];
+            if(totalCredits > 0) parts.push(`${ totalCredits } ${ LocalizeText('catalog.purchase.credits') }`);
+            if(totalPoints > 0) parts.push(`${ totalPoints } ${ LocalizeText('catalog.purchase.diamonds') }`);
+            return parts.join(' + ');
+        };
+
+        return (
+            <div className="flex flex-col gap-1.5 w-full">
+                <Button
+                    variant="success"
+                    className="w-full"
+                    size="sm"
+                    onClick={ batchPurchase }
+                    disabled={ purchaseState === CatalogPurchaseState.PURCHASE }
+                >
+                    { (purchaseState === CatalogPurchaseState.PURCHASE && batchProgress) ? (
+                        <span className="flex flex-col items-center leading-none gap-0.5">
+                            <span className="text-xs font-semibold">{ batchProgress.sent }/{ batchProgress.total }</span>
+                            <span className="text-[10px] opacity-70">Kaufe...</span>
+                        </span>
+                    ) : (
+                        <span className="flex flex-col items-center leading-none gap-0.5">
+                            <span className="text-xs font-semibold">{ selectedOffers.length } Items kaufen</span>
+                            { batchPriceLabel() && <span className="text-[10px] opacity-70">{ batchPriceLabel() }</span> }
+                        </span>
+                    ) }
+                </Button>
+            </div>
+        );
     }
 
     return (

@@ -13,6 +13,7 @@ export const LayoutRoomPreviewerView: FC<LayoutRoomPreviewerViewProps> = props =
     const { roomPreviewer = null, height = 0, children = null } = props;
     const [ renderingCanvas, setRenderingCanvas ] = useState<IRoomRenderingCanvas>(null);
     const elementRef = useRef<HTMLDivElement>();
+    const canvasRef = useRef<IRoomRenderingCanvas>(null);
 
     const onClick = (event: MouseEvent<HTMLDivElement>) =>
     {
@@ -28,44 +29,47 @@ export const LayoutRoomPreviewerView: FC<LayoutRoomPreviewerViewProps> = props =
 
         const update = (time: number) =>
         {
-            if(!roomPreviewer || !renderingCanvas || !elementRef.current) return;
+            if(!roomPreviewer || !canvasRef.current || !elementRef.current) return;
         
             roomPreviewer.updatePreviewRoomView();
 
-            if(!renderingCanvas.canvasUpdated) return;
+            if(!canvasRef.current.canvasUpdated) return;
 
-            elementRef.current.style.backgroundImage = `url(${ TextureUtils.generateImageUrl(renderingCanvas.master) })`;
+            elementRef.current.style.backgroundImage = `url(${ TextureUtils.generateImageUrl(canvasRef.current.master) })`;
         }
 
-        if(!renderingCanvas)
+        const tryInit = (width: number) =>
         {
-            if(elementRef.current && roomPreviewer)
-            {
-                const computed = document.defaultView.getComputedStyle(elementRef.current, null);
+            if(canvasRef.current || !elementRef.current || !roomPreviewer) return;
+            if(width < 10) return;
 
-                let backgroundColor = computed.backgroundColor;
+            const computed = document.defaultView.getComputedStyle(elementRef.current, null);
 
-                try {
-                    backgroundColor = ColorConverter.rgbStringToHex(backgroundColor);
-                } catch {
-                    backgroundColor = '#111114';
-                }
-                backgroundColor = backgroundColor.replace('#', '0x');
+            let backgroundColor = computed.backgroundColor;
 
-                roomPreviewer.backgroundColor = parseInt(backgroundColor, 16);
-
-                const width = elementRef.current.parentElement.clientWidth;
-                
-                roomPreviewer.getRoomCanvas(width, height);
-
-                const canvas = roomPreviewer.getRenderingCanvas();
-
-                setRenderingCanvas(canvas);
-
-                canvas.canvasUpdated = true;
-
-                update(-1);
+            try {
+                backgroundColor = ColorConverter.rgbStringToHex(backgroundColor);
+            } catch {
+                backgroundColor = '#111114';
             }
+            backgroundColor = backgroundColor.replace('#', '0x');
+
+            roomPreviewer.backgroundColor = parseInt(backgroundColor, 16);
+
+            roomPreviewer.getRoomCanvas(width, height);
+
+            const canvas = roomPreviewer.getRenderingCanvas();
+
+            canvasRef.current = canvas;
+            setRenderingCanvas(canvas);
+
+            canvas.canvasUpdated = true;
+            update(-1);
+        };
+
+        if(!canvasRef.current && elementRef.current)
+        {
+            tryInit(elementRef.current.parentElement.clientWidth);
         }
 
         GetTicker().add(update);
@@ -76,9 +80,17 @@ export const LayoutRoomPreviewerView: FC<LayoutRoomPreviewerViewProps> = props =
 
             const width = elementRef.current.parentElement.offsetWidth;
 
-            roomPreviewer.modifyRoomCanvas(width, height);
+            if(width < 10) return;
 
-            update(-1);
+            if(!canvasRef.current)
+            {
+                tryInit(width);
+            }
+            else
+            {
+                roomPreviewer.modifyRoomCanvas(width, height);
+                update(-1);
+            }
         });
         
         resizeObserver.observe(elementRef.current);
@@ -90,7 +102,7 @@ export const LayoutRoomPreviewerView: FC<LayoutRoomPreviewerViewProps> = props =
             GetTicker().remove(update);
         }
 
-    }, [ renderingCanvas, roomPreviewer, elementRef, height ]);
+    }, [ roomPreviewer, elementRef, height ]);
 
     return (
         <div className="room-preview-container">

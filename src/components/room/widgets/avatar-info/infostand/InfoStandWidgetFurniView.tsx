@@ -1,11 +1,13 @@
 import { CrackableDataType, FurnitureFloorUpdateComposer, FurnitureStackHeightComposer, GroupInformationComposer, GroupInformationEvent, NowPlayingEvent, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter, RoomWidgetFurniInfoUsagePolicyEnum, SetObjectDataMessageComposer, SongInfoReceivedEvent, StringDataType } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaTimes, FaUser, FaMusic, FaUserAlt, FaShoppingCart, FaListUl, FaWrench, FaUndo, FaRedo } from 'react-icons/fa';
+import { FaUser, FaMusic, FaUserAlt, FaShoppingCart, FaListUl, FaWrench, FaUndo, FaRedo } from 'react-icons/fa';
 import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { AvatarInfoFurni, CreateLinkEvent, GetGroupInformation, GetNitroInstance, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Base, Button, Column, Flex, LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, Text, UserProfileIconView } from '../../../../../common';
+import { Base, Column, Flex, LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, Text, UserProfileIconView } from '../../../../../common';
 import { useMessageEvent, useRoom, useSoundEvent } from '../../../../../hooks';
 import { useFurnitureRarity } from '../../../../../hooks/rooms/widgets/useFurnitureRarity';
+import { useFurnitureDurability } from '../../../../../hooks/rooms/widgets/useFurnitureDurability';
 
 interface InfoStandWidgetFurniViewProps
 {
@@ -23,6 +25,7 @@ const RARITY_CSS_MAP: Record<string, string> = {
     'monthly_rare': 'rarity-monthly',
     'cashshop_rare': 'rarity-cashshop',
     'bonzen_rare': 'rarity-bonzen',
+    'drachen_rare': 'rarity-drachen',
 };
 
 const SEAL_CSS_MAP: Record<string, string> = {
@@ -31,6 +34,7 @@ const SEAL_CSS_MAP: Record<string, string> = {
     'monthly_rare': 'seal-monthly',
     'cashshop_rare': 'seal-cashshop',
     'bonzen_rare': 'seal-bonzen',
+    'drachen_rare': 'seal-drachen',
 };
 
 export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props =>
@@ -38,6 +42,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     const { avatarInfo = null, onClose = null } = props;
     const { roomSession = null } = useRoom();
     const { rarityData } = useFurnitureRarity(avatarInfo?.typeId ?? 0);
+    const { durabilityData } = useFurnitureDurability(avatarInfo?.id ?? 0);
 
     const [ pickupMode, setPickupMode ] = useState(0);
     const [ canMove, setCanMove ] = useState(false);
@@ -70,6 +75,9 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         if(isLtd) return 'rarity-ltd';
         return '';
     }, [ rarityData, isLtd ]);
+
+    // Stable unique SVG filter ID for electric card
+    const filterId = useMemo(() => `swirl-${Math.random().toString(36).slice(2, 8)}`, []);
 
     useSoundEvent<NowPlayingEvent>(NowPlayingEvent.NPE_SONG_CHANGED, event =>
     {
@@ -420,204 +428,298 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     if(furniKeys.length > 0 && furniValues.length > 0 && furniKeys.length === furniValues.length) actionButtons.push({ label: LocalizeText('save'), action: 'save_branding_configuration' });
     if(customKeys.length > 0 && customValues.length > 0 && customKeys.length === customValues.length) actionButtons.push({ label: LocalizeText('save'), action: 'save_custom_variables' });
 
+    // ─── Shared content fragments (used by both Electric + Normal card) ───
+
+    const detailsContent = (
+        <>
+            <Flex alignItems="center" gap={ 1 } className="furni-meta">
+                <FaUser className="furni-meta-icon" />
+                <UserProfileIconView userId={ avatarInfo.ownerId } />
+                <Text small wrap>{ avatarInfo.ownerName }</Text>
+            </Flex>
+
+            { !avatarInfo.isWallItem &&
+                <div className="furni-coords">
+                    <span>X: { isEditorOpen ? livePos.x : avatarInfo.posX }</span>
+                    <span>Y: { isEditorOpen ? livePos.y : avatarInfo.posY }</span>
+                    <span>H: { (isEditorOpen ? livePos.z : avatarInfo.posZ).toFixed(2) }</span>
+                    { canMove &&
+                        <FaWrench className={ `furni-edit-toggle ${ isEditorOpen ? 'active' : '' }` } onClick={ () => setIsEditorOpen(prev => !prev) } /> }
+                </div> }
+
+            { isRarity && rarityData.circulation > 0 &&
+                <Flex alignItems="center" gap={ 1 } className="furni-meta">
+                    <Text small style={ { color: 'rgba(255,255,255,0.5)', fontSize: '10px' } }>
+                        Umlauf: { rarityData.circulation.toLocaleString() } Stk.
+                    </Text>
+                </Flex> }
+
+            { isRarity && rarityData.tradeValue !== null && rarityData.tradeValue > 0 &&
+                <Flex alignItems="center" gap={ 1 } className="furni-meta">
+                    <Text small style={ { color: 'rgba(255,255,255,0.5)', fontSize: '10px' } }>
+                        Wert: { rarityData.tradeValue.toLocaleString() } Credits
+                    </Text>
+                </Flex> }
+
+            { durabilityData &&
+                <div className="mt-1 mb-1">
+                    <div className="flex items-center gap-1 mb-0.5">
+                        <FaWrench style={ { fontSize: '9px', color: 'rgba(255,255,255,0.45)' } } />
+                        <Text small style={ { color: 'rgba(255,255,255,0.5)', fontSize: '10px' } }>
+                            Haltbarkeit: { durabilityData.durabilityRemaining }%
+                        </Text>
+                    </div>
+                    <div style={ { width: '100%', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' } }>
+                        <div style={ {
+                            width: `${ durabilityData.durabilityRemaining }%`,
+                            height: '100%',
+                            borderRadius: '2px',
+                            transition: 'width 0.3s',
+                            background: durabilityData.status === 'broken' ? '#6b7280'
+                                : durabilityData.durabilityRemaining > 50 ? '#22c55e'
+                                : durabilityData.durabilityRemaining > 25 ? '#eab308'
+                                : '#ef4444',
+                        } } />
+                    </div>
+                    { durabilityData.status === 'broken' &&
+                        <Text small style={ { color: '#ef4444', fontSize: '10px', marginTop: '2px' } }>
+                            ZERBROCHEN - Repariere in der Werkstatt!
+                        </Text> }
+                </div> }
+
+            { (isJukeBox || isSongDisk) &&
+                <>
+                    { (songId === -1) &&
+                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
+                            <FaMusic className="furni-meta-icon" />
+                            <Text small wrap>{ LocalizeText('infostand.jukebox.text.not.playing') }</Text>
+                        </Flex> }
+                    { !!songName.length &&
+                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
+                            <FaMusic className="furni-meta-icon" />
+                            <Text small wrap>{ songName }</Text>
+                        </Flex> }
+                    { !!songCreator.length &&
+                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
+                            <FaUserAlt className="furni-meta-icon" />
+                            <Text small wrap>{ songCreator }</Text>
+                        </Flex> }
+                </> }
+            { isCrackable &&
+                <Text small wrap className="furni-meta-text">
+                    { LocalizeText('infostand.crackable_furni.hits_remaining', [ 'hits', 'target' ], [ crackableHits.toString(), crackableTarget.toString() ]) }
+                </Text> }
+            { avatarInfo.groupId > 0 &&
+                <Flex pointer alignItems="center" gap={ 1 } className="furni-meta" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
+                    <LayoutBadgeImageView badgeCode={ getGroupBadgeCode() } isGroup={ true } />
+                    <Text small underline>{ groupName }</Text>
+                </Flex> }
+            { godMode && canSeeFurniId &&
+                <Text small wrap className="furni-id">ID: { avatarInfo.id }</Text> }
+            { godMode && (furniKeys.length > 0) &&
+                <Column gap={ 1 } className="furni-meta">
+                    { furniKeys.map((key, index) =>
+                    {
+                        return (
+                            <Flex key={ index } alignItems="center" gap={ 1 }>
+                                <Text small wrap align="end" className="col-4">{ key }</Text>
+                                <input type="text" className="form-control form-control-sm" value={ furniValues[index] } onChange={ event => onFurniSettingChange(index, event.target.value) }/>
+                            </Flex>);
+                    }) }
+                </Column> }
+            { (customKeys.length > 0) &&
+                <Column gap={ 1 } className="furni-meta">
+                    { customKeys.map((key, index) =>
+                    {
+                        return (
+                            <Flex key={ index } alignItems="center" gap={ 1 }>
+                                <Text small wrap align="end" className="col-4">{ key }</Text>
+                                <input type="text" className="form-control form-control-sm" value={ customValues[index] } onChange={ event => onCustomVariableChange(index, event.target.value) }/>
+                            </Flex>);
+                    }) }
+                </Column> }
+        </>
+    );
+
+    const editorContent = isEditorOpen && canMove && !avatarInfo.isWallItem && (
+        <div className="furni-editor">
+            <div className="editor-row">
+                <div className="editor-section">
+                    <span className="editor-label">Position</span>
+                    <div className="diamond-grid">
+                        <div className="diamond-btn nw" onClick={ () => handleMoveDirection(0, -1) }><ChevronUp size={ 14 } /></div>
+                        <div className="diamond-btn ne" onClick={ () => handleMoveDirection(1, 0) }><ChevronRight size={ 14 } /></div>
+                        <div className="diamond-btn sw" onClick={ () => handleMoveDirection(-1, 0) }><ChevronLeft size={ 14 } /></div>
+                        <div className="diamond-btn se" onClick={ () => handleMoveDirection(0, 1) }><ChevronDown size={ 14 } /></div>
+                    </div>
+                    <span className="editor-label" style={ { marginTop: '6px' } }>Drehen</span>
+                    <div className="rotate-controls">
+                        <div className="rotate-btn" onClick={ () => handleRotate(false) }><FaUndo /></div>
+                        <div className="rotate-btn" onClick={ () => handleRotate(true) }><FaRedo /></div>
+                    </div>
+                </div>
+                <div className="editor-section">
+                    <span className="editor-label">Höhe</span>
+                    <div className="height-display">{ livePos.z.toFixed(2) }</div>
+                    <div className="height-grid">
+                        <div className="height-btn plus" onClick={ () => handleHeightChange(1) }>+1</div>
+                        <div className="height-btn plus" onClick={ () => handleHeightChange(0.1) }>+0.1</div>
+                        <div className="height-btn plus" onClick={ () => handleHeightChange(0.01) }>+0.01</div>
+                        <div className="height-btn minus" onClick={ () => handleHeightChange(-1) }>-1</div>
+                        <div className="height-btn minus" onClick={ () => handleHeightChange(-0.1) }>-0.1</div>
+                        <div className="height-btn minus" onClick={ () => handleHeightChange(-0.01) }>-0.01</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const actionsContent = actionButtons.length > 0 && (
+        <Flex alignItems="stretch" className="furni-actions">
+            { actionButtons.map((btn, i) =>
+            {
+                return (
+                    <Flex key={ i } grow justifyContent="center" alignItems="center" pointer className="furni-action" onClick={ () => processButtonAction(btn.action) }>
+                        { btn.label }
+                    </Flex>
+                );
+            }) }
+        </Flex>
+    );
+
+    const linksContent = (avatarInfo.purchaseOfferId > 0 || isRarity) && (
+        <div className="furni-links">
+            { avatarInfo.purchaseOfferId > 0 &&
+                <div className="furni-link" onClick={ () => processButtonAction('buy_one') }>
+                    <FaShoppingCart className="link-icon" />
+                    <span>Kaufen</span>
+                </div> }
+            { isRarity &&
+                <div className="furni-link" onClick={ () => CreateLinkEvent('pricelist/toggle') }>
+                    <FaListUl className="link-icon" />
+                    <span>Preisliste</span>
+                </div> }
+        </div>
+    );
+
+    // ─── Electric Card (Rarity / LTD items) ───
+
+    if(isRarity || isLtd)
+    {
+        return (
+            <div className="flex flex-col items-end">
+                <div className={ `ec-wrap furni-compact ${ panelClass }` }>
+                    <svg className="ec-filters" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                            <filter id={ filterId } colorInterpolationFilters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
+                                <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise1" seed="1" />
+                                <feOffset in="noise1" dx="0" dy="0" result="offsetNoise1">
+                                    <animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
+                                </feOffset>
+                                <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise2" seed="1" />
+                                <feOffset in="noise2" dx="0" dy="0" result="offsetNoise2">
+                                    <animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" calcMode="linear" />
+                                </feOffset>
+                                <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise3" seed="2" />
+                                <feOffset in="noise3" dx="0" dy="0" result="offsetNoise3">
+                                    <animate attributeName="dx" values="490; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
+                                </feOffset>
+                                <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise4" seed="2" />
+                                <feOffset in="noise4" dx="0" dy="0" result="offsetNoise4">
+                                    <animate attributeName="dx" values="0; -490" dur="6s" repeatCount="indefinite" calcMode="linear" />
+                                </feOffset>
+                                <feComposite in="offsetNoise1" in2="offsetNoise2" result="part1" />
+                                <feComposite in="offsetNoise3" in2="offsetNoise4" result="part2" />
+                                <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise" />
+                                <feDisplacementMap in="SourceGraphic" in2="combinedNoise" scale="30" xChannelSelector="R" yChannelSelector="B" />
+                            </filter>
+                        </defs>
+                    </svg>
+
+                    <div className="ec-backdrop">
+                        <div className="ec-border">
+                            <div className="ec-main" style={ { filter: `url(#${ filterId })` } } />
+                        </div>
+                        <div className="ec-glow-1" />
+                        <div className="ec-glow-2" />
+                    </div>
+                    <div className="ec-bg-glow" />
+
+                    <div className="ec-content">
+                        <div className="ec-top">
+                            <div className="ec-badge">
+                                { rarityData?.rarityType.displayName || 'LTD' }
+                            </div>
+
+                            { isLtd &&
+                                <LayoutLimitedEditionCompactPlateView
+                                    uniqueNumber={ avatarInfo.stuffData.uniqueNumber }
+                                    uniqueSeries={ avatarInfo.stuffData.uniqueSeries } /> }
+
+                            { avatarInfo.image && avatarInfo.image.src.length &&
+                                <div className="furni-image-wrap">
+                                    <img src={ avatarInfo.image.src } alt="" />
+                                </div> }
+
+                            <p className="ec-title">{ avatarInfo.name }</p>
+                            { avatarInfo.description &&
+                                <p className="ec-desc">{ avatarInfo.description }</p> }
+
+                            { isRarity && rarityData.setName &&
+                                <span className="furni-seal seal-set" style={ { marginTop: '8px' } }>{ rarityData.setName }</span> }
+                            { isRarity && rarityData.isOg &&
+                                <span className="furni-seal seal-og" style={ { marginTop: '4px' } }>OG</span> }
+                        </div>
+
+                        <hr className="ec-divider" />
+
+                        <div className="ec-bottom">
+                            { detailsContent }
+                        </div>
+
+                        { editorContent }
+                        { actionsContent }
+                        { linksContent }
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // ─── Normal Card (non-rarity items) ───
+
     return (
-        <Column gap={ 0 } alignItems="end">
-            <Column className={ `nitro-infostand furni-compact rounded ${ panelClass }` } overflow="visible">
-                { /* Preview area */ }
+        <div className="flex flex-col items-end">
+            <Card className="relative w-[280px] rounded-xl shadow-none border-white/10 bg-black text-white p-0 gap-0 overflow-hidden furni-compact">
+                <CardContent className="p-0">
                 <Flex position="relative" justifyContent="center" alignItems="center" className="furni-preview">
-                    <FaTimes className="cursor-pointer furni-close" onClick={ onClose } />
-                    { /* LTD plate */ }
-                    { isLtd &&
-                        <div className="absolute left-1 top-1">
-                            <LayoutLimitedEditionCompactPlateView uniqueNumber={ avatarInfo.stuffData.uniqueNumber } uniqueSeries={ avatarInfo.stuffData.uniqueSeries } />
-                        </div> }
-                    { /* Rarity level badge (non-LTD) */ }
                     { (!isLtd && avatarInfo.stuffData.rarityLevel > -1) &&
                         <div className="absolute left-1 top-1">
                             <LayoutRarityLevelView level={ avatarInfo.stuffData.rarityLevel } />
                         </div> }
-                    { /* Rarity seal badge */ }
-                    { isRarity &&
-                        <div className="absolute right-8 top-2">
-                            <span className={ `furni-seal ${ SEAL_CSS_MAP[rarityData.rarityType.name] || '' }` }>
-                                { rarityData.rarityType.displayName }
-                            </span>
-                        </div> }
                     { avatarInfo.image && avatarInfo.image.src.length &&
-                        <img src={ avatarInfo.image.src } alt="" /> }
+                        <div className="furni-image-wrap">
+                            <img src={ avatarInfo.image.src } alt="" />
+                        </div> }
                 </Flex>
 
-                { /* Info area */ }
-                <Column className="furni-info" gap={ 0 }>
-                    { /* Name */ }
-                    <Text variant="white" className="furni-name" style={ isRarity ? { color: rarityData.rarityType.colorPrimary } : undefined }>
-                        { avatarInfo.name }
-                    </Text>
-                    { avatarInfo.description &&
-                        <Text variant="white" className="furni-desc">{ avatarInfo.description }</Text> }
+                <div className="furni-body">
+                    <div className="furni-section">
+                        <Text className="furni-name">{ avatarInfo.name }</Text>
+                        { avatarInfo.description &&
+                            <Text className="furni-desc">{ avatarInfo.description }</Text> }
+                    </div>
 
-                    { /* Set name seal */ }
-                    { isRarity && rarityData.setName &&
-                        <Flex className="pb-1">
-                            <span className="furni-seal seal-set">{ rarityData.setName }</span>
-                        </Flex> }
+                    <div className="furni-section">
+                        { detailsContent }
+                    </div>
+                </div>
 
-                    { /* OG seal */ }
-                    { isRarity && rarityData.isOg &&
-                        <Flex className="pb-1">
-                            <span className="furni-seal seal-og">OG</span>
-                        </Flex> }
-
-                    { /* Owner */ }
-                    <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                        <FaUser className="furni-meta-icon" />
-                        <UserProfileIconView userId={ avatarInfo.ownerId } />
-                        <Text variant="white" small wrap>{ avatarInfo.ownerName }</Text>
-                    </Flex>
-
-                    { /* Coordinates & height + editor toggle */ }
-                    { !avatarInfo.isWallItem &&
-                        <div className="furni-coords">
-                            <span>X: { isEditorOpen ? livePos.x : avatarInfo.posX }</span>
-                            <span>Y: { isEditorOpen ? livePos.y : avatarInfo.posY }</span>
-                            <span>H: { (isEditorOpen ? livePos.z : avatarInfo.posZ).toFixed(2) }</span>
-                            { canMove &&
-                                <FaWrench className={ `furni-edit-toggle ${ isEditorOpen ? 'active' : '' }` } onClick={ () => setIsEditorOpen(prev => !prev) } /> }
-                        </div> }
-
-                    { /* Circulation (rarity only) */ }
-                    { isRarity && rarityData.circulation > 0 &&
-                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                            <Text variant="white" small style={ { color: 'rgba(255,255,255,0.45)', fontSize: '10px' } }>
-                                Umlauf: { rarityData.circulation.toLocaleString() } Stk.
-                            </Text>
-                        </Flex> }
-
-                    { /* Trade value (if available) */ }
-                    { isRarity && rarityData.tradeValue !== null && rarityData.tradeValue > 0 &&
-                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                            <Text variant="white" small style={ { color: 'rgba(255,255,255,0.45)', fontSize: '10px' } }>
-                                Wert: { rarityData.tradeValue.toLocaleString() } Credits
-                            </Text>
-                        </Flex> }
-
-                    { /* Jukebox / Songdisk */ }
-                    { (isJukeBox || isSongDisk) &&
-                        <>
-                            { (songId === -1) &&
-                                <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                                    <FaMusic className="furni-meta-icon" />
-                                    <Text variant="white" small wrap>{ LocalizeText('infostand.jukebox.text.not.playing') }</Text>
-                                </Flex> }
-                            { !!songName.length &&
-                                <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                                    <FaMusic className="furni-meta-icon" />
-                                    <Text variant="white" small wrap>{ songName }</Text>
-                                </Flex> }
-                            { !!songCreator.length &&
-                                <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                                    <FaUserAlt className="furni-meta-icon" />
-                                    <Text variant="white" small wrap>{ songCreator }</Text>
-                                </Flex> }
-                        </> }
-                    { isCrackable &&
-                        <Text variant="white" small wrap className="furni-meta-text">
-                            { LocalizeText('infostand.crackable_furni.hits_remaining', [ 'hits', 'target' ], [ crackableHits.toString(), crackableTarget.toString() ]) }
-                        </Text> }
-                    { avatarInfo.groupId > 0 &&
-                        <Flex pointer alignItems="center" gap={ 1 } className="furni-meta" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
-                            <LayoutBadgeImageView badgeCode={ getGroupBadgeCode() } isGroup={ true } />
-                            <Text variant="white" small underline>{ groupName }</Text>
-                        </Flex> }
-                    { godMode && canSeeFurniId &&
-                        <Text small wrap variant="white" className="furni-id">ID: { avatarInfo.id }</Text> }
-                    { godMode && (furniKeys.length > 0) &&
-                        <Column gap={ 1 } className="furni-meta">
-                            { furniKeys.map((key, index) =>
-                            {
-                                return (
-                                    <Flex key={ index } alignItems="center" gap={ 1 }>
-                                        <Text small wrap align="end" variant="white" className="col-4">{ key }</Text>
-                                        <input type="text" className="form-control form-control-sm" value={ furniValues[index] } onChange={ event => onFurniSettingChange(index, event.target.value) }/>
-                                    </Flex>);
-                            }) }
-                        </Column> }
-                    { (customKeys.length > 0) &&
-                        <Column gap={ 1 } className="furni-meta">
-                            { customKeys.map((key, index) =>
-                            {
-                                return (
-                                    <Flex key={ index } alignItems="center" gap={ 1 }>
-                                        <Text small wrap align="end" variant="white" className="col-4">{ key }</Text>
-                                        <input type="text" className="form-control form-control-sm" value={ customValues[index] } onChange={ event => onCustomVariableChange(index, event.target.value) }/>
-                                    </Flex>);
-                            }) }
-                        </Column> }
-                </Column>
-
-                { /* Furniture Editor Panel */ }
-                { isEditorOpen && canMove && !avatarInfo.isWallItem &&
-                    <div className="furni-editor">
-                        <div className="editor-row">
-                            { /* Position (diamond arrows) */ }
-                            <div className="editor-section">
-                                <span className="editor-label">Position</span>
-                                <div className="diamond-grid">
-                                    <div className="diamond-btn nw" onClick={ () => handleMoveDirection(0, -1) }><ChevronUp size={ 14 } /></div>
-                                    <div className="diamond-btn ne" onClick={ () => handleMoveDirection(1, 0) }><ChevronRight size={ 14 } /></div>
-                                    <div className="diamond-btn sw" onClick={ () => handleMoveDirection(-1, 0) }><ChevronLeft size={ 14 } /></div>
-                                    <div className="diamond-btn se" onClick={ () => handleMoveDirection(0, 1) }><ChevronDown size={ 14 } /></div>
-                                </div>
-                                <span className="editor-label" style={ { marginTop: '6px' } }>Drehen</span>
-                                <div className="rotate-controls">
-                                    <div className="rotate-btn" onClick={ () => handleRotate(false) }><FaUndo /></div>
-                                    <div className="rotate-btn" onClick={ () => handleRotate(true) }><FaRedo /></div>
-                                </div>
-                            </div>
-                            { /* Height controls */ }
-                            <div className="editor-section">
-                                <span className="editor-label">Höhe</span>
-                                <div className="height-display">{ livePos.z.toFixed(2) }</div>
-                                <div className="height-grid">
-                                    <div className="height-btn plus" onClick={ () => handleHeightChange(1) }>+1</div>
-                                    <div className="height-btn plus" onClick={ () => handleHeightChange(0.1) }>+0.1</div>
-                                    <div className="height-btn plus" onClick={ () => handleHeightChange(0.01) }>+0.01</div>
-                                    <div className="height-btn minus" onClick={ () => handleHeightChange(-1) }>-1</div>
-                                    <div className="height-btn minus" onClick={ () => handleHeightChange(-0.1) }>-0.1</div>
-                                    <div className="height-btn minus" onClick={ () => handleHeightChange(-0.01) }>-0.01</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> }
-
-                { /* Action buttons */ }
-                { actionButtons.length > 0 &&
-                    <Flex alignItems="stretch" className="furni-actions">
-                        { actionButtons.map((btn, i) =>
-                        {
-                            return (
-                                <Flex key={ i } grow justifyContent="center" alignItems="center" pointer className="furni-action" onClick={ () => processButtonAction(btn.action) }>
-                                    { btn.label }
-                                </Flex>
-                            );
-                        }) }
-                    </Flex> }
-
-                { /* Bottom links: catalog + price list */ }
-                { (avatarInfo.purchaseOfferId > 0 || isRarity) &&
-                    <div className="furni-links">
-                        { avatarInfo.purchaseOfferId > 0 &&
-                            <div className="furni-link" onClick={ () => processButtonAction('buy_one') }>
-                                <FaShoppingCart className="link-icon" />
-                                <span>Kaufen</span>
-                            </div> }
-                        { isRarity &&
-                            <div className="furni-link" onClick={ () => CreateLinkEvent('pricelist/toggle') }>
-                                <FaListUl className="link-icon" />
-                                <span>Preisliste</span>
-                            </div> }
-                    </div> }
-            </Column>
-        </Column>
+                { editorContent }
+                { actionsContent }
+                { linksContent }
+                </CardContent>
+            </Card>
+        </div>
     );
 }

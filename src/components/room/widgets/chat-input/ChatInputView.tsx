@@ -1,10 +1,11 @@
 import { HabboClubLevelEnum, RoomControllerLevel } from '@nitrots/nitro-renderer';
 import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfiguration, GetSessionDataManager, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
+import { ChatMessageTypeEnum, CreateLinkEvent, GetClubMemberLevel, GetConfiguration, GetSessionDataManager, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
 import { useChatInputWidget, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
 import { ChatInputEmojiPickerView } from './ChatInputEmojiPickerView';
 import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
+import { HotbarView } from '../../../hotbar/HotbarView';
 
 const CHAT_COMMANDS: { command: string, description: string, minRank: number, category: string }[] = [
     // ── Client ─────────────────────────────────────────────
@@ -15,7 +16,9 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':screenshot', description: 'Screenshot erstellen', minRank: 0, category: 'Client' },
     { command: ':togglefps', description: 'FPS-Anzeige umschalten', minRank: 0, category: 'Client' },
     { command: ':d', description: 'Lach-Ausdruck', minRank: 0, category: 'Client' },
-    { command: ':kiss', description: 'Kuss werfen', minRank: 0, category: 'Client' },
+    { command: ':kiss ', description: 'User küssen [username]', minRank: 0, category: 'Allgemein' },
+    { command: ':hug ', description: 'User umarmen [username]', minRank: 0, category: 'Allgemein' },
+    { command: ':hit ', description: 'User hauen [username]', minRank: 0, category: 'Allgemein' },
     { command: ':jump', description: 'Springen', minRank: 0, category: 'Client' },
     { command: ':idle', description: 'AFK gehen', minRank: 0, category: 'Client' },
     { command: ':sign', description: 'Schild zeigen (Nummer)', minRank: 0, category: 'Client' },
@@ -28,6 +31,14 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':lotto', description: 'Lotto-Info anzeigen', minRank: 0, category: 'Allgemein' },
     { command: ':lotto buy', description: 'Tickets kaufen [anzahl]', minRank: 0, category: 'Allgemein' },
     { command: ':lotto history', description: 'Letzte Gewinner anzeigen', minRank: 0, category: 'Allgemein' },
+    { command: ':rel', description: 'Deine Top-Beziehungen anzeigen', minRank: 0, category: 'Allgemein' },
+    { command: ':rel ', description: 'Beziehungs-Info mit User anzeigen', minRank: 0, category: 'Allgemein' },
+    { command: ':sets', description: 'SET-Counter anzeigen', minRank: 0, category: 'Allgemein' },
+    { command: ':sets complete', description: 'Set einfügen [ID]', minRank: 0, category: 'Allgemein' },
+    { command: ':sets claim', description: 'Belohnung abholen [ID]', minRank: 0, category: 'Allgemein' },
+    { command: ':sets preview', description: 'SET-Möbel im Raum platzieren [ITEM_ID]', minRank: 0, category: 'Allgemein' },
+    { command: ':send', description: 'Währung senden [name] [taler/pixel/punkte] [anzahl]', minRank: 0, category: 'Allgemein' },
+    { command: ':win', description: 'Event-Win vergeben [name]', minRank: 7, category: 'GameX' },
     { command: ':sit', description: 'Hinsetzen', minRank: 0, category: 'Allgemein' },
     { command: ':stand', description: 'Aufstehen', minRank: 0, category: 'Allgemein' },
     { command: ':lay', description: 'Hinlegen', minRank: 0, category: 'Allgemein' },
@@ -74,6 +85,31 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':mute_bots', description: 'Bots stummschalten', minRank: 4, category: 'Moderator' },
     { command: ':mute_pets', description: 'Pets stummschalten', minRank: 4, category: 'Moderator' },
     { command: ':connect_camera', description: 'Kamera verbinden', minRank: 4, category: 'Moderator' },
+    { command: ':jail', description: 'Spieler verhaften [minuten]', minRank: 4, category: 'Moderator' },
+    { command: ':jail free', description: 'Spieler freilassen', minRank: 4, category: 'Moderator' },
+    { command: ':jail list', description: 'Inhaftierte Spieler anzeigen', minRank: 4, category: 'Moderator' },
+    { command: ':radio', description: 'Radio-Hilfe anzeigen', minRank: 4, category: 'Moderator' },
+    { command: ':radio add', description: 'Track hinzufuegen (URL Titel Artist)', minRank: 4, category: 'Moderator' },
+    { command: ':radio play', description: 'Radio starten', minRank: 4, category: 'Moderator' },
+    { command: ':radio pause', description: 'Radio pausieren/fortsetzen', minRank: 4, category: 'Moderator' },
+    { command: ':radio skip', description: 'Track ueberspringen', minRank: 4, category: 'Moderator' },
+    { command: ':radio queue', description: 'Warteschlange anzeigen', minRank: 4, category: 'Moderator' },
+    { command: ':radio remove', description: 'Track aus Queue entfernen (Nr)', minRank: 4, category: 'Moderator' },
+    { command: ':radio clear', description: 'Queue leeren', minRank: 4, category: 'Moderator' },
+    { command: ':radio transition', description: 'Uebergang setzen (none|crossfade|fadeout)', minRank: 4, category: 'Moderator' },
+    { command: ':radio sfx', description: 'Sound-Effekt abspielen (URL)', minRank: 4, category: 'Moderator' },
+    { command: ':radio announce', description: 'DJ-Durchsage senden', minRank: 4, category: 'Moderator' },
+    { command: ':radio loop', description: 'Loop-Modus an/aus', minRank: 4, category: 'Moderator' },
+    { command: ':radio tts', description: 'TTS-Durchsage generieren', minRank: 4, category: 'Moderator' },
+    { command: ':radio tts confirm', description: 'TTS-Durchsage senden', minRank: 4, category: 'Moderator' },
+    { command: ':radio tts cancel', description: 'TTS-Durchsage abbrechen', minRank: 4, category: 'Moderator' },
+    { command: ':radio playlist list', description: 'Playlisten anzeigen', minRank: 4, category: 'Moderator' },
+    { command: ':radio playlist create', description: 'Neue Playlist erstellen', minRank: 4, category: 'Moderator' },
+    { command: ':radio playlist delete', description: 'Playlist loeschen', minRank: 4, category: 'Moderator' },
+    { command: ':radio playlist add', description: 'Track zu Playlist', minRank: 4, category: 'Moderator' },
+    { command: ':radio playlist remove', description: 'Track aus Playlist entfernen', minRank: 4, category: 'Moderator' },
+    { command: ':radio playlist load', description: 'Playlist in Queue laden', minRank: 4, category: 'Moderator' },
+    { command: ':radio playlist show', description: 'Playlist-Tracks anzeigen', minRank: 4, category: 'Moderator' },
     // ── Admin ──────────────────────────────────────────────
     { command: ':lotto draw', description: 'Ziehung sofort starten', minRank: 5, category: 'Admin' },
     { command: ':lotto on', description: 'Lotto aktivieren', minRank: 5, category: 'Admin' },
@@ -81,6 +117,9 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':lotto settime', description: 'Ziehungszeit setzen (HH:MM)', minRank: 5, category: 'Admin' },
     { command: ':lotto setprice', description: 'Ticket-Preis setzen', minRank: 5, category: 'Admin' },
     { command: ':lotto setjackpot', description: 'Basis-Jackpot setzen', minRank: 5, category: 'Admin' },
+    { command: ':radio on', description: 'Radio einschalten', minRank: 5, category: 'Admin' },
+    { command: ':radio off', description: 'Radio ausschalten', minRank: 5, category: 'Admin' },
+    { command: ':sets reload', description: 'SET-System neu laden', minRank: 5, category: 'Admin' },
     { command: ':ban', description: 'User bannen', minRank: 5, category: 'Admin' },
     { command: ':unban', description: 'User entbannen', minRank: 5, category: 'Admin' },
     { command: ':credits', description: 'Credits geben', minRank: 5, category: 'Admin' },
@@ -129,6 +168,13 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':update_hotelview', description: 'Hotel-View neu laden', minRank: 5, category: 'Admin' },
     { command: ':promote_offer', description: 'Promo-Angebot senden', minRank: 5, category: 'Admin' },
     { command: ':update_youtube', description: 'YouTube-Playlists neu laden', minRank: 5, category: 'Admin' },
+    { command: ':durability type list', description: 'Raritaetstyp-Defaults anzeigen', minRank: 5, category: 'Admin' },
+    { command: ':durability type set', description: 'Typ-Default setzen', minRank: 5, category: 'Admin' },
+    { command: ':durability type info', description: 'Typ-Details anzeigen', minRank: 5, category: 'Admin' },
+    { command: ':durability type apply', description: 'Typ-Defaults anwenden', minRank: 5, category: 'Admin' },
+    { command: ':durability type reset', description: 'Typ-Defaults entfernen', minRank: 5, category: 'Admin' },
+    { command: ':durability reload', description: 'Durability Configs neu laden', minRank: 5, category: 'Admin' },
+    { command: ':durability status', description: 'System-Status anzeigen', minRank: 5, category: 'Admin' },
     // ── Super-Admin ────────────────────────────────────────
     { command: ':masscredits', description: 'Credits an alle User', minRank: 6, category: 'Super-Admin' },
     { command: ':massduckets', description: 'Duckets an alle User', minRank: 6, category: 'Super-Admin' },
@@ -200,6 +246,16 @@ export const ChatInputView: FC<{}> = props =>
     const sendChatValue = useCallback((value: string, shiftKey: boolean = false) =>
     {
         if(!value || (value === '')) return;
+
+        // Intercept :rel → open relationship modal
+        if(value.trim() === ':rel' || value.trim().startsWith(':rel '))
+        {
+            const relParts = value.trim().split(' ');
+            const targetName = relParts.length >= 2 ? relParts[1] : '';
+            CreateLinkEvent(targetName ? `relationship/show/${ targetName }` : 'relationship/show');
+            setChatValue('');
+            return;
+        }
 
         let chatType = (shiftKey ? ChatMessageTypeEnum.CHAT_SHOUT : ChatMessageTypeEnum.CHAT_DEFAULT);
         let text = value;
@@ -393,6 +449,8 @@ export const ChatInputView: FC<{}> = props =>
 
     return (
         createPortal(
+            <>
+            <HotbarView />
             <div className="relative w-full">
                 { showCommands && (() => {
                     const filtered = CHAT_COMMANDS
@@ -439,10 +497,18 @@ export const ChatInputView: FC<{}> = props =>
                         <div className="flex items-center gap-2">
                             <ChatInputEmojiPickerView onSelectEmoji={ (code) => { setChatValue(prev => prev + code); inputRef.current?.focus(); } } />
                             <ChatInputStyleSelectorView chatStyleId={ chatStyleId } chatStyleIds={ chatStyleIds } selectChatStyleId={ updateChatStyleId } />
+                            <button
+                                onClick={ () => window.dispatchEvent(new Event('hotbar:toggle')) }
+                                title="Schnellleiste ein/ausblenden"
+                                className="flex items-center justify-center w-6 h-6 rounded cursor-pointer text-white/50 hover:text-yellow-400 hover:bg-white/10 transition-all"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 12 10h7.99a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 12 14z"/></svg>
+                            </button>
                         </div>
-                        <span className="chat-send-hint">↵ Send</span>
+                        <span className="chat-send-hint">↵ Senden</span>
                     </div>
                 </div>
-            </div>, document.getElementById('toolbar-chat-input-container'))
+            </div>
+            </>, document.getElementById('toolbar-chat-input-container'))
     );
 }

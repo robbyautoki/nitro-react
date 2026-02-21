@@ -352,6 +352,12 @@ const useNotificationState = () =>
         // Lottery events are handled by LotteryView
         if(parser.type && parser.type.startsWith('lottery.')) return;
 
+        // Jail events are handled by ArrestToastView
+        if(parser.type && parser.type.startsWith('jail.')) return;
+
+        // Radio events are handled by RadioPanelView
+        if(parser.type && parser.type.startsWith('radio.')) return;
+
         showNotification(parser.type, parser.parameters);
     });
 

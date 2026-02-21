@@ -1,12 +1,13 @@
 import { ConfigurationEvent, GetAssetManager, HabboWebTools, LegacyExternalInterface, Nitro, NitroCommunicationDemoEvent, NitroConfiguration, NitroEvent, NitroLocalizationEvent, NitroVersion, RoomEngineEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { GetCommunication, GetConfiguration, GetNitroInstance, GetUIVersion } from './api';
+import { GetCommunication, GetConfiguration, GetNitroInstance, GetUIVersion, initSessionToken } from './api';
 import { Base, TransitionAnimation, TransitionAnimationTypes } from './common';
 import { LoadingView } from './components/loading/LoadingView';
 import { MainView } from './components/main/MainView';
 import { useConfigurationEvent, useLocalizationEvent, useMainEvent, useRoomEngineEvent } from './hooks';
 
 NitroVersion.UI_VERSION = GetUIVersion();
+initSessionToken();
 
 export const App: FC<{}> = props =>
 {
@@ -76,6 +77,10 @@ export const App: FC<{}> = props =>
 
                 setTimeout(() => setIsReady(true), 300);
                 return;
+            case NitroLocalizationEvent.FAILED:
+                setIsError(true);
+                setMessage('Localization Failed');
+                return;
             case NitroLocalizationEvent.LOADED: {
                 const assetUrls = GetConfiguration<string[]>('preload.assets.urls');
                 const urls: string[] = [];
@@ -109,6 +114,7 @@ export const App: FC<{}> = props =>
     useMainEvent(NitroCommunicationDemoEvent.CONNECTION_CLOSED, handler);
     useRoomEngineEvent(RoomEngineEvent.ENGINE_INITIALIZED, handler);
     useLocalizationEvent(NitroLocalizationEvent.LOADED, handler);
+    useLocalizationEvent(NitroLocalizationEvent.FAILED, handler);
     useConfigurationEvent(ConfigurationEvent.LOADED, handler);
     useConfigurationEvent(ConfigurationEvent.FAILED, handler);
 

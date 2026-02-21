@@ -134,7 +134,7 @@ export const CatalogLayoutColorGroupingView : FC<CatalogLayoutColorGroupViewProp
                     </Button>
                 </div> }
             <div className="flex-1 min-h-0 overflow-auto">
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(56px,1fr))] gap-2">
+                <div className="grid grid-cols-[repeat(auto-fill,68px)] gap-1">
                     { (!colorsShowing || !currentOffer || !colorableItems.has(currentOffer.product.furnitureData.className)) &&
                         offers.map((offer, index) => <CatalogGridOfferView key={ index } itemActive={ (currentOffer && (currentOffer.product.furnitureData.hasIndexedColor ? currentOffer.product.furnitureData.className === offer.product.furnitureData.className : currentOffer.offerId === offer.offerId)) } offer={ offer } selectOffer={ selectOffer }/>) }
                     { (colorsShowing && currentOffer && colorableItems.has(currentOffer.product.furnitureData.className)) &&
@@ -147,7 +147,7 @@ export const CatalogLayoutColorGroupingView : FC<CatalogLayoutColorGroupViewProp
                                     key={ index }
                                     className={ cn(
                                         'aspect-square rounded-lg border-2 cursor-pointer transition-all',
-                                        isActive ? 'border-primary ring-1 ring-ring scale-105' : 'border-border hover:border-border'
+                                        isActive ? 'border-indigo-400/80 ring-1 ring-indigo-400/40 scale-105' : 'border-white/[0.12] hover:border-white/[0.25]'
                                     ) }
                                     style={ { backgroundColor: ColorConverter.int2rgb(color) } }
                                     onClick={ event => selectColor(index, currentOffer.product.furnitureData.className) }

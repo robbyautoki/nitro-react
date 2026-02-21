@@ -14,4 +14,5 @@ export * from './Randomizer';
 export * from './RoomChatFormatter';
 export * from './SetLocalStorage';
 export * from './SoundNames';
+export * from './SessionTokenManager';
 export * from './WindowSaveOptions';

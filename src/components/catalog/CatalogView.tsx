@@ -1,16 +1,44 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaTimes, FaList, FaInfoCircle } from 'react-icons/fa';
-import { AddEventLinkTracker, LocalizeText, RemoveLinkEventTracker } from '../../api';
-import { useCatalog } from '../../hooks';
+import { AddEventLinkTracker, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
+import { CatalogPurchasedEvent } from '../../events';
+import { useCatalog, useUiEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
 import { Button } from '../ui/button';
 import { CatalogInspectorView } from './views/CatalogInspectorView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
+import { CatalogSubcategoryChipsView } from './views/navigation/CatalogSubcategoryChipsView';
 import { CatalogSearchView } from './views/page/common/CatalogSearchView';
 import { GetCatalogLayout } from './views/page/layout/GetCatalogLayout';
+import { CatalogVirtualGridView } from './views/page/layout/CatalogVirtualGridView';
 import { MarketplacePostOfferView } from './views/page/layout/marketplace/MarketplacePostOfferView';
+
+const RECENT_KEY = 'catalog_recent_purchases';
+const FREQUENT_KEY = 'catalog_most_purchased';
+const MAX_TRACKED = 8;
+
+export interface TrackedPurchase
+{
+    name: string;
+    iconUrl: string;
+    offerId: number;
+    priceCredits: number;
+    count?: number;
+}
+
+export const loadTracked = (key: string): TrackedPurchase[] =>
+{
+    try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+    catch { return []; }
+};
+
+const saveTracked = (key: string, items: TrackedPurchase[]) =>
+{
+    try { localStorage.setItem(key, JSON.stringify(items.slice(0, MAX_TRACKED))); }
+    catch {}
+};
 
 const SELF_CONTAINED_LAYOUTS = new Set([
     'frontpage4', 'frontpage_featured',
@@ -27,6 +55,8 @@ export const CatalogView: FC<{}> = props =>
 
     const [ navOverlay, setNavOverlay ] = useState(false);
     const [ inspectorOverlay, setInspectorOverlay ] = useState(false);
+    const [ virtualPage, setVirtualPage ] = useState<string | null>(null);
+    const catalogContentRef = useRef<HTMLDivElement>(null);
 
     const resizingRef = useRef(false);
     const resizeStartRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -70,10 +100,101 @@ export const CatalogView: FC<{}> = props =>
         };
     }, []);
 
+    // Intercept clicks on <a> tags in server-rendered HTML (e.g. event:habbopages/ links)
+    useEffect(() =>
+    {
+        const handleLinkClick = (event: MouseEvent) =>
+        {
+            const target = event.target as HTMLElement;
+            const anchor = target.closest('a');
+
+            if(!anchor) return;
+
+            const href = anchor.getAttribute('href');
+            if(!href) return;
+
+            event.preventDefault();
+            OpenUrl(href);
+        };
+
+        const el = catalogContentRef.current;
+        if(!el) return;
+
+        el.addEventListener('click', handleLinkClick);
+        return () => el.removeEventListener('click', handleLinkClick);
+    }, []);
+
+    // Virtual page from navigation (Zuletzt gekauft / Am meisten gekauft)
+    useEffect(() =>
+    {
+        const handler = (e: CustomEvent) => setVirtualPage(e.detail);
+
+        window.addEventListener('catalog_virtual_page', handler as EventListener);
+        return () => window.removeEventListener('catalog_virtual_page', handler as EventListener);
+    }, []);
+
+    // Clear virtual page when a real catalog page loads
+    useEffect(() =>
+    {
+        if(currentPage) setVirtualPage(null);
+    }, [ currentPage ]);
+
+    // When virtual page activates, clear navigation highlight for real nodes
+    useEffect(() =>
+    {
+        if(!virtualPage) return;
+
+        window.dispatchEvent(new Event('catalog_virtual_clear'));
+    }, [ virtualPage ]);
+
+    // Track purchases globally (recent + frequency)
+    useUiEvent<CatalogPurchasedEvent>(CatalogPurchasedEvent.PURCHASE_SUCCESS, (event) =>
+    {
+        const purchase = event.purchase;
+        if(!purchase) return;
+
+        const iconUrl = (currentOffer?.pricingModel !== Offer.PRICING_MODEL_BUNDLE && currentOffer?.product)
+            ? currentOffer.product.getIconUrl(currentOffer)
+            : '';
+
+        const entry: TrackedPurchase = {
+            name: purchase.localizationId,
+            iconUrl,
+            offerId: purchase.offerId,
+            priceCredits: purchase.priceCredits,
+        };
+
+        // Update recent purchases
+        const recent = loadTracked(RECENT_KEY);
+        const updatedRecent = [ entry, ...recent.filter(p => p.offerId !== entry.offerId) ].slice(0, MAX_TRACKED);
+        saveTracked(RECENT_KEY, updatedRecent);
+
+        // Update most purchased (increment count)
+        const frequent = loadTracked(FREQUENT_KEY);
+        const existing = frequent.find(p => p.offerId === entry.offerId);
+
+        if(existing)
+        {
+            existing.count = (existing.count || 1) + 1;
+            existing.name = entry.name;
+            existing.iconUrl = entry.iconUrl;
+        }
+        else
+        {
+            frequent.push({ ...entry, count: 1 });
+        }
+
+        const updatedFrequent = frequent.sort((a, b) => (b.count || 0) - (a.count || 0)).slice(0, MAX_TRACKED);
+        saveTracked(FREQUENT_KEY, updatedFrequent);
+
+        // Dispatch a custom event so NavigationView can refresh
+        window.dispatchEvent(new Event('catalog_purchase_tracked'));
+    });
+
     const showInspector = currentPage && !SELF_CONTAINED_LAYOUTS.has(currentPage.layoutCode);
 
     const breadcrumb = useMemo(() =>
-        activeNodes?.filter(n => n.localization).map(n => n.localization) ?? [],
+        activeNodes?.filter(n => n.localization).map(n => n.localization.replace(/\s*\(\d+\)$/, '')) ?? [],
     [ activeNodes ]);
 
     useEffect(() =>
@@ -167,10 +288,6 @@ export const CatalogView: FC<{}> = props =>
                             <Button variant="ghost" size="icon-sm" className="xl:hidden shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setNavOverlay(v => !v) }>
                                 <FaList className="size-3" />
                             </Button> }
-                        { showInspector &&
-                            <Button variant="ghost" size="icon-sm" className="xl:hidden shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setInspectorOverlay(v => !v) }>
-                                <FaInfoCircle className="size-3" />
-                            </Button> }
 
                         <button
                             className="appearance-none border-0 bg-transparent rounded-md p-1 text-white/25 hover:bg-white/[0.06] hover:text-white/70 transition-colors shrink-0"
@@ -190,24 +307,22 @@ export const CatalogView: FC<{}> = props =>
                             </div>
                         ) }
 
-                        <div className="flex-1 min-w-0 overflow-hidden flex flex-col">
-                            { currentPage?.offers && (
-                                <div className="px-3 py-1.5 border-b border-white/[0.04] flex items-center gap-1.5 shrink-0">
-                                    <span className="text-[9px] text-white/20">
-                                        { currentPage.offers.length } items
-                                    </span>
+                        <div ref={ catalogContentRef } className="flex-1 min-w-0 overflow-hidden flex flex-col relative">
+                            { !virtualPage && <CatalogSubcategoryChipsView /> }
+                            <div className="flex-1 min-h-0 overflow-hidden">
+                                { virtualPage
+                                    ? <CatalogVirtualGridView type={ virtualPage } />
+                                    : GetCatalogLayout(currentPage, () => setNavigationHidden(true))
+                                }
+                            </div>
+
+                            {/* Bottom Inspector Panel */}
+                            { showInspector && currentOffer && (
+                                <div className="shrink-0 border-t border-white/[0.08] bg-[rgba(10,10,14,0.98)] catalog-inspector-enter">
+                                    <CatalogInspectorView />
                                 </div>
                             ) }
-                            <div className="flex-1 min-h-0 overflow-hidden">
-                                { GetCatalogLayout(currentPage, () => setNavigationHidden(true)) }
-                            </div>
                         </div>
-
-                        { showInspector && (
-                            <div className={ `w-[260px] min-w-[260px] border-l border-white/[0.06] overflow-y-auto hidden xl:flex xl:flex-col ${ inspectorOverlay ? '!flex absolute inset-y-0 right-0 z-20 bg-[rgba(10,10,14,0.98)] border-l border-white/[0.08]' : '' }` }>
-                                <CatalogInspectorView />
-                            </div>
-                        ) }
                     </div>
 
                     <div className="catalog-resize-handle" onMouseDown={ onResizeStart } />

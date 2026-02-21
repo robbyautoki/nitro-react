@@ -1,4 +1,5 @@
 import { IObjectData } from '@nitrots/nitro-renderer';
+import { IPurchasableOffer } from './IPurchasableOffer';
 
 export interface IPurchaseOptions
 {
@@ -6,4 +7,5 @@ export interface IPurchaseOptions
     extraData?: string;
     extraParamRequired?: boolean;
     previewStuffData?: IObjectData;
+    selectedOffers?: IPurchasableOffer[];
 }

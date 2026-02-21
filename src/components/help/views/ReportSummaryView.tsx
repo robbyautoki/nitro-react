@@ -1,16 +1,16 @@
 import { CallForHelpFromForumMessageMessageComposer, CallForHelpFromForumThreadMessageComposer, CallForHelpFromIMMessageComposer, CallForHelpFromPhotoMessageComposer, CallForHelpMessageComposer } from '@nitrots/nitro-renderer';
 import { FC } from 'react';
-import { LocalizeText, ReportType, SendMessageComposer } from '../../../api';
-import { Button, Column, Text } from '../../../common';
+import { Send } from 'lucide-react';
+import { ReportType, SendMessageComposer } from '../../../api';
 import { useHelp } from '../../../hooks';
 
-export const ReportSummaryView: FC<{}> = props =>
+export const ReportSummaryView: FC<{}> = () =>
 {
     const { activeReport = null, setActiveReport = null } = useHelp();
 
     const submitReport = () =>
     {
-        const chats: (string | number )[] = [];
+        const chats: (string | number)[] = [];
 
         switch(activeReport.reportType)
         {
@@ -41,17 +41,39 @@ export const ReportSummaryView: FC<{}> = props =>
         }
 
         setActiveReport(null);
-    }
+    };
 
     return (
-        <>
-            <Column gap={ 1 }>
-                <Text fontSize={ 4 }>{ LocalizeText('help.cfh.button.send') }</Text>
-                <Text>{ LocalizeText('help.main.summary') }</Text>
-            </Column>
-            <Button variant="success" onClick={ submitReport }>
-                { LocalizeText('guide.help.request.emergency.submit.button') }
-            </Button>
-        </>
-    )
-}
+        <div className="space-y-4">
+            <div>
+                <p className="text-xs text-white/40 mb-3">Pruefe deine Meldung und sende sie ab</p>
+            </div>
+
+            <div className="space-y-2">
+                { activeReport?.message && (
+                    <div className="px-3.5 py-3 rounded-xl border border-white/[0.06] bg-white/[0.03]">
+                        <p className="text-[11px] text-white/30 mb-1">Deine Beschreibung</p>
+                        <p className="text-sm text-white/70">{ activeReport.message }</p>
+                    </div>
+                ) }
+
+                { activeReport?.reportedChats?.length > 0 && (
+                    <div className="px-3.5 py-3 rounded-xl border border-white/[0.06] bg-white/[0.03]">
+                        <p className="text-[11px] text-white/30 mb-1">Gemeldete Nachrichten</p>
+                        <p className="text-sm text-white/70">{ activeReport.reportedChats.length } Nachricht(en) ausgewaehlt</p>
+                    </div>
+                ) }
+            </div>
+
+            <div className="flex justify-end pt-2">
+                <button
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all bg-green-500/20 text-green-400 border border-green-500/20 hover:bg-green-500/30"
+                    onClick={ submitReport }
+                >
+                    <Send className="size-3.5" />
+                    Meldung absenden
+                </button>
+            </div>
+        </div>
+    );
+};

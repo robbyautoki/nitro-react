@@ -8,7 +8,7 @@ import { CatalogPurchaseWidgetView } from '../widgets/CatalogPurchaseWidgetView'
 import { CatalogTotalPriceWidget } from '../widgets/CatalogTotalPriceWidget';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
-export const CatalogLayouGuildForumView: FC<CatalogLayoutProps> = props =>
+export const CatalogLayoutGuildForumView: FC<CatalogLayoutProps> = props =>
 {
     const { page = null } = props;
     const [ selectedGroupIndex, setSelectedGroupIndex ] = useState<number>(0);

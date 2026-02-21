@@ -11,7 +11,7 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = props =>
     const { catalogOptions = null, setCatalogOptions = null } = useCatalog();
     const { clubGifts = null } = catalogOptions;
     const { showConfirm = null } = useNotification();
-    
+
     const giftsAvailable = useCallback(() =>
     {
         if(!clubGifts) return '';
@@ -40,16 +40,21 @@ export const CatalogLayoutVipGiftsView: FC<CatalogLayoutProps> = props =>
         }, null);
     }, [ setCatalogOptions, showConfirm ]);
 
-    const sortGifts = useMemo(() => 
+    const sortGifts = useMemo(() =>
     {
-        let gifts = clubGifts.offers.sort((a,b) => 
+        if(!clubGifts?.offers) return [];
+
+        return [...clubGifts.offers].sort((a, b) =>
         {
-            return clubGifts.getOfferExtraData(a.offerId).daysRequired - clubGifts.getOfferExtraData(b.offerId).daysRequired;
-        })
-        return gifts;
-    },[ clubGifts ]);
-    
-    
+            const aData = clubGifts.getOfferExtraData(a.offerId);
+            const bData = clubGifts.getOfferExtraData(b.offerId);
+
+            return (aData?.daysRequired ?? 0) - (bData?.daysRequired ?? 0);
+        });
+    }, [ clubGifts ]);
+
+    if(!clubGifts) return null;
+
     return (
         <div className="flex flex-col h-full gap-2">
             <span className="text-xs font-semibold text-white/90 truncate shrink-0">{ giftsAvailable() }</span>

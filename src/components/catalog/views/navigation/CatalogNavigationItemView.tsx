@@ -28,7 +28,7 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                 onClick={ () => activateNode(node) }
             >
                 <CatalogIconView icon={ node.iconId } />
-                <span className="truncate">{ node.localization }</span>
+                <span className="truncate">{ node.localization?.replace(/\s*\(\d+\)$/, '') }</span>
             </div>
             { node.isOpen && node.isBranch &&
                 <div className="ml-3 border-l border-white/[0.05] pl-0.5 mt-0.5">

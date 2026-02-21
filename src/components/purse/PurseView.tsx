@@ -1,13 +1,13 @@
 import { FriendlyTime, HabboClubLevelEnum } from '@nitrots/nitro-renderer';
-import { FC, useMemo } from 'react';
-import { CreateLinkEvent, GetConfiguration, LocalizeText } from '../../api';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, LocalizeText, getAuthHeaders } from '../../api';
 import { LayoutCurrencyIcon } from '../../common';
 import { usePurse } from '../../hooks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CurrencyView } from './views/CurrencyView';
 import { LevelView } from './views/LevelView';
 import { SeasonalView } from './views/SeasonalView';
-import { Store, ClipboardList } from 'lucide-react';
+import { Store, ClipboardList, Wrench } from 'lucide-react';
 
 export const PurseView: FC<{}> = props =>
 {
@@ -15,6 +15,33 @@ export const PurseView: FC<{}> = props =>
 
     const displayedCurrencies = useMemo(() => GetConfiguration<number[]>('system.currency.types', []), []);
     const currencyDisplayNumberShort = useMemo(() => GetConfiguration<boolean>('currency.display.number.short', false), []);
+
+    const [ offerCount, setOfferCount ] = useState(0);
+
+    useEffect(() =>
+    {
+        const fetchOffers = () =>
+        {
+            try
+            {
+                const cmsUrl = GetConfiguration<string>('url.prefix', '');
+                const userId = GetSessionDataManager().userId;
+                if(!cmsUrl || !userId) return;
+
+                fetch(`${ cmsUrl }/api/marketplace?action=my-offers-received`, {
+                    headers: getAuthHeaders(),
+                })
+                    .then(r => r.ok ? r.json() : [])
+                    .then(data => setOfferCount(Array.isArray(data) ? data.length : 0))
+                    .catch(() => {});
+            }
+            catch {}
+        };
+
+        fetchOffers();
+        const interval = setInterval(fetchOffers, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
     const getClubText = (() =>
     {
@@ -97,14 +124,19 @@ export const PurseView: FC<{}> = props =>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            className="relative p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
                             onClick={ () => CreateLinkEvent('marketplace/toggle') }
                         >
                             <Store className="size-4 text-white/90" strokeWidth={ 2 } />
+                            { offerCount > 0 && (
+                                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold leading-none">
+                                    { offerCount }
+                                </span>
+                            ) }
                         </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
-                        Marketplace
+                        Marktplatz
                     </TooltipContent>
                 </Tooltip>
 
@@ -119,6 +151,20 @@ export const PurseView: FC<{}> = props =>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
                         Preisliste
+                    </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            onClick={ () => CreateLinkEvent('workshop/toggle') }
+                        >
+                            <Wrench className="size-4 text-white/90" strokeWidth={ 2 } />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        Werkstatt
                     </TooltipContent>
                 </Tooltip>
 

@@ -9,6 +9,7 @@ import { CameraWidgetView } from '../camera/CameraWidgetView';
 import { CampaignView } from '../campaign/CampaignView';
 import { CatalogView } from '../catalog/CatalogView';
 import { MarketplaceView } from '../marketplace/MarketplaceView';
+import { WorkshopView } from '../workshop/WorkshopView';
 import { ChatHistoryView } from '../chat-history/ChatHistoryView';
 import { FloorplanEditorView } from '../floorplan-editor/FloorplanEditorView';
 import { FriendsView } from '../friends/FriendsView';
@@ -30,8 +31,12 @@ import { UserProfileView } from '../user-profile/UserProfileView';
 import { UserSettingsView } from '../user-settings/UserSettingsView';
 import { LotteryView } from '../lottery/LotteryView';
 import { WelcomeToastView } from '../welcome/WelcomeToastView';
+import { ArrestToastView } from '../welcome/ArrestToastView';
+import { RadioPanelView } from '../radio/RadioPanelView';
+import { RadioView } from '../radio/RadioView';
 import { PriceListView } from '../pricelist/PriceListView';
 import { WiredView } from '../wired/WiredView';
+import { RelationshipView } from '../relationship/RelationshipView';
 
 export const MainView: FC<{}> = props =>
 {
@@ -50,13 +55,13 @@ export const MainView: FC<{}> = props =>
 
     useEffect(() =>
     {
-        const linkTracker: ILinkEventTracker = { 
+        const linkTracker: ILinkEventTracker = {
             linkReceived: (url: string) =>
             {
                 const parts = url.split('/');
-        
+
                 if(parts.length < 2) return;
-        
+
                 switch(parts[1])
                 {
                     case 'open':
@@ -92,6 +97,9 @@ export const MainView: FC<{}> = props =>
             <ToolbarView isInRoom={ !landingViewVisible } />
             <PurseView />
             <WelcomeToastView />
+            <ArrestToastView />
+            <RadioPanelView />
+            <RadioView />
             <LotteryView />
             <ModToolsView />
             <RoomView />
@@ -103,7 +111,9 @@ export const MainView: FC<{}> = props =>
             <InventoryView />
             <CatalogView />
             <MarketplaceView />
+            <RelationshipView />
             <PriceListView />
+            <WorkshopView />
             <FriendsView />
             <RightSideView />
             <UserSettingsView />

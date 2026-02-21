@@ -2,7 +2,7 @@ import { Dispose, DropBounce, EaseOut, JumpBy, Motions, NitroToolbarAnimateIconE
 import { FC, useState } from 'react';
 import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, MessengerIconState, OpenMessengerChat, VisitDesktop } from '../../api';
 import { LayoutAvatarImageView, TransitionAnimation, TransitionAnimationTypes } from '../../common';
-import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useRoomEngineEvent, useSessionInfo } from '../../hooks';
+import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useRoomEngineEvent, useSeasonalTheme, useSessionInfo } from '../../hooks';
 import { ToolbarMeView } from './ToolbarMeView';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     const { requests = [] } = useFriends();
     const { iconState = MessengerIconState.HIDDEN } = useMessenger();
     const isMod = GetSessionDataManager().isModerator;
+    const theme = useSeasonalTheme();
 
     useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event =>
     {
@@ -70,11 +71,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
     return (
         <TooltipProvider delayDuration={ 400 }>
             { /* Left sidebar - Icons vertikal, frei schwebend */ }
-            { /* Logo oben links */ }
-            <div className="fixed top-2 left-4 z-[60] pointer-events-none">
-                <TextGif gifUrl="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmx6a3BzZ3pwajN0bnphZGlpcHI2ajA1cWpzaHBkbHJ0anVjeGcyeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wQHDnQmXZlpVuuPqey/giphy.gif" text="bahhos" size="lg" weight="bold" />
-            </div>
-            <div className="nitro-toolbar fixed left-4 top-1/2 -translate-y-1/2 z-[70] pointer-events-auto flex flex-col items-center gap-4 py-3 px-2 texture-panel backdrop-blur-xl rounded-2xl">
+            <div
+                className="nitro-toolbar fixed left-4 top-1/2 -translate-y-1/2 z-[70] pointer-events-auto flex flex-col items-center gap-4 py-3 px-2 texture-panel backdrop-blur-xl rounded-2xl"
+                style={ theme.accentGlow ? { boxShadow: `0 0 20px 2px ${ theme.accentGlow }, inset 0 0 15px 1px ${ theme.accentGlow }` } : undefined }
+            >
                 { /* Avatar + Me Menu */ }
                 <div className="relative">
                     <div className="absolute left-full ml-2 top-0 pointer-events-none">

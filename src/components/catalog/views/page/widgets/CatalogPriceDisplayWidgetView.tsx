@@ -22,14 +22,14 @@ export const CatalogPriceDisplayWidgetView: FC<CatalogPriceDisplayWidgetViewProp
     return (
         <>
             { (offer.priceInCredits > 0) &&
-                <Badge className="gap-1 bg-amber-100 text-amber-800 border-amber-200">
+                <Badge className="gap-1 bg-amber-900/30 text-amber-300 border-amber-700/40">
                     <span className="font-bold">{ (offer.priceInCredits * quantity) }</span>
                     <LayoutCurrencyIcon type={ -1 } />
                 </Badge> }
             { separator && (offer.priceInCredits > 0) && (offer.priceInActivityPoints > 0) &&
-                <FaPlus size="xs" className="text-muted-foreground" /> }
+                <FaPlus size="xs" className="text-white/30" /> }
             { (offer.priceInActivityPoints > 0) &&
-                <Badge className="gap-1 bg-teal-100 text-teal-800 border-teal-200">
+                <Badge className="gap-1 bg-teal-900/30 text-teal-300 border-teal-700/40">
                     <span className="font-bold">{ (offer.priceInActivityPoints * quantity) }</span>
                     <LayoutCurrencyIcon type={ offer.activityPointType } />
                 </Badge> }

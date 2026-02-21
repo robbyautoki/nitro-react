@@ -25,7 +25,7 @@ export interface ItemStats
 const useMarketplaceState = () =>
 {
     const [ isVisible, setIsVisible ] = useState(false);
-    const [ currentTab, setCurrentTab ] = useState<string>('browse');
+    const [ currentTab, setCurrentTab ] = useState<string>('custom-browse');
     const [ searchType, setSearchType ] = useState(MarketplaceSearchType.BY_ACTIVITY);
     const [ offers, setOffers ] = useState(new Map<number, MarketplaceOfferData>());
     const [ totalItemsFound, setTotalItemsFound ] = useState(0);

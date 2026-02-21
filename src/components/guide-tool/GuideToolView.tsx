@@ -1,5 +1,5 @@
 import { GuideOnDutyStatusMessageEvent, GuideSessionAttachedMessageEvent, GuideSessionDetachedMessageEvent, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionInvitedToGuideRoomMessageEvent, GuideSessionMessageMessageEvent, GuideSessionOnDutyUpdateMessageComposer, GuideSessionPartnerIsTypingMessageEvent, GuideSessionStartedMessageEvent, ILinkEventTracker, PerkAllowancesMessageEvent, PerkEnum } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { AddEventLinkTracker, GetConfiguration, GetSessionDataManager, GuideSessionState, GuideToolMessage, GuideToolMessageGroup, LocalizeText, RemoveLinkEventTracker, SendMessageComposer } from '../../api';
 import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { GuideToolEvent } from '../../events';
@@ -41,6 +41,7 @@ export const GuideToolView: FC<{}> = props =>
     const [ ongoingIsTyping, setOngoingIsTyping ] = useState<boolean>(false);
     const [ ongoingMessageGroups, setOngoingMessageGroups ] = useState<GuideToolMessageGroup[]>([]);
 
+    const hasAutoDutied = useRef(false);
     const { simpleAlert = null } = useNotification();
 
     const updateSessionState = useCallback((newState: string, replacement?: string) =>
@@ -125,6 +126,14 @@ export const GuideToolView: FC<{}> = props =>
         {
             setIsOnDuty(false);
             SendMessageComposer(new GuideSessionOnDutyUpdateMessageComposer(false, false, false, false));
+        }
+
+        // Auto-duty: Staff automatisch on-duty fuer Help-Requests setzen
+        if(parser.isAllowed(PerkEnum.GIVE_GUIDE_TOUR) && !hasAutoDutied.current)
+        {
+            hasAutoDutied.current = true;
+            setIsHandlingHelpRequests(true);
+            SendMessageComposer(new GuideSessionOnDutyUpdateMessageComposer(true, false, true, false));
         }
     });
 

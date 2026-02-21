@@ -1,14 +1,14 @@
 import { RoomObjectType } from '@nitrots/nitro-renderer';
 import { FC, useMemo, useState } from 'react';
+import { User } from 'lucide-react';
 import { ChatEntryType, GetSessionDataManager, IReportedUser, LocalizeText, ReportState } from '../../../api';
-import { AutoGrid, Button, Column, Flex, LayoutGridItem, Text } from '../../../common';
 import { useChatHistory, useHelp } from '../../../hooks';
 
-export const SelectReportedUserView: FC<{}> = props =>
+export const SelectReportedUserView: FC<{}> = () =>
 {
     const [ selectedUserId, setSelectedUserId ] = useState(-1);
     const { chatHistory = [] } = useChatHistory();
-    const { activeReport = null, setActiveReport = null } = useHelp();
+    const { setActiveReport = null } = useHelp();
 
     const availableUsers = useMemo(() =>
     {
@@ -26,60 +26,62 @@ export const SelectReportedUserView: FC<{}> = props =>
     {
         if(userId <= 0) return;
 
-        setActiveReport(prevValue =>
-        {
-            return { ...prevValue, reportedUserId: userId, currentStep: ReportState.SELECT_CHATS };
-        });
-    }
+        setActiveReport(prev => ({
+            ...prev,
+            reportedUserId: userId,
+            currentStep: ReportState.SELECT_CHATS,
+        }));
+    };
 
     const selectUser = (userId: number) =>
     {
-        setSelectedUserId(prevValue =>
-        {
-            if(userId === prevValue) return -1;
-
-            return userId;
-        });
-    }
-
-    const back = () =>
-    {
-        setActiveReport(prevValue =>
-        {
-            return { ...prevValue, currentStep: (prevValue.currentStep - 1) };
-        });
-    }
+        setSelectedUserId(prev => (userId === prev) ? -1 : userId);
+    };
 
     return (
-        <>
-            <Column gap={ 1 }>
-                <Text fontSize={ 4 }>{ LocalizeText('help.emergency.main.step.two.title') }</Text>
-                { (availableUsers.length > 0) &&
-                    <Text>{ LocalizeText('report.user.pick.user') }</Text> }
-            </Column>
-            <Column gap={ 1 } overflow="hidden">
-                { !!!availableUsers.length &&
-                    <Text>{ LocalizeText('report.user.error.nolist') }</Text> }
-                { (availableUsers.length > 0) &&
-                    <AutoGrid columnCount={ 1 } columnMinHeight={ 25 } gap={ 1 }>
-                        { availableUsers.map((user, index) =>
-                        {
-                            return (
-                                <LayoutGridItem key={ user.id } onClick={ event => selectUser(user.id) } itemActive={ (selectedUserId === user.id) }>
-                                    <span dangerouslySetInnerHTML={ { __html: (user.username) } } />
-                                </LayoutGridItem>
-                            );
-                        }) }
-                    </AutoGrid> }
-            </Column>
-            <Flex gap={ 2 } justifyContent="between">
-                <Button variant="secondary" onClick={ back }>
-                    { LocalizeText('generic.back') }
-                </Button>
-                <Button disabled={ (selectedUserId <= 0) } onClick={ () => submitUser(selectedUserId) }>
-                    { LocalizeText('help.emergency.main.submit.button') }
-                </Button>
-            </Flex>
-        </>
+        <div className="space-y-4">
+            <div>
+                <p className="text-xs text-white/40 mb-3">Waehle den Spieler, den du melden moechtest</p>
+            </div>
+
+            { !availableUsers.length && (
+                <div className="px-4 py-6 rounded-xl border border-white/[0.06] bg-white/[0.03] text-center">
+                    <p className="text-sm text-white/40">Keine Spieler verfuegbar. Du musst zuerst mit jemandem chatten.</p>
+                </div>
+            ) }
+
+            { availableUsers.length > 0 && (
+                <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
+                    { availableUsers.map(user => (
+                        <button
+                            key={ user.id }
+                            className={ `w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all text-left ${
+                                selectedUserId === user.id
+                                    ? 'border-blue-500/30 bg-blue-500/10 text-white/90'
+                                    : 'border-white/[0.06] bg-white/[0.03] text-white/70 hover:bg-white/[0.06] hover:border-white/[0.1]'
+                            }` }
+                            onClick={ () => selectUser(user.id) }
+                        >
+                            <div className={ `shrink-0 p-1.5 rounded-lg ${
+                                selectedUserId === user.id ? 'bg-blue-500/20 text-blue-400' : 'bg-white/[0.05] text-white/40'
+                            }` }>
+                                <User className="size-4" />
+                            </div>
+                            <span className="text-sm font-medium">{ user.username }</span>
+                        </button>
+                    )) }
+                </div>
+            ) }
+
+            <div className="flex justify-end pt-2">
+                <button
+                    className="px-4 py-2 rounded-xl text-sm font-medium transition-all bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:bg-blue-500/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                    disabled={ selectedUserId <= 0 }
+                    onClick={ () => submitUser(selectedUserId) }
+                >
+                    Weiter
+                </button>
+            </div>
+        </div>
     );
-}
+};

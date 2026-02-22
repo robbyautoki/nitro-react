@@ -62,19 +62,103 @@ const SpeakerIcon: FC<{ size?: number }> = ({ size = 18 }) => (
     </svg>
 );
 
+const VoiceControls: FC<{ channelName: string; onDisconnect: () => void }> = ({ channelName, onDisconnect }) =>
+{
+    const { localParticipant } = useLocalParticipant();
+    const [ isMuted, setIsMuted ] = useState(false);
+    const [ isDeafened, setIsDeafened ] = useState(false);
+    const participants = useParticipants();
+    const username = GetSessionDataManager().userName;
+
+    const toggleMute = useCallback(async () =>
+    {
+        const newMuted = !isMuted;
+        await localParticipant.setMicrophoneEnabled(!newMuted);
+        setIsMuted(newMuted);
+    }, [ localParticipant, isMuted ]);
+
+    const toggleDeafen = useCallback(async () =>
+    {
+        const newDeafened = !isDeafened;
+
+        // Mute/unmute alle remote audio tracks
+        participants.forEach(p =>
+        {
+            if(p.identity === localParticipant.identity) return;
+            p.audioTrackPublications.forEach(pub =>
+            {
+                if(pub.track) pub.track.enabled = !newDeafened;
+            });
+        });
+
+        if(newDeafened && !isMuted)
+        {
+            await localParticipant.setMicrophoneEnabled(false);
+            setIsMuted(true);
+        }
+        else if(!newDeafened && isMuted)
+        {
+            await localParticipant.setMicrophoneEnabled(true);
+            setIsMuted(false);
+        }
+
+        setIsDeafened(newDeafened);
+    }, [ localParticipant, isDeafened, isMuted, participants ]);
+
+    return (
+        <div className="dc-voice-footer">
+            <div className="dc-voice-connected-info">
+                <div className="dc-voice-signal" />
+                <div className="dc-voice-connected-text">
+                    <span className="dc-voice-connected-label">Sprachverbunden</span>
+                    <span className="dc-voice-connected-channel">{ channelName }</span>
+                </div>
+            </div>
+            <div className="dc-voice-user-controls">
+                <div className="dc-voice-user-info">
+                    <div className="dc-voice-user-avatar">
+                        <img
+                            src={ `https://www.habbo.de/habbo-imaging/avatarimage?figure=${ GetSessionDataManager().figure }&direction=2&head_direction=2&headonly=1&size=s` }
+                            alt={ username }
+                        />
+                    </div>
+                    <span className="dc-voice-user-name">{ username }</span>
+                </div>
+                <div className="dc-voice-buttons">
+                    <button
+                        className={ `dc-voice-btn ${ isMuted ? 'dc-voice-btn--danger' : '' }` }
+                        onClick={ toggleMute }
+                        title={ isMuted ? 'Mikrofon einschalten' : 'Mikrofon ausschalten' }
+                    >
+                        { isMuted ? <MicMuteIcon size={ 20 } /> : <MicIcon size={ 20 } /> }
+                    </button>
+                    <button
+                        className={ `dc-voice-btn ${ isDeafened ? 'dc-voice-btn--danger' : '' }` }
+                        onClick={ toggleDeafen }
+                        title={ isDeafened ? 'Ton einschalten' : 'Ton ausschalten' }
+                    >
+                        { isDeafened ? <DeafenIcon size={ 20 } /> : <HeadphoneIcon size={ 20 } /> }
+                    </button>
+                    <button
+                        className="dc-voice-btn dc-voice-btn--disconnect"
+                        onClick={ onDisconnect }
+                        title="Trennen"
+                    >
+                        <DisconnectIcon size={ 20 } />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const VoiceConnectedContent: FC<{
     channelName: string;
     livekitUrl: string;
     token: string;
-    isMuted: boolean;
-    isDeafened: boolean;
-    onToggleMute: () => void;
-    onToggleDeafen: () => void;
     onDisconnect: () => void;
-}> = ({ channelName, livekitUrl, token, isMuted, isDeafened, onToggleMute, onToggleDeafen, onDisconnect }) =>
+}> = ({ channelName, livekitUrl, token, onDisconnect }) =>
 {
-    const username = GetSessionDataManager().userName;
-
     return (
         <LiveKitRoom
             serverUrl={ livekitUrl }
@@ -86,49 +170,7 @@ const VoiceConnectedContent: FC<{
         >
             <RoomAudioRenderer />
             <VoiceParticipantsList />
-            <div className="dc-voice-footer">
-                <div className="dc-voice-connected-info">
-                    <div className="dc-voice-signal" />
-                    <div className="dc-voice-connected-text">
-                        <span className="dc-voice-connected-label">Sprachverbunden</span>
-                        <span className="dc-voice-connected-channel">{ channelName }</span>
-                    </div>
-                </div>
-                <div className="dc-voice-user-controls">
-                    <div className="dc-voice-user-info">
-                        <div className="dc-voice-user-avatar">
-                            <img
-                                src={ `https://www.habbo.de/habbo-imaging/avatarimage?figure=${ GetSessionDataManager().figure }&direction=2&head_direction=2&size=s` }
-                                alt={ username }
-                            />
-                        </div>
-                        <span className="dc-voice-user-name">{ username }</span>
-                    </div>
-                    <div className="dc-voice-buttons">
-                        <button
-                            className={ `dc-voice-btn ${ isMuted ? 'dc-voice-btn--danger' : '' }` }
-                            onClick={ onToggleMute }
-                            title={ isMuted ? 'Mikrofon einschalten' : 'Mikrofon ausschalten' }
-                        >
-                            { isMuted ? <MicMuteIcon size={ 20 } /> : <MicIcon size={ 20 } /> }
-                        </button>
-                        <button
-                            className={ `dc-voice-btn ${ isDeafened ? 'dc-voice-btn--danger' : '' }` }
-                            onClick={ onToggleDeafen }
-                            title={ isDeafened ? 'Ton einschalten' : 'Ton ausschalten' }
-                        >
-                            { isDeafened ? <DeafenIcon size={ 20 } /> : <HeadphoneIcon size={ 20 } /> }
-                        </button>
-                        <button
-                            className="dc-voice-btn dc-voice-btn--disconnect"
-                            onClick={ onDisconnect }
-                            title="Trennen"
-                        >
-                            <DisconnectIcon size={ 20 } />
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <VoiceControls channelName={ channelName } onDisconnect={ onDisconnect } />
         </LiveKitRoom>
     );
 };
@@ -196,8 +238,6 @@ export const VoiceChannelView: FC<{}> = () =>
     const [ activeChannelId, setActiveChannelId ] = useState<number | null>(null);
     const [ activeChannelName, setActiveChannelName ] = useState<string>('');
     const [ token, setToken ] = useState<string>('');
-    const [ isMuted, setIsMuted ] = useState(false);
-    const [ isDeafened, setIsDeafened ] = useState(false);
     const [ isConnecting, setIsConnecting ] = useState(false);
     const [ showCreateForm, setShowCreateForm ] = useState(false);
     const [ newChannelName, setNewChannelName ] = useState('');
@@ -275,8 +315,6 @@ export const VoiceChannelView: FC<{}> = () =>
             setToken(data.token);
             setActiveChannelId(channel.id);
             setActiveChannelName(channel.name);
-            setIsMuted(false);
-            setIsDeafened(false);
         }
         catch(e)
         {
@@ -293,8 +331,6 @@ export const VoiceChannelView: FC<{}> = () =>
         setActiveChannelId(null);
         setActiveChannelName('');
         setToken('');
-        setIsMuted(false);
-        setIsDeafened(false);
     }, []);
 
     const createChannel = useCallback(async () =>
@@ -377,10 +413,6 @@ export const VoiceChannelView: FC<{}> = () =>
                         channelName={ activeChannelName }
                         livekitUrl={ livekitUrl }
                         token={ token }
-                        isMuted={ isMuted }
-                        isDeafened={ isDeafened }
-                        onToggleMute={ () => setIsMuted(!isMuted) }
-                        onToggleDeafen={ () => setIsDeafened(!isDeafened) }
                         onDisconnect={ disconnect }
                     />
                 ) }

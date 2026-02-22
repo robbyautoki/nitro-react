@@ -199,15 +199,15 @@ $dc-brand: #5865f2;
 }
 
 .dc-voice-participant-avatar {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     flex-shrink: 0;
     background: $dc-bg-active;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid transparent;
+    border: 3px solid transparent;
     transition: border-color 0.15s;
 
     &--speaking {
@@ -314,8 +314,8 @@ $dc-brand: #5865f2;
 }
 
 .dc-voice-user-avatar {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;

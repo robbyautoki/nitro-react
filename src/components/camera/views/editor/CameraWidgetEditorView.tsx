@@ -92,6 +92,26 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
         return GetRoomCameraWidgetManager().applyEffects(picture.texture, selectedEffects, false).src;
     }, [ picture, selectedEffects ]);
 
+    const getCroppedUrl = useCallback(() =>
+    {
+        if(zoomLevel <= 1 && panOffset.x === 0 && panOffset.y === 0) return getCurrentPictureUrl;
+
+        const size = 320;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.src = getCurrentPictureUrl;
+
+        const srcSize = size / zoomLevel;
+        const cx = (size / 2) - (panOffset.x / zoomLevel);
+        const cy = (size / 2) - (panOffset.y / zoomLevel);
+        ctx.drawImage(img, cx - srcSize / 2, cy - srcSize / 2, srcSize, srcSize, 0, 0, size, size);
+
+        return canvas.toDataURL('image/png');
+    }, [ getCurrentPictureUrl, zoomLevel, panOffset ]);
+
     const onPanMouseDown = useCallback((e: React.MouseEvent) =>
     {
         if(zoomLevel <= 1) return;
@@ -133,7 +153,7 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
                 onCancel();
                 return;
             case 'checkout':
-                onCheckout(getCurrentPictureUrl);
+                onCheckout(getCroppedUrl());
                 return;
             case 'change_tab':
                 setCurrentTab(String(effectName));
@@ -179,14 +199,14 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
             case 'download': {
                 const image = new Image();
                             
-                image.src = getCurrentPictureUrl
+                image.src = getCroppedUrl();
                             
                 const newWindow = window.open('');
                 newWindow.document.write(image.outerHTML);
                 return;
             }
         }
-    }, [ availableEffects, selectedEffectName, getCurrentPictureUrl, getSelectedEffectIndex, onCancel, onCheckout, onClose, setSelectedEffects ]);
+    }, [ availableEffects, selectedEffectName, getCurrentPictureUrl, getCroppedUrl, getSelectedEffectIndex, onCancel, onCheckout, onClose, setSelectedEffects ]);
 
     useEffect(() =>
     {

@@ -502,7 +502,7 @@ export const RadioPanelView: FC<{}> = () =>
             />
 
             {/* ── Compact Float Bar ── */}
-            <div className="fixed top-3 left-4 z-[65] pointer-events-auto flex items-center gap-1 py-1.5 px-3 texture-panel backdrop-blur-2xl rounded-2xl select-none">
+            <div className="fixed top-3 left-4 z-[65] pointer-events-auto flex items-center gap-1 h-[42px] px-3 texture-panel backdrop-blur-2xl rounded-2xl select-none">
                 {/* CMS Switcher — nur wenn im iframe */}
                 { isInIframe && (
                     <>
@@ -518,7 +518,7 @@ export const RadioPanelView: FC<{}> = () =>
                                 <rect x="14" y="14" width="7" height="7" rx="1" />
                             </svg>
                         </button>
-                        <div className="w-px h-5 bg-white/[0.06]" />
+                        <div className="w-px h-6 bg-white/[0.06]" />
                     </>
                 ) }
                 {/* Logo */}
@@ -528,7 +528,7 @@ export const RadioPanelView: FC<{}> = () =>
                     size="sm"
                     weight="bold"
                 />
-                <div className="w-px h-5 bg-white/[0.06]" />
+                <div className="w-px h-6 bg-white/[0.06]" />
 
                 {/* Track Info */}
                 { !radioEnabled ? (

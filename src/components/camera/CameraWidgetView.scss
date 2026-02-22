@@ -94,9 +94,24 @@
     width: $camera-editor-width;
     height: $camera-editor-height;
 
+    .picture-preview-container {
+        width: 380px;
+        height: 380px;
+        overflow: hidden;
+        border-radius: 4px;
+        position: relative;
+        user-select: none;
+    }
+
     .picture-preview {
-        width: 320px;
-        height: 320px;
+        width: 380px;
+        height: 380px;
+        display: block;
+        image-rendering: auto;
+    }
+
+    .camera-footer {
+        flex-shrink: 0;
     }
 
     .layout-grid-item {

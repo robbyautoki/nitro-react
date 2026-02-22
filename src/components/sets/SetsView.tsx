@@ -29,6 +29,8 @@ interface FurnitureSet {
     reward_credits: number;
     reward_pixels: number;
     reward_points: number;
+    has_reward_item: boolean;
+    has_rewards: boolean;
     release_date: string | null;
     reward_item: RewardItem | null;
     totalItems: number;
@@ -279,7 +281,7 @@ const SetDetailPanel: FC<SetDetailPanelProps> = ({ set, ownedNames, onComplete, 
 {
     const progress = getProgress(set, ownedNames);
     const complete = progress.percent === 100;
-    const hasRewards = set.reward_credits > 0 || set.reward_pixels > 0 || set.reward_points > 0 || set.reward_item !== null;
+    const hasRewards = set.has_rewards || set.reward_credits > 0 || set.reward_pixels > 0 || set.reward_points > 0 || set.has_reward_item || set.reward_item !== null;
 
     return (
         <div className="flex flex-col gap-3 p-4">

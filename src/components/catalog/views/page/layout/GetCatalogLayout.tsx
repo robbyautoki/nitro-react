@@ -32,11 +32,16 @@ export const GetCatalogLayout = (page: ICatalogPage, hideNavigation: () => void)
     // Sets overview page (ID 9998) - first child, auto-selected
     if(page.pageId === 9998) return <CatalogLayoutSetsStartView { ...layoutProps } />;
 
-    // Sets detail pages (ID >= 10000, children of 9999)
+    // Sets detail pages (ID >= 10000) require explicit marker in page_text2
     if(page.pageId >= 10000)
     {
         const text1 = page.localization?.getText(0) || '';
-        if(text1 && !isNaN(Number(text1))) return <CatalogLayoutSetsDetailView { ...layoutProps } />;
+        const marker = page.localization?.getText(1) || '';
+
+        if(marker === 'set-detail' && text1 && !isNaN(Number(text1)))
+        {
+            return <CatalogLayoutSetsDetailView { ...layoutProps } />;
+        }
     }
 
     switch(page.layoutCode)

@@ -532,18 +532,18 @@ export const RadioPanelView: FC<{}> = () =>
 
                 {/* Track Info */}
                 { !radioEnabled ? (
-                    <span className="text-xs text-red-400/60 italic">Aus</span>
+                    <span className="text-sm text-red-400/60 italic">Aus</span>
                 ) : currentTrack ? (
-                    <span className="text-xs text-white/80 truncate max-w-[160px]">
+                    <span className="text-sm text-white/80 truncate max-w-[160px]">
                         { currentTrack.title } – { currentTrack.artist }
                     </span>
                 ) : (
-                    <span className="text-xs text-white/40 italic">Radio</span>
+                    <span className="text-sm text-white/40 italic">Radio</span>
                 ) }
 
                 { needsInteraction && (
                     <button
-                        className="text-[10px] text-amber-300 hover:text-amber-200 font-bold"
+                        className="text-xs text-amber-300 hover:text-amber-200 font-bold"
                         onClick={ handleUnlock }
                     >
                         ▶
@@ -553,7 +553,7 @@ export const RadioPanelView: FC<{}> = () =>
                 {/* Play/Pause */}
                 { radioEnabled && currentTrack && (
                     <button
-                        className="text-xs text-white/60 hover:text-white/90 transition-colors"
+                        className="text-sm text-white/60 hover:text-white/90 transition-colors"
                         onClick={ () => sendCommand(paused ? ':radio play' : ':radio pause') }
                     >
                         { paused ? '▶' : '⏸' }
@@ -563,7 +563,7 @@ export const RadioPanelView: FC<{}> = () =>
                 {/* Volume */}
                 <div className="flex items-center gap-1">
                     <button
-                        className="text-[10px] text-white/40 hover:text-white/70 transition-colors"
+                        className="text-xs text-white/40 hover:text-white/70 transition-colors"
                         onClick={ () => setMuted(!muted) }
                     >
                         { muted || volume === 0 ? '🔇' : volume < 0.4 ? '🔈' : '🔊' }
@@ -574,7 +574,7 @@ export const RadioPanelView: FC<{}> = () =>
                         max="100"
                         value={ muted ? 0 : Math.round(volume * 100) }
                         onChange={ (e) => { setVolume(parseInt(e.target.value) / 100); setMuted(false); } }
-                        className="w-12 h-0.5 accent-white/60 cursor-pointer"
+                        className="w-14 h-1 accent-white/60 cursor-pointer"
                     />
                 </div>
 

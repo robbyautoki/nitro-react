@@ -49,9 +49,13 @@ export const VoiceChannelView: FC<{}> = () =>
         if(!roomId || !cmsUrl) return;
 
         fetch(`${ cmsUrl }/api/voice/channels?roomId=${ roomId }`)
-            .then(r => r.json())
-            .then(data => setChannels(data.channels || []))
-            .catch(() => setChannels([]));
+            .then(r => { if(!r.ok) throw new Error(); return r.json(); })
+            .then(data =>
+            {
+                if(data.channels && data.channels.length > 0)
+                    setChannels(data.channels);
+            })
+            .catch(() => {});
     }, [ roomId, cmsUrl ]);
 
     // Load channels when room changes

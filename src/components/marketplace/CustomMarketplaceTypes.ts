@@ -23,6 +23,7 @@ export interface CustomListingItem
     limited_data?: string;
     seal?: SealInfo | null;
     rarity?: RarityInfo | null;
+    in_circulation?: number;
 }
 
 export interface ItemInfo

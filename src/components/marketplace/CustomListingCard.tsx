@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { GetConfiguration } from '../../api';
 import { CustomListing } from './CustomMarketplaceTypes';
 import { ItemInfoTooltip } from './ItemInfoTooltip';
-import { Coins, Clock, MessageSquare, Package, User } from 'lucide-react';
+import { Coins, Clock, MessageSquare, Package, User, Hash, Shield } from 'lucide-react';
 
 const CURRENCY_COLORS: Record<string, string> = {
     credits: 'text-amber-400/80',
@@ -136,6 +136,25 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
                     { mode === 'browse' && listing.offer_count != null && listing.offer_count > 0 && (
                         <span className="text-[11px] text-blue-400/60">
                             { listing.offer_count } Anfrage{ listing.offer_count !== 1 ? 'n' : '' }
+                        </span>
+                    ) }
+                    { ltd && (
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400">
+                            <Hash className="size-2.5" />LIMITED
+                        </span>
+                    ) }
+                    { !ltd && rarityDisplay && (
+                        <span
+                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold"
+                            style={ { backgroundColor: (rarityColor ?? '#888') + '20', color: rarityColor ?? '#a78bfa' } }
+                        >
+                            { rarityDisplay }
+                        </span>
+                    ) }
+                    { mainItem?.in_circulation != null && mainItem.in_circulation > 0 && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-white/30">
+                            <Package className="size-2.5" />
+                            { mainItem.in_circulation.toLocaleString() }x im Umlauf
                         </span>
                     ) }
                 </div>

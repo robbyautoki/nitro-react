@@ -57,6 +57,10 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
 {
     const mainItem = listing.items[0];
     const ltd = mainItem ? parseLtd(mainItem.limited_data) : null;
+    const seal = mainItem?.seal;
+    const rarity = mainItem?.rarity;
+    const rarityDisplay = seal?.rarity_display ?? rarity?.rarity_display ?? null;
+    const rarityColor = seal?.color ?? rarity?.color ?? null;
     const currColor = CURRENCY_COLORS[listing.currency] || 'text-white/60';
 
     return (
@@ -76,6 +80,14 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
                 { ltd && (
                     <div className="absolute -top-1 -right-1 px-1 py-0.5 rounded text-[8px] font-bold bg-amber-500/90 text-black leading-none">
                         { ltd.num }/{ ltd.total }
+                    </div>
+                ) }
+                { rarityDisplay && (
+                    <div
+                        className="absolute -bottom-1 -left-1 px-1 py-0.5 rounded text-[7px] font-bold leading-none text-white"
+                        style={ { backgroundColor: rarityColor ?? '#888' } }
+                    >
+                        { rarityDisplay }
                     </div>
                 ) }
             </div>

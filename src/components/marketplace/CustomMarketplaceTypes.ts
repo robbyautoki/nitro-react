@@ -1,3 +1,18 @@
+export interface SealInfo
+{
+    rarity_id: number;
+    rarity_name: string;
+    rarity_display: string;
+    color: string;
+}
+
+export interface RarityInfo
+{
+    rarity_name: string;
+    rarity_display: string;
+    color: string;
+}
+
 export interface CustomListingItem
 {
     item_id?: number;
@@ -6,6 +21,8 @@ export interface CustomListingItem
     item_name: string;
     icon?: string;
     limited_data?: string;
+    seal?: SealInfo | null;
+    rarity?: RarityInfo | null;
 }
 
 export interface ItemInfo
@@ -15,6 +32,8 @@ export interface ItemInfo
     item_name: string;
     limited_data: string;
     rarity_type: string | null;
+    rarity_color: string | null;
+    seal: { rarity_display: string; color: string } | null;
     in_circulation: number;
     last_sale_price: number | null;
     avg_price: number | null;

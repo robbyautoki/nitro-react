@@ -148,7 +148,7 @@ export const InventoryCategoryBar: FC<InventoryCategoryBarProps> = ({ groupItems
                     <div className="context-item" onClick={ onRename }>Umbenennen</div>
                     <div className="context-item" onClick={ onMoveLeft }>Nach links</div>
                     <div className="context-item" onClick={ onMoveRight }>Nach rechts</div>
-                    <div className="context-item context-danger" onClick={ onDelete }>Loeschen</div>
+                    <div className="context-item context-danger" onClick={ onDelete }>Löschen</div>
                 </div>
             ) }
             { showDialog && (

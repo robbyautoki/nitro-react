@@ -9,7 +9,7 @@ const AUTO_FILTER_OPTIONS = [
     { value: 'wallpaper', label: 'Tapeten' },
     { value: 'poster', label: 'Poster' },
     { value: 'trophy', label: 'Trophaeen' },
-    { value: 'guild', label: 'Gruppenmoebel' },
+    { value: 'guild', label: 'Gruppenmöbel' },
     { value: 'rare', label: 'Raritaeten' },
 ];
 

@@ -1,7 +1,8 @@
 import { FC } from 'react';
 import { GetConfiguration } from '../../api';
 import { CustomListing } from './CustomMarketplaceTypes';
-import { Coins, Clock, MessageSquare, Package, User, Info } from 'lucide-react';
+import { ItemInfoTooltip } from './ItemInfoTooltip';
+import { Coins, Clock, MessageSquare, Package, User } from 'lucide-react';
 
 const CURRENCY_COLORS: Record<string, string> = {
     credits: 'text-amber-400/80',
@@ -50,10 +51,9 @@ interface Props
     onBuy?: () => void;
     onCancel?: () => void;
     onOffer?: () => void;
-    onInfo?: () => void;
 }
 
-export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onCancel, onOffer, onInfo }) =>
+export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onCancel, onOffer }) =>
 {
     const mainItem = listing.items[0];
     const ltd = mainItem ? parseLtd(mainItem.limited_data) : null;
@@ -146,15 +146,7 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
 
             {/* Actions */}
             <div className="flex items-center gap-1.5 shrink-0">
-                { onInfo && (
-                    <button
-                        className="h-7 w-7 rounded-lg bg-white/[0.06] text-white/40 hover:text-white/80 hover:bg-white/10 transition-all flex items-center justify-center"
-                        onClick={ onInfo }
-                        title="Info"
-                    >
-                        <Info className="size-3.5" />
-                    </button>
-                ) }
+                <ItemInfoTooltip listing={ listing } />
                 { mode === 'browse' && isMine && (
                     <span className="h-7 px-2.5 rounded-lg bg-white/[0.06] text-white/30 text-[11px] font-medium flex items-center">
                         Dein Angebot

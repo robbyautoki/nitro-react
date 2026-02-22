@@ -119,10 +119,10 @@ export const InventoryView: FC<{}> = props =>
     if(!isVisible) return null;
 
     const TAB_LABELS: Record<string, string> = {
-        [TAB_FURNITURE]: 'Furniture',
+        [TAB_FURNITURE]: 'Möbel',
         [TAB_BOTS]: 'Bots',
-        [TAB_PETS]: 'Pets',
-        [TAB_BADGES]: 'Badges',
+        [TAB_PETS]: 'Haustiere',
+        [TAB_BADGES]: 'Abzeichen',
     };
 
     return (
@@ -137,7 +137,7 @@ export const InventoryView: FC<{}> = props =>
             { !isTrading &&
                 <div className="inv-layout">
                     <div className="inv-sidebar drag-handler">
-                        <div className="inv-sidebar-title">Inventory</div>
+                        <div className="inv-sidebar-title">Inventar</div>
                         { TABS.map((name, index) =>
                         {
                             const unseenCount = getCount(UNSEEN_CATEGORIES[index]);

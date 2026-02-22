@@ -2,6 +2,7 @@ import { FC, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Store, Search, Package, BarChart3, History, MessageCircle, ShoppingBag } from 'lucide-react';
 import { DraggableWindow, DraggableWindowPosition } from '../../common';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
 import { MarketplaceBrowseView } from './MarketplaceBrowseView';
 import { MarketplaceOwnOffersView } from './MarketplaceOwnOffersView';
@@ -30,6 +31,7 @@ export const MarketplaceView: FC<{}> = () =>
     if(!isVisible) return null;
 
     return (
+        <TooltipProvider delayDuration={ 150 }>
         <DraggableWindow uniqueKey="marketplace" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
             <div className="w-[820px] max-h-[85vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
                 <div className="flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(85vh-4px)]">
@@ -83,5 +85,6 @@ export const MarketplaceView: FC<{}> = () =>
                 </div>
             </div>
         </DraggableWindow>
+        </TooltipProvider>
     );
 };

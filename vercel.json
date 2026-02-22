@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/photos/public", "destination": "https://bahhos.de/api/photos/public" }
+  ]
+}

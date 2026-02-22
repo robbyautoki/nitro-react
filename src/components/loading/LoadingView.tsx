@@ -22,13 +22,6 @@ const LOADING_TIPS = [
     'Werde kreativ mit Wired',
 ];
 
-function getCmsBaseUrl(): string
-{
-    const host = window.location.hostname;
-    if(host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3030';
-    return 'https://bahhos.de';
-}
-
 function ensureMinCards(urls: string[], min: number): string[]
 {
     if(urls.length === 0) return [];
@@ -59,7 +52,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
 
     useEffect(() =>
     {
-        const url = getCmsBaseUrl() + '/api/photos/public';
+        const url = '/api/photos/public';
         fetch(url)
             .then(res => res.json())
             .then((data: { url: string }[]) =>

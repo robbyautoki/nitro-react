@@ -1,5 +1,6 @@
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GetConfiguration, GetSessionDataManager } from '../../api';
+import { getAuthHeaders } from '../../api/utils/SessionTokenManager';
 import { useRoom } from '../../hooks';
 import {
     Room as LiveKitRoom,
@@ -179,12 +180,10 @@ export const VoiceChannelView: FC<{}> = () =>
 
         try
         {
-            const ssoTicket = GetSessionDataManager().ssoTicket;
             const res = await fetch(`${ cmsUrl }/api/voice/token`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
-                    ssoTicket,
                     roomId,
                     channelId: channel.id,
                 }),

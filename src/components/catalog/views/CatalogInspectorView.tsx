@@ -2,6 +2,7 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Offer, ProductTypeEnum } from '../../../api';
 import { useCatalog } from '../../../hooks';
+import { useFurnitureRarity } from '../../../hooks/rooms/widgets/useFurnitureRarity';
 import { CatalogAddOnBadgeWidgetView } from './page/widgets/CatalogAddOnBadgeWidgetView';
 import { CatalogLimitedItemWidgetView } from './page/widgets/CatalogLimitedItemWidgetView';
 import { CatalogPurchaseWidgetView } from './page/widgets/CatalogPurchaseWidgetView';
@@ -15,6 +16,7 @@ const ZOOM_GAP = 8;
 export const CatalogInspectorView: FC<{}> = props =>
 {
     const { currentOffer = null, purchaseOptions = null, setPurchaseOptions = null } = useCatalog();
+    const { rarityData } = useFurnitureRarity(currentOffer?.product?.productClassId ?? 0);
     const previewRef = useRef<HTMLDivElement>(null);
     const zoomRef = useRef<HTMLDivElement>(null);
     const rafRef = useRef<number>(0);
@@ -189,6 +191,22 @@ export const CatalogInspectorView: FC<{}> = props =>
                 <h3 className="text-[13px] font-semibold text-white/90 leading-tight truncate">
                     { currentOffer.localizationName }
                 </h3>
+
+                { rarityData && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                        { rarityData.rarityType && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                                style={ { background: `${ rarityData.rarityType.colorPrimary }20`, color: rarityData.rarityType.colorPrimary, border: `1px solid ${ rarityData.rarityType.colorPrimary }40` } }>
+                                { rarityData.rarityType.displayName }
+                            </span>
+                        ) }
+                        { rarityData.circulation > 0 && (
+                            <span className="text-[10px] text-white/40">
+                                { rarityData.circulation.toLocaleString() } im Umlauf
+                            </span>
+                        ) }
+                    </div>
+                ) }
 
                 <CatalogLimitedItemWidgetView fullWidth />
 

@@ -34,6 +34,7 @@ const useCatalogState = () =>
     const [ catalogSkipPurchaseConfirmation, setCatalogSkipPurchaseConfirmation ] = useCatalogSkipPurchaseConfirmation();
     const [ purchasableOffer, setPurchaseableOffer ] = useState<IPurchasableOffer>(null);
     const [ placedObjectPurchaseData, setPlacedObjectPurchaseData ] = useState<PlacedObjectPurchaseData>(null);
+    const placedObjectPurchaseQueue = useRef<PlacedObjectPurchaseData[]>([]);
     const [ catalogSize, setCatalogSize ] = useState({ width: 850, height: 480 });
     const [ furniCount, setFurniCount ] = useState(0);
     const [ furniLimit, setFurniLimit ] = useState(0);
@@ -187,6 +188,34 @@ const useCatalogState = () =>
     {
         if(!flag) resetObjectMover();
 
+        for(const entry of placedObjectPurchaseQueue.current)
+        {
+            switch(entry.category)
+            {
+                case RoomObjectCategory.FLOOR:
+                    GetRoomEngine().removeRoomObjectFloor(entry.roomId, entry.objectId);
+                    break;
+                case RoomObjectCategory.WALL: {
+                    switch(entry.furniData.className)
+                    {
+                        case 'floor':
+                        case 'wallpaper':
+                        case 'landscape':
+                            resetRoomPaint('reset', '');
+                            break;
+                        default:
+                            GetRoomEngine().removeRoomObjectWall(entry.roomId, entry.objectId);
+                            break;
+                    }
+                    break;
+                }
+                default:
+                    GetRoomEngine().deleteRoomObject(entry.objectId, entry.category);
+                    break;
+            }
+        }
+        placedObjectPurchaseQueue.current = [];
+
         setPlacedObjectPurchaseData(prevValue =>
         {
             if(prevValue)
@@ -197,7 +226,6 @@ const useCatalogState = () =>
                         GetRoomEngine().removeRoomObjectFloor(prevValue.roomId, prevValue.objectId);
                         break;
                     case RoomObjectCategory.WALL: {
-
                         switch(prevValue.furniData.className)
                         {
                             case 'floor':
@@ -729,7 +757,9 @@ const useCatalogState = () =>
             return;
         }
 
-        setPlacedObjectPurchaseData(new PlacedObjectPurchaseData(event.roomId, event.objectId, event.category, event.wallLocation, event.x, event.y, event.direction, purchasableOffer));
+        const purchaseData = new PlacedObjectPurchaseData(event.roomId, event.objectId, event.category, event.wallLocation, event.x, event.y, event.direction, purchasableOffer);
+        setPlacedObjectPurchaseData(purchaseData);
+        placedObjectPurchaseQueue.current.push(purchaseData);
 
         switch(currentType)
         {
@@ -811,33 +841,44 @@ const useCatalogState = () =>
     {
         const roomEngine = GetRoomEngine();
 
-        if(!placedObjectPurchaseData || (placedObjectPurchaseData.productClassId !== event.spriteId) || (placedObjectPurchaseData.roomId !== roomEngine.activeRoomId)) return;
+        const idx = placedObjectPurchaseQueue.current.findIndex(
+            d => d.productClassId === event.spriteId && d.roomId === roomEngine.activeRoomId
+        );
+
+        if(idx === -1) return;
+
+        const data = placedObjectPurchaseQueue.current[idx];
+        placedObjectPurchaseQueue.current.splice(idx, 1);
 
         switch(event.category)
         {
             case FurniCategory.FLOOR: {
                 const floorType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_FLOOR_TYPE);
 
-                if(placedObjectPurchaseData.extraParam !== floorType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
+                if(data.extraParam !== floorType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
                 break;
             }
             case FurniCategory.WALL_PAPER: {
                 const wallType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_WALL_TYPE);
 
-                if(placedObjectPurchaseData.extraParam !== wallType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
+                if(data.extraParam !== wallType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
                 break;
             }
             case FurniCategory.LANDSCAPE: {
                 const landscapeType = roomEngine.getRoomInstanceVariable(roomEngine.activeRoomId, RoomObjectVariable.ROOM_LANDSCAPE_TYPE);
 
-                if(placedObjectPurchaseData.extraParam !== landscapeType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
+                if(data.extraParam !== landscapeType) SendMessageComposer(new FurniturePlacePaintComposer(event.id));
                 break;
             }
             default:
-                SendMessageComposer(new FurniturePlaceComposer(event.id, placedObjectPurchaseData.category, placedObjectPurchaseData.wallLocation, placedObjectPurchaseData.x, placedObjectPurchaseData.y, placedObjectPurchaseData.direction));
+                SendMessageComposer(new FurniturePlaceComposer(event.id, data.category, data.wallLocation, data.x, data.y, data.direction));
         }
 
-        if(!catalogPlaceMultipleObjects) resetPlacedOfferData();
+        if(!catalogPlaceMultipleObjects)
+        {
+            placedObjectPurchaseQueue.current = [];
+            resetPlacedOfferData();
+        }
     });
 
     useEffect(() =>

@@ -1,17 +1,17 @@
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Trophy, Loader2 } from 'lucide-react';
-import { ILinkEventTracker, RoomEngineObjectPlacedEvent, RoomObjectCategory, RoomObjectPlacementSource } from '@nitrots/nitro-renderer';
-import { AddEventLinkTracker, GetConfiguration, GetRoomEngine, GetRoomSession, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
+import { ILinkEventTracker } from '@nitrots/nitro-renderer';
+import { AddEventLinkTracker, attemptItemPlacement, GetConfiguration, GetRoomSession, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
 import { DraggableWindow, DraggableWindowPosition } from '../../common';
-import { useRoomEngineEvent } from '../../hooks/events';
+import { InventoryFurniAddedEvent } from '../../events';
+import { useUiEvent } from '../../hooks/events';
 import { useInventoryFurni } from '../../hooks';
 
 interface SetItem {
     item_base_id: number;
     public_name: string;
     item_name: string;
-    sprite_id: number;
 }
 
 interface RewardItem {
@@ -110,7 +110,10 @@ export const SetsView: FC<{}> = () =>
     const [ loading, setLoading ] = useState(false);
     const [ selectedSetId, setSelectedSetId ] = useState<number | null>(null);
     const ownedNames = useOwnedClassNames();
-    const pendingPreviewRef = useRef<{ itemBaseId: number } | null>(null);
+    const { groupItems } = useInventoryFurni();
+    const groupItemsRef = useRef(groupItems);
+    groupItemsRef.current = groupItems;
+    const pendingPreviewRef = useRef<{ spriteId: number } | null>(null);
 
     useEffect(() =>
     {
@@ -169,20 +172,19 @@ export const SetsView: FC<{}> = () =>
         return count;
     }, [ sets, ownedNames ]);
 
-    useRoomEngineEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectPlacedEvent.PLACED, event =>
+    useUiEvent<InventoryFurniAddedEvent>(InventoryFurniAddedEvent.FURNI_ADDED, event =>
     {
         const preview = pendingPreviewRef.current;
-        if(!preview) return;
-        if(!event.placedInRoom) { pendingPreviewRef.current = null; return; }
+        if(!preview || event.spriteId !== preview.spriteId) return;
 
         pendingPreviewRef.current = null;
 
-        try
+        // Small delay to let groupItems state update before attempting placement
+        setTimeout(() =>
         {
-            const session = GetRoomSession();
-            if(session) session.sendChatMessage(`:sets preview ${ preview.itemBaseId } ${ event.x } ${ event.y } ${ event.direction }`, 0);
-        }
-        catch {}
+            const group = groupItemsRef.current.find(g => g.type === event.spriteId);
+            if(group) attemptItemPlacement(group);
+        }, 150);
     });
 
     const onClose = useCallback(() => setIsVisible(false), []);
@@ -201,19 +203,20 @@ export const SetsView: FC<{}> = () =>
     {
         try
         {
-            const engine = GetRoomEngine();
-            if(!engine) return;
+            const session = GetRoomSession();
+            if(!session) return;
 
-            pendingPreviewRef.current = { itemBaseId: item.item_base_id };
+            const sessionData = GetSessionDataManager();
+            const baseName = item.item_name.split('*')[0];
+            const floorData = sessionData.getFloorItemDataByName(baseName);
+            const wallData = !floorData ? sessionData.getWallItemDataByName(baseName) : null;
+            const spriteId = floorData?.id ?? wallData?.id ?? 0;
 
-            engine.processRoomObjectPlacement(
-                RoomObjectPlacementSource.CATALOG,
-                -(item.item_base_id),
-                RoomObjectCategory.FLOOR,
-                item.sprite_id,
-                ''
-            );
+            if(spriteId === 0) return;
 
+            pendingPreviewRef.current = { spriteId };
+
+            session.sendChatMessage(`:sets preview ${ item.item_base_id }`, 0);
             setIsVisible(false);
         }
         catch {}

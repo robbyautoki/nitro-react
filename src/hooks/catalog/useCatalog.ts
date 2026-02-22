@@ -820,11 +820,13 @@ const useCatalogState = () =>
     {
         const roomEngine = GetRoomEngine();
 
+        console.log('[MULTI-PLACE] FURNI_ADDED', { spriteId: event.spriteId, category: event.category, queueLen: placedObjectPurchaseQueue.current.length, queueItems: placedObjectPurchaseQueue.current.map(d => ({ classId: d.productClassId, roomId: d.roomId })), activeRoom: roomEngine.activeRoomId, multiPlace: catalogPlaceMultipleObjectsRef.current });
+
         const idx = placedObjectPurchaseQueue.current.findIndex(
             d => d.productClassId === event.spriteId && d.roomId === roomEngine.activeRoomId
         );
 
-        if(idx === -1) return;
+        if(idx === -1) { console.log('[MULTI-PLACE] No queue match!'); return; }
 
         const data = placedObjectPurchaseQueue.current[idx];
         placedObjectPurchaseQueue.current.splice(idx, 1);

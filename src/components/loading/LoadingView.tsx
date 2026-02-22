@@ -33,7 +33,7 @@ function ensureMinCards(urls: string[], min: number): string[]
 function PhotoCard({ url }: { url: string })
 {
     return (
-        <div className="relative w-[200px] h-[150px] rounded-xl overflow-hidden border border-white/10 shadow-lg shrink-0">
+        <div className="relative w-[320px] h-[240px] rounded-2xl overflow-hidden shadow-lg shrink-0">
             <img
                 src={ url }
                 alt=""
@@ -86,7 +86,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
             { cards.length > 0 && (
                 <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
                     <div
-                        className="flex flex-row gap-4 h-full w-[200vw]"
+                        className="flex flex-row gap-5 h-full w-[250vw]"
                         style={ {
                             transform: 'rotateX(15deg) rotateY(-8deg) rotateZ(15deg)',
                             opacity: 0.35,
@@ -158,7 +158,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                             transition={ { delay: 0.4 } }
                         >
                             <motion.div
-                                className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
+                                className="h-full rounded-full bg-white"
                                 initial={ { width: '0%' } }
                                 animate={ { width: `${ Math.min(percent, 100) }%` } }
                                 transition={ { duration: 0.5, ease: 'easeOut' } }

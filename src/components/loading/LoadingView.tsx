@@ -30,6 +30,17 @@ function ensureMinCards(urls: string[], min: number): string[]
     return result.slice(0, min);
 }
 
+function shuffleArray(arr: string[]): string[]
+{
+    const a = [ ...arr ];
+    for(let i = a.length - 1; i > 0; i--)
+    {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ a[i], a[j] ] = [ a[j], a[i] ];
+    }
+    return a;
+}
+
 function PhotoCard({ url }: { url: string })
 {
     return (
@@ -59,8 +70,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
             {
                 if(Array.isArray(data) && data.length > 0)
                 {
-                    const shuffled = [ ...data.map(p => p.url) ].sort(() => Math.random() - 0.5);
-                    setPhotoUrls(shuffled);
+                    setPhotoUrls(data.map(p => p.url));
                 }
             })
             .catch(() => {});
@@ -73,18 +83,17 @@ export const LoadingView: FC<LoadingViewProps> = props =>
         return () => clearInterval(interval);
     }, [ isError ]);
 
-    const cards = ensureMinCards(photoUrls, 24);
-    const col1 = cards.filter((_, i) => i % 6 === 0);
-    const col2 = cards.filter((_, i) => i % 6 === 1);
-    const col3 = cards.filter((_, i) => i % 6 === 2);
-    const col4 = cards.filter((_, i) => i % 6 === 3);
-    const col5 = cards.filter((_, i) => i % 6 === 4);
-    const col6 = cards.filter((_, i) => i % 6 === 5);
+    const col1 = shuffleArray(ensureMinCards(photoUrls, 4));
+    const col2 = shuffleArray(ensureMinCards(photoUrls, 4));
+    const col3 = shuffleArray(ensureMinCards(photoUrls, 4));
+    const col4 = shuffleArray(ensureMinCards(photoUrls, 4));
+    const col5 = shuffleArray(ensureMinCards(photoUrls, 4));
+    const col6 = shuffleArray(ensureMinCards(photoUrls, 4));
 
     return (
         <div className="nitro-loading">
             { /* 3D Gallery Background */ }
-            { cards.length > 0 && (
+            { photoUrls.length > 0 && (
                 <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
                     <div
                         className="flex flex-row gap-5 h-full w-[250vw]"

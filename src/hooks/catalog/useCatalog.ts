@@ -712,7 +712,7 @@ const useCatalogState = () =>
         refreshBuilderStatus();
     });
 
-    useUiEvent<CatalogPurchasedEvent>(CatalogPurchasedEvent.PURCHASE_SUCCESS, event => { console.log('[MULTI-PLACE] PURCHASE_SUCCESS'); PlaySound(SoundNames.CREDITS); SendMessageComposer(new UserCurrencyComposer()); });
+    useUiEvent<CatalogPurchasedEvent>(CatalogPurchasedEvent.PURCHASE_SUCCESS, event => { PlaySound(SoundNames.CREDITS); });
 
     useRoomEngineEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectPlacedEvent.PLACED, event =>
     {

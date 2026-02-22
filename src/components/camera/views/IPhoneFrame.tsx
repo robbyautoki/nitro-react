@@ -38,7 +38,7 @@ export const IPhoneFrame: FC = () =>
             <rect x="8" y="4" width="234" height="496" rx="26" ry="26" fill="url(#iphone-screen-bezel)" />
 
             {/* Screen-Bereich (transparent/cutout) */}
-            <rect x="14" y="14" width="222" height="476" rx="20" ry="20" fill="black" />
+            <rect x="14" y="14" width="222" height="476" rx="20" ry="20" fill="transparent" />
 
             {/* Dynamic Island */}
             <rect x="98" y="20" width="54" height="16" rx="8" ry="8" fill="#111113" />

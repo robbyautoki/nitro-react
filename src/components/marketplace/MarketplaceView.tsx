@@ -1,6 +1,7 @@
 import { FC, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Store, Search, Package, BarChart3, History, MessageCircle, ShoppingBag } from 'lucide-react';
+import { DraggableWindow, DraggableWindowPosition } from '../../common';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
 import { MarketplaceBrowseView } from './MarketplaceBrowseView';
 import { MarketplaceOwnOffersView } from './MarketplaceOwnOffersView';
@@ -29,22 +30,18 @@ export const MarketplaceView: FC<{}> = () =>
     if(!isVisible) return null;
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-auto">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={ onClose } />
-
-            {/* Outer ring */}
-            <div className="relative w-[820px] max-h-[85vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
-                {/* Inner panel */}
-                <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(85vh-4px)]">
+        <DraggableWindow uniqueKey="marketplace" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
+            <div className="w-[820px] max-h-[85vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
+                <div className="flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(85vh-4px)]">
 
                     {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent shrink-0">
+                    <div className="drag-handler flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent shrink-0 cursor-move">
                         <div className="flex items-center gap-2.5">
                             <Store className="size-4 text-white/70" />
                             <span className="text-sm font-semibold text-white/90 tracking-tight">Marktplatz</span>
                         </div>
                         <button
-                            className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all"
+                            className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all cursor-pointer"
                             onClick={ onClose }
                         >
                             <FaTimes className="size-3" />
@@ -85,6 +82,6 @@ export const MarketplaceView: FC<{}> = () =>
                     </div>
                 </div>
             </div>
-        </div>
+        </DraggableWindow>
     );
 };

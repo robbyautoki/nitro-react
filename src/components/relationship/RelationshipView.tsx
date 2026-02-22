@@ -3,7 +3,7 @@ import { FaTimes } from 'react-icons/fa';
 import { Heart, ArrowLeft, MessageCircle, Eye, Handshake, Swords, Mail, Trophy, Info, Users } from 'lucide-react';
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { AddEventLinkTracker, GetConfiguration, GetSessionDataManager, RemoveLinkEventTracker, getAuthHeaders } from '../../api';
-import { LayoutAvatarImageView } from '../../common';
+import { DraggableWindow, DraggableWindowPosition, LayoutAvatarImageView } from '../../common';
 
 const LEVEL_NAMES = ['Unbekannt', 'Bekannte', 'Kumpel', 'Guter Freund', 'Bester Freund', 'Seelenverwandt', 'Unzertrennlich', 'Legende'];
 const LEVEL_COLORS = ['#666', '#999', '#6bb5ff', '#4ade80', '#facc15', '#f97316', '#ef4444', '#c084fc'];
@@ -224,17 +224,15 @@ export const RelationshipView: FC<{}> = () =>
     ];
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-auto">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={ onClose } />
-
-            <div className="relative w-[480px] max-h-[75vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
-                <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(75vh-4px)]">
+        <DraggableWindow uniqueKey="relationship" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
+            <div className="w-[480px] max-h-[75vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
+                <div className="flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(75vh-4px)]">
 
                     {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent shrink-0">
+                    <div className="drag-handler flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent shrink-0 cursor-move">
                         <div className="flex items-center gap-2.5">
                             { selectedRel ? (
-                                <button className="p-1 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all" onClick={ () => setSelectedRel(null) }>
+                                <button className="p-1 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all cursor-pointer" onClick={ () => setSelectedRel(null) }>
                                     <ArrowLeft className="size-4" />
                                 </button>
                             ) : (
@@ -247,14 +245,14 @@ export const RelationshipView: FC<{}> = () =>
                         <div className="flex items-center gap-1">
                             { !selectedRel && (
                                 <button
-                                    className={ `p-1.5 rounded-lg transition-all ${ showInfo ? 'text-pink-400 bg-pink-500/10' : 'text-white/40 hover:text-white/80 hover:bg-white/[0.08]' }` }
+                                    className={ `p-1.5 rounded-lg transition-all cursor-pointer ${ showInfo ? 'text-pink-400 bg-pink-500/10' : 'text-white/40 hover:text-white/80 hover:bg-white/[0.08]' }` }
                                     onClick={ () => setShowInfo(prev => !prev) }
                                     title="Info zum Beziehungssystem"
                                 >
                                     <Info className="size-3.5" />
                                 </button>
                             ) }
-                            <button className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all" onClick={ onClose }>
+                            <button className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all cursor-pointer" onClick={ onClose }>
                                 <FaTimes className="size-3" />
                             </button>
                         </div>
@@ -350,8 +348,10 @@ export const RelationshipView: FC<{}> = () =>
                                         <span className="text-[11px] text-white/20 w-4 text-center shrink-0">{ i + 1 }</span>
 
                                         {/* Avatar */}
-                                        <div className="w-10 h-12 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0 overflow-hidden">
-                                            <LayoutAvatarImageView figure={ rel.other_look } direction={ 2 } headOnly={ true } />
+                                        <div className="w-10 h-12 rounded-lg bg-white/[0.05] border border-white/[0.06] shrink-0 overflow-hidden relative">
+                                            <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'scale(0.55)', transformOrigin: 'center top', marginTop: '2px' }}>
+                                                <LayoutAvatarImageView figure={ rel.other_look } direction={ 2 } headOnly={ true } />
+                                            </div>
                                         </div>
 
                                         {/* Info */}
@@ -376,6 +376,6 @@ export const RelationshipView: FC<{}> = () =>
                     </div>
                 </div>
             </div>
-        </div>
+        </DraggableWindow>
     );
 };

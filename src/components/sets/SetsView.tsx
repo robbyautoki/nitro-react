@@ -3,6 +3,7 @@ import { FaTimes } from 'react-icons/fa';
 import { Trophy, Loader2 } from 'lucide-react';
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { AddEventLinkTracker, GetConfiguration, GetRoomSession, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
+import { DraggableWindow, DraggableWindowPosition } from '../../common';
 import { useInventoryFurni } from '../../hooks';
 
 interface SetItem {
@@ -185,20 +186,18 @@ export const SetsView: FC<{}> = () =>
     if(!isVisible) return null;
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-auto">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={ onClose } />
-
-            <div className="relative w-[720px] max-h-[80vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
-                <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(80vh-4px)]">
+        <DraggableWindow uniqueKey="sets" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
+            <div className="w-[720px] max-h-[80vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
+                <div className="flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(80vh-4px)]">
 
                     {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent shrink-0">
+                    <div className="drag-handler flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent shrink-0 cursor-move">
                         <div className="flex items-center gap-2.5">
                             <Trophy className="size-4 text-yellow-400/80" />
                             <span className="text-sm font-semibold text-white/90 tracking-tight">Sets</span>
                             <span className="text-xs text-white/30">{ completedCount }/{ sets.length } abgeschlossen</span>
                         </div>
-                        <button className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all" onClick={ onClose }>
+                        <button className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all cursor-pointer" onClick={ onClose }>
                             <FaTimes className="size-3" />
                         </button>
                     </div>
@@ -265,7 +264,7 @@ export const SetsView: FC<{}> = () =>
                     </div>
                 </div>
             </div>
-        </div>
+        </DraggableWindow>
     );
 };
 

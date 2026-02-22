@@ -21,6 +21,7 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = p
 {
     const { avatarInfo = null, onClose = null } = props;
     const [ mode, setMode ] = useState(MODE_NORMAL);
+    const [ isCompanion, setIsCompanion ] = useState(false);
     const { roomSession = null } = useRoom();
     const { petRespectRemaining = 0, respectPet = null } = useSessionInfo();
 
@@ -64,6 +65,14 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = p
                     break;
                 case 'pick_up':
                     roomSession.pickupPet(avatarInfo.id);
+                    break;
+                case 'companion_follow':
+                    roomSession.sendChatMessage(':companion activate ' + avatarInfo.name, 0);
+                    localStorage.setItem('companion_pet_id', avatarInfo.id.toString());
+                    break;
+                case 'companion_unfollow':
+                    roomSession.sendChatMessage(':companion deactivate', 0);
+                    localStorage.removeItem('companion_pet_id');
                     break;
                 case 'mount':
                     roomSession.mountPet(avatarInfo.id);
@@ -114,6 +123,11 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = p
 
     useEffect(() =>
     {
+        setIsCompanion(localStorage.getItem('companion_pet_id') === avatarInfo?.id?.toString());
+    }, [ avatarInfo ]);
+
+    useEffect(() =>
+    {
         setMode(prevValue =>
         {
             if(avatarInfo.petType === PetType.MONSTERPLANT) return MODE_MONSTER_PLANT;
@@ -138,6 +152,15 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = p
                     <ContextMenuListItemView onClick={ event => processAction('train') }>
                         { LocalizeText('infostand.button.train') }
                     </ContextMenuListItemView>
+                    { isCompanion ?
+                        <ContextMenuListItemView onClick={ event => { processAction('companion_unfollow'); setIsCompanion(false); } }>
+                            Nicht mehr folgen
+                        </ContextMenuListItemView>
+                        :
+                        <ContextMenuListItemView onClick={ event => { processAction('companion_follow'); setIsCompanion(true); } }>
+                            Folgen
+                        </ContextMenuListItemView>
+                    }
                     <ContextMenuListItemView onClick={ event => processAction('pick_up') }>
                         { LocalizeText('infostand.button.pickup') }
                     </ContextMenuListItemView>

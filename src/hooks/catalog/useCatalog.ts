@@ -35,6 +35,12 @@ const useCatalogState = () =>
     const [ purchasableOffer, setPurchaseableOffer ] = useState<IPurchasableOffer>(null);
     const [ placedObjectPurchaseData, setPlacedObjectPurchaseData ] = useState<PlacedObjectPurchaseData>(null);
     const placedObjectPurchaseQueue = useRef<PlacedObjectPurchaseData[]>([]);
+    const catalogPlaceMultipleObjectsRef = useRef(catalogPlaceMultipleObjects);
+    catalogPlaceMultipleObjectsRef.current = catalogPlaceMultipleObjects;
+    const catalogSkipPurchaseConfirmationRef = useRef(catalogSkipPurchaseConfirmation);
+    catalogSkipPurchaseConfirmationRef.current = catalogSkipPurchaseConfirmation;
+    const purchasableOfferRef = useRef(purchasableOffer);
+    purchasableOfferRef.current = purchasableOffer;
     const [ catalogSize, setCatalogSize ] = useState({ width: 850, height: 480 });
     const [ furniCount, setFurniCount ] = useState(0);
     const [ furniLimit, setFurniLimit ] = useState(0);
@@ -761,11 +767,11 @@ const useCatalogState = () =>
 
                 if(roomObject) roomObject.model.setValue(RoomObjectVariable.FURNITURE_ALPHA_MULTIPLIER, 0.5);
 
-                if(catalogSkipPurchaseConfirmation)
+                if(catalogSkipPurchaseConfirmationRef.current)
                 {
                     SendMessageComposer(new PurchaseFromCatalogComposer(pageId, purchasableOffer.offerId, product.extraParam, 1));
 
-                    if(catalogPlaceMultipleObjects)
+                    if(catalogPlaceMultipleObjectsRef.current)
                     {
                         setMultiPlaceCount(prev => prev + 1);
                         requestOfferToMover(purchasableOffer, true);
@@ -773,7 +779,7 @@ const useCatalogState = () =>
                 }
                 else
                 {
-                    if(catalogPlaceMultipleObjects)
+                    if(catalogPlaceMultipleObjectsRef.current)
                     {
                         SendMessageComposer(new PurchaseFromCatalogComposer(pageId, purchasableOffer.offerId, product.extraParam, 1));
                         setMultiPlaceCount(prev => prev + 1);
@@ -847,7 +853,7 @@ const useCatalogState = () =>
                 SendMessageComposer(new FurniturePlaceComposer(event.id, data.category, data.wallLocation, data.x, data.y, data.direction));
         }
 
-        if(!catalogPlaceMultipleObjects)
+        if(!catalogPlaceMultipleObjectsRef.current)
         {
             placedObjectPurchaseQueue.current = [];
             resetPlacedOfferData();

@@ -371,7 +371,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             { !multiSelectMode && selectedItem &&
                 <div className="inv-footer">
                     <div className="inv-footer-preview-large">
-                        <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 140 } />
+                        <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 110 } />
                     </div>
                     <div className="inv-footer-info">
                         <div className="inv-footer-name">{ selectedItem.name }</div>

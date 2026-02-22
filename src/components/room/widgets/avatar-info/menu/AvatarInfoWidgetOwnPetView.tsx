@@ -161,9 +161,10 @@ export const AvatarInfoWidgetOwnPetView: FC<AvatarInfoWidgetOwnPetViewProps> = p
                             Folgen
                         </ContextMenuListItemView>
                     }
-                    <ContextMenuListItemView onClick={ event => processAction('pick_up') }>
-                        { LocalizeText('infostand.button.pickup') }
-                    </ContextMenuListItemView>
+                    { !isCompanion &&
+                        <ContextMenuListItemView onClick={ event => processAction('pick_up') }>
+                            { LocalizeText('infostand.button.pickup') }
+                        </ContextMenuListItemView> }
                     { (avatarInfo.petType === PetType.HORSE) &&
                         <ContextMenuListItemView onClick={ event => processAction('buy_saddle') }>
                             { LocalizeText('infostand.button.buy_saddle') }

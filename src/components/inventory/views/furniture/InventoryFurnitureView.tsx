@@ -41,21 +41,21 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 
     const [ durabilityInfo, setDurabilityInfo ] = useState<{ remaining: number; status: string; repairCost: number } | null>(null);
     const [ multiSelectMode, setMultiSelectMode ] = useState(false);
-    const [ selectedTypes, setSelectedTypes ] = useState<Set<number>>(new Set());
+    const [ selectedGroups, setSelectedGroups ] = useState<Set<GroupItem>>(new Set());
     const [ showDeleteDialog, setShowDeleteDialog ] = useState(false);
     const [ deleteTarget, setDeleteTarget ] = useState<{ groupItem: GroupItem; maxCount: number } | null>(null);
     const [ showCategoryDropdown, setShowCategoryDropdown ] = useState(false);
 
     const categoryFilteredItems = filterByCategory(groupItems, activeCategory);
 
-    const toggleMultiSelect = useCallback((type: number) =>
+    const toggleMultiSelect = useCallback((group: GroupItem) =>
     {
-        setSelectedTypes(prev =>
+        setSelectedGroups(prev =>
         {
             const next = new Set(prev);
 
-            if(next.has(type)) next.delete(type);
-            else next.add(type);
+            if(next.has(group)) next.delete(group);
+            else next.add(group);
 
             return next;
         });
@@ -64,7 +64,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
     const clearMultiSelect = useCallback(() =>
     {
         setMultiSelectMode(false);
-        setSelectedTypes(new Set());
+        setSelectedGroups(new Set());
         setShowCategoryDropdown(false);
     }, []);
 
@@ -127,9 +127,9 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 
     const handleBatchAssign = useCallback(async (categoryId: number) =>
     {
-        if(!selectedTypes.size) return;
+        if(!selectedGroups.size) return;
 
-        const types = Array.from(selectedTypes);
+        const types = Array.from(new Set(Array.from(selectedGroups).map(g => g.type)));
 
         try
         {
@@ -153,18 +153,15 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
         }
 
         setShowCategoryDropdown(false);
-    }, [ selectedTypes, assignItem ]);
+    }, [ selectedGroups, assignItem ]);
 
     const handleBatchDelete = useCallback(() =>
     {
         const allItemIds: number[] = [];
 
-        for(const group of groupItems)
+        for(const group of selectedGroups)
         {
-            if(selectedTypes.has(group.type))
-            {
-                allItemIds.push(...group.items.map(item => item.id));
-            }
+            allItemIds.push(...group.items.map(item => item.id));
         }
 
         if(!allItemIds.length) return;
@@ -173,7 +170,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 
         handleDeleteItems(allItemIds);
         clearMultiSelect();
-    }, [ groupItems, selectedTypes, handleDeleteItems, clearMultiSelect ]);
+    }, [ selectedGroups, handleDeleteItems, clearMultiSelect ]);
 
     useEffect(() =>
     {
@@ -333,16 +330,16 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                             key={ index }
                             groupItem={ item }
                             multiSelectMode={ multiSelectMode }
-                            isMultiSelected={ selectedTypes.has(item.type) }
+                            isMultiSelected={ selectedGroups.has(item) }
                             onMultiToggle={ toggleMultiSelect }
                         />) }
                 </AutoGrid>
             </div>
-            { multiSelectMode && selectedTypes.size > 0 &&
+            { multiSelectMode && selectedGroups.size > 0 &&
                 <div className="inv-multi-toolbar">
-                    <span className="inv-multi-count">{ selectedTypes.size } ausgewählt</span>
+                    <span className="inv-multi-count">{ selectedGroups.size } ausgewählt</span>
                     <div className="inv-multi-actions">
-                        { categories.length > 0 &&
+                        { categories.length > 0 && selectedGroups.size > 0 &&
                             <div className="inv-multi-dropdown-wrap">
                                 <Button size="sm" onClick={ () => setShowCategoryDropdown(!showCategoryDropdown) }>
                                     Kategorie zuweisen

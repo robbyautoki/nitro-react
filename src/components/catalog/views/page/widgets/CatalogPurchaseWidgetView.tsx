@@ -20,7 +20,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     const [ catalogSkipPurchaseConfirmation, setCatalogSkipPurchaseConfirmation ] = useLocalStorage(LocalStorageKeys.CATALOG_SKIP_PURCHASE_CONFIRMATION, false);
     const [ batchProgress, setBatchProgress ] = useState<{ total: number; sent: number } | null>(null);
     const batchActiveRef = useRef(false);
-    const { currentOffer = null, currentPage = null, purchaseOptions = null, setPurchaseOptions = null } = useCatalog();
+    const { currentOffer = null, currentPage = null, purchaseOptions = null, setPurchaseOptions = null, requestOfferToMover = null } = useCatalog();
     const { getCurrencyAmount = null } = usePurse();
     const [ catalogPlaceMultipleObjects, setCatalogPlaceMultipleObjects ] = useCatalogPlaceMultipleItems();
 
@@ -281,22 +281,29 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                         </span>
                     ) }
                 </Button>
-                <Button
-                    variant={ purchaseOptions?.multiSelectMode ? 'default' : 'ghost' }
-                    size="sm"
-                    className={ 'w-full text-xs ' + (purchaseOptions?.multiSelectMode ? 'text-white' : 'text-white/50 hover:text-white/80') }
-                    onClick={ () => setPurchaseOptions(prev => ({ ...prev, multiSelectMode: !prev.multiSelectMode })) }
-                >
-                    Mehrfach auswählen { purchaseOptions?.multiSelectMode ? '✓' : '' }
-                </Button>
-                <Button
-                    variant={ catalogPlaceMultipleObjects ? 'default' : 'ghost' }
-                    size="sm"
-                    className={ 'w-full text-xs ' + (catalogPlaceMultipleObjects ? 'text-white' : 'text-white/50 hover:text-white/80') }
-                    onClick={ () => setCatalogPlaceMultipleObjects(!catalogPlaceMultipleObjects) }
-                >
-                    Mehrfach platzieren { catalogPlaceMultipleObjects ? '✓' : '' }
-                </Button>
+                <div className="flex gap-1 w-full">
+                    { purchaseOptions?.multiSelectMode &&
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="flex-1 text-[10px] px-1 text-emerald-400 bg-emerald-500/10"
+                            onClick={ () => setPurchaseOptions(prev => ({ ...prev, multiSelectMode: false })) }
+                        >
+                            ✓ Auswahl
+                        </Button> }
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className={ 'flex-1 text-[10px] px-1 ' + (catalogPlaceMultipleObjects ? 'text-blue-400 bg-blue-500/10' : 'text-white/40 hover:text-white/70') }
+                        onClick={ () => {
+                            const newVal = !catalogPlaceMultipleObjects;
+                            setCatalogPlaceMultipleObjects(newVal);
+                            if(newVal && selectedOffers?.length === 1) requestOfferToMover(selectedOffers[0]);
+                        } }
+                    >
+                        { catalogPlaceMultipleObjects ? '✓ ' : '📦 ' }Mehrfach platzieren
+                    </Button>
+                </div>
             </div>
         );
     }
@@ -304,32 +311,30 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     return (
         <div className="flex flex-col gap-1.5 w-full">
             <PurchaseButton />
-            { (!noGiftOption && !currentOffer.isRentOffer) &&
+            <div className="flex gap-1 w-full">
+                { (!noGiftOption && !currentOffer.isRentOffer) &&
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="flex-1 text-[10px] text-white/40 hover:text-white/70 px-1"
+                        disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
+                        onClick={ () => purchase(true) }
+                    >
+                        🎁 Geschenk
+                    </Button> }
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full text-xs text-white/50 hover:text-white/80"
-                    disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
-                    onClick={ () => purchase(true) }
+                    className={ 'flex-1 text-[10px] px-1 ' + (catalogPlaceMultipleObjects ? 'text-blue-400 bg-blue-500/10' : 'text-white/40 hover:text-white/70') }
+                    onClick={ () => {
+                        const newVal = !catalogPlaceMultipleObjects;
+                        setCatalogPlaceMultipleObjects(newVal);
+                        if(newVal && currentOffer) requestOfferToMover(currentOffer);
+                    } }
                 >
-                    { LocalizeText('catalog.purchase_confirmation.gift') } →
-                </Button> }
-            <Button
-                variant={ purchaseOptions?.multiSelectMode ? 'default' : 'ghost' }
-                size="sm"
-                className={ 'w-full text-xs ' + (purchaseOptions?.multiSelectMode ? 'text-white' : 'text-white/50 hover:text-white/80') }
-                onClick={ () => setPurchaseOptions(prev => ({ ...prev, multiSelectMode: !prev.multiSelectMode })) }
-            >
-                Mehrfach auswählen { purchaseOptions?.multiSelectMode ? '✓' : '' }
-            </Button>
-            <Button
-                variant={ catalogPlaceMultipleObjects ? 'default' : 'ghost' }
-                size="sm"
-                className={ 'w-full text-xs ' + (catalogPlaceMultipleObjects ? 'text-white' : 'text-white/50 hover:text-white/80') }
-                onClick={ () => setCatalogPlaceMultipleObjects(!catalogPlaceMultipleObjects) }
-            >
-                Mehrfach platzieren { catalogPlaceMultipleObjects ? '✓' : '' }
-            </Button>
+                    { catalogPlaceMultipleObjects ? '✓ ' : '📦 ' }Mehrfach platzieren
+                </Button>
+            </div>
         </div>
     );
 }

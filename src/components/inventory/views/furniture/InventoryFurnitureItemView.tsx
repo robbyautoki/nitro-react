@@ -10,7 +10,7 @@ interface InventoryFurnitureItemViewProps
     groupItem: GroupItem;
     multiSelectMode?: boolean;
     isMultiSelected?: boolean;
-    onMultiToggle?: (type: number) => void;
+    onMultiToggle?: (group: GroupItem) => void;
 }
 
 export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = props =>
@@ -28,7 +28,7 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
         {
             if(event.type === MouseEventType.MOUSE_DOWN && onMultiToggle)
             {
-                onMultiToggle(groupItem.type);
+                onMultiToggle(groupItem);
             }
 
             return;

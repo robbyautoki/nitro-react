@@ -1,15 +1,17 @@
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Trophy, Loader2 } from 'lucide-react';
-import { ILinkEventTracker } from '@nitrots/nitro-renderer';
-import { AddEventLinkTracker, GetConfiguration, GetRoomSession, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
+import { ILinkEventTracker, RoomEngineObjectPlacedEvent, RoomObjectCategory, RoomObjectPlacementSource } from '@nitrots/nitro-renderer';
+import { AddEventLinkTracker, GetConfiguration, GetRoomEngine, GetRoomSession, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
 import { DraggableWindow, DraggableWindowPosition } from '../../common';
+import { useRoomEngineEvent } from '../../hooks/events';
 import { useInventoryFurni } from '../../hooks';
 
 interface SetItem {
     item_base_id: number;
     public_name: string;
     item_name: string;
+    sprite_id: number;
 }
 
 interface RewardItem {
@@ -108,6 +110,7 @@ export const SetsView: FC<{}> = () =>
     const [ loading, setLoading ] = useState(false);
     const [ selectedSetId, setSelectedSetId ] = useState<number | null>(null);
     const ownedNames = useOwnedClassNames();
+    const pendingPreviewRef = useRef<{ itemBaseId: number } | null>(null);
 
     useEffect(() =>
     {
@@ -166,6 +169,22 @@ export const SetsView: FC<{}> = () =>
         return count;
     }, [ sets, ownedNames ]);
 
+    useRoomEngineEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectPlacedEvent.PLACED, event =>
+    {
+        const preview = pendingPreviewRef.current;
+        if(!preview) return;
+        if(!event.placedInRoom) { pendingPreviewRef.current = null; return; }
+
+        pendingPreviewRef.current = null;
+
+        try
+        {
+            const session = GetRoomSession();
+            if(session) session.sendChatMessage(`:sets preview ${ preview.itemBaseId } ${ event.x } ${ event.y } ${ event.direction }`, 0);
+        }
+        catch {}
+    });
+
     const onClose = useCallback(() => setIsVisible(false), []);
 
     const handleComplete = useCallback((id: number) =>
@@ -180,7 +199,24 @@ export const SetsView: FC<{}> = () =>
 
     const handlePreview = useCallback((item: SetItem) =>
     {
-        try { const session = GetRoomSession(); if(session) session.sendChatMessage(`:sets preview ${ item.item_base_id }`, 0); } catch {}
+        try
+        {
+            const engine = GetRoomEngine();
+            if(!engine) return;
+
+            pendingPreviewRef.current = { itemBaseId: item.item_base_id };
+
+            engine.processRoomObjectPlacement(
+                RoomObjectPlacementSource.CATALOG,
+                -(item.item_base_id),
+                RoomObjectCategory.FLOOR,
+                item.sprite_id,
+                ''
+            );
+
+            setIsVisible(false);
+        }
+        catch {}
     }, []);
 
     if(!isVisible) return null;

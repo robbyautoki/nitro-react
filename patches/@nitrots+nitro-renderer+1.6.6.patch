@@ -12,7 +12,7 @@ index 671cf7f..a14673f 100644
              visualizationData.avatarManager = Nitro.instance.avatar;
          }
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts
-index 1dc732f..1dd5be3 100644
+index 1dc732f..bc703c9 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts
 @@ -2,7 +2,7 @@ import { IAssetData, IRoomGeometry, IRoomObjectModel, MouseEventType, PetType, R
@@ -24,6 +24,15 @@ index 1dc732f..1dd5be3 100644
  import { MovingObjectLogic } from '../MovingObjectLogic';
  
  export class PetLogic extends MovingObjectLogic
+@@ -36,7 +36,7 @@ export class PetLogic extends MovingObjectLogic
+ 
+     public getEventTypes(): string[]
+     {
+-        const types = [RoomObjectMouseEvent.CLICK, RoomObjectMoveEvent.POSITION_CHANGED];
++        const types = [RoomObjectMouseEvent.CLICK, RoomObjectMouseEvent.MOUSE_ENTER, RoomObjectMouseEvent.MOUSE_LEAVE, RoomObjectMoveEvent.POSITION_CHANGED];
+ 
+         return this.mergeTypes(super.getEventTypes(), types);
+     }
 @@ -210,6 +210,13 @@ export class PetLogic extends MovingObjectLogic
  
              return;
@@ -38,6 +47,19 @@ index 1dc732f..1dd5be3 100644
      }
  
      public mouseEvent(event: RoomSpriteMouseEvent, geometry: IRoomGeometry): void
+@@ -223,6 +230,12 @@ export class PetLogic extends MovingObjectLogic
+                 break;
+             case MouseEventType.DOUBLE_CLICK:
+                 break;
++            case MouseEventType.ROLL_OVER:
++                eventType = RoomObjectMouseEvent.MOUSE_ENTER;
++                break;
++            case MouseEventType.ROLL_OUT:
++                eventType = RoomObjectMouseEvent.MOUSE_LEAVE;
++                break;
+             case MouseEventType.MOUSE_DOWN: {
+                 const petType = this.object.model.getValue<number>(RoomObjectVariable.PET_TYPE);
+ 
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
 index e12279a..ddce28e 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts

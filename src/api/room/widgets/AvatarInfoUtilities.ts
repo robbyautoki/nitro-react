@@ -1,5 +1,6 @@
 import { GetTickerTime, IFurnitureData, IRoomModerationSettings, IRoomPetData, IRoomUserData, ObjectDataFactory, PetFigureData, PetType, RoomControllerLevel, RoomModerationSettings, RoomObjectCategory, RoomObjectType, RoomObjectVariable, RoomTradingLevelEnum, RoomWidgetEnumItemExtradataParameter, Vector3d } from '@nitrots/nitro-renderer';
 import { GetRoomEngine, GetRoomSession, GetSessionDataManager, IsOwnerOfFurniture } from '../../nitro';
+import { getLevelFromScore } from '../../utils/LevelUtils';
 import { LocalizeText } from '../../utils';
 import { AvatarInfoFurni } from './AvatarInfoFurni';
 import { AvatarInfoName } from './AvatarInfoName';
@@ -63,7 +64,7 @@ export class AvatarInfoUtilities
                 userType = userData.type;
 
                 if(userData.type === RoomObjectType.PET) level = userData.petLevel;
-                else if(userData.type === RoomObjectType.USER) level = userData.activityPoints;
+                else if(userData.type === RoomObjectType.USER) level = getLevelFromScore(userData.activityPoints).level;
                 break;
             }
         }

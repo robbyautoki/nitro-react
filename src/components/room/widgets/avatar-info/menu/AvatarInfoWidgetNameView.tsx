@@ -36,10 +36,15 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
 
     return (
         <ContextMenuView objectId={ nameInfo.roomIndex } category={ nameInfo.category } userType={ nameInfo.userType } fades={ (nameInfo.id !== GetSessionDataManager().userId) } classNames={ getClassNames } onClose={ onClose }>
-            <div className="text-shadow">
-                { prestige > 0 && <span className="mr-1">{ prestige > 2 ? `🌟×${ prestige }` : '🌟'.repeat(prestige) }</span> }
+            <div className="text-shadow flex items-center gap-1">
+                { prestige > 0 && <span>{ prestige > 2 ? `🌟×${ prestige }` : '🌟'.repeat(prestige) }</span> }
                 { nameInfo.name }
-                { nameInfo.level > 0 && <span className="ml-1 opacity-75">Lv. { nameInfo.level }</span> }
+                { nameInfo.level > 0 && nameInfo.userType === RoomObjectType.USER &&
+                    <span className="inline-flex items-center px-1.5 py-0 rounded-full text-[10px] font-bold" style={{ background: 'linear-gradient(135deg, #f5c842, #d4a017, #f5d442)', color: '#5a3e00', textShadow: '0 1px 0 rgba(255,255,255,0.3)', lineHeight: '14px' }}>
+                        Lv. { nameInfo.level }
+                    </span> }
+                { nameInfo.level > 0 && nameInfo.userType === RoomObjectType.PET &&
+                    <span className="opacity-75">Lv. { nameInfo.level }</span> }
             </div>
         </ContextMenuView>
     );

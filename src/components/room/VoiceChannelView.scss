@@ -1,249 +1,379 @@
-.voice-toggle-btn {
+$dc-bg-primary: #313338;
+$dc-bg-secondary: #2b2d31;
+$dc-bg-tertiary: #1e1f22;
+$dc-bg-hover: #35373c;
+$dc-bg-active: #404249;
+$dc-text-primary: #f2f3f5;
+$dc-text-secondary: #949ba4;
+$dc-text-muted: #6d6f78;
+$dc-green: #23a559;
+$dc-red: #ed4245;
+$dc-brand: #5865f2;
+
+.dc-voice {
     position: fixed;
     left: 10px;
     bottom: 75px;
     z-index: 200;
-    width: 40px;
-    height: 40px;
+    width: 240px;
+    font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
     @media (max-width: 575.98px) {
         left: 6px;
         bottom: 70px;
-        width: 36px;
-        height: 36px;
+        width: 220px;
     }
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
+}
+
+.dc-voice-panel {
+    background: $dc-bg-secondary;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dc-voice-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 10px 4px 16px;
+}
+
+.dc-voice-header-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: $dc-text-secondary;
+    cursor: default;
+}
+
+.dc-voice-header-add {
+    background: none;
+    border: none;
+    color: $dc-text-secondary;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: color 0.15s;
 
     &:hover {
-        background: rgba(0, 0, 0, 0.8);
-        transform: scale(1.05);
-    }
-
-    .voice-icon {
-        color: rgba(255, 255, 255, 0.7);
-        display: flex;
-        align-items: center;
-
-        &.active {
-            color: #43b581;
-        }
-    }
-
-    .voice-pulse {
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        border: 2px solid #43b581;
-        animation: voicePulse 2s ease-in-out infinite;
+        color: $dc-text-primary;
     }
 }
 
-.voice-panel {
-    position: fixed;
-    left: 10px;
-    bottom: 125px;
-    z-index: 201;
-    width: 260px;
-    max-height: 400px;
+.dc-voice-create {
+    padding: 6px 10px 8px;
+}
 
-    @media (max-width: 575.98px) {
-        left: 6px;
-        bottom: 115px;
-        width: 240px;
+.dc-voice-create-input {
+    width: 100%;
+    background: $dc-bg-tertiary;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 13px;
+    color: $dc-text-primary;
+    outline: none;
+
+    &::placeholder {
+        color: $dc-text-muted;
     }
-    background: rgba(20, 20, 28, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    overflow: hidden;
+
+    &:focus {
+        box-shadow: 0 0 0 1px $dc-brand;
+    }
+}
+
+.dc-voice-create-actions {
     display: flex;
-    flex-direction: column;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-
-    .voice-panel-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 12px 14px;
-        font-size: 13px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.9);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .voice-close-btn {
-        background: none;
-        border: none;
-        color: rgba(255, 255, 255, 0.4);
-        cursor: pointer;
-        font-size: 14px;
-        padding: 2px 6px;
-        border-radius: 4px;
-
-        &:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.1);
-        }
-    }
+    gap: 6px;
+    margin-top: 6px;
 }
 
-.voice-channels-list {
+.dc-voice-create-btn {
     flex: 1;
-    overflow-y: auto;
-    padding: 6px 0;
-}
+    background: $dc-brand;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: background 0.15s;
 
-.voice-channel-item {
-    .voice-channel-name {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 14px;
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.5);
-        cursor: pointer;
-        transition: all 0.15s ease;
-
-        &:hover {
-            color: rgba(255, 255, 255, 0.8);
-            background: rgba(255, 255, 255, 0.04);
-        }
-
-        &.active {
-            color: #43b581;
-        }
-
-        .voice-channel-icon {
-            font-size: 14px;
-        }
-
-        .voice-channel-count {
-            margin-left: auto;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.3);
-        }
+    &:hover {
+        background: darken($dc-brand, 8%);
     }
 }
 
-.voice-participants {
-    padding: 2px 0 6px 30px;
+.dc-voice-create-cancel {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: $dc-text-secondary;
+    cursor: pointer;
+    transition: color 0.15s;
+
+    &:hover {
+        color: $dc-text-primary;
+    }
 }
 
-.voice-participant {
+.dc-voice-channels {
+    padding: 0 0 4px;
+}
+
+.dc-voice-channel-row {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 3px 14px 3px 0;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
-    cursor: default;
+    padding: 6px 8px;
+    margin: 1px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: $dc-text-secondary;
+    cursor: pointer;
+    transition: all 0.1s;
 
-    &.speaking {
-        color: #43b581;
+    &:hover {
+        background: $dc-bg-hover;
+        color: $dc-text-primary;
     }
 
-    .voice-participant-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        flex-shrink: 0;
-
-        &.active {
-            background: #43b581;
-        }
-
-        &.muted {
-            background: rgba(255, 255, 255, 0.2);
-        }
-    }
-
-    .voice-speaking-indicator {
-        width: 14px;
-        height: 14px;
-        margin-left: auto;
-        border-radius: 50%;
-        background: #43b581;
-        animation: speakingPulse 0.8s ease-in-out infinite;
+    &--active {
+        color: $dc-text-primary;
     }
 }
 
-.voice-controls {
+.dc-voice-channel-name {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.dc-voice-channel-limit {
+    font-size: 11px;
+    color: $dc-text-muted;
+    margin-left: auto;
+}
+
+.dc-voice-status {
+    text-align: center;
+    padding: 6px;
+    font-size: 11px;
+    color: $dc-text-muted;
+}
+
+// Connected participants
+.dc-voice-participants {
+    padding: 2px 8px 4px 28px;
+}
+
+.dc-voice-participant {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px;
+    border-radius: 4px;
+    cursor: default;
+    transition: background 0.1s;
+
+    &:hover {
+        background: $dc-bg-hover;
+    }
+
+    &--speaking .dc-voice-participant-name {
+        color: $dc-green;
+    }
+}
+
+.dc-voice-participant-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: $dc-bg-active;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 10px 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(0, 0, 0, 0.2);
+    border: 2px solid transparent;
+    transition: border-color 0.15s;
 
-    .voice-ctrl-btn {
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        border: none;
-        background: rgba(255, 255, 255, 0.08);
-        color: rgba(255, 255, 255, 0.7);
-        cursor: pointer;
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.15s ease;
+    &--speaking {
+        border-color: $dc-green;
+    }
+}
+
+.dc-voice-participant-avatar-inner {
+    font-size: 11px;
+    font-weight: 700;
+    color: $dc-text-primary;
+    line-height: 1;
+}
+
+.dc-voice-participant-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: $dc-text-secondary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.15s;
+
+    &--muted {
+        color: $dc-text-muted;
+    }
+}
+
+.dc-voice-participant-muted {
+    color: $dc-red;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+// Voice connected footer
+.dc-voice-footer {
+    border-top: 1px solid $dc-bg-tertiary;
+    background: $dc-bg-tertiary;
+}
+
+.dc-voice-connected-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px 0;
+}
+
+.dc-voice-signal {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: $dc-green;
+    flex-shrink: 0;
+    animation: dcSignalPulse 2s ease-in-out infinite;
+}
+
+.dc-voice-connected-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.dc-voice-connected-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: $dc-green;
+    line-height: 1.2;
+}
+
+.dc-voice-connected-channel {
+    font-size: 11px;
+    color: $dc-text-secondary;
+    line-height: 1.2;
+}
+
+.dc-voice-user-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 6px;
+}
+
+.dc-voice-user-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+}
+
+.dc-voice-user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: $dc-bg-active;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.dc-voice-user-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: $dc-text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dc-voice-buttons {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.dc-voice-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: $dc-text-secondary;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+
+    &:hover {
+        background: $dc-bg-hover;
+        color: $dc-text-primary;
+    }
+
+    &--danger {
+        color: $dc-red;
 
         &:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba($dc-red, 0.15);
+            color: $dc-red;
         }
+    }
 
-        &.active {
-            background: rgba(237, 66, 69, 0.3);
-            color: #ed4245;
-        }
+    &--disconnect {
+        color: $dc-text-secondary;
+        background: transparent;
 
-        &.disconnect {
-            background: rgba(237, 66, 69, 0.3);
-            color: #ed4245;
-
-            &:hover {
-                background: rgba(237, 66, 69, 0.5);
-            }
-        }
-
-        &.ptt {
-            width: auto;
-            border-radius: 6px;
-            padding: 0 10px;
-            font-size: 11px;
-            font-weight: 600;
-
-            &.active {
-                background: rgba(67, 181, 129, 0.3);
-                color: #43b581;
-            }
+        &:hover {
+            background: rgba($dc-red, 0.15);
+            color: $dc-red;
         }
     }
 }
 
-.voice-status {
-    text-align: center;
-    padding: 8px;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.4);
+// Hide LiveKit default UI (we use custom)
+.lk-audio-conference,
+.lk-control-bar {
+    display: none !important;
 }
 
-@keyframes voicePulse {
-    0%, 100% { opacity: 0; transform: scale(1); }
-    50% { opacity: 0.6; transform: scale(1.1); }
-}
-
-@keyframes speakingPulse {
-    0%, 100% { transform: scale(0.8); opacity: 0.6; }
-    50% { transform: scale(1.2); opacity: 1; }
+@keyframes dcSignalPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }

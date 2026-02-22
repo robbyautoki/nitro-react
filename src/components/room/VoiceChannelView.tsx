@@ -2,15 +2,10 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GetConfiguration, GetSessionDataManager } from '../../api';
 import { getAuthHeaders } from '../../api/utils/SessionTokenManager';
 import { useRoom } from '../../hooks';
-import {
-    Room as LiveKitRoom,
-    RoomEvent,
-    Track,
-    RemoteParticipant,
-    LocalParticipant,
-    Participant,
-    ConnectionState,
-} from 'livekit-client';
+import { LiveKitRoom, useParticipants, useLocalParticipant, useTracks, RoomAudioRenderer } from '@livekit/components-react';
+import '@livekit/components-styles';
+import { Track, ConnectionState } from 'livekit-client';
+import './VoiceChannelView.scss';
 
 interface VoiceChannel {
     id: number;
@@ -19,30 +14,175 @@ interface VoiceChannel {
     maxParticipants?: number;
 }
 
-interface VoiceParticipant {
-    identity: string;
-    isSpeaking: boolean;
+const MicIcon: FC<{ size?: number }> = ({ size = 18 }) => (
+    <svg width={ size } height={ size } viewBox="0 0 24 24" fill="none">
+        <path d="M12 3a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" fill="currentColor"/>
+        <path d="M19 10v1a7 7 0 0 1-14 0v-1" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M12 19v3m-3 0h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+);
+
+const MicMuteIcon: FC<{ size?: number }> = ({ size = 18 }) => (
+    <svg width={ size } height={ size } viewBox="0 0 24 24" fill="none">
+        <path d="M12 3a3 3 0 0 0-3 3v4a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" fill="currentColor" opacity="0.5"/>
+        <path d="M19 10v1a7 7 0 0 1-14 0v-1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5"/>
+        <line x1="3" y1="3" x2="21" y2="21" stroke="#ed4245" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+);
+
+const HeadphoneIcon: FC<{ size?: number }> = ({ size = 18 }) => (
+    <svg width={ size } height={ size } viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 3C7.03 3 3 7.03 3 12v7c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-3c0-1.1-.9-2-2-2H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-2c-1.1 0-2 .9-2 2v3c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9Z"/>
+    </svg>
+);
+
+const DeafenIcon: FC<{ size?: number }> = ({ size = 18 }) => (
+    <svg width={ size } height={ size } viewBox="0 0 24 24" fill="none">
+        <path d="M12 3C7.03 3 3 7.03 3 12v7c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-3c0-1.1-.9-2-2-2H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-2c-1.1 0-2 .9-2 2v3c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-7c0-4.97-4.03-9-9-9Z" fill="currentColor" opacity="0.5"/>
+        <line x1="3" y1="3" x2="21" y2="21" stroke="#ed4245" strokeWidth="2.5" strokeLinecap="round"/>
+    </svg>
+);
+
+const DisconnectIcon: FC<{ size?: number }> = ({ size = 18 }) => (
+    <svg width={ size } height={ size } viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08a.956.956 0 0 1-.29-.7c0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28a11.27 11.27 0 0 0-2.67-1.85.996.996 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9Z"/>
+    </svg>
+);
+
+const PlusIcon: FC<{ size?: number }> = ({ size = 14 }) => (
+    <svg width={ size } height={ size } viewBox="0 0 18 18" fill="currentColor">
+        <polygon points="15 10 10 10 10 15 8 15 8 10 3 10 3 8 8 8 8 3 10 3 10 8 15 8"/>
+    </svg>
+);
+
+const SpeakerIcon: FC<{ size?: number }> = ({ size = 18 }) => (
+    <svg width={ size } height={ size } viewBox="0 0 24 24" fill="currentColor" opacity="0.7">
+        <path d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    </svg>
+);
+
+const VoiceConnectedContent: FC<{
+    channelName: string;
+    livekitUrl: string;
+    token: string;
     isMuted: boolean;
-}
+    isDeafened: boolean;
+    onToggleMute: () => void;
+    onToggleDeafen: () => void;
+    onDisconnect: () => void;
+}> = ({ channelName, livekitUrl, token, isMuted, isDeafened, onToggleMute, onToggleDeafen, onDisconnect }) =>
+{
+    const username = GetSessionDataManager().userName;
+
+    return (
+        <LiveKitRoom
+            serverUrl={ livekitUrl }
+            token={ token }
+            connect={ true }
+            audio={ true }
+            video={ false }
+            data-lk-theme="default"
+        >
+            <RoomAudioRenderer />
+            <VoiceParticipantsList />
+            <div className="dc-voice-footer">
+                <div className="dc-voice-connected-info">
+                    <div className="dc-voice-signal" />
+                    <div className="dc-voice-connected-text">
+                        <span className="dc-voice-connected-label">Sprachverbunden</span>
+                        <span className="dc-voice-connected-channel">{ channelName }</span>
+                    </div>
+                </div>
+                <div className="dc-voice-user-controls">
+                    <div className="dc-voice-user-info">
+                        <div className="dc-voice-user-avatar">
+                            <img
+                                src={ `https://www.habbo.de/habbo-imaging/avatarimage?figure=${ GetSessionDataManager().figure }&direction=2&head_direction=2&size=s` }
+                                alt={ username }
+                            />
+                        </div>
+                        <span className="dc-voice-user-name">{ username }</span>
+                    </div>
+                    <div className="dc-voice-buttons">
+                        <button
+                            className={ `dc-voice-btn ${ isMuted ? 'dc-voice-btn--danger' : '' }` }
+                            onClick={ onToggleMute }
+                            title={ isMuted ? 'Mikrofon einschalten' : 'Mikrofon ausschalten' }
+                        >
+                            { isMuted ? <MicMuteIcon size={ 20 } /> : <MicIcon size={ 20 } /> }
+                        </button>
+                        <button
+                            className={ `dc-voice-btn ${ isDeafened ? 'dc-voice-btn--danger' : '' }` }
+                            onClick={ onToggleDeafen }
+                            title={ isDeafened ? 'Ton einschalten' : 'Ton ausschalten' }
+                        >
+                            { isDeafened ? <DeafenIcon size={ 20 } /> : <HeadphoneIcon size={ 20 } /> }
+                        </button>
+                        <button
+                            className="dc-voice-btn dc-voice-btn--disconnect"
+                            onClick={ onDisconnect }
+                            title="Trennen"
+                        >
+                            <DisconnectIcon size={ 20 } />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </LiveKitRoom>
+    );
+};
+
+const VoiceParticipantsList: FC = () =>
+{
+    const participants = useParticipants();
+    const tracks = useTracks([ Track.Source.Microphone ]);
+
+    return (
+        <div className="dc-voice-participants">
+            { participants.map(p =>
+            {
+                const audioTrack = tracks.find(t => t.participant.identity === p.identity);
+                const isSpeaking = p.isSpeaking;
+                const isMuted = !p.isMicrophoneEnabled;
+
+                return (
+                    <div key={ p.identity } className={ `dc-voice-participant ${ isSpeaking ? 'dc-voice-participant--speaking' : '' }` }>
+                        <div className={ `dc-voice-participant-avatar ${ isSpeaking ? 'dc-voice-participant-avatar--speaking' : '' }` }>
+                            <div className="dc-voice-participant-avatar-inner">
+                                { p.identity.charAt(0).toUpperCase() }
+                            </div>
+                        </div>
+                        <span className={ `dc-voice-participant-name ${ isMuted ? 'dc-voice-participant-name--muted' : '' }` }>
+                            { p.identity }
+                        </span>
+                        { isMuted && (
+                            <span className="dc-voice-participant-muted">
+                                <MicMuteIcon size={ 14 } />
+                            </span>
+                        ) }
+                    </div>
+                );
+            }) }
+        </div>
+    );
+};
 
 export const VoiceChannelView: FC<{}> = () =>
 {
     const { roomSession } = useRoom();
-    const [ isOpen, setIsOpen ] = useState(false);
     const [ channels, setChannels ] = useState<VoiceChannel[]>([]);
     const [ activeChannelId, setActiveChannelId ] = useState<number | null>(null);
-    const [ participants, setParticipants ] = useState<VoiceParticipant[]>([]);
+    const [ activeChannelName, setActiveChannelName ] = useState<string>('');
+    const [ token, setToken ] = useState<string>('');
     const [ isMuted, setIsMuted ] = useState(false);
     const [ isDeafened, setIsDeafened ] = useState(false);
-    const [ pushToTalk, setPushToTalk ] = useState(false);
     const [ isConnecting, setIsConnecting ] = useState(false);
-    const [ connectionState, setConnectionState ] = useState<string>('disconnected');
+    const [ showCreateForm, setShowCreateForm ] = useState(false);
+    const [ newChannelName, setNewChannelName ] = useState('');
 
-    const livekitRoom = useRef<LiveKitRoom | null>(null);
     const cmsUrl = useMemo(() => GetConfiguration<string>('url.prefix', ''), []);
     const livekitUrl = useMemo(() => GetConfiguration<string>('voice.livekit.url', 'ws://localhost:7880'), []);
     const isMod = GetSessionDataManager().isModerator;
-
     const roomId = roomSession?.roomId;
 
     const refreshChannels = useCallback(() =>
@@ -59,22 +199,15 @@ export const VoiceChannelView: FC<{}> = () =>
             .catch(() => {});
     }, [ roomId, cmsUrl ]);
 
-    // Load channels when room changes
-    useEffect(() =>
-    {
-        refreshChannels();
-    }, [ refreshChannels ]);
+    useEffect(() => { refreshChannels(); }, [ refreshChannels ]);
 
-    // Poll for channels every 10s (fallback for other users in room)
     useEffect(() =>
     {
         if(!roomId || !cmsUrl) return;
-
         const interval = setInterval(refreshChannels, 10000);
         return () => clearInterval(interval);
     }, [ roomId, cmsUrl, refreshChannels ]);
 
-    // Listen for [VOICE_CHANNELS] whisper from emulator
     useEffect(() =>
     {
         const handler = (event: CustomEvent) =>
@@ -84,321 +217,152 @@ export const VoiceChannelView: FC<{}> = () =>
                 const msg = event.detail?.message;
                 if(!msg || !msg.startsWith('[VOICE_CHANNELS]')) return;
                 const json = JSON.parse(msg.replace('[VOICE_CHANNELS]', ''));
-                if(json.roomId === roomId)
-                {
-                    setChannels(json.channels || []);
-                }
+                if(json.roomId === roomId) setChannels(json.channels || []);
             }
             catch(_) {}
         };
-
         window.addEventListener('whisper_message' as any, handler);
         return () => window.removeEventListener('whisper_message' as any, handler);
     }, [ roomId ]);
 
-    // Cleanup on room change
     useEffect(() =>
     {
         return () =>
         {
-            if(livekitRoom.current)
-            {
-                livekitRoom.current.disconnect();
-                livekitRoom.current = null;
-            }
             setActiveChannelId(null);
-            setParticipants([]);
-            setConnectionState('disconnected');
+            setToken('');
         };
     }, [ roomId ]);
-
-    // Push-to-Talk key handler
-    useEffect(() =>
-    {
-        if(!pushToTalk || !livekitRoom.current) return;
-
-        const handleKeyDown = (e: KeyboardEvent) =>
-        {
-            if(e.key === 'v' || e.key === 'V')
-            {
-                livekitRoom.current?.localParticipant?.setMicrophoneEnabled(true);
-            }
-        };
-
-        const handleKeyUp = (e: KeyboardEvent) =>
-        {
-            if(e.key === 'v' || e.key === 'V')
-            {
-                livekitRoom.current?.localParticipant?.setMicrophoneEnabled(false);
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        window.addEventListener('keyup', handleKeyUp);
-        return () =>
-        {
-            window.removeEventListener('keydown', handleKeyDown);
-            window.removeEventListener('keyup', handleKeyUp);
-        };
-    }, [ pushToTalk ]);
-
-    const updateParticipants = useCallback(() =>
-    {
-        if(!livekitRoom.current) return;
-
-        const room = livekitRoom.current;
-        const parts: VoiceParticipant[] = [];
-
-        const addParticipant = (p: Participant) =>
-        {
-            parts.push({
-                identity: p.identity,
-                isSpeaking: p.isSpeaking,
-                isMuted: !p.isMicrophoneEnabled,
-            });
-        };
-
-        addParticipant(room.localParticipant);
-        room.remoteParticipants.forEach(p => addParticipant(p));
-
-        setParticipants(parts);
-    }, []);
 
     const joinChannel = useCallback(async (channel: VoiceChannel) =>
     {
         if(isConnecting) return;
-
-        // Disconnect from current if any
-        if(livekitRoom.current)
-        {
-            await livekitRoom.current.disconnect();
-            livekitRoom.current = null;
-        }
-
         setIsConnecting(true);
-        setConnectionState('connecting');
 
         try
         {
             const res = await fetch(`${ cmsUrl }/api/voice/token`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
-                body: JSON.stringify({
-                    roomId,
-                    channelId: channel.id,
-                }),
+                body: JSON.stringify({ roomId, channelId: channel.id }),
             });
 
             if(!res.ok) throw new Error('Token-Fehler');
+            const data = await res.json();
 
-            const { token } = await res.json();
-
-            const room = new LiveKitRoom({
-                audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true },
-                adaptiveStream: true,
-                dynacast: true,
-            });
-
-            room.on(RoomEvent.ParticipantConnected, updateParticipants);
-            room.on(RoomEvent.ParticipantDisconnected, updateParticipants);
-            room.on(RoomEvent.ActiveSpeakersChanged, updateParticipants);
-            room.on(RoomEvent.TrackMuted, updateParticipants);
-            room.on(RoomEvent.TrackUnmuted, updateParticipants);
-            room.on(RoomEvent.ConnectionStateChanged, (state: ConnectionState) =>
-            {
-                setConnectionState(state);
-            });
-            room.on(RoomEvent.Disconnected, () =>
-            {
-                setActiveChannelId(null);
-                setParticipants([]);
-                setConnectionState('disconnected');
-                livekitRoom.current = null;
-            });
-
-            await room.connect(livekitUrl, token);
-            await room.localParticipant.setMicrophoneEnabled(!pushToTalk);
-
-            livekitRoom.current = room;
+            setToken(data.token);
             setActiveChannelId(channel.id);
+            setActiveChannelName(channel.name);
             setIsMuted(false);
             setIsDeafened(false);
-            updateParticipants();
         }
         catch(e)
         {
             console.error('[Voice] Join failed:', e);
-            setConnectionState('disconnected');
         }
         finally
         {
             setIsConnecting(false);
         }
-    }, [ cmsUrl, roomId, livekitUrl, pushToTalk, isConnecting, updateParticipants ]);
+    }, [ cmsUrl, roomId, isConnecting ]);
 
-    const leaveChannel = useCallback(async () =>
+    const disconnect = useCallback(() =>
     {
-        if(livekitRoom.current)
-        {
-            await livekitRoom.current.disconnect();
-            livekitRoom.current = null;
-        }
         setActiveChannelId(null);
-        setParticipants([]);
-        setConnectionState('disconnected');
+        setActiveChannelName('');
+        setToken('');
+        setIsMuted(false);
+        setIsDeafened(false);
     }, []);
 
-    const toggleMute = useCallback(async () =>
+    const createChannel = useCallback(async () =>
     {
-        if(!livekitRoom.current || pushToTalk) return;
-        const newMuted = !isMuted;
-        await livekitRoom.current.localParticipant.setMicrophoneEnabled(!newMuted);
-        setIsMuted(newMuted);
-    }, [ isMuted, pushToTalk ]);
+        if(!newChannelName.trim() || !cmsUrl || !roomId) return;
 
-    const toggleDeafen = useCallback(async () =>
-    {
-        if(!livekitRoom.current) return;
-        const newDeafened = !isDeafened;
-
-        livekitRoom.current.remoteParticipants.forEach(p =>
+        try
         {
-            p.audioTrackPublications.forEach(pub =>
-            {
-                if(pub.track) pub.track.enabled = !newDeafened;
+            await fetch(`${ cmsUrl }/api/voice/channels`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({ roomId, name: newChannelName.trim(), maxParticipants: 0 }),
             });
-        });
-
-        if(newDeafened && !isMuted)
-        {
-            await livekitRoom.current.localParticipant.setMicrophoneEnabled(false);
-            setIsMuted(true);
+            setNewChannelName('');
+            setShowCreateForm(false);
+            refreshChannels();
         }
-
-        setIsDeafened(newDeafened);
-    }, [ isDeafened, isMuted ]);
-
-    const kickParticipant = useCallback(async (identity: string) =>
-    {
-        if(!livekitRoom.current || !isMod) return;
-        livekitRoom.current.remoteParticipants.forEach(p =>
-        {
-            if(p.identity === identity)
-            {
-                // Server-side kick via data message
-                livekitRoom.current?.localParticipant.publishData(
-                    new TextEncoder().encode(JSON.stringify({ action: 'kick', target: identity })),
-                    { reliable: true }
-                );
-            }
-        });
-    }, [ isMod ]);
+        catch(e) { console.error('[Voice] Create failed:', e); }
+    }, [ cmsUrl, roomId, newChannelName, refreshChannels ]);
 
     if(!roomId || channels.length === 0) return null;
 
     return (
-        <>
-            { /* Mikrofon-Button (fixed position, über Toolbar) */ }
-            <div
-                className="voice-toggle-btn"
-                onClick={ () => setIsOpen(!isOpen) }
-                title="Sprachchat"
-            >
-                <div className={ `voice-icon ${ activeChannelId ? 'active' : '' }` }>
-                    { activeChannelId
-                        ? <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-                        : <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-                    }
+        <div className="dc-voice">
+            <div className="dc-voice-panel">
+                <div className="dc-voice-header">
+                    <span className="dc-voice-header-label">SPRACHCHANNEL</span>
+                    { isMod && (
+                        <button
+                            className="dc-voice-header-add"
+                            onClick={ () => setShowCreateForm(!showCreateForm) }
+                            title="Channel erstellen"
+                        >
+                            <PlusIcon />
+                        </button>
+                    ) }
                 </div>
-                { activeChannelId && <div className="voice-pulse" /> }
-            </div>
 
-            { /* Voice Panel */ }
-            { isOpen && (
-                <div className="voice-panel">
-                    <div className="voice-panel-header">
-                        <span>Sprachchat</span>
-                        <button className="voice-close-btn" onClick={ () => setIsOpen(false) }>x</button>
-                    </div>
-
-                    <div className="voice-channels-list">
-                        { channels.map(ch => (
-                            <div key={ ch.id } className="voice-channel-item">
-                                <div
-                                    className={ `voice-channel-name ${ activeChannelId === ch.id ? 'active' : '' }` }
-                                    onClick={ () => activeChannelId === ch.id ? leaveChannel() : joinChannel(ch) }
-                                >
-                                    <span className="voice-channel-icon">{ activeChannelId === ch.id ? '\u{1F50A}' : '\u{1F508}' }</span>
-                                    <span>{ ch.name }</span>
-                                    { (ch.max || ch.maxParticipants) ? (
-                                        <span className="voice-channel-count">
-                                            { activeChannelId === ch.id ? participants.length : 0 }/{ ch.max || ch.maxParticipants }
-                                        </span>
-                                    ) : null }
-                                </div>
-
-                                { activeChannelId === ch.id && participants.length > 0 && (
-                                    <div className="voice-participants">
-                                        { participants.map(p => (
-                                            <div
-                                                key={ p.identity }
-                                                className={ `voice-participant ${ p.isSpeaking ? 'speaking' : '' }` }
-                                                onContextMenu={ (e) =>
-                                                {
-                                                    if(!isMod || p.identity === GetSessionDataManager().userName) return;
-                                                    e.preventDefault();
-                                                    kickParticipant(p.identity);
-                                                } }
-                                            >
-                                                <span className={ `voice-participant-dot ${ p.isMuted ? 'muted' : 'active' }` } />
-                                                <span>{ p.identity }</span>
-                                                { p.isSpeaking && <span className="voice-speaking-indicator" /> }
-                                            </div>
-                                        )) }
-                                    </div>
-                                ) }
-                            </div>
-                        )) }
-                    </div>
-
-                    { activeChannelId && (
-                        <div className="voice-controls">
-                            <button
-                                className={ `voice-ctrl-btn ${ isMuted ? 'active' : '' }` }
-                                onClick={ toggleMute }
-                                title={ isMuted ? 'Mikro an' : 'Mikro aus' }
-                            >
-                                { isMuted ? '\u{1F507}' : '\u{1F3A4}' }
-                            </button>
-                            <button
-                                className={ `voice-ctrl-btn ${ isDeafened ? 'active' : '' }` }
-                                onClick={ toggleDeafen }
-                                title={ isDeafened ? 'Audio an' : 'Audio aus' }
-                            >
-                                { isDeafened ? '\u{1F515}' : '\u{1F514}' }
-                            </button>
-                            <button
-                                className="voice-ctrl-btn disconnect"
-                                onClick={ leaveChannel }
-                                title="Verlassen"
-                            >
-                                x
-                            </button>
-                            <button
-                                className={ `voice-ctrl-btn ptt ${ pushToTalk ? 'active' : '' }` }
-                                onClick={ () => setPushToTalk(!pushToTalk) }
-                                title={ pushToTalk ? 'Push-to-Talk aus' : 'Push-to-Talk an (V)' }
-                            >
-                                PTT
-                            </button>
+                { showCreateForm && (
+                    <div className="dc-voice-create">
+                        <input
+                            className="dc-voice-create-input"
+                            type="text"
+                            placeholder="Channel-Name..."
+                            value={ newChannelName }
+                            onChange={ e => setNewChannelName(e.target.value) }
+                            onKeyDown={ e => e.key === 'Enter' && createChannel() }
+                            autoFocus
+                        />
+                        <div className="dc-voice-create-actions">
+                            <button className="dc-voice-create-btn" onClick={ createChannel }>Erstellen</button>
+                            <button className="dc-voice-create-cancel" onClick={ () => { setShowCreateForm(false); setNewChannelName(''); } }>Abbrechen</button>
                         </div>
-                    ) }
+                    </div>
+                ) }
 
-                    { connectionState === 'connecting' && (
-                        <div className="voice-status">Verbinde...</div>
-                    ) }
+                <div className="dc-voice-channels">
+                    { channels.map(ch => (
+                        <div key={ ch.id } className="dc-voice-channel">
+                            <div
+                                className={ `dc-voice-channel-row ${ activeChannelId === ch.id ? 'dc-voice-channel-row--active' : '' }` }
+                                onClick={ () => activeChannelId === ch.id ? disconnect() : joinChannel(ch) }
+                            >
+                                <SpeakerIcon />
+                                <span className="dc-voice-channel-name">{ ch.name }</span>
+                                { (ch.max || ch.maxParticipants) ? (
+                                    <span className="dc-voice-channel-limit">{ ch.max || ch.maxParticipants }</span>
+                                ) : null }
+                            </div>
+                        </div>
+                    )) }
                 </div>
-            ) }
-        </>
+
+                { isConnecting && (
+                    <div className="dc-voice-status">Verbinde...</div>
+                ) }
+
+                { activeChannelId && token && (
+                    <VoiceConnectedContent
+                        channelName={ activeChannelName }
+                        livekitUrl={ livekitUrl }
+                        token={ token }
+                        isMuted={ isMuted }
+                        isDeafened={ isDeafened }
+                        onToggleMute={ () => setIsMuted(!isMuted) }
+                        onToggleDeafen={ () => setIsDeafened(!isDeafened) }
+                        onDisconnect={ disconnect }
+                    />
+                ) }
+            </div>
+        </div>
     );
 };

@@ -95,17 +95,18 @@
     height: $camera-editor-height;
 
     .picture-preview-container {
-        width: 380px;
-        height: 380px;
+        width: 320px;
+        height: 320px;
         overflow: hidden;
         border-radius: 4px;
         position: relative;
         user-select: none;
+        flex-shrink: 0;
     }
 
     .picture-preview {
-        width: 380px;
-        height: 380px;
+        width: 320px;
+        height: 320px;
         display: block;
         image-rendering: auto;
     }

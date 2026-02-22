@@ -1,10 +1,11 @@
-import { BuildersClubFurniCountMessageEvent, BuildersClubPlaceRoomItemMessageComposer, BuildersClubPlaceWallItemMessageComposer, BuildersClubQueryFurniCountMessageComposer, BuildersClubSubscriptionStatusMessageEvent, CatalogPageMessageEvent, CatalogPagesListEvent, CatalogPublishedMessageEvent, ClubGiftInfoEvent, FrontPageItem, FurnitureListAddOrUpdateEvent, FurniturePlaceComposer, FurniturePlacePaintComposer, GetCatalogIndexComposer, GetCatalogPageComposer, GetClubGiftInfo, GetGiftWrappingConfigurationComposer, GetTickerTime, GiftWrappingConfigurationEvent, GuildMembershipsMessageEvent, HabboClubOffersMessageEvent, LegacyDataType, LimitedEditionSoldOutEvent, MarketplaceMakeOfferResult, NodeData, ProductOfferEvent, PurchaseErrorMessageEvent, PurchaseFromCatalogComposer, PurchaseNotAllowedMessageEvent, PurchaseOKMessageEvent, RoomControllerLevel, RoomEngineObjectPlacedEvent, RoomObjectCategory, RoomObjectPlacementSource, RoomObjectType, RoomObjectVariable, RoomPreviewer, SellablePetPalettesMessageEvent, UnseenItemsEvent, UserCurrencyComposer, Vector3d } from '@nitrots/nitro-renderer';
+import { BuildersClubFurniCountMessageEvent, BuildersClubPlaceRoomItemMessageComposer, BuildersClubPlaceWallItemMessageComposer, BuildersClubQueryFurniCountMessageComposer, BuildersClubSubscriptionStatusMessageEvent, CatalogPageMessageEvent, CatalogPagesListEvent, CatalogPublishedMessageEvent, ClubGiftInfoEvent, FrontPageItem, FurnitureListAddOrUpdateEvent, FurniturePlaceComposer, FurniturePlacePaintComposer, GetCatalogIndexComposer, GetCatalogPageComposer, GetClubGiftInfo, GetGiftWrappingConfigurationComposer, GetTickerTime, GiftWrappingConfigurationEvent, GuildMembershipsMessageEvent, HabboClubOffersMessageEvent, LegacyDataType, LimitedEditionSoldOutEvent, MarketplaceMakeOfferResult, NodeData, ProductOfferEvent, PurchaseErrorMessageEvent, PurchaseFromCatalogComposer, PurchaseNotAllowedMessageEvent, PurchaseOKMessageEvent, RoomControllerLevel, RoomEngineObjectPlacedEvent, RoomObjectCategory, RoomObjectPlacementSource, RoomObjectType, RoomObjectVariable, RoomPreviewer, RoomSessionEvent, SellablePetPalettesMessageEvent, UnseenItemsEvent, UserCurrencyComposer, Vector3d } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBetween } from 'use-between';
-import { BuilderFurniPlaceableStatus, CatalogNode, CatalogPage, CatalogPetPalette, CatalogType, CreateLinkEvent, DispatchUiEvent, FurniCategory, GetFurnitureData, GetProductDataForLocalization, GetRoomEngine, GetRoomSession, GiftWrappingConfiguration, ICatalogNode, ICatalogOptions, ICatalogPage, IPageLocalization, IProduct, IPurchasableOffer, IPurchaseOptions, LocalizeText, NotificationAlertType, Offer, PageLocalization, PlacedObjectPurchaseData, PlaySound, Product, ProductTypeEnum, RequestedPage, SearchResult, SendMessageComposer, SoundNames } from '../../api';
+import { BuilderFurniPlaceableStatus, CatalogNode, CatalogPage, CatalogPetPalette, CatalogType, CloneObject, CreateLinkEvent, DispatchUiEvent, FurniCategory, GetFurnitureData, GetProductDataForLocalization, GetRoomEngine, GetRoomSession, GiftWrappingConfiguration, ICatalogNode, ICatalogOptions, ICatalogPage, IPageLocalization, IProduct, IPurchasableOffer, IPurchaseOptions, LocalizeText, NotificationAlertType, Offer, PageLocalization, PlacedObjectPurchaseData, PlaySound, Product, ProductTypeEnum, RequestedPage, SearchResult, SendMessageComposer, SoundNames } from '../../api';
 import { CatalogPurchasedEvent, CatalogPurchaseFailureEvent, CatalogPurchaseNotAllowedEvent, CatalogPurchaseSoldOutEvent, InventoryFurniAddedEvent } from '../../events';
-import { useMessageEvent, useRoomEngineEvent, useUiEvent } from '../events';
+import { useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent, useUiEvent } from '../events';
 import { useNotification } from '../notification';
+import { usePurse } from '../purse';
 import { useCatalogPlaceMultipleItems } from './useCatalogPlaceMultipleItems';
 import { useCatalogSkipPurchaseConfirmation } from './useCatalogSkipPurchaseConfirmation';
 
@@ -14,6 +15,7 @@ const DRAG_AND_DROP_ENABLED = true;
 const useCatalogState = () =>
 {
     const [ isVisible, setIsVisible ] = useState(false);
+    const { purse, setPurse } = usePurse();
     const [ isBusy, setIsBusy ] = useState(false);
     const [ pageId, setPageId ] = useState(-1);
     const [ previousPageId, setPreviousPageId ] = useState(-1);
@@ -489,8 +491,28 @@ const useCatalogState = () =>
     useMessageEvent<PurchaseOKMessageEvent>(PurchaseOKMessageEvent, event =>
     {
         const parser = event.getParser();
+        const offer = parser.offer;
 
-        DispatchUiEvent(new CatalogPurchasedEvent(parser.offer));
+        if(offer.priceCredits > 0 || offer.priceActivityPoints > 0)
+        {
+            setPurse(prevValue =>
+            {
+                const newValue = CloneObject(prevValue);
+
+                if(offer.priceCredits > 0) newValue.credits = Math.max(0, newValue.credits - offer.priceCredits);
+
+                if(offer.priceActivityPoints > 0)
+                {
+                    newValue.activityPoints = new Map(newValue.activityPoints);
+                    const current = newValue.activityPoints.get(offer.priceActivityPointsType) || 0;
+                    newValue.activityPoints.set(offer.priceActivityPointsType, Math.max(0, current - offer.priceActivityPoints));
+                }
+
+                return newValue;
+            });
+        }
+
+        DispatchUiEvent(new CatalogPurchasedEvent(offer));
     });
 
     useMessageEvent<PurchaseErrorMessageEvent>(PurchaseErrorMessageEvent, event =>
@@ -918,6 +940,13 @@ const useCatalogState = () =>
     {
         return () => setCurrentOffer(null);
     }, [ currentPage ]);
+
+    useRoomSessionManagerEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, event =>
+    {
+        cancelObjectMover();
+        setMultiPlaceCount(0);
+        placedObjectPurchaseQueue.current = [];
+    });
 
     useEffect(() =>
     {

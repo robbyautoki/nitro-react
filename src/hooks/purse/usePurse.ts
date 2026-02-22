@@ -120,7 +120,7 @@ const usePurseState = () =>
         SendMessageComposer(new UserCurrencyComposer());
     }, []);
 
-    return { purse, hcDisabled, clubStatus, getCurrencyAmount };
+    return { purse, setPurse, hcDisabled, clubStatus, getCurrencyAmount };
 }
 
 export const usePurse = () => useBetween(usePurseState);

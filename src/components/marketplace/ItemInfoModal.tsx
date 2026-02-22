@@ -67,11 +67,23 @@ export const ItemInfoModal: FC<Props> = ({ listing, onClose }) =>
                                 </div>
                             ) }
 
-                            {/* Rarity Type */}
+                            {/* Seal (instance-level) */}
+                            { info.seal && (
+                                <div className="flex items-center gap-2">
+                                    <Shield className="size-3.5" style={ { color: info.seal.color } } />
+                                    <span className="text-[11px] font-semibold" style={ { color: info.seal.color } }>
+                                        Siegel: { info.seal.rarity_display }
+                                    </span>
+                                </div>
+                            ) }
+
+                            {/* Rarity Type (base-level) */}
                             { info.rarity_type && (
                                 <div className="flex items-center gap-2">
-                                    <Shield className="size-3.5 text-purple-400/80" />
-                                    <span className="text-[11px] text-white/70">{ RARITY_LABELS[info.rarity_type] ?? info.rarity_type }</span>
+                                    <Shield className="size-3.5" style={ { color: info.rarity_color ?? '#a78bfa' } } />
+                                    <span className="text-[11px] text-white/70">
+                                        { RARITY_LABELS[info.rarity_type.toLowerCase()] ?? info.rarity_type }
+                                    </span>
                                 </div>
                             ) }
 

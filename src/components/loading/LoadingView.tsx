@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import { Marquee } from '../ui/marquee';
 import { SlidingNumber } from '../ui/sliding-number';
@@ -83,17 +83,16 @@ export const LoadingView: FC<LoadingViewProps> = props =>
         return () => clearInterval(interval);
     }, [ isError ]);
 
-    const col1 = shuffleArray(ensureMinCards(photoUrls, 4));
-    const col2 = shuffleArray(ensureMinCards(photoUrls, 4));
-    const col3 = shuffleArray(ensureMinCards(photoUrls, 4));
-    const col4 = shuffleArray(ensureMinCards(photoUrls, 4));
-    const col5 = shuffleArray(ensureMinCards(photoUrls, 4));
-    const col6 = shuffleArray(ensureMinCards(photoUrls, 4));
+    const columns = useMemo(() =>
+    {
+        if(!photoUrls.length) return [];
+        return Array.from({ length: 6 }, () => shuffleArray(ensureMinCards(photoUrls, 4)));
+    }, [ photoUrls ]);
 
     return (
         <div className="nitro-loading">
             { /* 3D Gallery Background */ }
-            { photoUrls.length > 0 && (
+            { columns.length > 0 && (
                 <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
                     <div
                         className="flex flex-row gap-5 h-full w-[250vw]"
@@ -102,24 +101,18 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                             opacity: 0.35,
                         } }
                     >
-                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:35s] h-full flex-1">
-                            { col1.map((url, i) => <PhotoCard key={ `c1-${ i }` } url={ url } />) }
-                        </Marquee>
-                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:40s] h-full flex-1">
-                            { col2.map((url, i) => <PhotoCard key={ `c2-${ i }` } url={ url } />) }
-                        </Marquee>
-                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:32s] h-full flex-1">
-                            { col3.map((url, i) => <PhotoCard key={ `c3-${ i }` } url={ url } />) }
-                        </Marquee>
-                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:45s] h-full flex-1">
-                            { col4.map((url, i) => <PhotoCard key={ `c4-${ i }` } url={ url } />) }
-                        </Marquee>
-                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:37s] h-full flex-1">
-                            { col5.map((url, i) => <PhotoCard key={ `c5-${ i }` } url={ url } />) }
-                        </Marquee>
-                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:42s] h-full flex-1">
-                            { col6.map((url, i) => <PhotoCard key={ `c6-${ i }` } url={ url } />) }
-                        </Marquee>
+                        { columns.map((col, ci) => (
+                            <Marquee
+                                key={ ci }
+                                vertical
+                                pauseOnHover={ false }
+                                reverse={ ci % 2 === 1 }
+                                repeat={ 3 }
+                                className={ `h-full flex-1 [--duration:${ 32 + ci * 3 }s]` }
+                            >
+                                { col.map((url, i) => <PhotoCard key={ `c${ ci }-${ i }` } url={ url } />) }
+                            </Marquee>
+                        )) }
                     </div>
                 </div>
             ) }

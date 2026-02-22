@@ -38,7 +38,7 @@ export const ItemInfoTooltip: FC<Props> = ({ listing }) =>
     };
 
     const ltd = info?.limited_data && info.limited_data !== '0:0'
-        ? (() => { const p = info.limited_data.split(':'); return { num: parseInt(p[0]), total: parseInt(p[1]) }; })()
+        ? (() => { const p = info.limited_data.split(':'); return { num: parseInt(p[1]), total: parseInt(p[0]) }; })()
         : null;
 
     return (

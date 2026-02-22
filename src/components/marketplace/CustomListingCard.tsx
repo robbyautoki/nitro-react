@@ -38,8 +38,8 @@ function parseLtd(limitedData?: string): { num: number; total: number } | null
     if(!limitedData || limitedData === '0:0') return null;
     const parts = limitedData.split(':');
     if(parts.length !== 2) return null;
-    const num = parseInt(parts[0]);
-    const total = parseInt(parts[1]);
+    const total = parseInt(parts[0]);
+    const num = parseInt(parts[1]);
     return (num > 0 && total > 0) ? { num, total } : null;
 }
 

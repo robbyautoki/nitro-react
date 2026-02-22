@@ -1,9 +1,9 @@
 import { IRoomCameraWidgetEffect, IRoomCameraWidgetSelectedEffect, RoomCameraWidgetSelectedEffect } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaSave, FaSearchMinus, FaSearchPlus, FaTrash } from 'react-icons/fa';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FaSave, FaTrash } from 'react-icons/fa';
 import ReactSlider from 'react-slider';
 import { CameraEditorTabs, CameraPicture, CameraPictureThumbnail, GetRoomCameraWidgetManager, LocalizeText } from '../../../../api';
-import { Button, ButtonGroup, Column, Flex, Grid, LayoutImage, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView, Text } from '../../../../common';
+import { Button, ButtonGroup, Column, Flex, Grid, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView, Text } from '../../../../common';
 import { CameraWidgetEffectListView } from './effect-list/CameraWidgetEffectListView';
 
 export interface CameraWidgetEditorViewProps
@@ -25,7 +25,11 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
     const [ selectedEffectName, setSelectedEffectName ] = useState<string>(null);
     const [ selectedEffects, setSelectedEffects ] = useState<IRoomCameraWidgetSelectedEffect[]>([]);
     const [ effectsThumbnails, setEffectsThumbnails ] = useState<CameraPictureThumbnail[]>([]);
-    const [ isZoomed, setIsZoomed ] = useState(false);
+    const [ zoomLevel, setZoomLevel ] = useState(1);
+    const [ panOffset, setPanOffset ] = useState({ x: 0, y: 0 });
+    const isPanning = useRef(false);
+    const panStart = useRef({ x: 0, y: 0 });
+    const panStartOffset = useRef({ x: 0, y: 0 });
 
     const getColorMatrixEffects = useMemo(() =>
     {
@@ -85,8 +89,38 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
 
     const getCurrentPictureUrl = useMemo(() =>
     {
-        return GetRoomCameraWidgetManager().applyEffects(picture.texture, selectedEffects, isZoomed).src;
-    }, [ picture, selectedEffects, isZoomed ]);
+        return GetRoomCameraWidgetManager().applyEffects(picture.texture, selectedEffects, false).src;
+    }, [ picture, selectedEffects ]);
+
+    const onPanMouseDown = useCallback((e: React.MouseEvent) =>
+    {
+        if(zoomLevel <= 1) return;
+        isPanning.current = true;
+        panStart.current = { x: e.clientX, y: e.clientY };
+        panStartOffset.current = { ...panOffset };
+    }, [ zoomLevel, panOffset ]);
+
+    const onPanMouseMove = useCallback((e: React.MouseEvent) =>
+    {
+        if(!isPanning.current) return;
+        const dx = e.clientX - panStart.current.x;
+        const dy = e.clientY - panStart.current.y;
+        const maxPan = (zoomLevel - 1) * 190;
+        setPanOffset({
+            x: Math.max(-maxPan, Math.min(maxPan, panStartOffset.current.x + dx)),
+            y: Math.max(-maxPan, Math.min(maxPan, panStartOffset.current.y + dy))
+        });
+    }, [ zoomLevel ]);
+
+    const onPanMouseUp = useCallback(() =>
+    {
+        isPanning.current = false;
+    }, []);
+
+    useEffect(() =>
+    {
+        if(zoomLevel <= 1) setPanOffset({ x: 0, y: 0 });
+    }, [ zoomLevel ]);
 
     const processAction = useCallback((type: string, effectName: string = null) =>
     {
@@ -151,11 +185,8 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
                 newWindow.document.write(image.outerHTML);
                 return;
             }
-            case 'zoom':
-                setIsZoomed(!isZoomed);
-                return;
         }
-    }, [ isZoomed, availableEffects, selectedEffectName, getCurrentPictureUrl, getSelectedEffectIndex, onCancel, onCheckout, onClose, setIsZoomed, setSelectedEffects ]);
+    }, [ availableEffects, selectedEffectName, getCurrentPictureUrl, getSelectedEffectIndex, onCancel, onCheckout, onClose, setSelectedEffects ]);
 
     useEffect(() =>
     {
@@ -179,15 +210,30 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
                 }) }
             </NitroCardTabsView>
             <NitroCardContentView>
-                <Grid>
+                <Grid className="h-100">
                     <Column size={ 5 } overflow="hidden">
                         <CameraWidgetEffectListView myLevel={ myLevel } selectedEffects={ selectedEffects } effects={ getEffectList() } thumbnails={ effectsThumbnails } processAction={ processAction } />
                     </Column>
-                    <Column size={ 7 } justifyContent="between" overflow="hidden">
-                        <Column center>
-                            <LayoutImage imageUrl={ getCurrentPictureUrl } className="picture-preview" />
+                    <Column size={ 7 } className="d-flex flex-column" overflow="hidden">
+                        <Column center className="flex-grow-1">
+                            <div className="picture-preview-container"
+                                onMouseDown={ onPanMouseDown }
+                                onMouseMove={ onPanMouseMove }
+                                onMouseUp={ onPanMouseUp }
+                                onMouseLeave={ onPanMouseUp }
+                                style={{ cursor: zoomLevel > 1 ? (isPanning.current ? 'grabbing' : 'grab') : 'default' }}>
+                                <img
+                                    src={ getCurrentPictureUrl }
+                                    className="picture-preview"
+                                    draggable={ false }
+                                    style={{
+                                        transform: `translate(${ panOffset.x }px, ${ panOffset.y }px) scale(${ zoomLevel })`,
+                                        transformOrigin: 'center center',
+                                        transition: isPanning.current ? 'none' : 'transform 0.15s ease'
+                                    }} />
+                            </div>
                             { selectedEffectName &&
-                                <Column center fullWidth gap={ 1 }>
+                                <Column center fullWidth gap={ 1 } className="mt-1">
                                     <Text>{ LocalizeText('camera.effect.name.' + selectedEffectName) }</Text>
                                     <ReactSlider
                                         className={ 'nitro-slider' }
@@ -199,28 +245,37 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
                                         renderThumb={ (props, state) => <div { ...props }>{ state.valueNow }</div> } />
                                 </Column> }
                         </Column>
-                        <Flex justifyContent="between">
-                            <ButtonGroup>
-                                <Button onClick={ event => processAction('clear_effects') }>
-                                    <FaTrash className="fa-icon" />
-                                </Button>
-                                <Button onClick={ event => processAction('download') }>
-                                    <FaSave className="fa-icon" />
-                                </Button>
-                                <Button onClick={ event => processAction('zoom') }>
-                                    { isZoomed && <FaSearchMinus className="fa-icon" /> }
-                                    { !isZoomed && <FaSearchPlus className="fa-icon" /> }
-                                </Button>
-                            </ButtonGroup>
-                            <Flex gap={ 1 }>
-                                <Button onClick={ event => processAction('cancel') }>
-                                    { LocalizeText('generic.cancel') }
-                                </Button>
-                                <Button onClick={ event => processAction('checkout') }>
-                                    { LocalizeText('camera.preview.button.text') }
-                                </Button>
+                        <div className="camera-footer mt-2">
+                            <Flex alignItems="center" gap={ 1 } className="mb-2">
+                                <Text variant="muted" small>Zoom</Text>
+                                <ReactSlider
+                                    className={ 'nitro-slider flex-grow-1' }
+                                    min={ 1 }
+                                    max={ 3 }
+                                    step={ 0.05 }
+                                    value={ zoomLevel }
+                                    onChange={ (val: number) => setZoomLevel(val) }
+                                    renderThumb={ (props, state) => <div { ...props }>{ (state.valueNow as number).toFixed(1) }x</div> } />
                             </Flex>
-                        </Flex>
+                            <Flex justifyContent="between">
+                                <ButtonGroup>
+                                    <Button onClick={ event => processAction('clear_effects') }>
+                                        <FaTrash className="fa-icon" />
+                                    </Button>
+                                    <Button onClick={ event => processAction('download') }>
+                                        <FaSave className="fa-icon" />
+                                    </Button>
+                                </ButtonGroup>
+                                <Flex gap={ 1 }>
+                                    <Button onClick={ event => processAction('cancel') }>
+                                        { LocalizeText('generic.cancel') }
+                                    </Button>
+                                    <Button onClick={ event => processAction('checkout') }>
+                                        { LocalizeText('camera.preview.button.text') }
+                                    </Button>
+                                </Flex>
+                            </Flex>
+                        </div>
                     </Column>
                 </Grid>
             </NitroCardContentView>

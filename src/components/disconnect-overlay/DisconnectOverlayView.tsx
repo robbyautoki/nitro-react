@@ -3,12 +3,13 @@ import { FC } from 'react';
 export const DisconnectOverlayView: FC<{}> = () =>
 {
     const handleReload = () => window.location.reload();
+    const handleHome = () => { window.location.href = 'https://www.bahhos.de'; };
 
     return (
         <div className="nitro-disconnect-overlay">
             <div className="disconnect-box">
                 <div className="disconnect-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <line x1="1" y1="1" x2="23" y2="23" />
                         <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
                         <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
@@ -20,13 +21,14 @@ export const DisconnectOverlayView: FC<{}> = () =>
                 </div>
                 <div className="disconnect-title">Verbindung verloren</div>
                 <div className="disconnect-message">Der Server wurde möglicherweise neu gestartet oder ist nicht erreichbar.</div>
-                <button className="disconnect-button" onClick={ handleReload }>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="23 4 23 10 17 10" />
-                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                    </svg>
-                    Hotel neu laden
-                </button>
+                <div className="disconnect-buttons">
+                    <button className="disconnect-btn-primary" onClick={ handleReload }>
+                        Neu laden
+                    </button>
+                    <button className="disconnect-btn-secondary" onClick={ handleHome }>
+                        Zur Startseite
+                    </button>
+                </div>
             </div>
         </div>
     );

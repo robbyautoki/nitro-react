@@ -1,43 +1,85 @@
+@keyframes disconnect-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes disconnect-box-in {
+    from { opacity: 0; transform: scale(0.92) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .nitro-disconnect-overlay {
     position: fixed;
     inset: 0;
     z-index: 1000;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
     display: flex;
     align-items: center;
     justify-content: center;
+    animation: disconnect-fade-in 0.3s ease;
 
     .disconnect-box {
-        background: #1a1a2e;
-        border: 2px solid #e94560;
-        border-radius: 12px;
-        padding: 2rem;
+        background: rgba(12, 12, 16, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 2.5rem 2.5rem 2rem;
         text-align: center;
         color: white;
-        max-width: 400px;
+        max-width: 360px;
+        width: 90%;
+        animation: disconnect-box-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+
+        .disconnect-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: rgba(251, 146, 60, 0.1);
+            border: 1px solid rgba(251, 146, 60, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            color: #fb923c;
+        }
 
         .disconnect-title {
-            font-size: 1.25rem;
-            font-weight: bold;
+            font-size: 1.2rem;
+            font-weight: 600;
             margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
         }
 
         .disconnect-message {
-            color: #ccc;
-            margin-bottom: 1.5rem;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-bottom: 1.75rem;
         }
 
         .disconnect-button {
-            background: #e94560;
+            background: #fb923c;
             border: none;
             color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 0.7rem 1.75rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
 
             &:hover {
-                background: #c73a52;
+                background: #f97316;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 16px rgba(251, 146, 60, 0.3);
+            }
+
+            &:active {
+                transform: translateY(0);
             }
         }
     }

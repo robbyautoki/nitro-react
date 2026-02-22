@@ -429,6 +429,26 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                     onConfirm={ (itemIds) => { handleDeleteItems(itemIds); setShowDeleteDialog(false); setDeleteTarget(null); } }
                     onClose={ () => { setShowDeleteDialog(false); setDeleteTarget(null); } }
                 /> }
+            { showBatchDeleteDialog && createPortal(
+                <div className="inv-delete-overlay" onClick={ () => setShowBatchDeleteDialog(false) }>
+                    <div className="inv-delete-dialog" onClick={ e => e.stopPropagation() }>
+                        <div className="inv-delete-header">
+                            <FaTrash style={{ color: '#ef4444' }} />
+                            <span>Möbel löschen</span>
+                        </div>
+                        <div className="inv-delete-body">
+                            <div className="inv-delete-label">
+                                { batchDeleteItemCount } Möbelstück(e) aus { selectedGroups.size } Auswahl unwiderruflich löschen?
+                            </div>
+                        </div>
+                        <div className="inv-delete-footer">
+                            <button className="inv-delete-cancel" onClick={ () => setShowBatchDeleteDialog(false) }>Abbrechen</button>
+                            <button className="inv-delete-confirm" onClick={ confirmBatchDelete }>Löschen</button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            ) }
         </Column>
     );
 }

@@ -54,7 +54,7 @@ export const ItemInfoTooltip: FC<Props> = ({ listing }) =>
             <TooltipContent
                 side="left"
                 sideOffset={ 8 }
-                className="w-[300px] p-0 rounded-xl border border-white/[0.08] bg-[rgba(12,12,16,0.97)] backdrop-blur-xl shadow-2xl text-white"
+                className="!z-[500] w-[300px] p-0 rounded-xl border border-white/[0.08] bg-[rgba(12,12,16,0.97)] backdrop-blur-xl shadow-2xl text-white"
             >
                 { loading && (
                     <div className="p-4 text-center text-white/30 text-[11px]">Laden...</div>

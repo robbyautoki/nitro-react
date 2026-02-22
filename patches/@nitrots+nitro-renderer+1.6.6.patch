@@ -1,0 +1,303 @@
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts
+index 671cf7f..a14673f 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts
+@@ -219,7 +219,7 @@ export class RoomObjectVisualizationFactory implements IRoomObjectVisualizationF
+             return null;
+         }
+ 
+-        if((visualizationData instanceof AvatarVisualizationData) || (visualizationData instanceof FurnitureMannequinVisualizationData))
++        if((visualizationData instanceof AvatarVisualizationData) || (visualizationData instanceof FurnitureMannequinVisualizationData) || (visualizationData instanceof PetVisualizationData))
+         {
+             visualizationData.avatarManager = Nitro.instance.avatar;
+         }
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts
+index 1dc732f..1dd5be3 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts
+@@ -2,7 +2,7 @@ import { IAssetData, IRoomGeometry, IRoomObjectModel, MouseEventType, PetType, R
+ import { RoomObjectMouseEvent, RoomObjectMoveEvent, RoomSpriteMouseEvent } from '../../../../../events';
+ import { RoomObjectUpdateMessage } from '../../../../../room';
+ import { PetFigureData } from '../../../../avatar';
+-import { ObjectAvatarChatUpdateMessage, ObjectAvatarExperienceUpdateMessage, ObjectAvatarFigureUpdateMessage, ObjectAvatarPetGestureUpdateMessage, ObjectAvatarPostureUpdateMessage, ObjectAvatarSelectedMessage, ObjectAvatarSleepUpdateMessage, ObjectAvatarUpdateMessage } from '../../../messages';
++import { ObjectAvatarChatUpdateMessage, ObjectAvatarEffectUpdateMessage, ObjectAvatarExperienceUpdateMessage, ObjectAvatarFigureUpdateMessage, ObjectAvatarPetGestureUpdateMessage, ObjectAvatarPostureUpdateMessage, ObjectAvatarSelectedMessage, ObjectAvatarSleepUpdateMessage, ObjectAvatarUpdateMessage } from '../../../messages';
+ import { MovingObjectLogic } from '../MovingObjectLogic';
+ 
+ export class PetLogic extends MovingObjectLogic
+@@ -210,6 +210,13 @@ export class PetLogic extends MovingObjectLogic
+ 
+             return;
+         }
++
++        if(message instanceof ObjectAvatarEffectUpdateMessage)
++        {
++            model.setValue(RoomObjectVariable.FIGURE_EFFECT, message.effect);
++
++            return;
++        }
+     }
+ 
+     public mouseEvent(event: RoomSpriteMouseEvent, geometry: IRoomGeometry): void
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
+index e12279a..e3cf274 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
+@@ -1,11 +1,12 @@
++import { BLEND_MODES } from '@pixi/constants';
+ import { Resource, Texture } from '@pixi/core';
+-import { GetAssetManager, IGraphicAsset, IObjectVisualizationData, IRoomGeometry, RoomObjectVariable, RoomObjectVisualizationType } from '../../../../../api';
++import { AlphaTolerance, AvatarAction, AvatarSetType, GetAssetManager, IAvatarEffectListener, IAvatarImage, IGraphicAsset, IObjectVisualizationData, IRoomGeometry, RoomObjectVariable, RoomObjectVisualizationType } from '../../../../../api';
+ import { AnimationData, AnimationStateData, DirectionData, LayerData } from '../data';
+ import { FurnitureAnimatedVisualization, FurnitureVisualizationData } from '../furniture';
+ import { ExperienceData } from './ExperienceData';
+ import { PetVisualizationData } from './PetVisualizationData';
+ 
+-export class PetVisualization extends FurnitureAnimatedVisualization
++export class PetVisualization extends FurnitureAnimatedVisualization implements IAvatarEffectListener
+ {
+     public static TYPE: string = RoomObjectVisualizationType.PET_ANIMATED;
+ 
+@@ -13,6 +14,7 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+     private static SADDLE: string = 'saddle';
+     private static HAIR: string = 'hair';
+     private static ADDITIONAL_SPRITE_COUNT: number = 1;
++    private static MAX_EFFECT_SPRITES: number = 10;
+     private static EXPERIENCE_BUBBLE_VISIBLE_IN_MS: number = 1000;
+     private static PET_EXPERIENCE_BUBBLE: string = 'avatar_addition_pet_experience_bubble';
+     private static POSTURE_ANIMATION_INDEX: number = 0;
+@@ -42,6 +44,10 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+     private _previousAnimationDirection: number;
+     private _animationStates: AnimationStateData[];
+ 
++    private _effect: number;
++    private _effectAvatarImage: IAvatarImage;
++    private _effectSpriteCount: number;
++
+     constructor()
+     {
+         super();
+@@ -69,6 +75,10 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+         this._previousAnimationDirection = -1;
+         this._animationStates = [];
+ 
++        this._effect = 0;
++        this._effectAvatarImage = null;
++        this._effectSpriteCount = 0;
++
+         while(this._animationStates.length < PetVisualization.ANIMATION_INDEX_COUNT) this._animationStates.push(new AnimationStateData());
+     }
+ 
+@@ -115,6 +125,7 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+         super.update(geometry, time, update, skipUpdate);
+ 
+         this.updateExperienceBubble(time);
++        this.updateEffectSprites(geometry);
+     }
+ 
+     protected updateExperienceBubble(time: number): void
+@@ -225,6 +236,14 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+ 
+         if(!isNaN(color) && this._color !== color) this._color = color;
+ 
++        const effect = (model.getValue<number>(RoomObjectVariable.FIGURE_EFFECT) || 0);
++
++        if(effect !== this._effect)
++        {
++            this._effect = effect;
++            this.updateEffect(effect);
++        }
++
+         this.updateModelCounter = model.updateCounter;
+ 
+         return true;
+@@ -541,11 +560,6 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+         return this.asset.getAssetWithPalette(name, paletteName);
+     }
+ 
+-    protected getAdditionalLayerCount(): number
+-    {
+-        return super.getAdditionalLayerCount() + PetVisualization.ADDITIONAL_SPRITE_COUNT;
+-    }
+-
+     protected setLayerCount(count: number): void
+     {
+         super.setLayerCount(count);
+@@ -592,6 +606,132 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+         return GetAssetManager().getTexture(name);
+     }
+ 
++    private updateEffect(effectId: number): void
++    {
++        if(this._effectAvatarImage)
++        {
++            this._effectAvatarImage.dispose();
++            this._effectAvatarImage = null;
++        }
++
++        this._effectSpriteCount = 0;
++
++        if(effectId <= 0 || !this.data || !this.data.avatarManager) return;
++
++        const avatarImage = this.data.createAvatarImage('hd-180-1.ch-255-66.lg-280-110.sh-305-62', this._scale, 'M', null, this);
++
++        if(!avatarImage) return;
++
++        this._effectAvatarImage = avatarImage;
++
++        avatarImage.initActionAppends();
++        avatarImage.appendAction(AvatarAction.EFFECT, effectId);
++        avatarImage.endActionAppends();
++    }
++
++    private updateEffectSprites(geometry: IRoomGeometry): void
++    {
++        if(!this._effectAvatarImage) return;
++
++        this._effectAvatarImage.updateAnimationByFrames(1);
++
++        const effectSprites = this._effectAvatarImage.getSprites();
++        const baseIndex = this.totalSprites - PetVisualization.ADDITIONAL_SPRITE_COUNT;
++        const direction = this._effectAvatarImage.getDirection();
++        let spriteIndex = 0;
++
++        if(effectSprites)
++        {
++            for(const spriteData of effectSprites)
++            {
++                if(spriteData.id === 'avatar') continue;
++
++                const slotIndex = baseIndex - PetVisualization.MAX_EFFECT_SPRITES + spriteIndex;
++
++                if(slotIndex < 0 || slotIndex >= this.totalSprites) continue;
++
++                const sprite = this.getSprite(slotIndex);
++
++                if(!sprite) continue;
++
++                const layerData = this._effectAvatarImage.getLayerData(spriteData);
++
++                let frameNumber = 0;
++                let offsetX = spriteData.getDirectionOffsetX(direction);
++                let offsetY = spriteData.getDirectionOffsetY(direction);
++                let dd = 0;
++
++                if(spriteData.hasDirections) dd = direction;
++
++                if(layerData)
++                {
++                    frameNumber = layerData.animationFrame;
++                    offsetX += layerData.dx;
++                    offsetY += layerData.dy;
++                    dd += layerData.dd;
++                }
++
++                if(this._scale < 48)
++                {
++                    offsetX /= 2;
++                    offsetY /= 2;
++                }
++
++                if(dd < 0) dd += 8;
++                else if(dd > 7) dd -= 8;
++
++                const assetName = ((((((this._effectAvatarImage.getScale() + '_') + spriteData.member) + '_') + dd) + '_') + frameNumber);
++                const asset = this._effectAvatarImage.getAsset(assetName);
++
++                if(!asset)
++                {
++                    sprite.visible = false;
++                    spriteIndex++;
++                    continue;
++                }
++
++                sprite.texture = asset.texture;
++                sprite.offsetX = ((asset.offsetX - (this._scale / 2)) + offsetX);
++                sprite.offsetY = (asset.offsetY + offsetY);
++                sprite.flipH = asset.flipH;
++                sprite.relativeDepth = -0.02;
++                sprite.alphaTolerance = AlphaTolerance.MATCH_NOTHING;
++                sprite.visible = true;
++
++                if(spriteData.ink === 33) sprite.blendMode = BLEND_MODES.ADD;
++                else sprite.blendMode = BLEND_MODES.NORMAL;
++
++                spriteIndex++;
++            }
++        }
++
++        this._effectSpriteCount = spriteIndex;
++
++        for(let i = spriteIndex; i < PetVisualization.MAX_EFFECT_SPRITES; i++)
++        {
++            const slotIndex = baseIndex - PetVisualization.MAX_EFFECT_SPRITES + i;
++            if(slotIndex < 0 || slotIndex >= this.totalSprites) continue;
++
++            const sprite = this.getSprite(slotIndex);
++            if(sprite) sprite.visible = false;
++        }
++
++        if(spriteIndex > 0) this.updateSpriteCounter++;
++    }
++
++    public resetEffect(effect: number): void
++    {
++        if(effect === this._effect)
++        {
++            this.updateEffect(effect);
++        }
++    }
++
++    protected getAdditionalLayerCount(): number
++    {
++        return super.getAdditionalLayerCount() + PetVisualization.ADDITIONAL_SPRITE_COUNT + PetVisualization.MAX_EFFECT_SPRITES;
++    }
++
+     protected get data(): PetVisualizationData
+     {
+         return this._data as PetVisualizationData;
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualizationData.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualizationData.ts
+index a1f92ec..9afca14 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualizationData.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualizationData.ts
+@@ -1,16 +1,40 @@
+-import { IAssetVisualizationData } from '../../../../../api';
++import { AvatarScaleType, IAvatarEffectListener, IAvatarImage, IAvatarImageListener, IAvatarRenderManager, IAssetVisualizationData } from '../../../../../api';
+ import { AnimationSizeData, PetSizeData, SizeData } from '../data';
+ import { FurnitureAnimatedVisualizationData } from '../furniture';
+ 
+ export class PetVisualizationData extends FurnitureAnimatedVisualizationData
+ {
+     private _isAllowedToTurnHead: boolean;
++    private _avatarRenderer: IAvatarRenderManager;
+ 
+     constructor()
+     {
+         super();
+ 
+         this._isAllowedToTurnHead = true;
++        this._avatarRenderer = null;
++    }
++
++    public get avatarManager(): IAvatarRenderManager
++    {
++        return this._avatarRenderer;
++    }
++
++    public set avatarManager(renderer: IAvatarRenderManager)
++    {
++        this._avatarRenderer = renderer;
++    }
++
++    public createAvatarImage(figure: string, scale: number, gender: string = null, avatarListener: IAvatarImageListener = null, effectListener: IAvatarEffectListener = null): IAvatarImage
++    {
++        if(!this._avatarRenderer) return null;
++
++        let avatarImage: IAvatarImage = null;
++
++        if(scale > 48) avatarImage = this._avatarRenderer.createAvatarImage(figure, AvatarScaleType.LARGE, gender, avatarListener, effectListener);
++        else avatarImage = this._avatarRenderer.createAvatarImage(figure, AvatarScaleType.SMALL, gender, avatarListener, effectListener);
++
++        return avatarImage;
+     }
+ 
+     protected createSizeData(scale: number, layerCount: number, angle: number): SizeData

@@ -188,34 +188,6 @@ const useCatalogState = () =>
     {
         if(!flag) resetObjectMover();
 
-        for(const entry of placedObjectPurchaseQueue.current)
-        {
-            switch(entry.category)
-            {
-                case RoomObjectCategory.FLOOR:
-                    GetRoomEngine().removeRoomObjectFloor(entry.roomId, entry.objectId);
-                    break;
-                case RoomObjectCategory.WALL: {
-                    switch(entry.furniData.className)
-                    {
-                        case 'floor':
-                        case 'wallpaper':
-                        case 'landscape':
-                            resetRoomPaint('reset', '');
-                            break;
-                        default:
-                            GetRoomEngine().removeRoomObjectWall(entry.roomId, entry.objectId);
-                            break;
-                    }
-                    break;
-                }
-                default:
-                    GetRoomEngine().deleteRoomObject(entry.objectId, entry.category);
-                    break;
-            }
-        }
-        placedObjectPurchaseQueue.current = [];
-
         setPlacedObjectPurchaseData(prevValue =>
         {
             if(prevValue)
@@ -753,6 +725,7 @@ const useCatalogState = () =>
         if(!placed)
         {
             resetObjectMover();
+            placedObjectPurchaseQueue.current = [];
 
             return;
         }
@@ -971,6 +944,7 @@ const useCatalogState = () =>
             {
                 cancelObjectMover();
                 setMultiPlaceCount(0);
+                placedObjectPurchaseQueue.current = [];
                 setIsVisible(true);
             }
         };
@@ -980,6 +954,7 @@ const useCatalogState = () =>
             e.preventDefault();
             cancelObjectMover();
             setMultiPlaceCount(0);
+            placedObjectPurchaseQueue.current = [];
             setIsVisible(true);
         };
 

@@ -1,0 +1,75 @@
+.fog-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+
+    .fog-layer {
+        position: absolute;
+        inset: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(ellipse at center, rgba(180, 180, 200, 0.15) 0%, transparent 70%);
+        opacity: 0;
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+    }
+
+    .fog-layer-1 {
+        animation: fogDrift1 12s ease-in-out infinite alternate;
+    }
+
+    .fog-layer-2 {
+        animation: fogDrift2 16s ease-in-out infinite alternate-reverse;
+        animation-delay: -4s;
+    }
+
+    .fog-layer-3 {
+        animation: fogDrift3 20s ease-in-out infinite alternate;
+        animation-delay: -8s;
+    }
+}
+
+@keyframes fogDrift1 {
+    0% {
+        opacity: 0.25;
+        transform: translate(-10%, -5%) scale(1.1);
+    }
+    50% {
+        opacity: 0.4;
+    }
+    100% {
+        opacity: 0.2;
+        transform: translate(10%, 5%) scale(1.3);
+    }
+}
+
+@keyframes fogDrift2 {
+    0% {
+        opacity: 0.2;
+        transform: translate(15%, -10%) scale(1.2);
+    }
+    50% {
+        opacity: 0.35;
+    }
+    100% {
+        opacity: 0.15;
+        transform: translate(-15%, 10%) scale(1.0);
+    }
+}
+
+@keyframes fogDrift3 {
+    0% {
+        opacity: 0.15;
+        transform: translate(-5%, 15%) scale(1.0);
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.2;
+        transform: translate(5%, -15%) scale(1.4);
+    }
+}

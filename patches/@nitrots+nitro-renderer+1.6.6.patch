@@ -39,7 +39,7 @@ index 1dc732f..1dd5be3 100644
  
      public mouseEvent(event: RoomSpriteMouseEvent, geometry: IRoomGeometry): void
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
-index e12279a..e3cf274 100644
+index e12279a..8f01b0b 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
 @@ -1,11 +1,12 @@
@@ -122,7 +122,7 @@ index e12279a..e3cf274 100644
      protected setLayerCount(count: number): void
      {
          super.setLayerCount(count);
-@@ -592,6 +606,132 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+@@ -592,6 +606,133 @@ export class PetVisualization extends FurnitureAnimatedVisualization
          return GetAssetManager().getTexture(name);
      }
  
@@ -165,6 +165,7 @@ index e12279a..e3cf274 100644
 +            for(const spriteData of effectSprites)
 +            {
 +                if(spriteData.id === 'avatar') continue;
++                if(spriteData.ink !== 33) continue;
 +
 +                const slotIndex = baseIndex - PetVisualization.MAX_EFFECT_SPRITES + spriteIndex;
 +

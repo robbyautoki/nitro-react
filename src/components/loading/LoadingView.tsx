@@ -59,7 +59,8 @@ export const LoadingView: FC<LoadingViewProps> = props =>
             {
                 if(Array.isArray(data) && data.length > 0)
                 {
-                    setPhotoUrls(data.map(p => p.url));
+                    const shuffled = [ ...data.map(p => p.url) ].sort(() => Math.random() - 0.5);
+                    setPhotoUrls(shuffled);
                 }
             })
             .catch(() => {});

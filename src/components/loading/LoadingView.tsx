@@ -72,36 +72,43 @@ export const LoadingView: FC<LoadingViewProps> = props =>
         return () => clearInterval(interval);
     }, [ isError ]);
 
-    const cards = ensureMinCards(photoUrls, 16);
-    const col1 = cards.filter((_, i) => i % 4 === 0);
-    const col2 = cards.filter((_, i) => i % 4 === 1);
-    const col3 = cards.filter((_, i) => i % 4 === 2);
-    const col4 = cards.filter((_, i) => i % 4 === 3);
+    const cards = ensureMinCards(photoUrls, 24);
+    const col1 = cards.filter((_, i) => i % 6 === 0);
+    const col2 = cards.filter((_, i) => i % 6 === 1);
+    const col3 = cards.filter((_, i) => i % 6 === 2);
+    const col4 = cards.filter((_, i) => i % 6 === 3);
+    const col5 = cards.filter((_, i) => i % 6 === 4);
+    const col6 = cards.filter((_, i) => i % 6 === 5);
 
     return (
         <div className="nitro-loading">
             { /* 3D Gallery Background */ }
             { cards.length > 0 && (
-                <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
                     <div
-                        className="flex flex-row items-center gap-4 h-full justify-center"
+                        className="flex flex-row gap-4 h-full w-[200vw]"
                         style={ {
-                            transform: 'translateX(-60px) translateZ(-100px) rotateX(15deg) rotateY(-8deg) rotateZ(15deg)',
-                            perspective: '300px',
+                            transform: 'rotateX(15deg) rotateY(-8deg) rotateZ(15deg)',
                             opacity: 0.35,
                         } }
                     >
-                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:35s] h-full">
+                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:35s] h-full flex-1">
                             { col1.map((url, i) => <PhotoCard key={ `c1-${ i }` } url={ url } />) }
                         </Marquee>
-                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:40s] h-full">
+                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:40s] h-full flex-1">
                             { col2.map((url, i) => <PhotoCard key={ `c2-${ i }` } url={ url } />) }
                         </Marquee>
-                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:32s] h-full">
+                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:32s] h-full flex-1">
                             { col3.map((url, i) => <PhotoCard key={ `c3-${ i }` } url={ url } />) }
                         </Marquee>
-                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:45s] h-full">
+                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:45s] h-full flex-1">
                             { col4.map((url, i) => <PhotoCard key={ `c4-${ i }` } url={ url } />) }
+                        </Marquee>
+                        <Marquee vertical pauseOnHover={ false } repeat={ 3 } className="[--duration:37s] h-full flex-1">
+                            { col5.map((url, i) => <PhotoCard key={ `c5-${ i }` } url={ url } />) }
+                        </Marquee>
+                        <Marquee vertical pauseOnHover={ false } reverse repeat={ 3 } className="[--duration:42s] h-full flex-1">
+                            { col6.map((url, i) => <PhotoCard key={ `c6-${ i }` } url={ url } />) }
                         </Marquee>
                     </div>
                 </div>

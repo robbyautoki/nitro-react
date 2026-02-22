@@ -348,8 +348,8 @@ export const RelationshipView: FC<{}> = () =>
                                         <span className="text-[11px] text-white/20 w-4 text-center shrink-0">{ i + 1 }</span>
 
                                         {/* Avatar */}
-                                        <div className="w-10 h-12 rounded-lg bg-white/[0.05] border border-white/[0.06] shrink-0 overflow-hidden relative">
-                                            <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'scale(0.55)', transformOrigin: 'center top', marginTop: '2px' }}>
+                                        <div className="w-12 h-12 rounded-lg bg-white/[0.05] border border-white/[0.06] shrink-0 overflow-hidden relative">
+                                            <div className="absolute inset-0 flex items-center justify-center" style={{ transformOrigin: 'center center' }}>
                                                 <LayoutAvatarImageView figure={ rel.other_look } direction={ 2 } headOnly={ true } />
                                             </div>
                                         </div>

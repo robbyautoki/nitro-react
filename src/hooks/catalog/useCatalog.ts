@@ -931,6 +931,7 @@ const useCatalogState = () =>
             {
                 cancelObjectMover();
                 setMultiPlaceCount(0);
+                setIsVisible(true);
             }
         };
 
@@ -939,6 +940,7 @@ const useCatalogState = () =>
             e.preventDefault();
             cancelObjectMover();
             setMultiPlaceCount(0);
+            setIsVisible(true);
         };
 
         document.addEventListener('keydown', onKeyDown);

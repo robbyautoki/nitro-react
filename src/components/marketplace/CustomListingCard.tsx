@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { GetConfiguration } from '../../api';
+import { GetConfiguration, GetSessionDataManager } from '../../api';
 import { CustomListing } from './CustomMarketplaceTypes';
 import { ItemInfoTooltip } from './ItemInfoTooltip';
 import { Coins, Clock, MessageSquare, Package, User, Hash, Shield } from 'lucide-react';
@@ -63,10 +63,21 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
     const rarityColor = seal?.color ?? rarity?.color ?? null;
     const currColor = CURRENCY_COLORS[listing.currency] || 'text-white/60';
 
+    const displayName = (() =>
+    {
+        if(!mainItem) return 'Unknown';
+        const sessionData = GetSessionDataManager();
+        const baseName = mainItem.item_name?.split('*')[0];
+        if(!baseName) return mainItem.public_name;
+        const furniData = sessionData.getFloorItemDataByName(baseName) ?? sessionData.getWallItemDataByName(baseName);
+        if(furniData?.name && furniData.name !== baseName && !furniData.name.endsWith('_name')) return furniData.name;
+        return mainItem.public_name;
+    })();
+
     return (
         <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all group">
             {/* Item Image */}
-            <div className="relative w-11 h-11 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="relative w-11 h-11 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0">
                 { mainItem ? (
                     <img
                         src={ getFurniIcon(mainItem.item_name) }
@@ -97,7 +108,7 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
                 <div className="text-xs font-medium text-white/80 truncate">
                     { listing.is_bundle
                         ? `Bundle (${ listing.items.length } Items)`
-                        : mainItem?.public_name ?? 'Unknown'
+                        : displayName
                     }
                 </div>
                 <div className="flex items-center gap-3 mt-0.5 flex-wrap">

@@ -6,6 +6,7 @@ export class AvatarInfoName
         public readonly id: number,
         public readonly name: string,
         public readonly userType: number,
-        public readonly isFriend: boolean = false)
+        public readonly isFriend: boolean = false,
+        public readonly level: number = -1)
     {}
 }

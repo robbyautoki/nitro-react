@@ -39,6 +39,7 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
             <div className="text-shadow">
                 { prestige > 0 && <span className="mr-1">{ prestige > 2 ? `🌟×${ prestige }` : '🌟'.repeat(prestige) }</span> }
                 { nameInfo.name }
+                { nameInfo.level > 0 && <span className="ml-1 opacity-75">Lv. { nameInfo.level }</span> }
             </div>
         </ContextMenuView>
     );

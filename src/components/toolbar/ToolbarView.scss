@@ -14,6 +14,10 @@
             height: 0px;
         }
     }
+
+    #toolbar-room-tools-container:empty {
+        display: none;
+    }
 }
 
 .toolbar-icon-animation {

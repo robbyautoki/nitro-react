@@ -211,7 +211,7 @@ export const PurseView: FC<{}> = props =>
                         Settings
                     </TooltipContent>
                 </Tooltip>
-                <div id="toolbar-room-tools-container" className="flex items-center" />
+
             </div>
         </TooltipProvider>
     );

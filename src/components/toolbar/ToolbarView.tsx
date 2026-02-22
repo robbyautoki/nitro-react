@@ -204,8 +204,11 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                         </TooltipContent>
                     </Tooltip> }
             </div>
-            { /* Bottom center - Nur Chat Input */ }
-            <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto w-[520px]" id="toolbar-chat-input-container" />
+            { /* Bottom center - Chat Input + Room Tools */ }
+            <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto flex items-end gap-2 w-[620px]">
+                <div id="toolbar-chat-input-container" className="flex-1 min-w-0" />
+                <div id="toolbar-room-tools-container" className="flex items-center shrink-0" />
+            </div>
             { /* Hidden friend bar container so portal doesn't crash */ }
             <div id="toolbar-friend-bar-container" className="hidden" />
         </TooltipProvider>

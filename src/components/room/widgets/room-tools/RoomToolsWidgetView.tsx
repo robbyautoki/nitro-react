@@ -70,44 +70,43 @@ export const RoomToolsWidgetView: FC<{}> = props =>
 
     return createPortal(
         <TooltipProvider delayDuration={ 400 }>
-            <div className="flex items-center">
-                <div className="w-px h-6 bg-white/[0.06] mx-1" />
+            <div className="flex items-center gap-0.5 py-1.5 px-2 rounded-lg bg-[rgba(12,12,16,0.85)] border border-white/[0.08] backdrop-blur-[20px]">
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            className="p-1.5 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
                             onClick={ () => handleToolClick('settings') }
                         >
                             <i className="icon icon-cog" />
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm max-w-[200px]">
+                    <TooltipContent side="top" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm max-w-[200px]">
                         { settingsTooltip || LocalizeText('room.settings.button.text') }
                     </TooltipContent>
                 </Tooltip>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            className="p-1.5 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
                             onClick={ () => handleToolClick('zoom') }
                         >
                             <i className={ classNames('icon', (!isZoomedIn && 'icon-zoom-less'), (isZoomedIn && 'icon-zoom-more')) } />
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                    <TooltipContent side="top" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
                         { LocalizeText('room.zoom.button.text') }
                     </TooltipContent>
                 </Tooltip>
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                            className="p-1.5 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
                             onClick={ () => handleToolClick('chat_history') }
                         >
                             <i className="icon icon-chat-history" />
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                    <TooltipContent side="top" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
                         { LocalizeText('room.chathistory.button.text') }
                     </TooltipContent>
                 </Tooltip>
@@ -115,13 +114,13 @@ export const RoomToolsWidgetView: FC<{}> = props =>
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div
-                                className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                                className="p-1.5 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
                                 onClick={ () => handleToolClick('like_room') }
                             >
                                 <i className="icon icon-like-room" />
                             </div>
                         </TooltipTrigger>
-                        <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        <TooltipContent side="top" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
                             { LocalizeText('room.like.button.text') }
                         </TooltipContent>
                     </Tooltip> }

@@ -770,10 +770,9 @@ const useCatalogState = () =>
                 }
                 else
                 {
-                    // confirm
-
                     if(catalogPlaceMultipleObjects)
                     {
+                        SendMessageComposer(new PurchaseFromCatalogComposer(pageId, purchasableOffer.offerId, product.extraParam, 1));
                         setMultiPlaceCount(prev => prev + 1);
                         requestOfferToMover(purchasableOffer, true);
                     }

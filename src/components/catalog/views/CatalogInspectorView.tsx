@@ -244,7 +244,7 @@ export const CatalogInspectorView: FC<{}> = props =>
             </div>
 
             {/* Purchase Button */}
-            <div className="w-[160px] shrink-0 flex items-center justify-center px-3 border-l border-white/[0.06]">
+            <div className="w-[180px] shrink-0 flex items-center justify-center px-3 border-l border-white/[0.06]">
                 <CatalogPurchaseWidgetView />
             </div>
         </div>

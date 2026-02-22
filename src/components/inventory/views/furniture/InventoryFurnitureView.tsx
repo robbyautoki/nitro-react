@@ -1,7 +1,7 @@
 import { IRoomSession, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { attemptItemPlacement, CreateLinkEvent, DispatchUiEvent, FurniCategory, GetConfiguration, GetRoomEngine, GetSessionDataManager, GroupItem, LocalizeText, UnseenItemCategory } from '../../../../api';
-import { useCallback } from 'react';
 import { AutoGrid, Button, Column, LayoutRoomPreviewerView } from '../../../../common';
 import { CatalogPostMarketplaceOfferEvent } from '../../../../events';
 import { useInventoryFurni, useInventoryUnseenTracker } from '../../../../hooks';
@@ -45,6 +45,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
     const [ showDeleteDialog, setShowDeleteDialog ] = useState(false);
     const [ deleteTarget, setDeleteTarget ] = useState<{ groupItem: GroupItem; maxCount: number } | null>(null);
     const [ showCategoryDropdown, setShowCategoryDropdown ] = useState(false);
+    const [ showBatchDeleteDialog, setShowBatchDeleteDialog ] = useState(false);
 
     const categoryFilteredItems = filterByCategory(groupItems, activeCategory);
 
@@ -157,6 +158,11 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 
     const handleBatchDelete = useCallback(() =>
     {
+        setShowBatchDeleteDialog(true);
+    }, []);
+
+    const confirmBatchDelete = useCallback(() =>
+    {
         const allItemIds: number[] = [];
 
         for(const group of selectedGroups)
@@ -164,13 +170,13 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             allItemIds.push(...group.items.map(item => item.id));
         }
 
-        if(!allItemIds.length) return;
+        if(allItemIds.length) handleDeleteItems(allItemIds);
 
-        if(!confirm(`${ allItemIds.length } Möbelstück(e) unwiderruflich löschen?`)) return;
-
-        handleDeleteItems(allItemIds);
         clearMultiSelect();
+        setShowBatchDeleteDialog(false);
     }, [ selectedGroups, handleDeleteItems, clearMultiSelect ]);
+
+    const batchDeleteItemCount = Array.from(selectedGroups).reduce((sum, g) => sum + g.items.length, 0);
 
     useEffect(() =>
     {

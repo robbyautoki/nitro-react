@@ -301,7 +301,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                             if(newVal && selectedOffers?.length === 1) requestOfferToMover(selectedOffers[0]);
                         } }
                     >
-                        { catalogPlaceMultipleObjects ? '✓ ' : '📦 ' }Mehrfach platzieren
+                        { catalogPlaceMultipleObjects ? '✓ ' : '' }Platzieren
                     </Button>
                 </div>
             </div>
@@ -316,11 +316,11 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="flex-1 text-[10px] text-white/40 hover:text-white/70 px-1"
+                        className="shrink-0 text-[10px] text-white/40 hover:text-white/70 px-2"
                         disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
                         onClick={ () => purchase(true) }
                     >
-                        🎁 Geschenk
+                        🎁
                     </Button> }
                 <Button
                     variant="ghost"
@@ -332,7 +332,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                         if(newVal && currentOffer) requestOfferToMover(currentOffer);
                     } }
                 >
-                    { catalogPlaceMultipleObjects ? '✓ ' : '📦 ' }Mehrfach platzieren
+                    { catalogPlaceMultipleObjects ? '✓ ' : '' }Platzieren
                 </Button>
             </div>
         </div>

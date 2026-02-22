@@ -44,8 +44,7 @@ export const VoiceChannelView: FC<{}> = () =>
 
     const roomId = roomSession?.roomId;
 
-    // Load channels when room changes
-    useEffect(() =>
+    const refreshChannels = useCallback(() =>
     {
         if(!roomId || !cmsUrl) return;
 
@@ -54,6 +53,21 @@ export const VoiceChannelView: FC<{}> = () =>
             .then(data => setChannels(data.channels || []))
             .catch(() => setChannels([]));
     }, [ roomId, cmsUrl ]);
+
+    // Load channels when room changes
+    useEffect(() =>
+    {
+        refreshChannels();
+    }, [ refreshChannels ]);
+
+    // Poll for channels every 10s (fallback for other users in room)
+    useEffect(() =>
+    {
+        if(!roomId || !cmsUrl) return;
+
+        const interval = setInterval(refreshChannels, 10000);
+        return () => clearInterval(interval);
+    }, [ roomId, cmsUrl, refreshChannels ]);
 
     // Listen for [VOICE_CHANNELS] whisper from emulator
     useEffect(() =>

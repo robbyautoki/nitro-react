@@ -110,6 +110,13 @@ const useChatWidgetState = () =>
         let petType = -1;
         let text = event.message;
 
+        // Intercept [VOICE_CHANNELS] whispers — dispatch event, suppress bubble
+        if(text.startsWith('[VOICE_CHANNELS]'))
+        {
+            window.dispatchEvent(new CustomEvent('whisper_message', { detail: { message: text } }));
+            return;
+        }
+
         if(userData)
         {
             userType = userData.type;

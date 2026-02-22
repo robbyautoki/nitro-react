@@ -26,40 +26,38 @@ export const IPhoneFrame: FC = () =>
                     <stop offset="0%" stopColor="#1a1a1e" />
                     <stop offset="100%" stopColor="#0a0a0c" />
                 </linearGradient>
+                <mask id="iphone-screen-cutout">
+                    <rect width="250" height="504" fill="white" />
+                    <rect x="14" y="14" width="222" height="476" rx="20" ry="20" fill="black" />
+                </mask>
             </defs>
 
-            {/* Aeusserer Koerper */}
-            <rect x="4" y="0" width="242" height="504" rx="30" ry="30" fill="url(#iphone-metallic)" />
+            <g mask="url(#iphone-screen-cutout)">
+                {/* Aeusserer Koerper */}
+                <rect x="4" y="0" width="242" height="504" rx="30" ry="30" fill="url(#iphone-metallic)" />
 
-            {/* Kanten-Highlight (Lichtreflex) */}
-            <rect x="4" y="0" width="242" height="504" rx="30" ry="30" fill="none" stroke="url(#iphone-edge-highlight)" strokeWidth="1.5" />
+                {/* Kanten-Highlight (Lichtreflex) */}
+                <rect x="4" y="0" width="242" height="504" rx="30" ry="30" fill="none" stroke="url(#iphone-edge-highlight)" strokeWidth="1.5" />
 
-            {/* Innerer schwarzer Bezel */}
-            <rect x="8" y="4" width="234" height="496" rx="26" ry="26" fill="url(#iphone-screen-bezel)" />
+                {/* Innerer schwarzer Bezel */}
+                <rect x="8" y="4" width="234" height="496" rx="26" ry="26" fill="url(#iphone-screen-bezel)" />
 
-            {/* Screen-Bereich (transparent/cutout) */}
-            <rect x="14" y="14" width="222" height="476" rx="20" ry="20" fill="transparent" />
+                {/* Aeusserer Rahmen-Schatten */}
+                <rect x="4" y="0" width="242" height="504" rx="30" ry="30" fill="none" stroke="#888890" strokeWidth="0.5" />
+            </g>
 
-            {/* Dynamic Island */}
+            {/* Dynamic Island (ausserhalb der Maske, im Screen-Bereich sichtbar) */}
             <rect x="98" y="20" width="54" height="16" rx="8" ry="8" fill="#111113" />
-
-            {/* Kamera-Punkt in Dynamic Island */}
             <circle cx="138" cy="28" r="3.5" fill="#0d0d10" />
             <circle cx="138" cy="28" r="2" fill="#0a1628" opacity="0.8" />
 
             {/* Linke Seitenbuttons */}
-            {/* Stumm-Schalter */}
             <rect x="0" y="100" width="4" height="18" rx="2" ry="2" fill="#b0b0b8" />
-            {/* Lautstaerke hoch */}
             <rect x="0" y="140" width="4" height="32" rx="2" ry="2" fill="#b0b0b8" />
-            {/* Lautstaerke runter */}
             <rect x="0" y="182" width="4" height="32" rx="2" ry="2" fill="#b0b0b8" />
 
             {/* Rechter Seitenbutton (Power) */}
             <rect x="246" y="155" width="4" height="44" rx="2" ry="2" fill="#b0b0b8" />
-
-            {/* Aeusserer Rahmen-Schatten */}
-            <rect x="4" y="0" width="242" height="504" rx="30" ry="30" fill="none" stroke="#888890" strokeWidth="0.5" />
         </svg>
     );
 }

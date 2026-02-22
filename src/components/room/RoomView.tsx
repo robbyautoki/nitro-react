@@ -5,6 +5,7 @@ import { useRoom } from '../../hooks';
 import { RoomSpectatorView } from './spectator/RoomSpectatorView';
 import { RoomWidgetsView } from './widgets/RoomWidgetsView';
 import { FogOverlayView } from './FogOverlayView';
+import { VoiceChannelView } from './VoiceChannelView';
 
 export const RoomView: FC<{}> = props =>
 {
@@ -40,6 +41,7 @@ export const RoomView: FC<{}> = props =>
                 <>
                     <RoomWidgetsView />
                     <FogOverlayView />
+                    <VoiceChannelView />
                     { roomSession.isSpectator && <RoomSpectatorView /> }
                 </> }
         </Base>

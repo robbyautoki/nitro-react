@@ -690,7 +690,7 @@ const useCatalogState = () =>
         refreshBuilderStatus();
     });
 
-    useUiEvent<CatalogPurchasedEvent>(CatalogPurchasedEvent.PURCHASE_SUCCESS, event => PlaySound(SoundNames.CREDITS));
+    useUiEvent<CatalogPurchasedEvent>(CatalogPurchasedEvent.PURCHASE_SUCCESS, event => { console.log('[MULTI-PLACE] PURCHASE_SUCCESS'); PlaySound(SoundNames.CREDITS); });
 
     useRoomEngineEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectPlacedEvent.PLACED, event =>
     {
@@ -730,11 +730,14 @@ const useCatalogState = () =>
 
         if(!placed)
         {
+            console.log('[MULTI-PLACE] NOT PLACED - aborting');
             resetObjectMover();
             placedObjectPurchaseQueue.current = [];
 
             return;
         }
+
+        console.log('[MULTI-PLACE] PLACED', { x: event.x, y: event.y, offerId: purchasableOffer.offerId, pageId, skipConfirm: catalogSkipPurchaseConfirmationRef.current, multiPlace: catalogPlaceMultipleObjectsRef.current });
 
         const purchaseData = new PlacedObjectPurchaseData(event.roomId, event.objectId, event.category, event.wallLocation, event.x, event.y, event.direction, purchasableOffer);
         setPlacedObjectPurchaseData(purchaseData);

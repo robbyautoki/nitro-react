@@ -1,91 +1,132 @@
 .nitro-camera-capture {
     position: relative;
 
-    .header-close {
-        top: 8px;
-        right: 8px;
-        border-radius: $border-radius;
-        box-shadow: 0 0 0 1.5px $white;
-        border: 2px solid #921911;
-        background: repeating-linear-gradient(
-            rgba(245, 80, 65, 1),
-            rgba(245, 80, 65, 1) 50%,
-            rgba(194, 48, 39, 1) 50%,
-            rgba(194, 48, 39, 1) 100%
-        );
+    .iphone-camera {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 8px;
+    }
+
+    .iphone-close {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        z-index: 10;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
         cursor: pointer;
-        line-height: 1;
-        padding: 1px 3px;
+        font-size: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
 
         &:hover {
-            filter: brightness(1.2);
+            background: rgba(0, 0, 0, 0.8);
         }
 
         &:active {
-            filter: brightness(0.8);
+            background: rgba(0, 0, 0, 1);
         }
     }
 
-    .camera-area {
-        position: absolute;
-        top: 37px;
-        left: 10px;
-        width: 320px;
-        height: 320px;
-    }
-
-    .camera-canvas {
+    .iphone-frame-container {
         position: relative;
-        width: 340px;
-        height: 462px;
-        background-image: url('@/assets/images/room-widgets/camera-widget/camera-spritesheet.png');
-        background-position: -1px -1px;
-        z-index: 2;
+        width: 250px;
+        height: 504px;
+    }
 
-        .camera-button {
-            width: 94px;
-            height: 94px;
-            cursor: pointer;
-            margin-top: 362px;
+    .iphone-frame-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 3;
+        pointer-events: none;
+    }
 
-            background-image: url('@/assets/images/room-widgets/camera-widget/camera-spritesheet.png');
-            background-position: -343px -321px;
+    .iphone-screen-content {
+        position: absolute;
+        top: 28px;
+        left: 14px;
+        width: 222px;
+        height: 463px;
+        border-radius: 20px;
+        z-index: 1;
+        object-fit: cover;
+        image-rendering: auto;
+    }
 
-            &:hover {
-                background-position: -535px -321px;
-            }
+    .iphone-viewfinder {
+        background: transparent;
+    }
 
-            &:active {
-                background-position: -439px -321px;
-            }
+    .iphone-frame-actions {
+        z-index: 4;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 8px;
+        padding-bottom: 12px;
+        background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.6) 100%);
+    }
+
+    .iphone-shutter-area {
+        display: flex;
+        justify-content: center;
+        padding: 12px 0 4px 0;
+    }
+
+    .iphone-shutter-button {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 4px solid white;
+        background: rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        transition: transform 0.1s ease, background 0.1s ease;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
         }
 
-        .camera-view-finder {
-            background-image: url('@/assets/images/room-widgets/camera-widget/camera-spritesheet.png');
-            background-position: -343px -1px;
-        }
-
-        .camera-frame {
-            .camera-frame-preview-actions {
-                background: rgba(0, 0, 0, 0.5);
-            }
+        &:active {
+            background: rgba(255, 255, 255, 0.6);
+            transform: scale(0.92);
         }
     }
 
-    .camera-roll {
-        width: 330px;
-        background: #bab8b4;
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
-        border: 1px solid black;
-        box-shadow: inset 1px 0px white, inset -1px -1px white;
+    .iphone-camera-roll {
+        width: 250px;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 0 0 12px 12px;
+        padding: 8px;
+        backdrop-filter: blur(8px);
 
         img {
-            width: 56px;
-            height: 56px;
-            border: 1px solid black;
-            object-fit: contain;
-            image-rendering: initial;
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            object-fit: cover;
+            image-rendering: auto;
+            cursor: pointer;
+            transition: border-color 0.15s ease;
+
+            &:hover {
+                border-color: rgba(255, 255, 255, 0.6);
+            }
+
+            &.selected {
+                border-color: white;
+            }
         }
     }
 }

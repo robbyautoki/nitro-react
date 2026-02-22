@@ -108,7 +108,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                                 pauseOnHover={ false }
                                 reverse={ ci % 2 === 1 }
                                 repeat={ 3 }
-                                className={ `h-full flex-1 [--duration:${ 32 + ci * 3 }s]` }
+                                className={ `h-full flex-1 ${ [ '[--duration:32s]', '[--duration:40s]', '[--duration:35s]', '[--duration:45s]', '[--duration:37s]', '[--duration:42s]' ][ci] }` }
                             >
                                 { col.map((url, i) => <PhotoCard key={ `c${ ci }-${ i }` } url={ url } />) }
                             </Marquee>

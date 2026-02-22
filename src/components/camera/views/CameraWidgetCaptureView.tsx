@@ -4,7 +4,7 @@ import { FaTimes } from 'react-icons/fa';
 import { CameraPicture, GetRoomEngine, GetRoomSession, LocalizeText, PlaySound, SoundNames } from '../../../api';
 import { Column, DraggableWindow, Flex } from '../../../common';
 import { useCamera, useNotification } from '../../../hooks';
-import iphoneFrameImg from '@/assets/images/room-widgets/camera-widget/iphone-frame.png';
+import { IPhoneFrame } from './IPhoneFrame';
 
 export interface CameraWidgetCaptureViewProps
 {
@@ -65,12 +65,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = props =
                         <FaTimes className="fa-icon" />
                     </div>
                     <div className="iphone-frame-container">
-                        <img
-                            alt=""
-                            className="iphone-frame-image"
-                            src={ iphoneFrameImg }
-                            draggable={ false }
-                        />
+                        <IPhoneFrame />
                         { selectedPicture
                             ? <img alt="" className="iphone-screen-content" src={ selectedPicture.imageUrl } />
                             : <div ref={ elementRef } className="iphone-screen-content iphone-viewfinder" />

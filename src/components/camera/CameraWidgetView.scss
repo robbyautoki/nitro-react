@@ -39,13 +39,9 @@
         position: relative;
         width: 250px;
         height: 504px;
-        background: #000;
-        border-radius: 28px;
-        overflow: hidden;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     }
 
-    .iphone-frame-image {
+    .iphone-frame-svg {
         position: absolute;
         top: 0;
         left: 0;
@@ -57,10 +53,10 @@
 
     .iphone-screen-content {
         position: absolute;
-        top: 28px;
+        top: 14px;
         left: 14px;
         width: 222px;
-        height: 463px;
+        height: 476px;
         border-radius: 20px;
         z-index: 1;
         object-fit: cover;

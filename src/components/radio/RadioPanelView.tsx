@@ -502,7 +502,7 @@ export const RadioPanelView: FC<{}> = () =>
             />
 
             {/* ── Compact Float Bar ── */}
-            <div className="fixed top-3 left-4 z-[65] pointer-events-auto flex items-center gap-1 h-[42px] px-3 texture-panel backdrop-blur-2xl rounded-2xl select-none">
+            <div className="fixed top-3 left-4 z-[65] pointer-events-auto flex items-center gap-1 py-1.5 px-3 texture-panel backdrop-blur-2xl rounded-2xl select-none">
                 {/* CMS Switcher — nur wenn im iframe */}
                 { isInIframe && (
                     <>
@@ -522,28 +522,32 @@ export const RadioPanelView: FC<{}> = () =>
                     </>
                 ) }
                 {/* Logo */}
-                <TextGif
-                    gifUrl="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmx6a3BzZ3pwajN0bnphZGlpcHI2ajA1cWpzaHBkbHJ0anVjeGcyeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wQHDnQmXZlpVuuPqey/giphy.gif"
-                    text="bahhos"
-                    size="sm"
-                    weight="bold"
-                />
+                <div className="py-1 px-1">
+                    <TextGif
+                        gifUrl="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmx6a3BzZ3pwajN0bnphZGlpcHI2ajA1cWpzaHBkbHJ0anVjeGcyeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wQHDnQmXZlpVuuPqey/giphy.gif"
+                        text="bahhos"
+                        size="sm"
+                        weight="bold"
+                    />
+                </div>
                 <div className="w-px h-6 bg-white/[0.06]" />
 
                 {/* Track Info */}
-                { !radioEnabled ? (
-                    <span className="text-xs text-red-400/60 italic">Aus</span>
-                ) : currentTrack ? (
-                    <span className="text-xs text-white/80 truncate max-w-[160px]">
-                        { currentTrack.title } – { currentTrack.artist }
-                    </span>
-                ) : (
-                    <span className="text-xs text-white/40 italic">Radio</span>
-                ) }
+                <div className="py-1">
+                    { !radioEnabled ? (
+                        <span className="text-xs text-red-400/60 italic">Aus</span>
+                    ) : currentTrack ? (
+                        <span className="text-xs text-white/80 truncate max-w-[160px]">
+                            { currentTrack.title } – { currentTrack.artist }
+                        </span>
+                    ) : (
+                        <span className="text-xs text-white/40 italic">Radio</span>
+                    ) }
+                </div>
 
                 { needsInteraction && (
                     <button
-                        className="text-[10px] text-amber-300 hover:text-amber-200 font-bold"
+                        className="text-[10px] text-amber-300 hover:text-amber-200 font-bold py-1"
                         onClick={ handleUnlock }
                     >
                         ▶
@@ -553,7 +557,7 @@ export const RadioPanelView: FC<{}> = () =>
                 {/* Play/Pause */}
                 { radioEnabled && currentTrack && (
                     <button
-                        className="text-xs text-white/60 hover:text-white/90 transition-colors"
+                        className="text-xs text-white/60 hover:text-white/90 transition-colors py-1"
                         onClick={ () => sendCommand(paused ? ':radio play' : ':radio pause') }
                     >
                         { paused ? '▶' : '⏸' }
@@ -561,7 +565,7 @@ export const RadioPanelView: FC<{}> = () =>
                 ) }
 
                 {/* Volume */}
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 py-1">
                     <button
                         className="text-[10px] text-white/40 hover:text-white/70 transition-colors"
                         onClick={ () => setMuted(!muted) }

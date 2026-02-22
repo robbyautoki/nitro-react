@@ -1,5 +1,6 @@
 {
     "anonymous.room.id": 245,
+    "voice.livekit.url": "wss://voice.bahhos.de",
     "image.library.notifications.url": "${image.library.url}notifications/%image%.png",
     "achievements.images.url": "${image.library.url}Quests/%image%.png",
     "camera.url": "https://fedpajjcwqaqtifd.public.blob.vercel-storage.com/camera",

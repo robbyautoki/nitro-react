@@ -46,6 +46,8 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':companion activate', description: 'Pet als Begleiter aktivieren [Name]', minRank: 0, category: 'Allgemein' },
     { command: ':companion deactivate', description: 'Begleiter-Pet deaktivieren', minRank: 0, category: 'Allgemein' },
     { command: ':companion', description: 'Begleiter-Pet Status anzeigen', minRank: 0, category: 'Allgemein' },
+    { command: ':companion room off', description: 'Begleiter-Pets im Raum deaktivieren (Raumbesitzer)', minRank: 0, category: 'Allgemein' },
+    { command: ':companion room on', description: 'Begleiter-Pets im Raum erlauben (Raumbesitzer)', minRank: 0, category: 'Allgemein' },
     { command: ':send', description: 'Währung senden [name] [taler/pixel/punkte] [anzahl]', minRank: 0, category: 'Allgemein' },
     { command: '@', description: 'Person markieren [name] / Nachricht senden [name] [text]', minRank: 0, category: 'Allgemein' },
     { command: ':win', description: 'Event-Win vergeben [name]', minRank: 7, category: 'GameX' },

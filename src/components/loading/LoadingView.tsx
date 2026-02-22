@@ -88,7 +88,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                     <div
                         className="flex flex-row gap-5 h-full w-[250vw]"
                         style={ {
-                            transform: 'rotateX(15deg) rotateY(-8deg) rotateZ(15deg)',
+                            transform: 'scale(1.5) rotateX(15deg) rotateY(-8deg) rotateZ(15deg)',
                             opacity: 0.35,
                         } }
                     >

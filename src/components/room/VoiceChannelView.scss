@@ -220,6 +220,20 @@ $dc-brand: #5865f2;
     font-weight: 700;
     color: $dc-text-primary;
     line-height: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 50%;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        image-rendering: pixelated;
+    }
 }
 
 .dc-voice-participant-name {

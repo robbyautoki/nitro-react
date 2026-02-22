@@ -1,5 +1,6 @@
+import { RoomObjectCategory } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { GetConfiguration, GetSessionDataManager } from '../../api';
+import { GetConfiguration, GetRoomEngine, GetRoomSession, GetSessionDataManager } from '../../api';
 import { getAuthHeaders } from '../../api/utils/SessionTokenManager';
 import { useRoom } from '../../hooks';
 import { LiveKitRoom, useParticipants, useLocalParticipant, useTracks, RoomAudioRenderer } from '@livekit/components-react';
@@ -137,6 +138,23 @@ const VoiceParticipantsList: FC = () =>
     const participants = useParticipants();
     const tracks = useTracks([ Track.Source.Microphone ]);
 
+    const getFigureForUser = useCallback((username: string): string =>
+    {
+        try
+        {
+            const session = GetRoomSession();
+            if(!session) return '';
+            const roomObjects = GetRoomEngine().getRoomObjects(session.roomId, RoomObjectCategory.UNIT);
+            for(const obj of roomObjects)
+            {
+                const ud = session.userDataManager.getUserDataByIndex(obj.id);
+                if(ud?.name === username) return ud.figure;
+            }
+        }
+        catch(_) {}
+        return '';
+    }, []);
+
     return (
         <div className="dc-voice-participants">
             { participants.map(p =>
@@ -144,12 +162,16 @@ const VoiceParticipantsList: FC = () =>
                 const audioTrack = tracks.find(t => t.participant.identity === p.identity);
                 const isSpeaking = p.isSpeaking;
                 const isMuted = !p.isMicrophoneEnabled;
+                const figure = getFigureForUser(p.identity);
 
                 return (
                     <div key={ p.identity } className={ `dc-voice-participant ${ isSpeaking ? 'dc-voice-participant--speaking' : '' }` }>
                         <div className={ `dc-voice-participant-avatar ${ isSpeaking ? 'dc-voice-participant-avatar--speaking' : '' }` }>
                             <div className="dc-voice-participant-avatar-inner">
-                                { p.identity.charAt(0).toUpperCase() }
+                                { figure
+                                    ? <img src={ `https://www.habbo.de/habbo-imaging/avatarimage?figure=${ figure }&direction=2&head_direction=2&headonly=1&size=s` } alt={ p.identity } />
+                                    : p.identity.charAt(0).toUpperCase()
+                                }
                             </div>
                         </div>
                         <span className={ `dc-voice-participant-name ${ isMuted ? 'dc-voice-participant-name--muted' : '' }` }>

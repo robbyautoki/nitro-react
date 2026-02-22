@@ -2,6 +2,7 @@ import { FC, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FaTrash } from 'react-icons/fa';
 import { GroupItem } from '../../../../api';
+import { Slider } from '../../../ui/slider';
 
 interface InventoryDeleteDialogProps
 {
@@ -71,13 +72,12 @@ export const InventoryDeleteDialog: FC<InventoryDeleteDialogProps> = ({ groupIte
                                     Alle
                                 </button>
                             </div>
-                            <input
-                                type="range"
-                                className="inv-delete-slider"
+                            <Slider
                                 min={ 1 }
                                 max={ maxCount }
-                                value={ count }
-                                onChange={ e => setCount(parseInt(e.target.value)) }
+                                step={ 1 }
+                                value={ [ count ] }
+                                onValueChange={ (val) => setCount(val[0]) }
                             />
                             <div style={{ textAlign: 'center', fontSize: '11px', opacity: 0.5, marginTop: '2px' }}>
                                 { count } von { maxCount } löschen
@@ -93,7 +93,7 @@ export const InventoryDeleteDialog: FC<InventoryDeleteDialogProps> = ({ groupIte
                 <div className="inv-delete-footer">
                     <button className="inv-delete-cancel" onClick={ onClose }>Abbrechen</button>
                     <button className="inv-delete-confirm" onClick={ onSubmit }>
-                        { count > 1 ? `${ count } Stück löschen` : 'Löschen' }
+                        Löschen
                     </button>
                 </div>
             </div>

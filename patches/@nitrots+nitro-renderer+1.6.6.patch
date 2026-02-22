@@ -39,10 +39,10 @@ index 1dc732f..1dd5be3 100644
  
      public mouseEvent(event: RoomSpriteMouseEvent, geometry: IRoomGeometry): void
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
-index e12279a..8f01b0b 100644
+index e12279a..ddce28e 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/pet/PetVisualization.ts
-@@ -1,11 +1,12 @@
+@@ -1,18 +1,20 @@
 +import { BLEND_MODES } from '@pixi/constants';
  import { Resource, Texture } from '@pixi/core';
 -import { GetAssetManager, IGraphicAsset, IObjectVisualizationData, IRoomGeometry, RoomObjectVariable, RoomObjectVisualizationType } from '../../../../../api';
@@ -57,10 +57,11 @@ index e12279a..8f01b0b 100644
  {
      public static TYPE: string = RoomObjectVisualizationType.PET_ANIMATED;
  
-@@ -13,6 +14,7 @@ export class PetVisualization extends FurnitureAnimatedVisualization
+     private static HEAD: string = 'head';
      private static SADDLE: string = 'saddle';
      private static HAIR: string = 'hair';
-     private static ADDITIONAL_SPRITE_COUNT: number = 1;
+-    private static ADDITIONAL_SPRITE_COUNT: number = 1;
++    private static ADDITIONAL_SPRITE_COUNT: number = 11;
 +    private static MAX_EFFECT_SPRITES: number = 10;
      private static EXPERIENCE_BUBBLE_VISIBLE_IN_MS: number = 1000;
      private static PET_EXPERIENCE_BUBBLE: string = 'avatar_addition_pet_experience_bubble';
@@ -156,7 +157,7 @@ index e12279a..8f01b0b 100644
 +        this._effectAvatarImage.updateAnimationByFrames(1);
 +
 +        const effectSprites = this._effectAvatarImage.getSprites();
-+        const baseIndex = this.totalSprites - PetVisualization.ADDITIONAL_SPRITE_COUNT;
++        const effectStartIndex = this.totalSprites - PetVisualization.ADDITIONAL_SPRITE_COUNT;
 +        const direction = this._effectAvatarImage.getDirection();
 +        let spriteIndex = 0;
 +
@@ -167,7 +168,7 @@ index e12279a..8f01b0b 100644
 +                if(spriteData.id === 'avatar') continue;
 +                if(spriteData.ink !== 33) continue;
 +
-+                const slotIndex = baseIndex - PetVisualization.MAX_EFFECT_SPRITES + spriteIndex;
++                const slotIndex = effectStartIndex + spriteIndex;
 +
 +                if(slotIndex < 0 || slotIndex >= this.totalSprites) continue;
 +
@@ -230,7 +231,7 @@ index e12279a..8f01b0b 100644
 +
 +        for(let i = spriteIndex; i < PetVisualization.MAX_EFFECT_SPRITES; i++)
 +        {
-+            const slotIndex = baseIndex - PetVisualization.MAX_EFFECT_SPRITES + i;
++            const slotIndex = effectStartIndex + i;
 +            if(slotIndex < 0 || slotIndex >= this.totalSprites) continue;
 +
 +            const sprite = this.getSprite(slotIndex);
@@ -250,7 +251,7 @@ index e12279a..8f01b0b 100644
 +
 +    protected getAdditionalLayerCount(): number
 +    {
-+        return super.getAdditionalLayerCount() + PetVisualization.ADDITIONAL_SPRITE_COUNT + PetVisualization.MAX_EFFECT_SPRITES;
++        return super.getAdditionalLayerCount() + PetVisualization.ADDITIONAL_SPRITE_COUNT;
 +    }
 +
      protected get data(): PetVisualizationData

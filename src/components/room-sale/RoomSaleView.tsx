@@ -43,9 +43,7 @@ export const RoomSaleView: FC<{}> = () =>
 
         const userId = GetSessionDataManager().userId;
 
-        fetch(`${ cmsUrl }/api/room-sale?roomId=${ roomId }`, {
-            headers: { 'X-Habbo-User-Id': String(userId) },
-        })
+        fetch(`${ cmsUrl }/api/room-sale?roomId=${ roomId }`)
             .then(r => r.ok ? r.json() : null)
             .then(data =>
             {

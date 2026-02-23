@@ -21,6 +21,7 @@ export const GymProgressView: FC<{}> = () =>
         const parser = event.getParser();
 
         if (parser.type === 'gym.progress') {
+            console.log('[GymProgress] Received gym.progress event', Object.fromEntries(parser.parameters || []));
             const p = parser.parameters;
             const userId = parseInt(p?.get('user_id') || '0');
             const data: TrainerProgress = {
@@ -47,6 +48,7 @@ export const GymProgressView: FC<{}> = () =>
         }
     });
 
+    console.log('[GymProgress] Render, trainers:', trainers.size);
     if (trainers.size === 0) return null;
 
     return (

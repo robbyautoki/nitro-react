@@ -178,6 +178,15 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             Mod Tools
                         </TooltipContent>
                     </Tooltip> }
+                { isMod &&
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="navigation-item icon icon-catalog relative shrink-0 cursor-pointer opacity-70 hover:opacity-100" onClick={ event => CreateLinkEvent('catalog/staff-toggle') } />
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="bg-black/80 text-white text-xs shadow-sm backdrop-blur-sm">
+                            Staff Katalog
+                        </TooltipContent>
+                    </Tooltip> }
                 { /* Trenner */ }
                 <div className="w-6 h-px bg-white/20" />
                 { /* Social icons */ }

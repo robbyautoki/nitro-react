@@ -1,7 +1,7 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaTimes, FaList, FaInfoCircle } from 'react-icons/fa';
-import { AddEventLinkTracker, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
+import { AddEventLinkTracker, CatalogType, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
 import { CatalogPurchasedEvent } from '../../events';
 import { useCatalog, useUiEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
@@ -51,7 +51,7 @@ const SELF_CONTAINED_LAYOUTS = new Set([
 
 export const CatalogView: FC<{}> = props =>
 {
-    const { isVisible = false, setIsVisible = null, rootNode = null, currentPage = null, currentOffer = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById, catalogSize, setCatalogSize } = useCatalog();
+    const { isVisible = false, setIsVisible = null, rootNode = null, setRootNode = null, currentType, setCurrentType = null, currentPage = null, currentOffer = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById, catalogSize, setCatalogSize } = useCatalog();
 
     const [ navOverlay, setNavOverlay ] = useState(false);
     const [ inspectorOverlay, setInspectorOverlay ] = useState(false);
@@ -215,7 +215,17 @@ export const CatalogView: FC<{}> = props =>
                         setIsVisible(false);
                         return;
                     case 'toggle':
+                        if(currentType !== CatalogType.NORMAL)
+                        {
+                            setCurrentType(CatalogType.NORMAL);
+                            setRootNode(null);
+                        }
                         setIsVisible(prevValue => !prevValue);
+                        return;
+                    case 'staff-toggle':
+                        setCurrentType(CatalogType.BUILDER);
+                        setRootNode(null);
+                        setIsVisible(true);
                         return;
                     case 'open':
                         if(parts.length > 2)
@@ -248,7 +258,7 @@ export const CatalogView: FC<{}> = props =>
         AddEventLinkTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [ setIsVisible, openPageByOfferId, openPageByName ]);
+    }, [ setIsVisible, openPageByOfferId, openPageByName, setCurrentType, setRootNode, currentType ]);
 
     if(!isVisible) return (
         <>
@@ -268,7 +278,7 @@ export const CatalogView: FC<{}> = props =>
                     <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-11 cursor-move select-none">
                         <div className="flex items-center gap-1.5 shrink-0 min-w-0 overflow-hidden">
                             <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/25 shrink-0">
-                                { LocalizeText('catalog.title') }
+                                { currentType === CatalogType.BUILDER ? 'Staff Katalog' : LocalizeText('catalog.title') }
                             </span>
                             { breadcrumb.map((label, i) => (
                                 <Fragment key={ i }>

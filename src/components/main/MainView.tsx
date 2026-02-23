@@ -41,6 +41,7 @@ import { SetsView } from '../sets/SetsView';
 import { RoomSaleView } from '../room-sale/RoomSaleView';
 import { WinRewardView } from '../win/WinRewardView';
 import { WinNotification } from '../win/WinNotification';
+import { GymInfoView } from '../gym/GymInfoView';
 
 export const MainView: FC<{}> = props =>
 {
@@ -107,6 +108,7 @@ export const MainView: FC<{}> = props =>
             <LotteryView />
             <WinRewardView />
             <WinNotification />
+            <GymInfoView />
             <ModToolsView />
             <RoomView />
             <ChatHistoryView />

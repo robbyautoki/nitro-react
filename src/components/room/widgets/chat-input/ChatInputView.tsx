@@ -215,6 +215,7 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':update_petdata', description: 'Pet-Daten neu laden', minRank: 7, category: 'Root' },
     // ── Roleplay (nur in RP-Raum sichtbar) ─────────────────
     { command: ':gym', description: 'Fitness-Stats anzeigen', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':gym info', description: 'Gym-Anleitung öffnen', minRank: 0, category: 'Roleplay', roomId: 500 },
     { command: ':gym add strength', description: 'Punkt auf Stärke', minRank: 0, category: 'Roleplay', roomId: 500 },
     { command: ':gym add stamina', description: 'Punkt auf Ausdauer', minRank: 0, category: 'Roleplay', roomId: 500 },
     { command: ':gym add intellect', description: 'Punkt auf Intelligenz', minRank: 0, category: 'Roleplay', roomId: 500 },

@@ -45,23 +45,25 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
         return () => window.removeEventListener('catalog_virtual_clear', clear);
     }, []);
 
-    const { userNodes, staffNode } = useMemo(() =>
+    const STAFF_PAGES = useMemo(() => new Set(['Staff', 'Habbox Import', 'Multi Import', 'Creators']), []);
+
+    const { userNodes, staffNodes } = useMemo(() =>
     {
-        if(!rootNode?.children) return { userNodes: [], staffNode: null };
+        if(!rootNode?.children) return { userNodes: [], staffNodes: [] };
 
         const user = [];
-        let staff = null;
+        const staff = [];
 
         for(const child of rootNode.children)
         {
             if(!child.isVisible) continue;
 
-            if(stripPageId(child.localization) === 'Staff') staff = child;
+            if(STAFF_PAGES.has(stripPageId(child.localization))) staff.push(child);
             else user.push(child);
         }
 
-        return { userNodes: user, staffNode: staff };
-    }, [ rootNode ]);
+        return { userNodes: user, staffNodes: staff };
+    }, [ rootNode, STAFF_PAGES ]);
 
     const onVirtualClick = useCallback((type: string) =>
     {
@@ -158,8 +160,8 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                         </div> }
 
                     {/* ── Staff Catalog Section ── */}
-                    { staffView && staffNode &&
-                        <div className="mt-1">
+                    { staffView && staffNodes.length > 0 &&
+                        <div>
                             <div
                                 className="px-3 pt-2 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] cursor-pointer select-none flex items-center justify-between text-white/30 hover:text-white/50 transition-colors"
                                 onClick={ () => setStaffOpen(v => !v) }
@@ -171,11 +173,7 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                             </div>
                             { staffOpen &&
                                 <div className="px-1 pb-1">
-                                    { staffNode.children.map((child, index) =>
-                                    {
-                                        if(!child.isVisible) return null;
-                                        return <CatalogNavigationItemView key={ index } node={ child } />;
-                                    }) }
+                                    { staffNodes.map((topNode, index) => renderCategory(topNode, index)) }
                                 </div> }
                         </div> }
                 </> }

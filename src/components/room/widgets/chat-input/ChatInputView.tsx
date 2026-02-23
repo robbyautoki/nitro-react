@@ -219,6 +219,10 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':gym add strength', description: 'Punkt auf Stärke', minRank: 0, category: 'Roleplay', roomId: 500 },
     { command: ':gym add stamina', description: 'Punkt auf Ausdauer', minRank: 0, category: 'Roleplay', roomId: 500 },
     { command: ':gym add intellect', description: 'Punkt auf Intelligenz', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':gym shop', description: 'Energie-Shop öffnen', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':gym buy water', description: 'Wasser kaufen (5 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':gym buy energy', description: 'Energy-Drink kaufen (15 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':gym buy protein', description: 'Protein-Shake kaufen (30 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
 ];
 
 export const ChatInputView: FC<{}> = props =>

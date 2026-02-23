@@ -1,7 +1,7 @@
 import { GetTicker, RoomObjectCategory } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
-import { GetRoomObjectBounds, GetRoomSession } from '../../api';
+import { GetRoomObjectBounds, GetRoomSession, GetSessionDataManager } from '../../api';
 import { useMessageEvent } from '../../hooks';
 
 interface TrainerProgress {
@@ -26,6 +26,7 @@ export const GymProgressView: FC<{}> = () =>
         if (parser.type === 'gym.progress') {
             const p = parser.parameters;
             const userId = parseInt(p?.get('user_id') || '0');
+            if (userId !== GetSessionDataManager().userId) return;
             setTrainers(prev => {
                 const next = new Map(prev);
                 next.set(userId, {

@@ -427,28 +427,40 @@ const useCatalogState = () =>
 
     useMessageEvent<CatalogPagesListEvent>(CatalogPagesListEvent, event =>
     {
-        const parser = event.getParser();
-        const offers: Map<number, ICatalogNode[]> = new Map();
-
-        const getCatalogNode = (node: NodeData, depth: number, parent: ICatalogNode) =>
+        try
         {
-            const catalogNode = (new CatalogNode(node, depth, parent) as ICatalogNode);
+            console.log('[CATALOG DEBUG] CatalogPagesListEvent received');
+            const parser = event.getParser();
+            console.log('[CATALOG DEBUG] parser.root:', parser.root, 'children:', parser.root?.children?.length, 'type:', parser.catalogType);
+            const offers: Map<number, ICatalogNode[]> = new Map();
 
-            for(const offerId of catalogNode.offerIds)
+            const getCatalogNode = (node: NodeData, depth: number, parent: ICatalogNode) =>
             {
-                if(offers.has(offerId)) offers.get(offerId).push(catalogNode);
-                else offers.set(offerId, [ catalogNode ]);
+                const catalogNode = (new CatalogNode(node, depth, parent) as ICatalogNode);
+
+                for(const offerId of catalogNode.offerIds)
+                {
+                    if(offers.has(offerId)) offers.get(offerId).push(catalogNode);
+                    else offers.set(offerId, [ catalogNode ]);
+                }
+
+                depth++;
+
+                for(const child of node.children) catalogNode.addChild(getCatalogNode(child, depth, catalogNode));
+
+                return catalogNode;
             }
 
-            depth++;
-
-            for(const child of node.children) catalogNode.addChild(getCatalogNode(child, depth, catalogNode));
-
-            return catalogNode;
+            const newRoot = getCatalogNode(parser.root, 0, null);
+            console.log('[CATALOG DEBUG] tree built OK, setting rootNode');
+            setRootNode(newRoot);
+            setOffersToNodes(offers);
+            console.log('[CATALOG DEBUG] rootNode set OK');
         }
-
-        setRootNode(getCatalogNode(parser.root, 0, null));
-        setOffersToNodes(offers);
+        catch(e)
+        {
+            console.error('[CATALOG DEBUG] ERROR in CatalogPagesListEvent handler:', e);
+        }
     });
 
     useMessageEvent<CatalogPageMessageEvent>(CatalogPageMessageEvent, event =>

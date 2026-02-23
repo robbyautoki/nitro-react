@@ -364,6 +364,9 @@ const useNotificationState = () =>
         // Gym events are handled by GymInfoView
         if(parser.type && parser.type.startsWith('gym.')) return;
 
+        // Combat events are handled by CombatShopView / CombatHudView
+        if(parser.type && parser.type.startsWith('combat.')) return;
+
         showNotification(parser.type, parser.parameters);
     });
 

@@ -224,6 +224,22 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':gym buy water', description: 'Wasser kaufen (5 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
     { command: ':gym buy energy', description: 'Energy-Drink kaufen (15 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
     { command: ':gym buy protein', description: 'Protein-Shake kaufen (30 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    // ── RP Combat (nur in RP-Raum sichtbar) ──────────────────
+    { command: ':combat', description: 'Kampf-Stats anzeigen', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat shop', description: 'Waffen-Shop öffnen', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat buy bat', description: 'Schläger kaufen (100 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat buy axe', description: 'Axt kaufen (300 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat buy sword', description: 'Schwert kaufen (500 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat buy lockpick', description: 'Lockpick kaufen (3 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat buy armour', description: 'Rüstung kaufen (150 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat equip bat', description: 'Schläger ausrüsten', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat equip axe', description: 'Axt ausrüsten', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat equip sword', description: 'Schwert ausrüsten', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat equip armour', description: 'Rüstung anlegen', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':combat unequip', description: 'Waffe & Rüstung ablegen', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':hit', description: ':hit [username] — Spieler angreifen', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':rob', description: ':rob [username] — Spieler ausrauben', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':heal', description: 'HP heilen (20 Credits)', minRank: 0, category: 'Roleplay', roomId: 500 },
 ];
 
 export const ChatInputView: FC<{}> = props =>

@@ -17,6 +17,7 @@ import { RoomToolsWidgetView } from './room-tools/RoomToolsWidgetView';
 import { WordQuizWidgetView } from './word-quiz/WordQuizWidgetView';
 import { MultiPlaceCounterView } from './furniture/MultiPlaceCounterView';
 import { GymProgressView } from '../../gym/GymProgressView';
+import { CombatHudView } from '../../combat/CombatHudView';
 
 export const RoomWidgetsView: FC<{}> = props =>
 {
@@ -171,6 +172,7 @@ export const RoomWidgetsView: FC<{}> = props =>
             <FriendRequestWidgetView />
             <MultiPlaceCounterView />
             <GymProgressView />
+            <CombatHudView />
         </>
     );
 }

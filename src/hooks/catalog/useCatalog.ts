@@ -427,40 +427,28 @@ const useCatalogState = () =>
 
     useMessageEvent<CatalogPagesListEvent>(CatalogPagesListEvent, event =>
     {
-        try
+        const parser = event.getParser();
+        const offers: Map<number, ICatalogNode[]> = new Map();
+
+        const getCatalogNode = (node: NodeData, depth: number, parent: ICatalogNode) =>
         {
-            console.log('[CATALOG DEBUG] CatalogPagesListEvent received');
-            const parser = event.getParser();
-            console.log('[CATALOG DEBUG] parser.root:', parser.root, 'children:', parser.root?.children?.length, 'type:', parser.catalogType);
-            const offers: Map<number, ICatalogNode[]> = new Map();
+            const catalogNode = (new CatalogNode(node, depth, parent) as ICatalogNode);
 
-            const getCatalogNode = (node: NodeData, depth: number, parent: ICatalogNode) =>
+            for(const offerId of catalogNode.offerIds)
             {
-                const catalogNode = (new CatalogNode(node, depth, parent) as ICatalogNode);
-
-                for(const offerId of catalogNode.offerIds)
-                {
-                    if(offers.has(offerId)) offers.get(offerId).push(catalogNode);
-                    else offers.set(offerId, [ catalogNode ]);
-                }
-
-                depth++;
-
-                for(const child of node.children) catalogNode.addChild(getCatalogNode(child, depth, catalogNode));
-
-                return catalogNode;
+                if(offers.has(offerId)) offers.get(offerId).push(catalogNode);
+                else offers.set(offerId, [ catalogNode ]);
             }
 
-            const newRoot = getCatalogNode(parser.root, 0, null);
-            console.log('[CATALOG DEBUG] tree built OK, setting rootNode');
-            setRootNode(newRoot);
-            setOffersToNodes(offers);
-            console.log('[CATALOG DEBUG] rootNode set OK');
+            depth++;
+
+            for(const child of node.children) catalogNode.addChild(getCatalogNode(child, depth, catalogNode));
+
+            return catalogNode;
         }
-        catch(e)
-        {
-            console.error('[CATALOG DEBUG] ERROR in CatalogPagesListEvent handler:', e);
-        }
+
+        setRootNode(getCatalogNode(parser.root, 0, null));
+        setOffersToNodes(offers);
     });
 
     useMessageEvent<CatalogPageMessageEvent>(CatalogPageMessageEvent, event =>
@@ -1035,17 +1023,8 @@ const useCatalogState = () =>
         setPurchaseOptions(prev => ({ quantity: 1, extraData: null, extraParamRequired: false, previewStuffData: null, multiSelectMode: prev.multiSelectMode }));
     }, [ currentOffer ]);
 
-    const previousTypeRef = useRef(currentType);
-
     useEffect(() =>
     {
-        if(previousTypeRef.current !== currentType)
-        {
-            previousTypeRef.current = currentType;
-            setRootNode(null);
-            return;
-        }
-
         if(!isVisible || rootNode) return;
 
         SendMessageComposer(new GetGiftWrappingConfigurationComposer());

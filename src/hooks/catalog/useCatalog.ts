@@ -718,7 +718,10 @@ const useCatalogState = () =>
     {
         if(!objectMoverRequested || (event.type !== RoomEngineObjectPlacedEvent.PLACED)) return;
 
-        resetPlacedOfferData(true);
+        if(!catalogPlaceMultipleObjectsRef.current)
+        {
+            resetPlacedOfferData(true);
+        }
 
         if(!purchasableOffer)
         {
@@ -856,6 +859,11 @@ const useCatalogState = () =>
         const data = placedObjectPurchaseQueue.current[idx];
         placedObjectPurchaseQueue.current.splice(idx, 1);
 
+        if(data.category === RoomObjectCategory.FLOOR)
+            GetRoomEngine().removeRoomObjectFloor(data.roomId, data.objectId);
+        else if(data.category === RoomObjectCategory.WALL)
+            GetRoomEngine().removeRoomObjectWall(data.roomId, data.objectId);
+
         switch(event.category)
         {
             case FurniCategory.FLOOR: {
@@ -907,6 +915,11 @@ const useCatalogState = () =>
             const data = placedObjectPurchaseQueue.current[idx];
             placedObjectPurchaseQueue.current.splice(idx, 1);
 
+            if(data.category === RoomObjectCategory.FLOOR)
+                GetRoomEngine().removeRoomObjectFloor(data.roomId, data.objectId);
+            else if(data.category === RoomObjectCategory.WALL)
+                GetRoomEngine().removeRoomObjectWall(data.roomId, data.objectId);
+
             console.log('[MULTI-PLACE] Placing item', { itemId: item.itemId, spriteId: item.spriteId, x: data.x, y: data.y });
 
             SendMessageComposer(new FurniturePlaceComposer(item.itemId, data.category, data.wallLocation, data.x, data.y, data.direction));
@@ -930,6 +943,11 @@ const useCatalogState = () =>
 
             const data = placedObjectPurchaseQueue.current.shift();
 
+            if(data.category === RoomObjectCategory.FLOOR)
+                GetRoomEngine().removeRoomObjectFloor(data.roomId, data.objectId);
+            else if(data.category === RoomObjectCategory.WALL)
+                GetRoomEngine().removeRoomObjectWall(data.roomId, data.objectId);
+
             console.log('[MULTI-PLACE] Placing via Unseen', { itemId, x: data.x, y: data.y });
 
             SendMessageComposer(new FurniturePlaceComposer(itemId, data.category, data.wallLocation, data.x, data.y, data.direction));
@@ -945,6 +963,14 @@ const useCatalogState = () =>
     {
         cancelObjectMover();
         setMultiPlaceCount(0);
+
+        for(const data of placedObjectPurchaseQueue.current)
+        {
+            if(data.category === RoomObjectCategory.FLOOR)
+                GetRoomEngine().removeRoomObjectFloor(data.roomId, data.objectId);
+            else if(data.category === RoomObjectCategory.WALL)
+                GetRoomEngine().removeRoomObjectWall(data.roomId, data.objectId);
+        }
         placedObjectPurchaseQueue.current = [];
     });
 
@@ -1027,13 +1053,25 @@ const useCatalogState = () =>
     {
         if(!objectMoverRequested || !catalogPlaceMultipleObjects) return;
 
+        const cleanupGhosts = () =>
+        {
+            for(const data of placedObjectPurchaseQueue.current)
+            {
+                if(data.category === RoomObjectCategory.FLOOR)
+                    GetRoomEngine().removeRoomObjectFloor(data.roomId, data.objectId);
+                else if(data.category === RoomObjectCategory.WALL)
+                    GetRoomEngine().removeRoomObjectWall(data.roomId, data.objectId);
+            }
+            placedObjectPurchaseQueue.current = [];
+        };
+
         const onKeyDown = (e: KeyboardEvent) =>
         {
             if(e.key === 'Escape')
             {
                 cancelObjectMover();
                 setMultiPlaceCount(0);
-                placedObjectPurchaseQueue.current = [];
+                cleanupGhosts();
                 setIsVisible(true);
             }
         };
@@ -1043,7 +1081,7 @@ const useCatalogState = () =>
             e.preventDefault();
             cancelObjectMover();
             setMultiPlaceCount(0);
-            placedObjectPurchaseQueue.current = [];
+            cleanupGhosts();
             setIsVisible(true);
         };
 

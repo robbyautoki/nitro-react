@@ -1,5 +1,5 @@
 import { FC, useEffect, useMemo, useState } from 'react';
-import { GetSessionDataManager, LocalizeText, RoomObjectItem } from '../../../../api';
+import { GetRoomEngine, GetSessionDataManager, LocalizeText, RoomObjectItem } from '../../../../api';
 import { classNames, Flex, InfiniteScroll, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
 
 interface ChooserWidgetViewProps
@@ -15,7 +15,7 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = props =>
     const { title = null, items = [], selectItem = null, onClose = null } = props;
     const [ selectedItem, setSelectedItem ] = useState<RoomObjectItem>(null);
     const [ searchValue, setSearchValue ] = useState('');
-    const canSeeId = GetSessionDataManager().isModerator;
+    const canSeeId = GetSessionDataManager().hasSecurity(5);
 
     const filteredItems = useMemo(() =>
     {
@@ -38,9 +38,16 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = props =>
                 <input type="text" className="form-control form-control-sm" placeholder={ LocalizeText('generic.search') } value={ searchValue } onChange={ event => setSearchValue(event.target.value) } />
                 <InfiniteScroll rows={ filteredItems } rowRender={ row =>
                 {
+                    const iconUrl = row.typeId > 0
+                        ? (row.isWallItem
+                            ? GetRoomEngine().getFurnitureWallIconUrl(row.typeId)
+                            : GetRoomEngine().getFurnitureFloorIconUrl(row.typeId))
+                        : null;
+
                     return (
                         <Flex alignItems="center" className={ classNames('rounded p-1', (selectedItem === row) && 'bg-muted') } pointer onClick={ event => setSelectedItem(row) }>
-                            <Text truncate>{ row.name } { canSeeId && (' - ' + row.id) }</Text>
+                            { iconUrl && <img src={ iconUrl } className="chooser-icon" alt="" /> }
+                            <Text truncate>{ row.name }{ canSeeId && ` [${row.id}]` }</Text>
                         </Flex>
                     );
                 } } />

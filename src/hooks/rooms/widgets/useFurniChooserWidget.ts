@@ -24,6 +24,7 @@ const useFurniChooserWidgetState = () =>
             if(roomObject.id < 0) return null;
 
             let name = roomObject.type;
+            const typeId = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID);
 
             if(name.startsWith('poster'))
             {
@@ -31,13 +32,12 @@ const useFurniChooserWidgetState = () =>
             }
             else
             {
-                const typeId = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID);
                 const furniData = sessionDataManager.getWallItemData(typeId);
 
                 if(furniData && furniData.name.length) name = furniData.name;
             }
 
-            return new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name);
+            return new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name, typeId, true);
         });
 
         const floorItems = floorObjects.map(roomObject =>
@@ -51,7 +51,7 @@ const useFurniChooserWidgetState = () =>
 
             if(furniData && furniData.name.length) name = furniData.name;
 
-            return new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name);
+            return new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name, typeId, false);
         });
 
         setItems([ ...wallItems, ...floorItems ].sort((a, b) => ((a.name < b.name) ? -1 : 1)));
@@ -71,6 +71,7 @@ const useFurniChooserWidgetState = () =>
         {
             case RoomObjectCategory.WALL: {
                 let name = roomObject.type;
+                const typeId = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID);
 
                 if(name.startsWith('poster'))
                 {
@@ -78,13 +79,12 @@ const useFurniChooserWidgetState = () =>
                 }
                 else
                 {
-                    const typeId = roomObject.model.getValue<number>(RoomObjectVariable.FURNITURE_TYPE_ID);
                     const furniData = GetSessionDataManager().getWallItemData(typeId);
 
                     if(furniData && furniData.name.length) name = furniData.name;
                 }
 
-                item = new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name);
+                item = new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name, typeId, true);
 
                 break;
             }
@@ -96,7 +96,7 @@ const useFurniChooserWidgetState = () =>
 
                 if(furniData && furniData.name.length) name = furniData.name;
 
-                item = new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name);
+                item = new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name, typeId, false);
             }
         }
 

@@ -1,4 +1,12 @@
 .nitro-chooser-widget {
     width: $nitro-chooser-width;
     height: $nitro-chooser-height;
+
+    .chooser-icon {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+        margin-right: 4px;
+        flex-shrink: 0;
+    }
 }

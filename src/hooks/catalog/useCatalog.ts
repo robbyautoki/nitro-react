@@ -1035,8 +1035,17 @@ const useCatalogState = () =>
         setPurchaseOptions(prev => ({ quantity: 1, extraData: null, extraParamRequired: false, previewStuffData: null, multiSelectMode: prev.multiSelectMode }));
     }, [ currentOffer ]);
 
+    const previousTypeRef = useRef(currentType);
+
     useEffect(() =>
     {
+        if(previousTypeRef.current !== currentType)
+        {
+            previousTypeRef.current = currentType;
+            setRootNode(null);
+            return;
+        }
+
         if(!isVisible || rootNode) return;
 
         SendMessageComposer(new GetGiftWrappingConfigurationComposer());

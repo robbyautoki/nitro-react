@@ -216,12 +216,10 @@ export const CatalogView: FC<{}> = props =>
                         return;
                     case 'toggle':
                         setCurrentType(CatalogType.NORMAL);
-                        setRootNode(null);
                         setIsVisible(prevValue => !prevValue);
                         return;
                     case 'staff-toggle':
                         setCurrentType(CatalogType.BUILDER);
-                        setRootNode(null);
                         setIsVisible(true);
                         return;
                     case 'open':

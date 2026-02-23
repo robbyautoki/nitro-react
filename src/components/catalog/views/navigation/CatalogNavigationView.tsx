@@ -1,6 +1,6 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaChevronDown, FaChevronRight, FaClock, FaFire } from 'react-icons/fa';
-import { CatalogType, LocalizeText } from '../../../../api';
+import { LocalizeText } from '../../../../api';
 import { useCatalog } from '../../../../hooks';
 import { ScrollArea } from '../../../ui/scroll-area';
 import { CatalogIconView } from '../catalog-icon/CatalogIconView';
@@ -10,9 +10,14 @@ import { loadTracked, TrackedPurchase } from '../../CatalogView';
 
 const stripPageId = (text: string) => text?.replace(/\s*\(\d+\)$/, '') ?? '';
 
-export const CatalogNavigationView: FC<{}> = props =>
+interface CatalogNavigationViewProps
 {
-    const { rootNode = null, currentType = null, searchResult = null, activateNode = null, setSearchResult = null, setNavigationHidden = null, openPageByOfferId = null } = useCatalog();
+    staffView?: boolean;
+}
+
+export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffView = false }) =>
+{
+    const { rootNode = null, searchResult = null, activateNode = null, setSearchResult = null, setNavigationHidden = null, openPageByOfferId = null } = useCatalog();
     const [ userOpen, setUserOpen ] = useState(true);
     const [ staffOpen, setStaffOpen ] = useState(true);
     const [ activeVirtual, setActiveVirtual ] = useState<string | null>(null);
@@ -134,8 +139,8 @@ export const CatalogNavigationView: FC<{}> = props =>
                     { (recentPurchases.length > 0 || frequentPurchases.length > 0) &&
                         <div className="mx-3 my-1 border-t border-white/[0.06]" /> }
 
-                    {/* ── User Catalog Section (only in NORMAL mode) ── */}
-                    { currentType !== CatalogType.BUILDER && userNodes.length > 0 &&
+                    {/* ── User Catalog Section ── */}
+                    { !staffView && userNodes.length > 0 &&
                         <div>
                             <div
                                 className="px-3 pt-2 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] cursor-pointer select-none flex items-center justify-between text-white/30 hover:text-white/50 transition-colors"
@@ -152,8 +157,8 @@ export const CatalogNavigationView: FC<{}> = props =>
                                 </div> }
                         </div> }
 
-                    {/* ── Staff Catalog Section (only in BUILDER mode) ── */}
-                    { currentType === CatalogType.BUILDER && staffNode &&
+                    {/* ── Staff Catalog Section ── */}
+                    { staffView && staffNode &&
                         <div className="mt-1">
                             <div
                                 className="px-3 pt-2 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] cursor-pointer select-none flex items-center justify-between text-white/30 hover:text-white/50 transition-colors"

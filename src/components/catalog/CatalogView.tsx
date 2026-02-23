@@ -1,7 +1,7 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaTimes, FaList, FaInfoCircle } from 'react-icons/fa';
-import { AddEventLinkTracker, CatalogType, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
+import { AddEventLinkTracker, CatalogType, GetSessionDataManager, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
 import { CatalogPurchasedEvent } from '../../events';
 import { useCatalog, useUiEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
@@ -56,6 +56,8 @@ export const CatalogView: FC<{}> = props =>
     const [ navOverlay, setNavOverlay ] = useState(false);
     const [ inspectorOverlay, setInspectorOverlay ] = useState(false);
     const [ virtualPage, setVirtualPage ] = useState<string | null>(null);
+    const [ staffView, setStaffView ] = useState(false);
+    const isMod = GetSessionDataManager().isModerator;
     const catalogContentRef = useRef<HTMLDivElement>(null);
 
     const resizingRef = useRef(false);
@@ -215,11 +217,11 @@ export const CatalogView: FC<{}> = props =>
                         setIsVisible(false);
                         return;
                     case 'toggle':
-                        setCurrentType(CatalogType.NORMAL);
+                        setStaffView(false);
                         setIsVisible(prevValue => !prevValue);
                         return;
                     case 'staff-toggle':
-                        setCurrentType(CatalogType.BUILDER);
+                        setStaffView(true);
                         setIsVisible(true);
                         return;
                     case 'open':
@@ -253,7 +255,7 @@ export const CatalogView: FC<{}> = props =>
         AddEventLinkTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [ setIsVisible, openPageByOfferId, openPageByName, setCurrentType, setRootNode ]);
+    }, [ setIsVisible, openPageByOfferId, openPageByName ]);
 
     if(!isVisible) return (
         <>
@@ -273,7 +275,7 @@ export const CatalogView: FC<{}> = props =>
                     <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-11 cursor-move select-none">
                         <div className="flex items-center gap-1.5 shrink-0 min-w-0 overflow-hidden">
                             <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/25 shrink-0">
-                                { currentType === CatalogType.BUILDER ? 'Staff Katalog' : LocalizeText('catalog.title') }
+                                { staffView ? 'Staff Katalog' : LocalizeText('catalog.title') }
                             </span>
                             { breadcrumb.map((label, i) => (
                                 <Fragment key={ i }>
@@ -288,6 +290,15 @@ export const CatalogView: FC<{}> = props =>
                         <div className="w-[220px] shrink-0" onMouseDown={ e => e.stopPropagation() }>
                             <CatalogSearchView />
                         </div>
+
+                        { isMod &&
+                            <button
+                                className={ `appearance-none border rounded-md px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider transition-colors shrink-0 ${ staffView ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-transparent border-white/10 text-white/30 hover:text-white/50 hover:border-white/20' }` }
+                                onMouseDown={ e => e.stopPropagation() }
+                                onClick={ () => setStaffView(v => !v) }
+                            >
+                                Staff
+                            </button> }
 
                         { !navigationHidden &&
                             <Button variant="ghost" size="icon-sm" className="xl:hidden shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setNavOverlay(v => !v) }>
@@ -308,7 +319,7 @@ export const CatalogView: FC<{}> = props =>
 
                         { !navigationHidden && (
                             <div className={ `w-[185px] min-w-[185px] flex-col min-h-0 border-r border-white/[0.06] hidden xl:flex ${ navOverlay ? '!flex absolute inset-y-0 left-0 z-20 bg-[rgba(10,10,14,0.98)] border-r border-white/[0.08]' : '' }` }>
-                                <CatalogNavigationView />
+                                <CatalogNavigationView staffView={ staffView } />
                             </div>
                         ) }
 

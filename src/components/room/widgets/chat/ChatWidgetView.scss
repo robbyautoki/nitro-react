@@ -25,6 +25,16 @@
     }
 }
 
+.name-glow {
+    text-shadow: 0 0 6px currentColor, 0 0 12px currentColor;
+    animation: name-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes name-glow-pulse {
+    0%, 100% { text-shadow: 0 0 4px currentColor, 0 0 8px currentColor; }
+    50% { text-shadow: 0 0 8px currentColor, 0 0 16px currentColor, 0 0 24px currentColor; }
+}
+
 .bubble-container {
     position: absolute;
     width: fit-content;

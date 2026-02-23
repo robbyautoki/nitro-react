@@ -86,8 +86,8 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = props =>
                         <div className="user-image" style={ { backgroundImage: `url(${ chat.imageUrl })` } } /> }
                 </div>
                 <div className="chat-content">
-                    <b className="username mr-1" style={ chat.nameColor ? { color: chat.nameColor } : undefined } dangerouslySetInnerHTML={ { __html: DOMPurify.sanitize(`${ chat.username }: `) } } />
-                    <span className="message" dangerouslySetInnerHTML={ { __html: DOMPurify.sanitize(`${ chat.formattedText }`, { ADD_TAGS: ['img', 'b'], ADD_ATTR: ['src', 'alt', 'class'] }) } } />
+                    <b className={ `username mr-1${ chat.nameGlow ? ' name-glow' : '' }` } style={ chat.nameColor ? { color: chat.nameColor } : undefined } dangerouslySetInnerHTML={ { __html: DOMPurify.sanitize(`${ chat.username }: `) } } />
+                    <span className="message" dangerouslySetInnerHTML={ { __html: DOMPurify.sanitize(`${ chat.formattedText }`, { ADD_TAGS: ['img', 'b', 'i', 'span'], ADD_ATTR: ['src', 'alt', 'class', 'style'] }) } } />
                 </div>
                 <div className="pointer" />
             </div>

@@ -199,11 +199,17 @@ const useChatWidgetState = () =>
         }
 
         let nameColor: string = null;
+        let nameGlow: boolean = false;
         const nameColorMatch = text.match(/^\[NAMECOLOR:(#[0-9a-fA-F]{6})\]/);
         if(nameColorMatch)
         {
             nameColor = nameColorMatch[1];
             text = text.replace(nameColorMatch[0], '');
+        }
+        if(text.startsWith('[NAMEGLOW]'))
+        {
+            nameGlow = true;
+            text = text.replace('[NAMEGLOW]', '');
         }
 
         const formattedText = RoomChatFormatter(text);
@@ -221,7 +227,8 @@ const useChatWidgetState = () =>
             styleId,
             imageUrl,
             color,
-            nameColor);
+            nameColor,
+            nameGlow);
 
         setChatMessages(prevValue => [ ...prevValue, chatMessage ]);
         addChatEntry({ id: -1, webId: userData.webID, entityId: userData.roomIndex, name: username, imageUrl, style: styleId, chatType: chatType, entityType: userData.type, message: formattedText, timestamp: ChatHistoryCurrentDate(), type: ChatEntryType.TYPE_CHAT, roomId: roomSession.roomId, color });

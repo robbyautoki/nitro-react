@@ -25,7 +25,8 @@ export class ChatBubbleMessage
         public styleId: number = 0,
         public imageUrl: string = null,
         public color: string = null,
-        public nameColor: string = null
+        public nameColor: string = null,
+        public nameGlow: boolean = false
     ) 
     {
         this.id = ++ChatBubbleMessage.BUBBLE_COUNTER;

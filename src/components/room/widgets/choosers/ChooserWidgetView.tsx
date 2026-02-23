@@ -15,7 +15,7 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = props =>
     const { title = null, items = [], selectItem = null, onClose = null } = props;
     const [ selectedItem, setSelectedItem ] = useState<RoomObjectItem>(null);
     const [ searchValue, setSearchValue ] = useState('');
-    const canSeeId = GetSessionDataManager().hasSecurity(5);
+    const canSeeId = GetSessionDataManager().hasSecurity(15);
 
     const filteredItems = useMemo(() =>
     {

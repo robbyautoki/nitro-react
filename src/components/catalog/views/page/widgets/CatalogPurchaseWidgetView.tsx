@@ -335,6 +335,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                     Platzieren
                 </Button>
             </div>
+            <p className="text-[10px] text-white/30 text-center mt-1">⌘/Strg + Klick = Mehrfachauswahl</p>
         </div>
     );
 }

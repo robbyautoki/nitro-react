@@ -361,6 +361,9 @@ const useNotificationState = () =>
         // Win events are handled by WinRewardView / WinNotification
         if(parser.type && parser.type.startsWith('win.')) return;
 
+        // Gym events are handled by GymInfoView
+        if(parser.type && parser.type.startsWith('gym.')) return;
+
         showNotification(parser.type, parser.parameters);
     });
 

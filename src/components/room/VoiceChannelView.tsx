@@ -139,11 +139,42 @@ const usePushToTalk = (
 const VoiceSettings: FC<{
     mode: VoiceMode;
     pttKey: string;
+    anchorRef: React.RefObject<HTMLButtonElement>;
     onChangeMode: (m: VoiceMode) => void;
     onChangePttKey: (k: string) => void;
-}> = ({ mode, pttKey, onChangeMode, onChangePttKey }) =>
+    onClose: () => void;
+}> = ({ mode, pttKey, anchorRef, onChangeMode, onChangePttKey, onClose }) =>
 {
     const [ listening, setListening ] = useState(false);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const [ pos, setPos ] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+
+    useEffect(() =>
+    {
+        const anchor = anchorRef.current;
+        if(!anchor) return;
+        const rect = anchor.getBoundingClientRect();
+        const panelW = 220;
+        const panelH = mode === 'ptt' ? 110 : 80;
+        let top = rect.top - panelH - 8;
+        let left = rect.right - panelW;
+        if(top < 8) top = rect.bottom + 8;
+        if(left < 8) left = 8;
+        setPos({ top, left });
+    }, [ anchorRef, mode ]);
+
+    // Close on outside click
+    useEffect(() =>
+    {
+        const handler = (e: MouseEvent) =>
+        {
+            if(panelRef.current?.contains(e.target as Node)) return;
+            if(anchorRef.current?.contains(e.target as Node)) return;
+            onClose();
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [ onClose, anchorRef ]);
 
     useEffect(() =>
     {
@@ -160,7 +191,7 @@ const VoiceSettings: FC<{
     }, [ listening, onChangePttKey ]);
 
     return (
-        <div className="dc-voice-settings">
+        <div className="dc-voice-settings" ref={ panelRef } style={{ top: pos.top, left: pos.left }}>
             <div className="dc-voice-settings-title">Sprach-Einstellungen</div>
             <div className="dc-voice-settings-row">
                 <span className="dc-voice-settings-label">Modus</span>
@@ -206,6 +237,7 @@ const VoiceControls: FC<{
     const [ isMuted, setIsMuted ] = useState(false);
     const [ isDeafened, setIsDeafened ] = useState(false);
     const [ showSettings, setShowSettings ] = useState(false);
+    const gearBtnRef = useRef<HTMLButtonElement>(null);
     const participants = useParticipants();
     const username = GetSessionDataManager().userName;
 
@@ -286,23 +318,24 @@ const VoiceControls: FC<{
                     >
                         { isDeafened ? <DeafenIcon size={ 20 } /> : <HeadphoneIcon size={ 20 } /> }
                     </button>
-                    <div className="dc-voice-settings-wrapper">
-                        <button
-                            className={ `dc-voice-btn ${ showSettings ? 'dc-voice-btn--active' : '' }` }
-                            onClick={ () => setShowSettings(!showSettings) }
-                            title="Einstellungen"
-                        >
-                            <GearIcon size={ 18 } />
-                        </button>
-                        { showSettings && (
-                            <VoiceSettings
-                                mode={ voiceMode }
-                                pttKey={ pttKey }
-                                onChangeMode={ onChangeMode }
-                                onChangePttKey={ onChangePttKey }
-                            />
-                        ) }
-                    </div>
+                    <button
+                        ref={ gearBtnRef }
+                        className={ `dc-voice-btn ${ showSettings ? 'dc-voice-btn--active' : '' }` }
+                        onClick={ () => setShowSettings(!showSettings) }
+                        title="Einstellungen"
+                    >
+                        <GearIcon size={ 18 } />
+                    </button>
+                    { showSettings && (
+                        <VoiceSettings
+                            mode={ voiceMode }
+                            pttKey={ pttKey }
+                            anchorRef={ gearBtnRef as React.RefObject<HTMLButtonElement> }
+                            onChangeMode={ onChangeMode }
+                            onChangePttKey={ onChangePttKey }
+                            onClose={ () => setShowSettings(false) }
+                        />
+                    ) }
                     <button
                         className="dc-voice-btn dc-voice-btn--disconnect"
                         onClick={ onDisconnect }

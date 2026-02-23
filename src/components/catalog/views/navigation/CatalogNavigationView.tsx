@@ -56,7 +56,7 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
         {
             if(!child.isVisible) continue;
 
-            if(child.localization === 'Staff') staff = child;
+            if(stripPageId(child.localization) === 'Staff') staff = child;
             else user.push(child);
         }
 

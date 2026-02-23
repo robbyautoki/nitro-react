@@ -215,11 +215,6 @@ export const CatalogView: FC<{}> = props =>
                         setIsVisible(false);
                         return;
                     case 'toggle':
-                        if(currentType !== CatalogType.NORMAL)
-                        {
-                            setCurrentType(CatalogType.NORMAL);
-                            setRootNode(null);
-                        }
                         setIsVisible(prevValue => !prevValue);
                         return;
                     case 'staff-toggle':
@@ -258,7 +253,7 @@ export const CatalogView: FC<{}> = props =>
         AddEventLinkTracker(linkTracker);
 
         return () => RemoveLinkEventTracker(linkTracker);
-    }, [ setIsVisible, openPageByOfferId, openPageByName, setCurrentType, setRootNode, currentType ]);
+    }, [ setIsVisible, openPageByOfferId, openPageByName, setCurrentType, setRootNode ]);
 
     if(!isVisible) return (
         <>

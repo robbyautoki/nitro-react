@@ -33,6 +33,13 @@ const fetchApi = (action: string, extra = '') =>
         headers: getAuthHeaders(),
     }).then(r => r.json());
 
+const postApi = (body: object) =>
+    fetch(`${ getCmsUrl() }/api/relationships`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    }).then(r => r.json());
+
 export const RelationshipView: FC<{}> = () =>
 {
     const [ isVisible, setIsVisible ] = useState(false);
@@ -41,6 +48,7 @@ export const RelationshipView: FC<{}> = () =>
     const [ loading, setLoading ] = useState(false);
     const [ showInfo, setShowInfo ] = useState(false);
     const [ pendingUsername, setPendingUsername ] = useState<string | null>(null);
+    const [ deleteTarget, setDeleteTarget ] = useState<RelData | null>(null);
 
     // Link event tracker
     useEffect(() =>
@@ -106,6 +114,19 @@ export const RelationshipView: FC<{}> = () =>
 
     const onClose = useCallback(() => setIsVisible(false), []);
 
+    const confirmDelete = useCallback(async () =>
+    {
+        if(!deleteTarget) return;
+        await postApi({ action: 'delete', targetId: deleteTarget.other_id });
+        setDeleteTarget(null);
+        setSelectedRel(null);
+        setLoading(true);
+        fetchApi('top')
+            .then(data => setRelationships(Array.isArray(data) ? data : []))
+            .catch(() => setRelationships([]))
+            .finally(() => setLoading(false));
+    }, [ deleteTarget ]);
+
     const selectDetail = (rel: RelData) =>
     {
         setSelectedRel(rel);
@@ -168,9 +189,13 @@ export const RelationshipView: FC<{}> = () =>
         <div className="flex flex-col gap-3">
             <div className="p-3 rounded-xl bg-pink-500/[0.05] border border-pink-500/10">
                 <p className="text-[11px] text-white/60 leading-relaxed">
-                    Das Beziehungssystem trackt automatisch deine Interaktionen mit anderen Usern.
+                    Das Beziehungssystem trackt automatisch deine Interaktionen mit Freunden.
                     Je mehr ihr miteinander chattet, handelt und interagiert, desto stärker wird eure Bindung.
                     Höhere Level schalten besondere Titel frei.
+                    {'\n\n'}
+                    <strong className="text-white/70">Wichtig:</strong> Beziehungspunkte können nur mit Freunden gesammelt werden.
+                    Beziehungen können über das ✕-Symbol entfernt werden — dies gilt für beide Seiten.
+                    Die Beziehung kann erst wieder aufgenommen werden, wenn ihr erneut befreundet seid.
                 </p>
             </div>
 
@@ -369,8 +394,44 @@ export const RelationshipView: FC<{}> = () =>
                                             <span className="text-xs font-semibold text-white/60">{ rel.points.toLocaleString() }</span>
                                             <div className="text-[9px] text-white/25">Punkte</div>
                                         </div>
+
+                                        {/* Delete */}
+                                        <div
+                                            className="p-1.5 rounded-lg text-white/20 hover:text-red-400/80 hover:bg-red-500/10 transition-all cursor-pointer shrink-0"
+                                            onClick={ (e) => { e.stopPropagation(); setDeleteTarget(rel); } }
+                                            title="Beziehung entfernen"
+                                        >
+                                            <FaTimes className="size-2.5" />
+                                        </div>
                                     </button>
                                 )) }
+                            </div>
+                        ) }
+
+                        {/* Delete Confirm Dialog */}
+                        { deleteTarget && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+                                <div className="w-[320px] rounded-2xl border border-white/[0.08] bg-[rgba(12,12,16,0.98)] p-5 shadow-2xl">
+                                    <p className="text-sm text-white/80 text-center mb-1">Beziehung entfernen?</p>
+                                    <p className="text-[11px] text-white/40 text-center mb-4">
+                                        Die Beziehung mit <span className="text-white/70 font-medium">{ deleteTarget.other_username }</span> wird für beide Seiten gelöscht.
+                                        Punkte sammeln ist nur als Freunde wieder möglich.
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <button
+                                            className="flex-1 px-3 py-2 rounded-xl bg-white/[0.06] text-xs text-white/60 hover:bg-white/[0.1] transition-all cursor-pointer"
+                                            onClick={ () => setDeleteTarget(null) }
+                                        >
+                                            Abbrechen
+                                        </button>
+                                        <button
+                                            className="flex-1 px-3 py-2 rounded-xl bg-red-500/20 text-xs text-red-400 hover:bg-red-500/30 transition-all cursor-pointer"
+                                            onClick={ confirmDelete }
+                                        >
+                                            Entfernen
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         ) }
                     </div>

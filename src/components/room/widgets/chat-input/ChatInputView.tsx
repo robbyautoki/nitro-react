@@ -7,7 +7,7 @@ import { ChatInputEmojiPickerView } from './ChatInputEmojiPickerView';
 import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
 import { HotbarView } from '../../../hotbar/HotbarView';
 
-const CHAT_COMMANDS: { command: string, description: string, minRank: number, category: string }[] = [
+const CHAT_COMMANDS: { command: string, description: string, minRank: number, category: string, roomId?: number }[] = [
     // ── Client ─────────────────────────────────────────────
     { command: ':shake', description: 'Raum schuetteln', minRank: 0, category: 'Client' },
     { command: ':rotate', description: 'Raum drehen', minRank: 0, category: 'Client' },
@@ -213,6 +213,11 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':update_permissions', description: 'Permissions neu laden', minRank: 7, category: 'Root' },
     { command: ':update_guildparts', description: 'Gruppen-Teile neu laden', minRank: 7, category: 'Root' },
     { command: ':update_petdata', description: 'Pet-Daten neu laden', minRank: 7, category: 'Root' },
+    // ── Roleplay (nur in RP-Raum sichtbar) ─────────────────
+    { command: ':gym', description: 'Fitness-Stats anzeigen', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':gym add strength', description: 'Punkt auf Stärke', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':gym add stamina', description: 'Punkt auf Ausdauer', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':gym add intellect', description: 'Punkt auf Intelligenz', minRank: 0, category: 'Roleplay', roomId: 500 },
 ];
 
 export const ChatInputView: FC<{}> = props =>
@@ -471,6 +476,7 @@ export const ChatInputView: FC<{}> = props =>
             <div className="relative w-full">
                 { showCommands && (() => {
                     const filtered = CHAT_COMMANDS
+                        .filter(cmd => !cmd.roomId || cmd.roomId === roomSession?.roomId)
                         .filter(cmd => cmd.minRank === 0 || GetSessionDataManager().hasSecurity(cmd.minRank))
                         .filter(cmd => cmd.command.toLowerCase().startsWith(commandFilter));
                     if(filtered.length === 0) return null;

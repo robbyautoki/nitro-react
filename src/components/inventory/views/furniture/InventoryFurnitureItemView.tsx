@@ -65,10 +65,14 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
         setContextMenu({ x: e.clientX, y: e.clientY });
     }, [ categories, groupItem, setSelectedItem ]);
 
+    const isLtd = groupItem.stuffData.uniqueNumber > 0;
+    const ltdItemId = isLtd ? (groupItem.getLastItem()?.id || 0) : 0;
+    const assignmentKey = isLtd && ltdItemId > 0 ? -ltdItemId : groupItem.type;
+
     const onToggleCategory = useCallback((categoryId: number) =>
     {
-        toggleAssignment(groupItem.type, categoryId);
-    }, [ groupItem, toggleAssignment ]);
+        toggleAssignment(assignmentKey, categoryId);
+    }, [ assignmentKey, toggleAssignment ]);
 
     useEffect(() =>
     {
@@ -88,7 +92,7 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
     }, [ contextMenu ]);
 
     const count = groupItem.getUnlockedCount();
-    const itemCategories = getItemCategories(groupItem.type);
+    const itemCategories = getItemCategories(assignmentKey);
 
     return (
         <>

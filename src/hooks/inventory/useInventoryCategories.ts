@@ -307,6 +307,29 @@ const useInventoryCategoriesState = () =>
         return data.assignments[itemType] || [];
     }, [ data ]);
 
+    const itemMatchesCategory = useCallback((item: GroupItem, categoryId: number): boolean =>
+    {
+        const cats = data.assignments[item.type];
+
+        if(cats && cats.includes(categoryId)) return true;
+
+        if(item.stuffData.uniqueNumber > 0)
+        {
+            for(const fi of item.items)
+            {
+                const ltdCats = data.assignments[-fi.id];
+
+                if(ltdCats && ltdCats.includes(categoryId)) return true;
+            }
+        }
+
+        const category = data.categories.find(c => c.id === categoryId);
+
+        if(category?.autoFilter) return matchesAutoFilter(item, category.autoFilter);
+
+        return false;
+    }, [ data ]);
+
     const filterByCategory = useCallback((groupItems: GroupItem[], categoryId: number | null): GroupItem[] =>
     {
         if(!categoryId) return groupItems;
@@ -315,17 +338,8 @@ const useInventoryCategoriesState = () =>
 
         if(!category) return groupItems;
 
-        return groupItems.filter(item =>
-        {
-            const cats = data.assignments[item.type];
-
-            if(cats && cats.includes(categoryId)) return true;
-
-            if(category.autoFilter) return matchesAutoFilter(item, category.autoFilter);
-
-            return false;
-        });
-    }, [ data ]);
+        return groupItems.filter(item => itemMatchesCategory(item, categoryId));
+    }, [ data, itemMatchesCategory ]);
 
     const getCategoryItemCount = useCallback((categoryId: number, groupItems: GroupItem[]): number =>
     {
@@ -333,17 +347,8 @@ const useInventoryCategoriesState = () =>
 
         if(!category) return 0;
 
-        return groupItems.filter(item =>
-        {
-            const cats = data.assignments[item.type];
-
-            if(cats && cats.includes(categoryId)) return true;
-
-            if(category.autoFilter) return matchesAutoFilter(item, category.autoFilter);
-
-            return false;
-        }).length;
-    }, [ data ]);
+        return groupItems.filter(item => itemMatchesCategory(item, categoryId)).length;
+    }, [ data, itemMatchesCategory ]);
 
     // Optimistic reorder
     const reorderCategories = useCallback((orderedIds: number[]) =>

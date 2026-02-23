@@ -145,6 +145,7 @@ const CHAT_COMMANDS: { command: string, description: string, minRank: number, ca
     { command: ':badge', description: 'Badge geben', minRank: 5, category: 'Admin' },
     { command: ':takebadge', description: 'Badge entfernen', minRank: 5, category: 'Admin' },
     { command: ':gift', description: 'Geschenk senden', minRank: 5, category: 'Admin' },
+    { command: ':givefurni', description: 'Möbel vergeben [name] [item_base_id] [anzahl] [ltd_nr:ltd_total]', minRank: 5, category: 'Admin' },
     { command: ':ha', description: 'Hotel-Alert senden', minRank: 5, category: 'Admin' },
     { command: ':hal', description: 'Hotel-Alert mit Link', minRank: 5, category: 'Admin' },
     { command: ':freeze', description: 'User einfrieren', minRank: 5, category: 'Admin' },

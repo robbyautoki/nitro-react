@@ -12,9 +12,9 @@ export const CatalogSearchView: FC<{}> = props =>
 
     useEffect(() =>
     {
-        let search = searchValue?.toLocaleLowerCase().replace(' ', '');
+        const trimmed = searchValue?.trim().toLowerCase();
 
-        if(!search || !search.length)
+        if(!trimmed || !trimmed.length)
         {
             setSearchResult(null);
 
@@ -23,6 +23,20 @@ export const CatalogSearchView: FC<{}> = props =>
 
         const timeout = setTimeout(() =>
         {
+            const searchWords = trimmed.split(/\s+/).filter(w => w.length > 0);
+            const searchCombined = searchWords.join('');
+
+            const matches = (haystack: string): boolean =>
+            {
+                const haystackCombined = haystack.replace(/ /gi, '').toLowerCase();
+
+                if(haystackCombined.indexOf(searchCombined) >= 0) return true;
+
+                const haystackLower = haystack.toLowerCase();
+
+                return searchWords.every(word => haystackLower.indexOf(word) >= 0);
+            };
+
             const furnitureDatas = GetSessionDataManager().getAllFurnitureData({
                 loadFurnitureData: null
             });
@@ -38,13 +52,13 @@ export const CatalogSearchView: FC<{}> = props =>
 
                 if((currentType === CatalogType.NORMAL) && furniture.excludeDynamic) continue;
 
-                const searchValues = [ furniture.className, furniture.name, furniture.description ].join(' ').replace(/ /gi, '').toLowerCase();
+                const haystack = [ furniture.className, furniture.name, furniture.description ].join(' ');
 
                 if((currentType === CatalogType.BUILDER) && (furniture.purchaseOfferId === -1) && (furniture.rentOfferId === -1))
                 {
                     if((furniture.furniLine !== '') && (foundFurniLines.indexOf(furniture.furniLine) < 0))
                     {
-                        if(searchValues.indexOf(search) >= 0) foundFurniLines.push(furniture.furniLine);
+                        if(matches(haystack)) foundFurniLines.push(furniture.furniLine);
                     }
                 }
                 else
@@ -56,9 +70,9 @@ export const CatalogSearchView: FC<{}> = props =>
 
                     if(foundNodes.length)
                     {
-                        if(searchValues.indexOf(search) >= 0) foundFurniture.push(furniture);
+                        if(matches(haystack)) foundFurniture.push(furniture);
 
-                        if(foundFurniture.length === 250) break;
+                        if(foundFurniture.length === 500) break;
                     }
                 }
             }
@@ -69,9 +83,9 @@ export const CatalogSearchView: FC<{}> = props =>
 
             let nodes: ICatalogNode[] = [];
 
-            FilterCatalogNode(search, foundFurniLines, rootNode, nodes);
+            FilterCatalogNode(searchCombined, foundFurniLines, rootNode, nodes);
 
-            setSearchResult(new SearchResult(search, offers, nodes.filter(node => (node.isVisible))));
+            setSearchResult(new SearchResult(searchCombined, offers, nodes.filter(node => (node.isVisible))));
             setCurrentPage((new CatalogPage(-1, 'default_3x3', new PageLocalization([], []), offers, false, 1) as ICatalogPage));
         }, 300);
 

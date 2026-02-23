@@ -129,6 +129,12 @@ export const InventoryCategoryBar: FC<InventoryCategoryBarProps> = ({ groupItems
                             <span className="color-dot" style={{ backgroundColor: cat.color }} />
                             <span className="chip-label">{ cat.name }</span>
                             { count > 0 && <span className="chip-count">{ count }</span> }
+                            <span
+                                className="chip-delete"
+                                onClick={ (e) => { e.stopPropagation(); deleteCategory(cat.id); } }
+                            >
+                                &times;
+                            </span>
                         </div>
                     );
                 }) }

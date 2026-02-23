@@ -240,6 +240,24 @@
             color: rgba(255, 255, 255, 0.90);
         }
 
+        .chip-delete {
+            display: none;
+            font-size: 12px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.3);
+            margin-left: 2px;
+            line-height: 1;
+            transition: color 0.1s ease;
+
+            &:hover {
+                color: #ef4444;
+            }
+        }
+
+        &:hover .chip-delete {
+            display: flex;
+        }
+
         &.skeleton {
             width: 60px;
             height: 22px;

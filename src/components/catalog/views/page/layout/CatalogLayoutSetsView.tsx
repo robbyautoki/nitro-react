@@ -1,6 +1,7 @@
 import { FC, useEffect, useMemo, useState } from 'react';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 import { GetConfiguration, GetRoomSession, GetSessionDataManager } from '../../../../../api';
+import { getAuthHeaders } from '../../../../../api/utils/SessionTokenManager';
 import { useInventoryFurni } from '../../../../../hooks';
 
 interface SetItem {
@@ -131,7 +132,7 @@ export const CatalogLayoutSetsStartView: FC<CatalogLayoutProps> = () =>
     useEffect(() =>
     {
         fetch(`${ getCmsUrl() }/api/sets?action=catalog-public`, {
-            headers: { 'X-Habbo-User-Id': getUserId() },
+            headers: getAuthHeaders(),
         })
             .then(res => res.json())
             .then((data: FurnitureSet[]) =>
@@ -224,7 +225,7 @@ export const CatalogLayoutSetsDetailView: FC<CatalogLayoutProps> = props =>
         if(!setId) { setLoading(false); return; }
 
         fetch(`${ getCmsUrl() }/api/sets?action=catalog-public`, {
-            headers: { 'X-Habbo-User-Id': getUserId() },
+            headers: getAuthHeaders(),
         })
             .then(res => res.json())
             .then((data: FurnitureSet[]) =>

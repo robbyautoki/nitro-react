@@ -2,6 +2,7 @@ import { IRoomSession, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitr
 import { FC, useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { attemptItemPlacement, CreateLinkEvent, FurniCategory, GetConfiguration, GetRoomEngine, GetSessionDataManager, GroupItem, LocalizeText, UnseenItemCategory } from '../../../../api';
+import { getAuthHeaders } from '../../../../api/utils/SessionTokenManager';
 import { AutoGrid, Button, Column, LayoutRoomPreviewerView } from '../../../../common';
 import { useInventoryFurni, useInventoryUnseenTracker } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
@@ -72,10 +73,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             const response = await fetch(`${ cmsUrl }/api/inventory/items`, {
                 method: 'DELETE',
                 credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Habbo-User-Id': String(GetSessionDataManager().userId),
-                },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ itemIds }),
             });
 

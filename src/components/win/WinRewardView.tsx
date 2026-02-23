@@ -2,6 +2,7 @@ import { FC, useCallback, useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { GetConfiguration, GetRoomSession, GetSessionDataManager } from '../../api';
+import { getAuthHeaders } from '../../api/utils/SessionTokenManager';
 import { useMessageEvent } from '../../hooks';
 
 interface WinItem {
@@ -55,7 +56,7 @@ export const WinRewardView: FC<{}> = () =>
     {
         if(itemsLoaded) return;
         fetch(`${ getCmsUrl() }/api/wins?action=config`, {
-            headers: { 'X-Habbo-User-Id': String(getUserId()) },
+            headers: getAuthHeaders(),
         })
             .then(r => r.json())
             .then(data => { if(data.items) setItems(data.items); setItemsLoaded(true); })
@@ -98,7 +99,7 @@ export const WinRewardView: FC<{}> = () =>
         if(!userId) return;
 
         fetch(`${ getCmsUrl() }/api/wins?action=pending`, {
-            headers: { 'X-Habbo-User-Id': String(userId) },
+            headers: getAuthHeaders(),
         })
             .then(r => r.json())
             .then(data =>

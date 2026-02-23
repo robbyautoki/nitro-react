@@ -3,6 +3,7 @@ import { FaTimes } from 'react-icons/fa';
 import { Trophy, Loader2 } from 'lucide-react';
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { AddEventLinkTracker, attemptItemPlacement, GetConfiguration, GetRoomSession, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
+import { getAuthHeaders } from '../../api/utils/SessionTokenManager';
 import { DraggableWindow, DraggableWindowPosition } from '../../common';
 import { InventoryFurniAddedEvent } from '../../events';
 import { useUiEvent } from '../../hooks/events';
@@ -151,7 +152,7 @@ export const SetsView: FC<{}> = () =>
         try
         {
             const res = await fetch(`${ getCmsUrl() }/api/sets?action=catalog-public`, {
-                headers: { 'X-Habbo-User-Id': getUserId() },
+                headers: getAuthHeaders(),
             });
             const data: FurnitureSet[] = await res.json();
             setSets(data);

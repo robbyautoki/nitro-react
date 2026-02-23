@@ -381,6 +381,182 @@ $dc-brand: #5865f2;
     }
 }
 
+// Toggle button (always visible)
+.dc-voice-toggle {
+    position: fixed;
+    left: 10px;
+    bottom: 38px;
+    z-index: 201;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: $dc-bg-secondary;
+    color: $dc-text-muted;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+        background: $dc-bg-hover;
+        color: $dc-text-primary;
+    }
+
+    &--connected {
+        color: $dc-green;
+        border-color: rgba($dc-green, 0.3);
+
+        &:hover {
+            color: $dc-green;
+            border-color: rgba($dc-green, 0.5);
+        }
+    }
+}
+
+// Error message
+.dc-voice-error {
+    padding: 6px 12px;
+    margin: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: $dc-red;
+    background: rgba($dc-red, 0.1);
+    border: 1px solid rgba($dc-red, 0.2);
+    text-align: center;
+}
+
+// PTT badge
+.dc-voice-ptt-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: $dc-brand;
+    background: rgba($dc-brand, 0.15);
+    vertical-align: middle;
+}
+
+// Settings wrapper (for popover positioning)
+.dc-voice-settings-wrapper {
+    position: relative;
+}
+
+// Settings popover
+.dc-voice-settings {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    width: 220px;
+    background: $dc-bg-primary;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    z-index: 210;
+}
+
+.dc-voice-settings-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: $dc-text-secondary;
+    margin-bottom: 8px;
+}
+
+.dc-voice-settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.dc-voice-settings-label {
+    font-size: 12px;
+    color: $dc-text-secondary;
+    font-weight: 500;
+}
+
+.dc-voice-settings-toggle {
+    display: flex;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dc-voice-settings-opt {
+    background: $dc-bg-tertiary;
+    border: none;
+    padding: 4px 8px;
+    font-size: 11px;
+    color: $dc-text-muted;
+    cursor: pointer;
+    transition: all 0.1s;
+    white-space: nowrap;
+
+    &:hover {
+        color: $dc-text-secondary;
+    }
+
+    &--active {
+        background: $dc-brand;
+        color: white;
+
+        &:hover {
+            color: white;
+        }
+    }
+}
+
+.dc-voice-settings-keybind {
+    background: $dc-bg-tertiary;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $dc-text-primary;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-width: 60px;
+    text-align: center;
+
+    &:hover {
+        border-color: $dc-brand;
+    }
+
+    &--listening {
+        border-color: $dc-brand;
+        color: $dc-brand;
+        animation: dcKeybindPulse 1s ease-in-out infinite;
+    }
+}
+
+// Disabled button style (for mic in PTT mode)
+.dc-voice-btn--active {
+    background: $dc-bg-active;
+    color: $dc-text-primary;
+}
+
+.dc-voice-btn--disabled {
+    opacity: 0.4;
+    cursor: default;
+
+    &:hover {
+        background: transparent;
+    }
+}
+
 // Hide LiveKit default UI (we use custom)
 .lk-audio-conference,
 .lk-control-bar {
@@ -390,4 +566,9 @@ $dc-brand: #5865f2;
 @keyframes dcSignalPulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
+}
+
+@keyframes dcKeybindPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
 }

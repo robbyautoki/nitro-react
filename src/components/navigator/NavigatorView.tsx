@@ -236,6 +236,7 @@ export const NavigatorView: FC<{}> = props =>
     }, [ dedupedRooms ]);
 
     const isMyRoomsTab = topLevelContext?.code === 'myworld_view';
+    const isRpTab = topLevelContext?.code === 'hotel_view' && searchResult?.data === 'tag:rp';
 
     return (
         <>
@@ -256,7 +257,7 @@ export const NavigatorView: FC<{}> = props =>
                         <button
                             className={ cn(
                                 'h-full px-4 text-[11px] font-semibold transition-colors border-b-2 -mb-px',
-                                !isMyRoomsTab
+                                !isMyRoomsTab && !isRpTab
                                     ? 'text-white/90 border-white/50'
                                     : 'text-white/35 border-transparent hover:text-white/60'
                             ) }
@@ -274,6 +275,17 @@ export const NavigatorView: FC<{}> = props =>
                             onClick={ () => sendSearch('', 'myworld_view') }
                         >
                             Meine Räume
+                        </button>
+                        <button
+                            className={ cn(
+                                'h-full px-4 text-[11px] font-semibold transition-colors border-b-2 -mb-px',
+                                isRpTab
+                                    ? 'text-white/90 border-white/50'
+                                    : 'text-white/35 border-transparent hover:text-white/60'
+                            ) }
+                            onClick={ () => sendSearch('tag:rp', 'hotel_view') }
+                        >
+                            RP
                         </button>
                         <div className="flex-1" />
                         <button

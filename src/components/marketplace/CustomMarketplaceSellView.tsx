@@ -1,7 +1,9 @@
+import { FurnitureListComposer } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { GetConfiguration } from '../../api';
+import { GetConfiguration, SendMessageComposer } from '../../api';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { InventoryGroup } from './CustomMarketplaceTypes';
+import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
 import { ShoppingBag, Search, X, Plus, Coins, Package, Check, AlertTriangle } from 'lucide-react';
 
 function getFurniIcon(itemName: string)
@@ -37,6 +39,7 @@ interface SelectedItem
 
 export const CustomMarketplaceSellView: FC<{}> = () =>
 {
+    const { preselectedItemBaseId, setPreselectedItemBaseId } = useMarketplace();
     const [ inventory, setInventory ] = useState<InventoryGroup[]>([]);
     const [ searchQuery, setSearchQuery ] = useState('');
     const [ loading, setLoading ] = useState(true);
@@ -64,6 +67,26 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
     }, []);
 
     useEffect(() => { loadInventory(); }, [ loadInventory ]);
+
+    // Auto-select preselected item from inventory button
+    useEffect(() =>
+    {
+        if(!preselectedItemBaseId || loading || inventory.length === 0) return;
+
+        const group = inventory.find(g => g.item_base_id === preselectedItemBaseId);
+        if(group)
+        {
+            setSelected([{
+                item_base_id: group.item_base_id,
+                public_name: group.public_name,
+                item_name: group.item_name,
+                instance_ids: group.instance_ids,
+                quantity: 1,
+                available: group.count,
+            }]);
+        }
+        setPreselectedItemBaseId(null);
+    }, [ preselectedItemBaseId, loading, inventory, setPreselectedItemBaseId ]);
 
     const filteredInventory = searchQuery.length >= 1
         ? inventory.filter(g => g.public_name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -143,6 +166,8 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
             setPrice('');
             setNote('');
             loadInventory();
+            // Refresh the emulator-side inventory so items disappear from inventory panel
+            SendMessageComposer(new FurnitureListComposer());
             setTimeout(() => setSuccess(false), 3000);
         }
         else

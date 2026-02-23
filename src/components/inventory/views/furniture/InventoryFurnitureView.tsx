@@ -1,9 +1,8 @@
 import { IRoomSession, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { attemptItemPlacement, CreateLinkEvent, DispatchUiEvent, FurniCategory, GetConfiguration, GetRoomEngine, GetSessionDataManager, GroupItem, LocalizeText, UnseenItemCategory } from '../../../../api';
+import { attemptItemPlacement, CreateLinkEvent, FurniCategory, GetConfiguration, GetRoomEngine, GetSessionDataManager, GroupItem, LocalizeText, UnseenItemCategory } from '../../../../api';
 import { AutoGrid, Button, Column, LayoutRoomPreviewerView } from '../../../../common';
-import { CatalogPostMarketplaceOfferEvent } from '../../../../events';
 import { useInventoryFurni, useInventoryUnseenTracker } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
 import { FaWrench, FaTrash, FaCheckSquare } from 'react-icons/fa';
@@ -19,15 +18,9 @@ interface InventoryFurnitureViewProps
     roomPreviewer: RoomPreviewer;
 }
 
-const attemptPlaceMarketplaceOffer = (groupItem: GroupItem) =>
+const openMarketplaceSell = (groupItem: GroupItem) =>
 {
-    const item = groupItem.getLastItem();
-
-    if(!item) return false;
-
-    if(!item.sellable) return false;
-
-    DispatchUiEvent(new CatalogPostMarketplaceOfferEvent(item));
+    CreateLinkEvent(`marketplace/sell/${ groupItem.type }`);
 }
 
 export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
@@ -409,7 +402,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                                 ⚡ Hotbar
                             </Button>
                             { selectedItem.isSellable &&
-                                <Button size="sm" onClick={ event => attemptPlaceMarketplaceOffer(selectedItem) }>
+                                <Button size="sm" onClick={ () => openMarketplaceSell(selectedItem) }>
                                     { LocalizeText('inventory.marketplace.sell') }
                                 </Button> }
                             { selectedItem.getUnlockedCount() > 0 &&

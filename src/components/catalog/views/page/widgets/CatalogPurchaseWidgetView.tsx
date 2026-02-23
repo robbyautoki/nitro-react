@@ -301,7 +301,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                             if(newVal && selectedOffers?.length === 1) requestOfferToMover(selectedOffers[0]);
                         } }
                     >
-                        { catalogPlaceMultipleObjects ? '✓ ' : '' }Platzieren
+                        Platzieren
                     </Button>
                 </div>
             </div>
@@ -332,7 +332,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                         if(newVal && currentOffer) requestOfferToMover(currentOffer);
                     } }
                 >
-                    { catalogPlaceMultipleObjects ? '✓ ' : '' }Platzieren
+                    Platzieren
                 </Button>
             </div>
         </div>

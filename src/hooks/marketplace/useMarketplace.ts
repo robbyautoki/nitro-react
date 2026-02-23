@@ -26,6 +26,7 @@ const useMarketplaceState = () =>
 {
     const [ isVisible, setIsVisible ] = useState(false);
     const [ currentTab, setCurrentTab ] = useState<string>('custom-browse');
+    const [ preselectedItemBaseId, setPreselectedItemBaseId ] = useState<number | null>(null);
     const [ searchType, setSearchType ] = useState(MarketplaceSearchType.BY_ACTIVITY);
     const [ offers, setOffers ] = useState(new Map<number, MarketplaceOfferData>());
     const [ totalItemsFound, setTotalItemsFound ] = useState(0);
@@ -57,6 +58,14 @@ const useMarketplaceState = () =>
                     case 'toggle':
                         setIsVisible(prev => !prev);
                         return;
+                    case 'sell':
+                    {
+                        const itemBaseId = parts[2] ? parseInt(parts[2]) : null;
+                        if(itemBaseId && !isNaN(itemBaseId)) setPreselectedItemBaseId(itemBaseId);
+                        setCurrentTab('custom-sell');
+                        setIsVisible(true);
+                        return;
+                    }
                 }
             },
             eventUrlPrefix: 'marketplace/'
@@ -245,6 +254,7 @@ const useMarketplaceState = () =>
     return {
         isVisible, setIsVisible,
         currentTab, setCurrentTab,
+        preselectedItemBaseId, setPreselectedItemBaseId,
         searchType, setSearchType,
         offers, totalItemsFound,
         ownOffers, creditsWaiting,

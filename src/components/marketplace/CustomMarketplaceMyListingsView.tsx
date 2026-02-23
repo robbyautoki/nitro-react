@@ -1,4 +1,6 @@
+import { FurnitureListComposer } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
+import { SendMessageComposer } from '../../api';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { CustomListingCard } from './CustomListingCard';
 import { CustomListing } from './CustomMarketplaceTypes';
@@ -22,7 +24,12 @@ export const CustomMarketplaceMyListingsView: FC<{}> = () =>
     const handleCancel = async (listing: CustomListing) =>
     {
         const res = await CustomMarketplaceApi.cancelListing(listing.id);
-        if(res.ok) setListings(prev => prev.filter(l => l.id !== listing.id));
+        if(res.ok)
+        {
+            setListings(prev => prev.filter(l => l.id !== listing.id));
+            // Refresh inventory so returned items appear again
+            SendMessageComposer(new FurnitureListComposer());
+        }
     };
 
     if(loading) return <div className="text-center py-8 text-white/30 text-xs">Laden...</div>;

@@ -25,6 +25,10 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
     const [ offerPrice, setOfferPrice ] = useState('');
     const [ offerSubmitting, setOfferSubmitting ] = useState(false);
 
+    // Buy confirmation dialog
+    const [ buyTarget, setBuyTarget ] = useState<CustomListing | null>(null);
+    const [ buySubmitting, setBuySubmitting ] = useState(false);
+
     const doSearch = useCallback((p: number = 0) =>
     {
         setLoading(true);
@@ -48,10 +52,17 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
 
     const handleBuy = async (listing: CustomListing) =>
     {
-        if(!confirm(`${ listing.price.toLocaleString() } ${ listing.currency } bezahlen?`)) return;
+        setBuyTarget(listing);
+    };
+
+    const confirmBuy = async () =>
+    {
+        if(!buyTarget) return;
+        setBuySubmitting(true);
         setError('');
-        const res = await CustomMarketplaceApi.buy(listing.id);
-        if(res.ok) doSearch(page);
+        const res = await CustomMarketplaceApi.buy(buyTarget.id);
+        setBuySubmitting(false);
+        if(res.ok) { setBuyTarget(null); doSearch(page); }
         else setError(res.error || 'Kauf fehlgeschlagen');
     };
 
@@ -214,6 +225,41 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
                                     Abbrechen
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            ) }
+
+            {/* Buy Confirmation Dialog */}
+            { buyTarget && (
+                <div className="fixed inset-0 z-[300] flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50" onClick={ () => !buySubmitting && setBuyTarget(null) } />
+                    <div className="relative w-[320px] rounded-xl border border-white/[0.08] bg-[rgba(12,12,16,0.98)] p-4 shadow-2xl">
+                        <h3 className="text-sm font-semibold text-white/90 mb-3">Kauf bestätigen</h3>
+                        <p className="text-[11px] text-white/50 mb-1">
+                            { buyTarget.is_bundle
+                                ? `Bundle (${ buyTarget.items.length } Items)`
+                                : buyTarget.items[0]?.public_name
+                            }
+                        </p>
+                        <p className="text-xs text-white/70 mb-3">
+                            Preis: <span className="font-semibold text-amber-400">{ buyTarget.price.toLocaleString() } { buyTarget.currency === 'credits' ? 'Credits' : buyTarget.currency === 'pixels' ? 'Pixel' : 'Punkte' }</span>
+                        </p>
+                        <div className="flex gap-2">
+                            <button
+                                className="flex-1 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 text-[11px] font-medium hover:bg-emerald-500/30 transition-all disabled:opacity-40"
+                                onClick={ confirmBuy }
+                                disabled={ buySubmitting }
+                            >
+                                { buySubmitting ? 'Wird gekauft...' : 'Jetzt kaufen' }
+                            </button>
+                            <button
+                                className="h-8 px-3 rounded-lg bg-white/[0.06] text-white/50 text-[11px] font-medium hover:bg-white/10 transition-all"
+                                onClick={ () => setBuyTarget(null) }
+                                disabled={ buySubmitting }
+                            >
+                                Abbrechen
+                            </button>
                         </div>
                     </div>
                 </div>

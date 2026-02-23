@@ -198,6 +198,14 @@ const useChatWidgetState = () =>
             }
         }
 
+        let nameColor: string = null;
+        const nameColorMatch = text.match(/^\[NAMECOLOR:(#[0-9a-fA-F]{6})\]/);
+        if(nameColorMatch)
+        {
+            nameColor = nameColorMatch[1];
+            text = text.replace(nameColorMatch[0], '');
+        }
+
         const formattedText = RoomChatFormatter(text);
         const color = (avatarColor && (('#' + (avatarColor.toString(16).padStart(6, '0'))) || null));
 
@@ -212,7 +220,8 @@ const useChatWidgetState = () =>
             chatType,
             styleId,
             imageUrl,
-            color);
+            color,
+            nameColor);
 
         setChatMessages(prevValue => [ ...prevValue, chatMessage ]);
         addChatEntry({ id: -1, webId: userData.webID, entityId: userData.roomIndex, name: username, imageUrl, style: styleId, chatType: chatType, entityType: userData.type, message: formattedText, timestamp: ChatHistoryCurrentDate(), type: ChatEntryType.TYPE_CHAT, roomId: roomSession.roomId, color });

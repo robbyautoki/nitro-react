@@ -11,6 +11,17 @@ interface WinItem {
     item_name: string;
 }
 
+interface WinReward {
+    id: number;
+    winId: number;
+    winLevel: number;
+    credits: number;
+    pixels: number;
+    points: number;
+    bonusPercent: number;
+    giver: string;
+}
+
 const WHITE = '#ffffff';
 const WHITE60 = 'rgba(255,255,255,0.6)';
 const WHITE40 = 'rgba(255,255,255,0.4)';
@@ -26,21 +37,39 @@ const getCmsUrl = () => GetConfiguration<string>('url.prefix', '');
 const getUserId = () => GetSessionDataManager().userId;
 const getImageUrl = () => GetConfiguration<string>('image.library.url', '');
 
+let rewardIdCounter = 0;
+
 export const WinRewardView: FC<{}> = () =>
 {
-    const [ isVisible, setIsVisible ] = useState(false);
-    const [ winId, setWinId ] = useState(0);
-    const [ winLevel, setWinLevel ] = useState(0);
-    const [ credits, setCredits ] = useState(0);
-    const [ pixels, setPixels ] = useState(0);
-    const [ points, setPoints ] = useState(0);
-    const [ bonusPercent, setBonusPercent ] = useState(0);
-    const [ giver, setGiver ] = useState('');
+    const [ rewards, setRewards ] = useState<WinReward[]>([]);
     const [ items, setItems ] = useState<WinItem[]>([]);
     const [ selectedCurrency, setSelectedCurrency ] = useState<string | null>(null);
     const [ selectedItem, setSelectedItem ] = useState<WinItem | null>(null);
     const [ claiming, setClaiming ] = useState(false);
     const [ claimed, setClaimed ] = useState(false);
+    const [ itemsLoaded, setItemsLoaded ] = useState(false);
+
+    const current = rewards[0] ?? null;
+
+    const loadItems = useCallback(() =>
+    {
+        if(itemsLoaded) return;
+        fetch(`${ getCmsUrl() }/api/wins?action=config`, {
+            headers: { 'X-Habbo-User-Id': String(getUserId()) },
+        })
+            .then(r => r.json())
+            .then(data => { if(data.items) setItems(data.items); setItemsLoaded(true); })
+            .catch(() => {});
+    }, [itemsLoaded]);
+
+    const addReward = useCallback((reward: WinReward) =>
+    {
+        setRewards(prev =>
+        {
+            if(prev.some(r => r.winId === reward.winId)) return prev;
+            return [ ...prev, reward ];
+        });
+    }, []);
 
     // Listen for win.reward from emulator
     useMessageEvent<NotificationDialogMessageEvent>(NotificationDialogMessageEvent, event =>
@@ -49,33 +78,62 @@ export const WinRewardView: FC<{}> = () =>
         if(parser.type !== 'win.reward') return;
 
         const params = parser.parameters;
-        setWinId(parseInt(params?.get('win_id') || '0'));
-        setWinLevel(parseInt(params?.get('win_level') || '0'));
-        setCredits(parseInt(params?.get('credits') || '0'));
-        setPixels(parseInt(params?.get('pixels') || '0'));
-        setPoints(parseInt(params?.get('points') || '0'));
-        setBonusPercent(parseInt(params?.get('bonus_percent') || '0'));
-        setGiver(params?.get('giver') || '');
-        setSelectedCurrency(null);
-        setSelectedItem(null);
-        setClaimed(false);
-        setIsVisible(true);
+        addReward({
+            id: ++rewardIdCounter,
+            winId: parseInt(params?.get('win_id') || '0'),
+            winLevel: parseInt(params?.get('win_level') || '0'),
+            credits: parseInt(params?.get('credits') || '0'),
+            pixels: parseInt(params?.get('pixels') || '0'),
+            points: parseInt(params?.get('points') || '0'),
+            bonusPercent: parseInt(params?.get('bonus_percent') || '0'),
+            giver: params?.get('giver') || '',
+        });
+        loadItems();
+    });
 
-        // Load available items
-        fetch(`${ getCmsUrl() }/api/wins?action=config`, {
-            headers: { 'X-Habbo-User-Id': String(getUserId()) },
+    // Load pending wins on mount (reconnect/reload recovery)
+    useEffect(() =>
+    {
+        const userId = getUserId();
+        if(!userId) return;
+
+        fetch(`${ getCmsUrl() }/api/wins?action=pending`, {
+            headers: { 'X-Habbo-User-Id': String(userId) },
         })
             .then(r => r.json())
             .then(data =>
             {
-                if(data.items) setItems(data.items);
+                if(!data || !Array.isArray(data)) return;
+                for(const win of data)
+                {
+                    if(!win || win.status !== 'pending') continue;
+                    addReward({
+                        id: ++rewardIdCounter,
+                        winId: win.id,
+                        winLevel: win.win_level,
+                        credits: win.credits ?? 0,
+                        pixels: win.pixels ?? 0,
+                        points: win.points ?? 0,
+                        bonusPercent: win.bonus_percent ?? 0,
+                        giver: win.giver ?? '',
+                    });
+                }
+                if(data.length > 0) loadItems();
             })
             .catch(() => {});
-    });
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const dismissCurrent = useCallback(() =>
+    {
+        setRewards(prev => prev.slice(1));
+        setSelectedCurrency(null);
+        setSelectedItem(null);
+        setClaimed(false);
+    }, []);
 
     const handleClaim = useCallback(async () =>
     {
-        if(!selectedCurrency || claiming) return;
+        if(!selectedCurrency || claiming || !current) return;
         setClaiming(true);
 
         try
@@ -84,21 +142,23 @@ export const WinRewardView: FC<{}> = () =>
             if(session)
             {
                 const itemPart = selectedItem ? ` ${ selectedItem.item_base_id }` : '';
-                session.sendChatMessage(`:winclaim ${ winId } ${ selectedCurrency }${ itemPart }`, 0);
+                session.sendChatMessage(`:winclaim ${ current.winId } ${ selectedCurrency }${ itemPart }`, 0);
                 setClaimed(true);
             }
         }
         catch(e) {}
         finally { setClaiming(false); }
-    }, [selectedCurrency, selectedItem, winId, claiming]);
+    }, [selectedCurrency, selectedItem, current, claiming]);
 
-    if(!isVisible) return null;
+    if(!current) return null;
 
     const currencies = [
-        { key: 'credits', label: 'Credits', amount: credits, color: YELLOW, emoji: '💰' },
-        { key: 'pixels', label: 'Pixels', amount: pixels, color: BLUE, emoji: '💎' },
-        { key: 'points', label: 'Punkte', amount: points, color: GREEN, emoji: '⭐' },
+        { key: 'credits', label: 'Credits', amount: current.credits, color: YELLOW, emoji: '💰' },
+        { key: 'pixels', label: 'Pixels', amount: current.pixels, color: BLUE, emoji: '💎' },
+        { key: 'points', label: 'Punkte', amount: current.points, color: GREEN, emoji: '⭐' },
     ];
+
+    const queueCount = rewards.length;
 
     return (
         <div className="fixed inset-0 z-[250] flex items-center justify-center pointer-events-auto">
@@ -114,10 +174,15 @@ export const WinRewardView: FC<{}> = () =>
                             <span className="text-sm font-semibold text-white/90 tracking-tight">
                                 Event-Win erhalten!
                             </span>
+                            { queueCount > 1 && (
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 font-medium">
+                                    +{ queueCount - 1 } weitere
+                                </span>
+                            )}
                         </div>
                         { claimed && (
                             <button className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all"
-                                onClick={ () => setIsVisible(false) }>
+                                onClick={ dismissCurrent }>
                                 <FaTimes className="size-3" />
                             </button>
                         )}
@@ -127,12 +192,12 @@ export const WinRewardView: FC<{}> = () =>
 
                         {/* Win Info */}
                         <div className="text-center">
-                            <div className="text-2xl font-bold" style={{ color: ORANGE }}>Level { winLevel }</div>
-                            <div className="text-xs text-white/40 mt-1">Win von <span className="text-white/70 font-medium">{ giver }</span></div>
-                            { bonusPercent > 0 && (
+                            <div className="text-2xl font-bold" style={{ color: ORANGE }}>Level { current.winLevel }</div>
+                            <div className="text-xs text-white/40 mt-1">Win von <span className="text-white/70 font-medium">{ current.giver }</span></div>
+                            { current.bonusPercent > 0 && (
                                 <div className="mt-2 inline-block px-3 py-1 rounded-full text-[11px] font-medium"
                                     style={{ background: 'rgba(168,85,247,0.15)', color: PURPLE, border: '1px solid rgba(168,85,247,0.2)' }}>
-                                    +{ bonusPercent }% Rang-Bonus
+                                    +{ current.bonusPercent }% Rang-Bonus
                                 </div>
                             )}
                         </div>
@@ -226,8 +291,8 @@ export const WinRewardView: FC<{}> = () =>
                                 <button
                                     className="mt-2 px-6 py-2 rounded-lg text-xs font-medium text-white/60 hover:text-white/90 transition-all"
                                     style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
-                                    onClick={ () => setIsVisible(false) }>
-                                    Schließen
+                                    onClick={ dismissCurrent }>
+                                    { queueCount > 1 ? `Weiter (${queueCount - 1} übrig)` : 'Schließen' }
                                 </button>
                             </div>
                         )}

@@ -318,7 +318,7 @@ export const CatalogView: FC<{}> = props =>
                     <div className="flex-1 min-h-0 overflow-hidden flex relative">
 
                         { !navigationHidden && (
-                            <div className={ `w-[185px] min-w-[185px] flex-col min-h-0 border-r border-white/[0.06] hidden xl:flex ${ navOverlay ? '!flex absolute inset-y-0 left-0 z-20 bg-[rgba(10,10,14,0.98)] border-r border-white/[0.08]' : '' }` }>
+                            <div className={ `w-[210px] min-w-[210px] flex-col min-h-0 border-r border-white/[0.06] hidden xl:flex ${ navOverlay ? '!flex absolute inset-y-0 left-0 z-20 bg-[rgba(10,10,14,0.98)] border-r border-white/[0.08]' : '' }` }>
                                 <CatalogNavigationView staffView={ staffView } />
                             </div>
                         ) }

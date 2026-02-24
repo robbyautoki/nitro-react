@@ -1,13 +1,13 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaChevronDown, FaChevronRight, FaClock, FaFire, FaStar, FaRegStar } from 'react-icons/fa';
-import { GetConfiguration, LocalizeText, ICatalogNode } from '../../../../api';
+import { FaChevronDown, FaChevronRight, FaStar, FaRegStar } from 'react-icons/fa';
+import { GetConfiguration, ICatalogNode } from '../../../../api';
 import { getAuthHeaders } from '../../../../api/utils/SessionTokenManager';
 import { useCatalog } from '../../../../hooks';
 
 import { CatalogIconView } from '../catalog-icon/CatalogIconView';
 import { CatalogNavigationItemView } from './CatalogNavigationItemView';
 import { CatalogNavigationSetView } from './CatalogNavigationSetView';
-import { loadTracked, TrackedPurchase } from '../../CatalogView';
+
 
 const stripPageId = (text: string) => text?.replace(/\s*\(\d+\)$/, '') ?? '';
 
@@ -33,8 +33,6 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
     const [ favoritesOpen, setFavoritesOpen ] = useState(true);
     const [ activeVirtual, setActiveVirtual ] = useState<string | null>(null);
     const [ favorites, setFavorites ] = useState<number[]>([]);
-    const [ recentPurchases, setRecentPurchases ] = useState<TrackedPurchase[]>(() => loadTracked('catalog_recent_purchases'));
-    const [ frequentPurchases, setFrequentPurchases ] = useState<TrackedPurchase[]>(() => loadTracked('catalog_most_purchased'));
 
     const cmsUrl = useMemo(() => GetConfiguration<string>('url.prefix', ''), []);
 
@@ -58,19 +56,6 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
             body: JSON.stringify({ pageId }),
         }).catch(() => {});
     }, [ cmsUrl, favorites ]);
-
-    // Refresh when a purchase is tracked
-    useEffect(() =>
-    {
-        const refresh = () =>
-        {
-            setRecentPurchases(loadTracked('catalog_recent_purchases'));
-            setFrequentPurchases(loadTracked('catalog_most_purchased'));
-        };
-
-        window.addEventListener('catalog_purchase_tracked', refresh);
-        return () => window.removeEventListener('catalog_purchase_tracked', refresh);
-    }, []);
 
     // Clear active virtual when a real page is activated externally
     useEffect(() =>
@@ -99,12 +84,6 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
 
         return { userNodes: user, staffNodes: staff };
     }, [ rootNode, STAFF_PAGES ]);
-
-    const onVirtualClick = useCallback((type: string) =>
-    {
-        setActiveVirtual(type);
-        window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: type }));
-    }, []);
 
     const onSectionClick = (topNode: any) =>
     {
@@ -178,30 +157,6 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                         </div>
                         <div className="mx-3 my-1 border-t border-white/[0.06]" />
                     </> }
-
-                    {/* ── Zuletzt gekauft ── */}
-                    { recentPurchases.length > 0 &&
-                        <div
-                            className={ `px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] cursor-pointer select-none transition-colors flex items-center gap-2 rounded-sm ${ activeVirtual === 'recent' ? 'text-white/90 bg-white/[0.07]' : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03]' }` }
-                            onClick={ () => onVirtualClick('recent') }
-                        >
-                            <FaClock className="text-[9px]" />
-                            <span className="flex-1 truncate">{ LocalizeText('catalog.nav.recent_purchases') }</span>
-                        </div> }
-
-                    {/* ── Am meisten gekauft ── */}
-                    { frequentPurchases.length > 0 &&
-                        <div
-                            className={ `px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] cursor-pointer select-none transition-colors flex items-center gap-2 rounded-sm ${ activeVirtual === 'frequent' ? 'text-white/90 bg-white/[0.07]' : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03]' }` }
-                            onClick={ () => onVirtualClick('frequent') }
-                        >
-                            <FaFire className="text-[9px]" />
-                            <span className="flex-1 truncate">{ LocalizeText('catalog.nav.most_purchased') }</span>
-                        </div> }
-
-                    {/* ── Divider ── */}
-                    { (recentPurchases.length > 0 || frequentPurchases.length > 0) &&
-                        <div className="mx-3 my-1 border-t border-white/[0.06]" /> }
 
                     {/* ── User Catalog Section ── */}
                     { !staffView && userNodes.length > 0 &&

@@ -1,6 +1,6 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaTimes, FaList, FaInfoCircle } from 'react-icons/fa';
+import { FaTimes, FaList, FaInfoCircle, FaClock, FaFire } from 'react-icons/fa';
 import { AddEventLinkTracker, CatalogType, GetSessionDataManager, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
 import { CatalogPurchasedEvent } from '../../events';
 import { useCatalog, useUiEvent } from '../../hooks';
@@ -272,15 +272,18 @@ export const CatalogView: FC<{}> = props =>
                     style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `${ catalogSize.height }px` } }
                 >
                     {/* Header */}
-                    <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-11 cursor-move select-none">
+                    <div
+                        className="drag-handler relative flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-14 cursor-move select-none overflow-hidden"
+                        style={ { backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)', backgroundSize: '16px 16px' } }
+                    >
                         <div className="flex items-center gap-1.5 shrink-0 min-w-0 overflow-hidden">
-                            <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/25 shrink-0">
+                            <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/30 shrink-0">
                                 { staffView ? 'Staff Katalog' : LocalizeText('catalog.title') }
                             </span>
                             { breadcrumb.map((label, i) => (
                                 <Fragment key={ i }>
-                                    <span className="text-[10px] text-white/20 shrink-0">›</span>
-                                    <span className="text-[11px] text-white/50 truncate">{ label }</span>
+                                    <span className="text-[11px] text-white/20 shrink-0">›</span>
+                                    <span className="text-[12px] text-white/50 truncate">{ label }</span>
                                 </Fragment>
                             )) }
                         </div>
@@ -291,19 +294,35 @@ export const CatalogView: FC<{}> = props =>
                             <CatalogSearchView />
                         </div>
 
-                        { isMod &&
+                        <div className="flex items-center gap-1.5 shrink-0" onMouseDown={ e => e.stopPropagation() }>
                             <button
-                                className={ `appearance-none border rounded-md px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider transition-colors shrink-0 ${ staffView ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-transparent border-white/10 text-white/30 hover:text-white/50 hover:border-white/20' }` }
-                                onMouseDown={ e => e.stopPropagation() }
-                                onClick={ () => setStaffView(v => !v) }
+                                className={ `appearance-none border rounded-md p-1.5 transition-colors ${ virtualPage === 'recent' ? 'bg-white/[0.1] border-white/20 text-white/70' : 'bg-transparent border-white/10 text-white/25 hover:text-white/50 hover:border-white/20' }` }
+                                onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'recent' })) }
+                                title="Zuletzt gekauft"
                             >
-                                Staff
-                            </button> }
+                                <FaClock className="text-[10px]" />
+                            </button>
+                            <button
+                                className={ `appearance-none border rounded-md p-1.5 transition-colors ${ virtualPage === 'frequent' ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' : 'bg-transparent border-white/10 text-white/25 hover:text-white/50 hover:border-white/20' }` }
+                                onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'frequent' })) }
+                                title="Am meisten gekauft"
+                            >
+                                <FaFire className="text-[10px]" />
+                            </button>
 
-                        { !navigationHidden &&
-                            <Button variant="ghost" size="icon-sm" className="xl:hidden shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setNavOverlay(v => !v) }>
-                                <FaList className="size-3" />
-                            </Button> }
+                            { isMod &&
+                                <button
+                                    className={ `appearance-none border rounded-md px-2 py-1 text-[9px] font-semibold uppercase tracking-wider transition-colors ${ staffView ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-transparent border-white/10 text-white/30 hover:text-white/50 hover:border-white/20' }` }
+                                    onClick={ () => setStaffView(v => !v) }
+                                >
+                                    Staff
+                                </button> }
+
+                            { !navigationHidden &&
+                                <Button variant="ghost" size="icon-sm" className="xl:hidden" onClick={ () => setNavOverlay(v => !v) }>
+                                    <FaList className="size-3" />
+                                </Button> }
+                        </div>
 
                         <button
                             className="appearance-none border-0 bg-transparent rounded-md p-1 text-white/25 hover:bg-white/[0.06] hover:text-white/70 transition-colors shrink-0"

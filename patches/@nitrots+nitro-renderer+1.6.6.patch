@@ -1,3 +1,153 @@
+diff --git a/node_modules/@nitrots/nitro-renderer/src/core/communication/SocketConnection.ts b/node_modules/@nitrots/nitro-renderer/src/core/communication/SocketConnection.ts
+index 4d493f7..f36c4ea 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/core/communication/SocketConnection.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/core/communication/SocketConnection.ts
+@@ -19,6 +19,9 @@ export class SocketConnection extends EventDispatcher implements IConnection
+ 
+     private _isAuthenticated: boolean;
+ 
++    // CSP v6.2: Time-budgeted message queue
++    private _messageQueue: IMessageDataWrapper[];
++
+     constructor(communicationManager: ICommunicationManager, stateListener: IConnectionStateListener)
+     {
+         super();
+@@ -36,6 +39,8 @@ export class SocketConnection extends EventDispatcher implements IConnection
+ 
+         this._isAuthenticated = false;
+ 
++        this._messageQueue = [];
++
+         this.onOpen = this.onOpen.bind(this);
+         this.onClose = this.onClose.bind(this);
+         this.onError = this.onError.bind(this);
+@@ -63,6 +68,7 @@ export class SocketConnection extends EventDispatcher implements IConnection
+         this._messages = null;
+         this._codec = null;
+         this._dataBuffer = null;
++        this._messageQueue = null;
+     }
+ 
+     public onReady(): void
+@@ -217,22 +223,40 @@ export class SocketConnection extends EventDispatcher implements IConnection
+         }
+     }
+ 
++    // CSP v6.2: Time-budgeted message processing
++    // Decodes all pending data (fast), then processes wrappers with a 5ms budget per call.
++    // CommunicationManager.update() calls processReceivedData() each game tick to drain remaining queue.
+     private processData(): void
+     {
+         const wrappers = this.splitReceivedMessages();
+ 
+-        if(!wrappers || !wrappers.length) return;
+-
+-        if(this._isAuthenticated && !this._isReady)
++        if(wrappers && wrappers.length)
+         {
+-            if(!this._pendingServerMessages) this._pendingServerMessages = [];
++            if(this._isAuthenticated && !this._isReady)
++            {
++                if(!this._pendingServerMessages) this._pendingServerMessages = [];
+ 
+-            this._pendingServerMessages.push(...wrappers);
++                this._pendingServerMessages.push(...wrappers);
+ 
+-            return;
++                return;
++            }
++
++            this._messageQueue.push(...wrappers);
+         }
+ 
+-        this.processWrappers(...wrappers);
++        if(!this._messageQueue || !this._messageQueue.length) return;
++
++        const start = performance.now();
++        const budget = 5;
++
++        while(this._messageQueue.length > 0)
++        {
++            if(performance.now() - start > budget) break;
++
++            const wrapper = this._messageQueue.shift();
++
++            if(wrapper) this.processWrappers(wrapper);
++        }
+     }
+ 
+     private processWrappers(...wrappers: IMessageDataWrapper[]): void
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
+index 5731eba..9c1d5f7 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
+@@ -5,6 +5,7 @@ import { RoomEnterEffect, RoomId, RoomObjectUpdateMessage } from '../../room';
+ import { BotPlaceComposer, FurnitureColorWheelComposer, FurnitureDiceActivateComposer, FurnitureDiceDeactivateComposer, FurnitureFloorUpdateComposer, FurnitureGroupInfoComposer, FurnitureMultiStateComposer, FurnitureOneWayDoorComposer, FurniturePickupComposer, FurniturePlaceComposer, FurniturePostItPlaceComposer, FurnitureRandomStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, GetItemDataComposer, GetResolutionAchievementsMessageComposer, PetMoveComposer, PetPlaceComposer, RemoveWallItemComposer, RoomUnitLookComposer, RoomUnitWalkComposer, SetItemDataMessageComposer, SetObjectDataMessageComposer } from '../communication';
+ import { Nitro } from '../Nitro';
+ import { ObjectAvatarSelectedMessage, ObjectDataUpdateMessage, ObjectSelectedMessage, ObjectTileCursorUpdateMessage, ObjectVisibilityUpdateMessage } from './messages';
++import { MovingObjectLogic } from './object/logic/MovingObjectLogic';
+ import { SelectedRoomObjectData } from './utils';
+ 
+ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMouseListener, IRoomObjectEventManager
+@@ -1487,6 +1488,58 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
+         if(!this._roomEngine || !this._roomEngine.connection) return;
+ 
+         this._roomEngine.connection.send(new RoomUnitWalkComposer(x, y));
++
++        // CSP: Predict first step immediately for own avatar
++        this.predictOwnAvatarFirstStep(x, y);
++    }
++
++    private predictOwnAvatarFirstStep(targetX: number, targetY: number): void
++    {
++        const roomId = this._roomEngine.activeRoomId;
++        if(roomId < 0) return;
++
++        const session = this._roomEngine.roomSessionManager && this._roomEngine.roomSessionManager.getSession(roomId);
++        if(!session) return;
++
++        const ownObjectId = session.ownRoomIndex;
++        if(ownObjectId < 0) return;
++
++        const ownObject = this._roomEngine.getRoomObject(roomId, ownObjectId, RoomObjectCategory.UNIT);
++        if(!ownObject || !ownObject.logic) return;
++
++        const logic = ownObject.logic as unknown as MovingObjectLogic;
++        if(!logic.startPredictedMove) return;
++
++        // CSP v8: Use current tile position (prediction only from standstill)
++        const currentLoc = ownObject.getLocation();
++        const currentTileX = Math.round(currentLoc.x);
++        const currentTileY = Math.round(currentLoc.y);
++
++        const dx = targetX - currentTileX;
++        const dy = targetY - currentTileY;
++
++        if(dx === 0 && dy === 0) return;
++
++        let stepX: number;
++        let stepY: number;
++
++        if(Math.abs(dx) <= 1 && Math.abs(dy) <= 1)
++        {
++            stepX = targetX;
++            stepY = targetY;
++        }
++        else
++        {
++            stepX = currentTileX + Math.sign(dx);
++            stepY = currentTileY + Math.sign(dy);
++        }
++
++        const heightMap = this._roomEngine.getFurnitureStackingHeightMap(roomId);
++        const stepZ = heightMap ? heightMap.getTileHeight(stepX, stepY) : currentLoc.z;
++
++        if(stepZ < 0) return;
++
++        logic.startPredictedMove(stepX, stepY, stepZ);
+     }
+ 
+     private handleMouseOverObject(category: number, roomId: number, event: RoomObjectMouseEvent): ObjectTileCursorUpdateMessage
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts
 index 671cf7f..a14673f 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts

@@ -32,36 +32,41 @@ export const CustomMarketplaceMyListingsView: FC<{}> = () =>
         }
     };
 
-    if(loading) return <div className="text-center py-8 text-white/30 text-xs">Laden...</div>;
-
     return (
-        <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-                <ShoppingBag className="size-3.5 text-white/40" />
-                <span className="text-[11px] font-medium text-white/50">
-                    { listings.length > 0
-                        ? `${ listings.length } aktive${ listings.length === 1 ? 's Angebot' : ' Angebote' }`
-                        : 'Keine aktiven Angebote'
-                    }
-                </span>
-            </div>
-
-            { listings.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12 text-white/20">
-                    <Package className="size-10 mb-2" />
-                    <span className="text-xs">Du hast keine aktiven Angebote</span>
+        <div className="flex flex-col h-full gap-3 bg-[#0a0a0a] rounded-xl p-3 border border-white/[0.04]">
+            
+            <div className="flex flex-col flex-1 min-h-0 mt-2">
+                <div className="flex items-center justify-between shrink-0 px-2 border-b border-white/[0.08] pb-2">
+                    <span className="text-[10px] font-bold font-mono text-white/30 uppercase tracking-[0.1em]">
+                        { listings.length } ACTIVE LISTINGS
+                    </span>
+                    <div className="flex items-center text-[10px] font-bold font-mono text-white/30 uppercase tracking-[0.1em] gap-8 pr-12">
+                        <span className="w-24 text-right">PRICE</span>
+                        <span className="w-24 text-right">ACTIONS</span>
+                    </div>
                 </div>
-            ) }
-
-            <div className="flex flex-col gap-1.5">
-                { listings.map(listing => (
-                    <CustomListingCard
-                        key={ listing.id }
-                        listing={ listing }
-                        mode="own"
-                        onCancel={ () => handleCancel(listing) }
-                    />
-                )) }
+                
+                <div className="flex flex-col overflow-auto h-full rounded border border-white/[0.04] bg-[#050505]">
+                    { loading ? (
+                        <div className="flex-1 flex flex-col items-center justify-center text-emerald-500/50 text-xs gap-2 py-8">
+                            <span className="text-xs font-mono uppercase tracking-[0.2em]">FETCHING DATA...</span>
+                        </div>
+                    ) : listings.length > 0 ? (
+                        listings.map(listing => (
+                            <CustomListingCard
+                                key={ listing.id }
+                                listing={ listing }
+                                mode="own"
+                                onCancel={ () => handleCancel(listing) }
+                            />
+                        ))
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-white/20 text-xs gap-2 py-8">
+                            <span className="text-3xl font-mono opacity-50">¯\_(ツ)_/¯</span>
+                            <span className="font-mono uppercase tracking-[0.1em]">No active listings</span>
+                        </div>
+                    ) }
+                </div>
             </div>
         </div>
     );

@@ -3,6 +3,7 @@ import { GetConfiguration, GetSessionDataManager } from '../../api';
 import { CustomListing } from './CustomMarketplaceTypes';
 import { ItemInfoTooltip } from './ItemInfoTooltip';
 import { Coins, Clock, MessageSquare, Package, User, Hash, Shield } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 const CURRENCY_COLORS: Record<string, string> = {
     credits: 'text-amber-400/80',
@@ -75,135 +76,140 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, onBuy, onC
     })();
 
     return (
-        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all group">
+        <div className="flex items-center gap-3 px-3 py-2 bg-[#0a0a0a] border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors group">
             {/* Item Image */}
-            <div className="relative w-11 h-11 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0">
+            <div className="relative w-10 h-10 shrink-0 bg-white/[0.02] border border-white/[0.05] rounded overflow-hidden flex items-center justify-center">
                 { mainItem ? (
                     <img
                         src={ getFurniIcon(mainItem.item_name) }
                         alt={ mainItem.public_name }
-                        className="max-w-full max-h-full object-contain"
+                        className="w-8 h-8 object-contain opacity-80 group-hover:opacity-100 transition-opacity"
                         onError={ (e) => { (e.target as HTMLImageElement).style.display = 'none'; } }
                     />
                 ) : (
-                    <Package className="size-4 text-white/20" />
+                    <Package className="size-4 text-white/10" />
                 ) }
                 { ltd && (
-                    <div className="absolute -top-1 -right-1 px-1 py-0.5 rounded text-[8px] font-bold bg-amber-500/90 text-black leading-none">
-                        { ltd.num }/{ ltd.total }
-                    </div>
-                ) }
-                { rarityDisplay && (
-                    <div
-                        className="absolute -bottom-1 -left-1 px-1 py-0.5 rounded text-[7px] font-bold leading-none text-white"
-                        style={ { backgroundColor: rarityColor ?? '#888' } }
-                    >
-                        { rarityDisplay }
+                    <div className="absolute top-0 right-0 px-0.5 py-[1px] bg-amber-500/90 text-black text-[8px] font-bold leading-none z-10">
+                        { ltd.num }
                     </div>
                 ) }
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-white/80 truncate">
-                    { listing.is_bundle
-                        ? `Bundle (${ listing.items.length } Items)`
-                        : displayName
-                    }
-                </div>
-                <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                    <span className={ `flex items-center gap-1 text-[11px] ${ currColor }` }>
-                        <Coins className="size-3" />
-                        { listing.price.toLocaleString() } { CURRENCY_LABELS[listing.currency] ?? listing.currency }
+                <div className="text-[11px] font-bold text-white/90 truncate uppercase tracking-wide flex items-center gap-2">
+                    <span>
+                        { listing.is_bundle
+                            ? `Bundle (${ listing.items.length } Items)`
+                            : displayName
+                        }
                     </span>
-                    { mode === 'browse' && listing.seller && (
-                        <span className="flex items-center gap-1 text-[11px] text-white/30">
-                            <User className="size-3" />
-                            { listing.seller.username }
-                        </span>
-                    ) }
-                    { mode === 'sold' && listing.buyer && (
-                        <span className="flex items-center gap-1 text-[11px] text-white/30">
-                            <User className="size-3" />
-                            { listing.buyer }
-                        </span>
-                    ) }
-                    { mode !== 'sold' && (
-                        <span className="flex items-center gap-1 text-[11px] text-white/30">
-                            <Clock className="size-3" />
-                            { timeLeft(listing.expires_at) }
-                        </span>
-                    ) }
-                    { mode === 'sold' && listing.sold_at && (
-                        <span className="text-[11px] text-white/30">
-                            { new Date(listing.sold_at).toLocaleDateString('de-DE') }
-                        </span>
-                    ) }
-                    { listing.note && (
-                        <span className="flex items-center gap-1 text-[11px] text-white/30" title={ listing.note }>
-                            <MessageSquare className="size-3" />
-                        </span>
-                    ) }
-                    { mode === 'browse' && listing.offer_count != null && listing.offer_count > 0 && (
-                        <span className="text-[11px] text-blue-400/60">
-                            { listing.offer_count } Anfrage{ listing.offer_count !== 1 ? 'n' : '' }
-                        </span>
-                    ) }
                     { ltd && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-400">
-                            <Hash className="size-2.5" />LIMITED
+                        <span className="inline-flex items-center px-1 rounded text-[9px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                            # LIMITED
                         </span>
                     ) }
                     { !ltd && rarityDisplay && (
                         <span
-                            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold"
-                            style={ { backgroundColor: (rarityColor ?? '#888') + '20', color: rarityColor ?? '#a78bfa' } }
+                            className="inline-flex items-center px-1 rounded text-[9px] font-bold border"
+                            style={ { backgroundColor: (rarityColor ?? '#888') + '15', color: rarityColor ?? '#a78bfa', borderColor: (rarityColor ?? '#888') + '30' } }
                         >
                             { rarityDisplay }
                         </span>
                     ) }
-                    { mainItem?.in_circulation != null && mainItem.in_circulation > 0 && (
-                        <span className="inline-flex items-center gap-0.5 text-[10px] text-white/30">
-                            <Package className="size-2.5" />
-                            { mainItem.in_circulation.toLocaleString() }x im Umlauf
+                </div>
+                
+                <div className="flex items-center gap-3 mt-0.5 flex-wrap text-[10px] font-mono text-white/40">
+                    { mode === 'browse' && listing.seller && (
+                        <span className="flex items-center gap-1">
+                            <User className="size-2.5" />
+                            { listing.seller.username.toUpperCase() }
+                        </span>
+                    ) }
+                    { mode === 'sold' && listing.buyer && (
+                        <span className="flex items-center gap-1">
+                            <User className="size-2.5" />
+                            { listing.buyer.toUpperCase() }
+                        </span>
+                    ) }
+                    { mode !== 'sold' && (
+                        <span className="flex items-center gap-1">
+                            <Clock className="size-2.5" />
+                            { timeLeft(listing.expires_at) }
+                        </span>
+                    ) }
+                    { mode === 'sold' && listing.sold_at && (
+                        <span>
+                            { new Date(listing.sold_at).toLocaleDateString('de-DE') }
+                        </span>
+                    ) }
+                    { listing.note && (
+                        <span className="flex items-center gap-1 text-white/30" title={ listing.note }>
+                            <MessageSquare className="size-2.5" />
                         </span>
                     ) }
                 </div>
+                
                 { listing.note && mode === 'browse' && (
-                    <div className="text-[10px] text-white/25 mt-0.5 truncate italic">{ listing.note }</div>
+                    <div className="text-[9px] text-white/20 mt-0.5 truncate italic">"{ listing.note }"</div>
                 ) }
             </div>
 
+            {/* Stats Data */}
+            <div className="flex flex-col items-end shrink-0 w-24">
+                { mainItem?.in_circulation != null && mainItem.in_circulation > 0 && (
+                    <div className="text-[10px] font-mono text-white/40">
+                        VOL: { mainItem.in_circulation.toLocaleString() }
+                    </div>
+                ) }
+                { mode === 'browse' && listing.offer_count != null && listing.offer_count > 0 && (
+                    <div className="text-[10px] font-mono text-blue-400/60 mt-0.5">
+                        BIDS: { listing.offer_count }
+                    </div>
+                ) }
+            </div>
+
+            {/* Price Data */}
+            <div className="flex flex-col items-end shrink-0 w-28 pr-4">
+                <div className={ cn("text-[14px] font-bold font-mono tabular-nums leading-none", currColor.replace('/80', '')) }>
+                    { listing.price.toLocaleString() }
+                </div>
+                <div className="text-[9px] font-bold font-mono text-white/30 uppercase mt-1">
+                    { CURRENCY_LABELS[listing.currency] ?? listing.currency }
+                </div>
+            </div>
+
             {/* Actions */}
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center shrink-0">
                 <ItemInfoTooltip listing={ listing } />
                 { mode === 'browse' && isMine && (
-                    <span className="h-7 px-2.5 rounded-lg bg-white/[0.06] text-white/30 text-[11px] font-medium flex items-center">
-                        Dein Angebot
+                    <span className="h-8 px-4 border border-white/5 rounded bg-white/[0.02] text-white/20 text-[10px] font-bold uppercase tracking-wider flex items-center ml-2">
+                        OWNED
                     </span>
                 ) }
                 { mode === 'browse' && !isMine && onOffer && (
                     <button
-                        className="h-7 px-2.5 rounded-lg bg-blue-500/20 text-blue-400 text-[11px] font-medium hover:bg-blue-500/30 transition-all"
+                        className="h-8 px-3 ml-2 border border-blue-500/30 rounded bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-wider hover:bg-blue-500/20 transition-colors"
                         onClick={ onOffer }
                     >
-                        Anfrage
+                        BID
                     </button>
                 ) }
                 { mode === 'browse' && !isMine && onBuy && (
                     <button
-                        className="h-7 px-3 rounded-lg bg-emerald-500/20 text-emerald-400 text-[11px] font-medium hover:bg-emerald-500/30 transition-all"
+                        className="h-8 px-4 ml-2 border border-emerald-500/30 rounded bg-emerald-500/20 text-emerald-400 text-[11px] font-bold uppercase tracking-wider hover:bg-emerald-500/30 transition-colors"
                         onClick={ onBuy }
                     >
-                        Kaufen
+                        BUY
                     </button>
                 ) }
                 { mode === 'own' && listing.status === 'active' && onCancel && (
                     <button
-                        className="h-7 px-3 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-medium hover:bg-red-500/30 transition-all"
+                        className="h-8 px-4 ml-2 border border-red-500/30 rounded bg-red-500/10 text-red-400 text-[11px] font-bold uppercase tracking-wider hover:bg-red-500/20 transition-colors"
                         onClick={ onCancel }
                     >
-                        Abbrechen
+                        CANCEL
                     </button>
                 ) }
             </div>

@@ -4,6 +4,7 @@ import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { CustomListingCard } from './CustomListingCard';
 import { CustomListing } from './CustomMarketplaceTypes';
 import { Search, Package, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { LocalizeText } from '../../api';
 
 export const CustomMarketplaceBrowseView: FC<{}> = () =>
 {
@@ -82,7 +83,7 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
     const totalPages = Math.ceil(total / 20);
 
     return (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col h-full gap-3 bg-[#0a0a0a] rounded-xl p-3 border border-white/[0.04]">
             {/* Error Banner */}
             { error && (
                 <div className="flex items-center gap-2 p-2.5 rounded-xl bg-red-500/[0.08] border border-red-500/20">
@@ -92,104 +93,116 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
             ) }
 
             {/* Filters */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 bg-black/50 p-3 rounded-lg border border-white/[0.05]">
                 <div className="flex items-center gap-2">
+                    <span className="w-[100px] text-[10px] uppercase font-bold text-white/40 tracking-[0.1em] shrink-0">Search Name</span>
                     <input
-                        className="flex-1 h-7 px-2.5 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 placeholder-white/30 outline-none focus:border-white/20"
+                        className="flex-1 h-7 px-2.5 text-xs font-mono rounded bg-black/40 border border-white/10 text-white/90 placeholder-white/20 outline-none focus:border-emerald-500/50 uppercase"
                         type="text"
-                        placeholder="Item suchen..."
+                        placeholder="FURNI NAME..."
                         value={ searchQuery }
                         onChange={ e => setSearchQuery(e.target.value) }
                         onKeyDown={ e => e.key === 'Enter' && doSearch(0) }
                     />
                     <button
-                        className="h-7 px-3 rounded-lg bg-white/[0.1] text-white/80 text-[11px] font-medium hover:bg-white/[0.15] transition-all flex items-center gap-1"
+                        className="h-7 px-4 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold font-mono uppercase tracking-wider hover:bg-emerald-500/30 transition-colors flex items-center justify-center shrink-0"
                         onClick={ () => doSearch(0) }
                     >
-                        <Search className="size-3" />
-                        Suchen
+                        SEARCH
                     </button>
                 </div>
                 <div className="flex items-center gap-2">
+                    <span className="w-[100px] text-[10px] uppercase font-bold text-white/40 tracking-[0.1em] shrink-0">Search Price</span>
                     <input
-                        className="w-20 h-7 px-2 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 placeholder-white/30 outline-none focus:border-white/20"
+                        className="w-20 h-7 px-2 text-xs font-mono rounded bg-black/40 border border-white/10 text-amber-400 placeholder-white/20 outline-none focus:border-emerald-500/50"
                         type="number"
                         min={ 0 }
-                        placeholder="Min"
+                        placeholder="MIN"
                         value={ minPrice }
                         onChange={ e => setMinPrice(e.target.value) }
                     />
-                    <span className="text-white/30 text-[11px]">-</span>
                     <input
-                        className="w-20 h-7 px-2 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 placeholder-white/30 outline-none focus:border-white/20"
+                        className="w-20 h-7 px-2 text-xs font-mono rounded bg-black/40 border border-white/10 text-amber-400 placeholder-white/20 outline-none focus:border-emerald-500/50"
                         type="number"
                         min={ 0 }
-                        placeholder="Max"
+                        placeholder="MAX"
                         value={ maxPrice }
                         onChange={ e => setMaxPrice(e.target.value) }
                     />
-                    <select
-                        className="h-7 px-2 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 outline-none"
-                        value={ currency }
-                        onChange={ e => { setCurrency(e.target.value); } }
-                    >
-                        <option value="" className="bg-zinc-900">Alle Währungen</option>
-                        <option value="credits" className="bg-zinc-900">Credits</option>
-                        <option value="pixels" className="bg-zinc-900">Pixel</option>
-                        <option value="points" className="bg-zinc-900">Punkte</option>
-                    </select>
-                </div>
-            </div>
-
-            {/* Results count */}
-            <div className="flex items-center justify-between">
-                <span className="text-[11px] text-white/40">
-                    { total > 0 ? `${ total } Angebot${ total !== 1 ? 'e' : '' }` : 'Keine Angebote gefunden' }
-                </span>
-                { totalPages > 1 && (
-                    <div className="flex items-center gap-1">
-                        <button
-                            className="p-1 rounded text-white/30 hover:text-white/60 disabled:opacity-30"
-                            disabled={ page === 0 }
-                            onClick={ () => doSearch(page - 1) }
+                    
+                    <div className="flex-1 bg-black/40 border border-white/10 rounded overflow-hidden ml-2">
+                        <select
+                            className="w-full h-7 px-2 text-xs font-mono bg-transparent border-0 text-white/80 outline-none uppercase"
+                            value={ currency }
+                            onChange={ e => { setCurrency(e.target.value); } }
                         >
-                            <ChevronLeft className="size-3.5" />
-                        </button>
-                        <span className="text-[10px] text-white/40">{ page + 1 }/{ totalPages }</span>
-                        <button
-                            className="p-1 rounded text-white/30 hover:text-white/60 disabled:opacity-30"
-                            disabled={ page >= totalPages - 1 }
-                            onClick={ () => doSearch(page + 1) }
-                        >
-                            <ChevronRight className="size-3.5" />
-                        </button>
+                            <option value="" className="bg-black text-white">All Currencies</option>
+                            <option value="credits" className="bg-black text-white">Credits</option>
+                            <option value="pixels" className="bg-black text-white">Pixels</option>
+                            <option value="points" className="bg-black text-white">Points</option>
+                        </select>
                     </div>
-                ) }
+                </div>
             </div>
 
-            { loading && <div className="text-center py-8 text-white/30 text-xs">Laden...</div> }
-
-            { !loading && listings.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12 text-white/20">
-                    <Package className="size-10 mb-2" />
-                    <span className="text-xs">Keine Angebote vorhanden</span>
+            <div className="flex flex-col flex-1 min-h-0 mt-2">
+                <div className="flex items-center justify-between shrink-0 px-2 border-b border-white/[0.08] pb-2">
+                    <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-bold font-mono text-white/30 uppercase tracking-[0.1em]">
+                            { total > 0 ? `${ total } MATCHES` : '0 MATCHES' }
+                        </span>
+                        { totalPages > 1 && (
+                            <div className="flex items-center gap-1 bg-white/[0.05] rounded px-1">
+                                <button
+                                    className="p-0.5 rounded text-white/30 hover:text-white/60 disabled:opacity-30"
+                                    disabled={ page === 0 }
+                                    onClick={ () => doSearch(page - 1) }
+                                >
+                                    <ChevronLeft className="size-3" />
+                                </button>
+                                <span className="text-[9px] font-mono text-white/40">{ page + 1 }/{ totalPages }</span>
+                                <button
+                                    className="p-0.5 rounded text-white/30 hover:text-white/60 disabled:opacity-30"
+                                    disabled={ page >= totalPages - 1 }
+                                    onClick={ () => doSearch(page + 1) }
+                                >
+                                    <ChevronRight className="size-3" />
+                                </button>
+                            </div>
+                        ) }
+                    </div>
+                    
+                    <div className="flex items-center text-[10px] font-bold font-mono text-white/30 uppercase tracking-[0.1em] gap-4">
+                        <span className="w-24 text-right">STATS</span>
+                        <span className="w-24 text-right">PRICE</span>
+                        <span className="w-32 text-center">ACTIONS</span>
+                    </div>
                 </div>
-            ) }
 
-            { !loading && (
-                <div className="flex flex-col gap-1.5">
-                    { listings.map(listing => (
-                        <CustomListingCard
-                            key={ listing.id }
-                            listing={ listing }
-                            mode="browse"
-                            isMine={ listing.seller_id === myUserId }
-                            onBuy={ () => handleBuy(listing) }
-                            onOffer={ () => { setOfferTarget(listing); setOfferPrice(''); } }
-                        />
-                    )) }
+                <div className="flex flex-col overflow-auto h-full rounded border border-white/[0.04] bg-[#050505]">
+                    { loading ? (
+                        <div className="flex-1 flex flex-col items-center justify-center text-emerald-500/50 text-xs gap-2 py-8">
+                            <span className="text-xs font-mono uppercase tracking-[0.2em]">FETCHING DATA...</span>
+                        </div>
+                    ) : listings.length === 0 ? (
+                        <div className="flex-1 flex flex-col items-center justify-center text-white/20 text-xs gap-2 py-8">
+                            <span className="text-3xl font-mono opacity-50">¯\_(ツ)_/¯</span>
+                            <span className="font-mono uppercase tracking-[0.1em]">No market data available</span>
+                        </div>
+                    ) : (
+                        listings.map(listing => (
+                            <CustomListingCard
+                                key={ listing.id }
+                                listing={ listing }
+                                mode="browse"
+                                isMine={ listing.seller_id === myUserId }
+                                onBuy={ () => handleBuy(listing) }
+                                onOffer={ () => { setOfferTarget(listing); setOfferPrice(''); } }
+                            />
+                        ))
+                    ) }
                 </div>
-            ) }
+            </div>
 
             {/* Offer Dialog */}
             { offerTarget && (

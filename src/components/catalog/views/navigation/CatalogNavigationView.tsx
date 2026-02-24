@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaChevronDown, FaChevronRight, FaClock, FaFire } from 'react-icons/fa';
-import { LocalizeText } from '../../../../api';
+import { FaChevronDown, FaChevronRight, FaClock, FaFire, FaStar, FaRegStar } from 'react-icons/fa';
+import { GetConfiguration, LocalizeText, ICatalogNode } from '../../../../api';
+import { getAuthHeaders } from '../../../../api/utils/SessionTokenManager';
 import { useCatalog } from '../../../../hooks';
 
 import { CatalogIconView } from '../catalog-icon/CatalogIconView';
@@ -9,6 +10,17 @@ import { CatalogNavigationSetView } from './CatalogNavigationSetView';
 import { loadTracked, TrackedPurchase } from '../../CatalogView';
 
 const stripPageId = (text: string) => text?.replace(/\s*\(\d+\)$/, '') ?? '';
+
+const findNodeByPageId = (node: ICatalogNode, pageId: number): ICatalogNode | null =>
+{
+    if(node.pageId === pageId) return node;
+    for(const child of (node.children || []))
+    {
+        const found = findNodeByPageId(child, pageId);
+        if(found) return found;
+    }
+    return null;
+};
 
 interface CatalogNavigationViewProps
 {
@@ -20,9 +32,34 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
     const { rootNode = null, searchResult = null, activateNode = null, setSearchResult = null, setNavigationHidden = null, openPageByOfferId = null } = useCatalog();
     const [ userOpen, setUserOpen ] = useState(true);
     const [ staffOpen, setStaffOpen ] = useState(true);
+    const [ favoritesOpen, setFavoritesOpen ] = useState(true);
     const [ activeVirtual, setActiveVirtual ] = useState<string | null>(null);
+    const [ favorites, setFavorites ] = useState<number[]>([]);
     const [ recentPurchases, setRecentPurchases ] = useState<TrackedPurchase[]>(() => loadTracked('catalog_recent_purchases'));
     const [ frequentPurchases, setFrequentPurchases ] = useState<TrackedPurchase[]>(() => loadTracked('catalog_most_purchased'));
+
+    const cmsUrl = useMemo(() => GetConfiguration<string>('url.prefix', ''), []);
+
+    useEffect(() =>
+    {
+        if(!cmsUrl) return;
+        fetch(`${ cmsUrl }/api/catalog/favorites`, { headers: getAuthHeaders() })
+            .then(r => r.json())
+            .then(d => { if(d.favorites) setFavorites(d.favorites); })
+            .catch(() => {});
+    }, [ cmsUrl ]);
+
+    const toggleFavorite = useCallback((pageId: number) =>
+    {
+        if(!cmsUrl) return;
+        const isFav = favorites.includes(pageId);
+        setFavorites(prev => isFav ? prev.filter(id => id !== pageId) : [ ...prev, pageId ]);
+        fetch(`${ cmsUrl }/api/catalog/favorites`, {
+            method: isFav ? 'DELETE' : 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({ pageId }),
+        }).catch(() => {});
+    }, [ cmsUrl, favorites ]);
 
     // Refresh when a purchase is tracked
     useEffect(() =>
@@ -84,17 +121,26 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
         const hasChildren = topNode.isBranch && topNode.children.some(c => c.isVisible);
         const isActive = topNode.isActive && !activeVirtual;
         const isOpen = topNode.isOpen && hasChildren;
+        const isFav = favorites.includes(topNode.pageId);
 
         return (
             <div key={ index } className={ `mt-0.5 ${ isOpen ? 'bg-white/[0.02] rounded-md' : '' }` }>
                 <div
-                    className={ `px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] cursor-pointer select-none transition-colors flex items-center gap-2 rounded-sm border-l-2 ${ isActive ? 'text-white/90 bg-white/[0.07] border-sky-400/60' : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03] border-transparent' }` }
+                    className={ `group/cat px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] cursor-pointer select-none transition-colors flex items-center gap-2 rounded-sm border-l-2 ${ isActive ? 'text-white/90 bg-white/[0.07] border-sky-400/60' : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03] border-transparent' }` }
                     onClick={ () => onSectionClick(topNode) }
                 >
                     <div className="w-6 h-6 rounded-md bg-white/[0.05] flex items-center justify-center shrink-0">
                         <CatalogIconView icon={ topNode.iconId } />
                     </div>
                     <span className="flex-1 truncate">{ stripPageId(topNode.localization) }</span>
+                    <button
+                        className={ `shrink-0 transition-opacity ${ isFav ? 'opacity-100' : 'opacity-0 group-hover/cat:opacity-100' }` }
+                        onClick={ (e) => { e.stopPropagation(); toggleFavorite(topNode.pageId); } }
+                    >
+                        { isFav
+                            ? <FaStar className="text-[9px] text-amber-400/70" />
+                            : <FaRegStar className="text-[9px] text-white/25 hover:text-amber-400/50" /> }
+                    </button>
                     { hasChildren &&
                         (topNode.isOpen
                             ? <FaChevronDown className="text-[7px] text-white/20 shrink-0" />
@@ -120,6 +166,31 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                     </div> }
 
                 { !searchResult && <>
+
+                    {/* ── Favoriten ── */}
+                    { favorites.length > 0 && rootNode && <>
+                        <div>
+                            <div
+                                className="px-3 pt-2 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] cursor-pointer select-none flex items-center justify-between text-amber-400/40 hover:text-amber-400/60 transition-colors"
+                                onClick={ () => setFavoritesOpen(v => !v) }
+                            >
+                                <span className="flex items-center gap-1.5"><FaStar className="text-[8px]" /> Favoriten</span>
+                                { favoritesOpen
+                                    ? <FaChevronDown className="text-[7px]" />
+                                    : <FaChevronRight className="text-[7px]" /> }
+                            </div>
+                            { favoritesOpen &&
+                                <div className="px-1 pb-1">
+                                    { favorites.map(pageId =>
+                                    {
+                                        const node = findNodeByPageId(rootNode, pageId);
+                                        if(!node) return null;
+                                        return <CatalogNavigationItemView key={ pageId } node={ node } onToggleFavorite={ toggleFavorite } isFavorite={ true } />;
+                                    }) }
+                                </div> }
+                        </div>
+                        <div className="mx-3 my-1 border-t border-white/[0.06]" />
+                    </> }
 
                     {/* ── Zuletzt gekauft ── */}
                     { recentPurchases.length > 0 &&

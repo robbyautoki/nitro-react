@@ -309,16 +309,20 @@ const useCatalogState = () =>
     {
         cancelObjectMover();
 
-        if(targetNode.isBranch)
+        // If branch node is already open+active, just collapse it
+        if(targetNode.isBranch && targetNode.isOpen && targetNode.isActive)
         {
-            for(const child of targetNode.children)
+            setActiveNodes(prevValue =>
             {
-                if(!child.isVisible) continue;
-
-                targetNode = child;
-
-                break;
-            }
+                for(const existing of prevValue) 
+                {
+                    existing.deactivate();
+                    existing.close();
+                }
+                return [];
+            });
+            setCurrentPage(null);
+            return;
         }
 
         const nodes: ICatalogNode[] = [];
@@ -362,7 +366,7 @@ const useCatalogState = () =>
         });
 
         if(targetNode.pageId > -1) loadCatalogPage(targetNode.pageId, offerId);
-    }, [ setActiveNodes, loadCatalogPage, cancelObjectMover ]);
+    }, [ setActiveNodes, setCurrentPage, loadCatalogPage, cancelObjectMover ]);
 
     const openPageById = useCallback((id: number) =>
     {
@@ -981,20 +985,6 @@ const useCatalogState = () =>
         switch(requestedPage.current.requestType)
         {
             case RequestedPage.REQUEST_TYPE_NONE:
-                if(currentPage) return;
-
-                if(rootNode.isBranch)
-                {
-                    for(const child of rootNode.children)
-                    {
-                        if(child && child.isVisible)
-                        {
-                            activateNode(child);
-
-                            return;
-                        }
-                    }
-                }
                 return;
             case RequestedPage.REQUEST_TYPE_ID:
                 openPageById(requestedPage.current.requestById);

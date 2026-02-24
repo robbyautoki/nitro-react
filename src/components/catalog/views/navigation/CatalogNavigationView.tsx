@@ -2,7 +2,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaChevronDown, FaChevronRight, FaClock, FaFire } from 'react-icons/fa';
 import { LocalizeText } from '../../../../api';
 import { useCatalog } from '../../../../hooks';
-import { ScrollArea } from '../../../ui/scroll-area';
+
 import { CatalogIconView } from '../catalog-icon/CatalogIconView';
 import { CatalogNavigationItemView } from './CatalogNavigationItemView';
 import { CatalogNavigationSetView } from './CatalogNavigationSetView';
@@ -82,14 +82,18 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
     const renderCategory = (topNode: any, index: number) =>
     {
         const hasChildren = topNode.isBranch && topNode.children.some(c => c.isVisible);
+        const isActive = topNode.isActive && !activeVirtual;
+        const isOpen = topNode.isOpen && hasChildren;
 
         return (
-            <div key={ index }>
+            <div key={ index } className={ `mt-0.5 ${ isOpen ? 'bg-white/[0.02] rounded-md' : '' }` }>
                 <div
-                    className={ `px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] cursor-pointer select-none transition-colors flex items-center gap-2 rounded-sm ${ topNode.isActive && !activeVirtual ? 'text-white/90 bg-white/[0.07]' : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03]' }` }
+                    className={ `px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] cursor-pointer select-none transition-colors flex items-center gap-2 rounded-sm border-l-2 ${ isActive ? 'text-white/90 bg-white/[0.07] border-sky-400/60' : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03] border-transparent' }` }
                     onClick={ () => onSectionClick(topNode) }
                 >
-                    <CatalogIconView icon={ topNode.iconId } />
+                    <div className="w-6 h-6 rounded-md bg-white/[0.05] flex items-center justify-center shrink-0">
+                        <CatalogIconView icon={ topNode.iconId } />
+                    </div>
                     <span className="flex-1 truncate">{ stripPageId(topNode.localization) }</span>
                     { hasChildren &&
                         (topNode.isOpen
@@ -97,8 +101,8 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                             : <FaChevronRight className="text-[7px] text-white/20 shrink-0" />
                         ) }
                 </div>
-                { topNode.isOpen && hasChildren &&
-                    <div className="px-2 pb-0.5">
+                { isOpen &&
+                    <div className="px-2 pb-1">
                         <CatalogNavigationSetView node={ topNode } />
                     </div> }
             </div>
@@ -106,7 +110,7 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
     };
 
     return (
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto" style={ { scrollbarWidth: 'none' } }>
             <div className="py-1">
                 { searchResult && (searchResult.filteredNodes.length > 0) &&
                     <div className="px-2">
@@ -178,6 +182,6 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                         </div> }
                 </> }
             </div>
-        </ScrollArea>
+        </div>
     );
 }

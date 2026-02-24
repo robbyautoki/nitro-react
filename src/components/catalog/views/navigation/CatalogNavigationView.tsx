@@ -29,10 +29,11 @@ interface CatalogNavigationViewProps
 
 export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffView = false }) =>
 {
-    const { rootNode = null, searchResult = null, activateNode = null, setSearchResult = null, setNavigationHidden = null, openPageByOfferId = null } = useCatalog();
+    const { rootNode = null, searchResult = null, activateNode = null, setSearchResult = null, setNavigationHidden = null, openPageByOfferId = null, activeNodes = [] } = useCatalog();
     const [ favoritesOpen, setFavoritesOpen ] = useState(true);
     const [ activeVirtual, setActiveVirtual ] = useState<string | null>(null);
     const [ favorites, setFavorites ] = useState<number[]>([]);
+    const [ openSection, setOpenSection ] = useState<number | null>(null);
 
     const cmsUrl = useMemo(() => GetConfiguration<string>('url.prefix', ''), []);
 
@@ -56,6 +57,16 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
             body: JSON.stringify({ pageId }),
         }).catch(() => {});
     }, [ cmsUrl, favorites ]);
+
+    // Auto-open section containing the active node
+    useEffect(() =>
+    {
+        if(activeNodes.length >= 2)
+        {
+            const topLevelNode = activeNodes[1];
+            if(topLevelNode) setOpenSection(topLevelNode.pageId);
+        }
+    }, [ activeNodes ]);
 
     // Clear active virtual when a real page is activated externally
     useEffect(() =>
@@ -99,23 +110,37 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
 
         if(hasChildren)
         {
+            const isOpen = openSection === topNode.pageId;
+            const hasActiveChild = topNode.children.some((c: any) => c.isActive);
+
             return (
-                <div key={ index }>
-                    <div className="px-3 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.15em] select-none flex items-center gap-2 text-white/30">
+                <div key={ index } className={ index > 0 ? 'border-t border-white/[0.04]' : '' }>
+                    <div
+                        className={ `px-3 pt-2.5 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] select-none flex items-center gap-2 cursor-pointer transition-colors ${ isOpen || hasActiveChild ? 'text-white/50' : 'text-white/25 hover:text-white/40' }` }
+                        onClick={ () => setOpenSection(isOpen ? null : topNode.pageId) }
+                    >
                         <CatalogIconView icon={ topNode.iconId } />
-                        <span className="truncate">{ stripPageId(topNode.localization) }</span>
+                        <span className="flex-1 truncate">{ stripPageId(topNode.localization) }</span>
+                        { isOpen
+                            ? <FaChevronDown className="text-[7px] shrink-0 opacity-40" />
+                            : <FaChevronRight className="text-[7px] shrink-0 opacity-40" /> }
                     </div>
-                    <div className="px-1 pb-1">
-                        { topNode.children.filter((c: any) => c.isVisible).map((child: any, i: number) =>
-                            <CatalogNavigationItemView key={ i } node={ child } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(child.pageId) } />
-                        ) }
+                    <div
+                        className="overflow-hidden transition-all duration-200 ease-in-out"
+                        style={ { maxHeight: isOpen ? `${ topNode.children.filter((c: any) => c.isVisible).length * 32 }px` : '0px', opacity: isOpen ? 1 : 0 } }
+                    >
+                        <div className="px-1 pb-1">
+                            { topNode.children.filter((c: any) => c.isVisible).map((child: any, i: number) =>
+                                <CatalogNavigationItemView key={ i } node={ child } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(child.pageId) } />
+                            ) }
+                        </div>
                     </div>
                 </div>
             );
         }
 
         return (
-            <div key={ index } className="px-1">
+            <div key={ index } className={ `px-1 ${ index > 0 ? 'border-t border-white/[0.04] pt-1' : '' }` }>
                 <CatalogNavigationItemView node={ topNode } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(topNode.pageId) } />
             </div>
         );

@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaChevronDown, FaChevronRight, FaStar, FaRegStar } from 'react-icons/fa';
 import { GetConfiguration, ICatalogNode } from '../../../../api';
 import { getAuthHeaders } from '../../../../api/utils/SessionTokenManager';
@@ -58,13 +58,19 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
         }).catch(() => {});
     }, [ cmsUrl, favorites ]);
 
-    // Auto-open section containing the active node
+    // Auto-open section containing the active node (only when parent section actually changes)
+    const lastActiveSectionRef = useRef<number | null>(null);
+
     useEffect(() =>
     {
         if(activeNodes.length >= 2)
         {
-            const topLevelNode = activeNodes[1];
-            if(topLevelNode) setOpenSection(topLevelNode.pageId);
+            const parentPageId = activeNodes[1]?.pageId;
+            if(parentPageId && parentPageId !== lastActiveSectionRef.current)
+            {
+                lastActiveSectionRef.current = parentPageId;
+                setOpenSection(parentPageId);
+            }
         }
     }, [ activeNodes ]);
 
@@ -126,13 +132,15 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                             : <FaChevronRight className="text-[7px] shrink-0 opacity-40" /> }
                     </div>
                     <div
-                        className="overflow-hidden transition-all duration-200 ease-in-out"
-                        style={ { maxHeight: isOpen ? `${ topNode.children.filter((c: any) => c.isVisible).length * 32 }px` : '0px', opacity: isOpen ? 1 : 0 } }
+                        className="grid transition-[grid-template-rows,opacity] duration-200 ease-in-out"
+                        style={ { gridTemplateRows: isOpen ? '1fr' : '0fr', opacity: isOpen ? 1 : 0 } }
                     >
-                        <div className="px-1 pb-1">
-                            { topNode.children.filter((c: any) => c.isVisible).map((child: any, i: number) =>
-                                <CatalogNavigationItemView key={ i } node={ child } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(child.pageId) } />
-                            ) }
+                        <div className="overflow-hidden min-h-0">
+                            <div className="px-1 pb-1">
+                                { topNode.children.filter((c: any) => c.isVisible).map((child: any, i: number) =>
+                                    <CatalogNavigationItemView key={ i } node={ child } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(child.pageId) } />
+                                ) }
+                            </div>
                         </div>
                     </div>
                 </div>

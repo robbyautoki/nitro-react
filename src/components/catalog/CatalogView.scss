@@ -49,6 +49,7 @@
         font-size: 12px;
         color: rgba(255, 255, 255, 0.70);
         line-height: 1.6;
+        word-break: break-word;
 
         * {
             background-color: transparent !important;
@@ -68,6 +69,7 @@
         a {
             color: rgba(56, 189, 248, 0.80) !important;
             text-decoration: underline;
+            text-underline-offset: 2px;
             cursor: pointer;
 
             &:hover {
@@ -78,14 +80,14 @@
         br + br {
             display: block;
             content: '';
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
         img {
             max-width: 100% !important;
             height: auto !important;
             border-radius: 8px;
-            margin: 4px 0 8px !important;
+            margin: 6px 0 10px !important;
         }
 
         table {
@@ -95,6 +97,11 @@
         td {
             padding: 2px 4px !important;
             vertical-align: top;
+        }
+
+        // Neutralize old <font size="16"> etc.
+        font[size] {
+            font-size: inherit !important;
         }
     }
 
@@ -144,21 +151,7 @@
     }
 }
 
-// Layout info loyalty
-.nitro-catalog-layout-info-loyalty {
-    .info-loyalty-content {
-        background-repeat: no-repeat;
-        background-position: top right;
-        background-image: url('@/assets/images/catalog/diamond_info_illustration.gif');
-        padding-right: 123px;
-    }
 
-    .info-image {
-        width: 123px;
-        height: 350px;
-        background-image: url('@/assets/images/catalog/diamond_info_illustration.gif');
-    }
-}
 
 .nitro-catalog-layout-marketplace-post-offer {
     width: $marketplace-post-offer-width;

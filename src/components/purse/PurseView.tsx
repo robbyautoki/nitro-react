@@ -51,9 +51,7 @@ export const PurseView: FC<{}> = props =>
         const minutesUntilExpiration = purse.minutesUntilExpiration;
 
         if(purse.clubLevel === HabboClubLevelEnum.NO_CLUB) return LocalizeText('purse.clubdays.zero.amount.text');
-
         else if((minutesUntilExpiration > -1) && (minutesUntilExpiration < (60 * 24))) return FriendlyTime.shortFormat(minutesUntilExpiration * 60);
-
         else return FriendlyTime.shortFormat(totalDays * 86400);
     })();
 
@@ -62,18 +60,11 @@ export const PurseView: FC<{}> = props =>
         if(!purse || !purse.activityPoints || !purse.activityPoints.size) return null;
 
         const types = Array.from(purse.activityPoints.keys()).filter(type => (displayedCurrencies.indexOf(type) >= 0));
-
         let count = 0;
 
-        while(count < offset)
-        {
-            types.shift();
-
-            count++;
-        }
+        while(count < offset) { types.shift(); count++; }
 
         count = 0;
-
         const elements: JSX.Element[] = [];
 
         for(const type of types)
@@ -93,20 +84,20 @@ export const PurseView: FC<{}> = props =>
 
     return (
         <TooltipProvider delayDuration={ 400 }>
-            <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[69] pointer-events-auto flex items-center gap-1 py-1.5 px-3 texture-panel backdrop-blur-2xl rounded-2xl">
+            <div className="fixed top-0 left-16 right-0 h-12 z-[69] pointer-events-auto flex items-center gap-0.5 px-3 border-b border-white/[0.06] bg-black/40 backdrop-blur-xl">
                 <CurrencyView type={ -1 } amount={ purse.credits } short={ currencyDisplayNumberShort } />
                 { getCurrencyElements(0, 2) }
                 { getCurrencyElements(2, -1, true) }
 
-                <div className="w-px h-6 bg-white/[0.06] mx-1" />
+                <div className="w-px h-6 bg-white/[0.06] mx-1.5" />
                 <LevelView />
 
-                { !hcDisabled && <div className="w-px h-6 bg-white/[0.06] mx-1" /> }
+                { !hcDisabled && <div className="w-px h-6 bg-white/[0.06] mx-1.5" /> }
                 { !hcDisabled && (
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div
-                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+                                className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
                                 onClick={ () => CreateLinkEvent('habboUI/open/hccenter') }
                             >
                                 <LayoutCurrencyIcon type="hc" />
@@ -119,14 +110,11 @@ export const PurseView: FC<{}> = props =>
                     </Tooltip>
                 ) }
 
-                <div className="w-px h-6 bg-white/[0.06] mx-1" />
+                <div className="w-px h-6 bg-white/[0.06] mx-1.5" />
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div
-                            className="relative p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => CreateLinkEvent('marketplace/toggle') }
-                        >
+                        <div className="relative p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onClick={ () => CreateLinkEvent('marketplace/toggle') }>
                             <Store className="size-4 text-white/90" strokeWidth={ 2 } />
                             { offerCount > 0 && (
                                 <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold leading-none">
@@ -142,10 +130,7 @@ export const PurseView: FC<{}> = props =>
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => CreateLinkEvent('pricelist/toggle') }
-                        >
+                        <div className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onClick={ () => CreateLinkEvent('pricelist/toggle') }>
                             <ClipboardList className="size-4 text-white/90" strokeWidth={ 2 } />
                         </div>
                     </TooltipTrigger>
@@ -156,10 +141,7 @@ export const PurseView: FC<{}> = props =>
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => CreateLinkEvent('workshop/toggle') }
-                        >
+                        <div className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onClick={ () => CreateLinkEvent('workshop/toggle') }>
                             <Wrench className="size-4 text-white/90" strokeWidth={ 2 } />
                         </div>
                     </TooltipTrigger>
@@ -170,10 +152,7 @@ export const PurseView: FC<{}> = props =>
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => CreateLinkEvent('sets/toggle') }
-                        >
+                        <div className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onClick={ () => CreateLinkEvent('sets/toggle') }>
                             <Trophy className="size-4 text-white/90" strokeWidth={ 2 } />
                         </div>
                     </TooltipTrigger>
@@ -182,14 +161,11 @@ export const PurseView: FC<{}> = props =>
                     </TooltipContent>
                 </Tooltip>
 
-                <div className="w-px h-6 bg-white/[0.06] mx-1" />
+                <div className="w-px h-6 bg-white/[0.06] mx-1.5" />
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => CreateLinkEvent('help/show') }
-                        >
+                        <div className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onClick={ () => CreateLinkEvent('help/show') }>
                             <i className="icon icon-help" />
                         </div>
                     </TooltipTrigger>
@@ -200,10 +176,7 @@ export const PurseView: FC<{}> = props =>
 
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <div
-                            className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => CreateLinkEvent('user-settings/toggle') }
-                        >
+                        <div className="p-1.5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors" onClick={ () => CreateLinkEvent('user-settings/toggle') }>
                             <i className="icon icon-cog" />
                         </div>
                     </TooltipTrigger>
@@ -211,7 +184,6 @@ export const PurseView: FC<{}> = props =>
                         Settings
                     </TooltipContent>
                 </Tooltip>
-
             </div>
         </TooltipProvider>
     );

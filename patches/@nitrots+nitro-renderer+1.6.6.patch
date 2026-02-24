@@ -12,18 +12,9 @@ index 671cf7f..a14673f 100644
              visualizationData.avatarManager = Nitro.instance.avatar;
          }
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/MovingObjectLogic.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/MovingObjectLogic.ts
-index ac3907b..a09538b 100644
+index ac3907b..be705da 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/MovingObjectLogic.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/MovingObjectLogic.ts
-@@ -4,7 +4,7 @@ import { ObjectMoveUpdateMessage } from '../../messages';
- 
- export class MovingObjectLogic extends RoomObjectLogicBase
- {
--    public static DEFAULT_UPDATE_INTERVAL: number = 500;
-+    public static DEFAULT_UPDATE_INTERVAL: number = 250;
-     private static TEMP_VECTOR: Vector3d = new Vector3d();
- 
-     private _liftAmount: number;
 @@ -15,6 +15,14 @@ export class MovingObjectLogic extends RoomObjectLogicBase
      private _changeTime: number;
      private _updateInterval: number;

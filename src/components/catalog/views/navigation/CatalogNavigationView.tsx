@@ -30,8 +30,6 @@ interface CatalogNavigationViewProps
 export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffView = false }) =>
 {
     const { rootNode = null, searchResult = null, activateNode = null, setSearchResult = null, setNavigationHidden = null, openPageByOfferId = null } = useCatalog();
-    const [ userOpen, setUserOpen ] = useState(true);
-    const [ staffOpen, setStaffOpen ] = useState(true);
     const [ favoritesOpen, setFavoritesOpen ] = useState(true);
     const [ activeVirtual, setActiveVirtual ] = useState<string | null>(null);
     const [ favorites, setFavorites ] = useState<number[]>([]);
@@ -116,41 +114,30 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
         activateNode(topNode);
     };
 
-    const renderCategory = (topNode: any, index: number) =>
+    const renderTopNode = (topNode: any, index: number) =>
     {
-        const hasChildren = topNode.isBranch && topNode.children.some(c => c.isVisible);
-        const isActive = topNode.isActive && !activeVirtual;
-        const isOpen = topNode.isOpen && hasChildren;
-        const isFav = favorites.includes(topNode.pageId);
+        const hasChildren = topNode.isBranch && topNode.children.some((c: any) => c.isVisible);
+
+        if(hasChildren)
+        {
+            return (
+                <div key={ index }>
+                    <div className="px-3 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.15em] select-none flex items-center gap-2 text-white/30">
+                        <CatalogIconView icon={ topNode.iconId } />
+                        <span className="truncate">{ stripPageId(topNode.localization) }</span>
+                    </div>
+                    <div className="px-1 pb-1">
+                        { topNode.children.filter((c: any) => c.isVisible).map((child: any, i: number) =>
+                            <CatalogNavigationItemView key={ i } node={ child } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(child.pageId) } />
+                        ) }
+                    </div>
+                </div>
+            );
+        }
 
         return (
-            <div key={ index } className={ `mt-0.5 ${ isOpen ? 'bg-white/[0.02] rounded-md' : '' }` }>
-                <div
-                    className={ `group/cat px-3 py-[5px] text-[10px] font-semibold uppercase tracking-[0.05em] cursor-pointer select-none transition-colors flex items-center gap-2 rounded-sm border-l-2 ${ isActive ? 'text-white/90 bg-white/[0.07] border-sky-400/60' : 'text-white/50 hover:text-white/70 hover:bg-white/[0.03] border-transparent' }` }
-                    onClick={ () => onSectionClick(topNode) }
-                >
-                    <div className="w-6 h-6 rounded-md bg-white/[0.05] flex items-center justify-center shrink-0">
-                        <CatalogIconView icon={ topNode.iconId } />
-                    </div>
-                    <span className="flex-1 truncate">{ stripPageId(topNode.localization) }</span>
-                    <button
-                        className={ `shrink-0 transition-opacity ${ isFav ? 'opacity-100' : 'opacity-0 group-hover/cat:opacity-100' }` }
-                        onClick={ (e) => { e.stopPropagation(); toggleFavorite(topNode.pageId); } }
-                    >
-                        { isFav
-                            ? <FaStar className="text-[9px] text-amber-400/70" />
-                            : <FaRegStar className="text-[9px] text-white/25 hover:text-amber-400/50" /> }
-                    </button>
-                    { hasChildren &&
-                        (topNode.isOpen
-                            ? <FaChevronDown className="text-[7px] text-white/20 shrink-0" />
-                            : <FaChevronRight className="text-[7px] text-white/20 shrink-0" />
-                        ) }
-                </div>
-                { isOpen &&
-                    <div className="px-2 pb-1">
-                        <CatalogNavigationSetView node={ topNode } />
-                    </div> }
+            <div key={ index } className="px-1">
+                <CatalogNavigationItemView node={ topNode } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(topNode.pageId) } />
             </div>
         );
     };
@@ -218,39 +205,11 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
 
                     {/* ── User Catalog Section ── */}
                     { !staffView && userNodes.length > 0 &&
-                        <div>
-                            <div
-                                className="px-3 pt-2 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] cursor-pointer select-none flex items-center justify-between text-white/30 hover:text-white/50 transition-colors"
-                                onClick={ () => setUserOpen(v => !v) }
-                            >
-                                <span>Katalog</span>
-                                { userOpen
-                                    ? <FaChevronDown className="text-[7px]" />
-                                    : <FaChevronRight className="text-[7px]" /> }
-                            </div>
-                            { userOpen &&
-                                <div className="px-1 pb-1">
-                                    { userNodes.map((topNode, index) => renderCategory(topNode, index)) }
-                                </div> }
-                        </div> }
+                        userNodes.map((topNode, index) => renderTopNode(topNode, index)) }
 
                     {/* ── Staff Catalog Section ── */}
                     { staffView && staffNodes.length > 0 &&
-                        <div>
-                            <div
-                                className="px-3 pt-2 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] cursor-pointer select-none flex items-center justify-between text-white/30 hover:text-white/50 transition-colors"
-                                onClick={ () => setStaffOpen(v => !v) }
-                            >
-                                <span>Staff</span>
-                                { staffOpen
-                                    ? <FaChevronDown className="text-[7px]" />
-                                    : <FaChevronRight className="text-[7px]" /> }
-                            </div>
-                            { staffOpen &&
-                                <div className="px-1 pb-1">
-                                    { staffNodes.map((topNode, index) => renderCategory(topNode, index)) }
-                                </div> }
-                        </div> }
+                        staffNodes.map((topNode, index) => renderTopNode(topNode, index)) }
                 </> }
             </div>
         </div>

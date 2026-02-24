@@ -13,11 +13,11 @@ interface ToolbarMeViewProps
 }
 
 const ME_ITEMS = [
-    { iconClass: 'icon-me-achievements', label: 'Achievements', action: () => CreateLinkEvent('achievements/toggle'), hasBadge: true },
-    { iconClass: 'icon-me-profile', label: 'Profil', action: () => GetUserProfile(GetSessionDataManager().userId), hasBadge: false },
-    { iconClass: 'icon-me-rooms', label: 'Meine Räume', action: () => CreateLinkEvent('navigator/search/myworld_view'), hasBadge: false },
-    { iconClass: 'icon-me-clothing', label: 'Avatar', action: () => CreateLinkEvent('avatar-editor/toggle'), hasBadge: false },
-    { iconClass: 'icon-me-settings', label: 'Einstellungen', action: () => CreateLinkEvent('user-settings/toggle'), hasBadge: false },
+    { iconClass: 'icon-me-achievements', label: 'Achievements', action: () => CreateLinkEvent('achievements/toggle') },
+    { iconClass: 'icon-me-profile', label: 'Profil', action: () => GetUserProfile(GetSessionDataManager().userId) },
+    { iconClass: 'icon-me-rooms', label: 'Meine Räume', action: () => CreateLinkEvent('navigator/search/myworld_view') },
+    { iconClass: 'icon-me-clothing', label: 'Avatar', action: () => CreateLinkEvent('avatar-editor/toggle') },
+    { iconClass: 'icon-me-settings', label: 'Einstellungen', action: () => CreateLinkEvent('user-settings/toggle') },
 ];
 
 export const ToolbarMeView: FC<ToolbarMeViewProps> = props =>

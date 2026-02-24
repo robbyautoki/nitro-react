@@ -463,7 +463,7 @@ export const PurseView: FC<{}> = props =>
 
     return (
         <TooltipProvider delayDuration={ 400 }>
-            <div className="fixed top-3 left-20 z-[69] pointer-events-auto inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-md">
+            <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[69] pointer-events-auto inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-md">
                 <CurrencyView type={ -1 } amount={ purse.credits } short={ currencyDisplayNumberShort } />
                 { getCurrencyElements(0, 2) }
                 { getCurrencyElements(2, -1, true) }

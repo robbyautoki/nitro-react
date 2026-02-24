@@ -5,7 +5,7 @@ import { LayoutAvatarImageView } from '../../common';
 import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useRoomEngineEvent, useSessionInfo } from '../../hooks';
 import { ToolbarMeView } from './ToolbarMeView';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function SidebarItem({ iconClass, label, badge, onClick }: { iconClass: string; label: string; badge?: number; onClick?: () => void })
@@ -129,11 +129,9 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
     return (
         <TooltipProvider delayDuration={ 400 }>
-            {/* Sidebar wrapper — identical to prototype LeftSidebar */}
             <div className="nitro-toolbar fixed left-0 top-0 h-full z-[70] pointer-events-auto relative shrink-0">
-                <div className={ `border-r border-border/40 bg-card/50 flex flex-col items-center py-3 gap-0.5 overflow-hidden transition-all duration-200 h-full ${ sidebarOpen ? 'w-16' : 'w-0 border-r-0' }` }>
+                <div className={ `border-r border-border/40 bg-card/50 backdrop-blur-xl flex flex-col items-center py-3 gap-0.5 overflow-hidden transition-all duration-200 h-full ${ sidebarOpen ? 'w-16' : 'w-0 border-r-0' }` }>
 
-                    {/* Avatar + Me Menu */}
                     <ToolbarMeView
                         useGuideTool={ useGuideTool }
                         unseenAchievementCount={ getTotalUnseen }
@@ -142,7 +140,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
                     <div className="w-8 h-px bg-border/30 my-1" />
 
-                    {/* Nav Icons */}
                     { isInRoom
                         ? <SidebarItem iconClass="icon-habbo" label="Hotel View" onClick={ () => VisitDesktop() } />
                         : <SidebarItem iconClass="icon-house" label="Home" onClick={ () => CreateLinkEvent('navigator/goto/home') } />
@@ -159,18 +156,15 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
 
                     <div className="w-8 h-px bg-border/30 my-1" />
 
-                    {/* Social Icons */}
                     <SidebarItem iconClass="icon-friendall" label="Freunde" badge={ requests.length } onClick={ () => CreateLinkEvent('friends/toggle') } />
                     { ((iconState === MessengerIconState.SHOW) || (iconState === MessengerIconState.UNREAD)) &&
                         <SidebarItem iconClass={ `icon-message${ iconState === MessengerIconState.UNREAD ? ' is-unseen' : '' }` } label="Messenger" onClick={ () => OpenMessengerChat() } /> }
 
                     <div className="w-8 h-px bg-border/30 my-1" />
 
-                    {/* Online Friends */}
                     <OnlineFriendsPopover />
                 </div>
 
-                {/* Collapse toggle — outside overflow-hidden */}
                 <button
                     onClick={ () => setSidebarOpen(v => !v) }
                     className="absolute top-3 -right-3 z-20 size-6 rounded-full bg-card border border-border/50 shadow-sm flex items-center justify-center hover:bg-accent/50 transition-colors"
@@ -179,7 +173,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                 </button>
             </div>
 
-            {/* Bottom center - Chat Input + Room Tools */}
             <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto flex items-end gap-2 w-[620px]">
                 <div id="toolbar-chat-input-container" className="flex-1 min-w-0" />
                 <div id="toolbar-room-tools-container" className="flex items-center shrink-0" />

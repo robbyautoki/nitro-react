@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaChevronDown, FaChevronRight, FaStar, FaRegStar } from 'react-icons/fa';
 import { GetConfiguration, ICatalogNode } from '../../../../api';
 import { getAuthHeaders } from '../../../../api/utils/SessionTokenManager';
@@ -29,7 +29,7 @@ interface CatalogNavigationViewProps
 
 export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffView = false }) =>
 {
-    const { rootNode = null, searchResult = null, activateNode = null, setSearchResult = null, setNavigationHidden = null, openPageByOfferId = null, activeNodes = [] } = useCatalog();
+    const { rootNode = null, searchResult = null, activateNode = null, setSearchResult = null, setNavigationHidden = null, openPageByOfferId = null } = useCatalog();
     const [ favoritesOpen, setFavoritesOpen ] = useState(true);
     const [ activeVirtual, setActiveVirtual ] = useState<string | null>(null);
     const [ favorites, setFavorites ] = useState<number[]>([]);
@@ -57,22 +57,6 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
             body: JSON.stringify({ pageId }),
         }).catch(() => {});
     }, [ cmsUrl, favorites ]);
-
-    // Auto-open section containing the active node (only when parent section actually changes)
-    const lastActiveSectionRef = useRef<number | null>(null);
-
-    useEffect(() =>
-    {
-        if(activeNodes.length >= 2)
-        {
-            const parentPageId = activeNodes[1]?.pageId;
-            if(parentPageId && parentPageId !== lastActiveSectionRef.current)
-            {
-                lastActiveSectionRef.current = parentPageId;
-                setOpenSection(parentPageId);
-            }
-        }
-    }, [ activeNodes ]);
 
     // Clear active virtual when a real page is activated externally
     useEffect(() =>
@@ -116,14 +100,14 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
 
         if(hasChildren)
         {
-            const isOpen = openSection === topNode.pageId;
             const hasActiveChild = topNode.children.some((c: any) => c.isActive);
+            const isOpen = openSection === topNode.pageId || hasActiveChild;
 
             return (
                 <div key={ index } className={ index > 0 ? 'border-t border-white/[0.04]' : '' }>
                     <div
-                        className={ `px-3 pt-2.5 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] select-none flex items-center gap-2 cursor-pointer transition-colors ${ isOpen || hasActiveChild ? 'text-white/50' : 'text-white/25 hover:text-white/40' }` }
-                        onClick={ () => setOpenSection(isOpen ? null : topNode.pageId) }
+                        className={ `px-3 pt-2.5 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] select-none flex items-center gap-2 cursor-pointer transition-colors ${ isOpen ? 'text-white/50' : 'text-white/25 hover:text-white/40' }` }
+                        onClick={ () => setOpenSection(isOpen && !hasActiveChild ? null : topNode.pageId) }
                     >
                         <CatalogIconView icon={ topNode.iconId } />
                         <span className="flex-1 truncate">{ stripPageId(topNode.localization) }</span>

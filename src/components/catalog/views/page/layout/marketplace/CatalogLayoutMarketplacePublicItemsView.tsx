@@ -132,7 +132,7 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     });
 
     return (
-        <div className="flex flex-col h-full gap-2">
+        <div className="flex flex-col h-full gap-3 bg-[#0a0a0a] rounded-xl p-3 border border-white/[0.04]">
             <div className="flex gap-1">
                 <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'bg-white/[0.12] text-white/90 border-white/[0.15]' : 'bg-transparent text-white/40 border-transparent hover:text-white/60 hover:bg-white/[0.05]' }` } onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
                     { LocalizeText('catalog.marketplace.search_by_activity') }
@@ -144,15 +144,31 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
                     { LocalizeText('catalog.marketplace.search_advanced') }
                 </button>
             </div>
-            <SearchFormView sortTypes={ getSortTypes } searchType={ searchType } onSearch={ requestOffers } />
+            
+            <div className="bg-black/50 p-3 rounded-lg border border-white/[0.05]">
+                <SearchFormView sortTypes={ getSortTypes } searchType={ searchType } onSearch={ requestOffers } />
+            </div>
+            
             <div className="flex flex-col gap-1.5 flex-1 min-h-0">
-                <span className="text-xs font-semibold text-white/90 truncate shrink-0">
-                    { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.size.toString() ]) }
-                </span>
-                <div className="flex flex-col gap-1.5 overflow-auto nitro-catalog-layout-marketplace-grid">
-                    {
+                <div className="flex items-center justify-between shrink-0 px-2 mt-2 border-b border-white/[0.08] pb-2">
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.1em]">
+                        { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.size.toString() ]) }
+                    </span>
+                    <div className="flex items-center text-[10px] font-bold text-white/30 uppercase tracking-[0.1em] gap-8 pr-[70px]">
+                        <span className="w-16 text-right">Spread</span>
+                        <span className="w-16 text-right">Price</span>
+                    </div>
+                </div>
+                
+                <div className="flex flex-col overflow-auto h-full rounded border border-white/[0.04] bg-[#050505]">
+                    { offers.size > 0 ? (
                         Array.from(offers.values()).map( (entry, index) => <CatalogLayoutMarketplaceItemView key={ index } offerData={ entry } type={ PUBLIC_OFFER } onClick={ purchaseItem } />)
-                    }
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-white/20 text-xs gap-2 py-8">
+                            <span className="text-2xl font-mono opacity-50">¯\_(ツ)_/¯</span>
+                            No market data available.
+                        </div>
+                    ) }
                 </div>
             </div>
         </div>

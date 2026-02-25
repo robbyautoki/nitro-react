@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { ChatMessageTypeEnum, CreateLinkEvent, GetClubMemberLevel, GetConfiguration, GetRoomEngine, GetRoomSession, GetSessionDataManager, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
 import { useChatInputWidget, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
 import { ChatInputEmojiPickerView } from './ChatInputEmojiPickerView';
-import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
+import { ChatInputStyleSelectorView, getBubbleImageUrl } from './ChatInputStyleSelectorView';
 import { HotbarView } from '../../../hotbar/HotbarView';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -674,7 +674,13 @@ export const ChatInputView: FC<{}> = props =>
                 <div className="flex items-center justify-between mt-1.5 px-1">
                     <div className="flex items-center gap-3 text-[10px] text-white/25">
                         <span className="flex items-center gap-1"><Smile className="w-3 h-3" /> Emoji</span>
-                        <span className="flex items-center gap-1"><Palette className="w-3 h-3" /> #{chatStyleId}</span>
+                        <span className="flex items-center gap-1">
+                            { getBubbleImageUrl(chatStyleId)
+                                ? <img src={ getBubbleImageUrl(chatStyleId) } alt="" className="h-3 w-auto inline-block opacity-60" style={ { imageRendering: 'pixelated' } } />
+                                : <Palette className="w-3 h-3" />
+                            }
+                            #{ chatStyleId }
+                        </span>
                         <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Hotbar</span>
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-white/25">

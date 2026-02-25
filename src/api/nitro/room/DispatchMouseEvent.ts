@@ -51,5 +51,5 @@ export const DispatchMouseEvent = (event: MouseEvent, canvasId: number = 1) =>
         default: return;
     }
     
-    GetRoomEngine().dispatchMouseEvent(canvasId, x, y, eventType, event.altKey, (event.ctrlKey || event.metaKey), event.shiftKey, false);
+    GetRoomEngine().dispatchMouseEvent(canvasId, x, y, eventType, event.altKey, (event.ctrlKey || event.metaKey), event.shiftKey, (event.buttons > 0));
 }

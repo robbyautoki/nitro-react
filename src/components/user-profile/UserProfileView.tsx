@@ -163,7 +163,7 @@ export const UserProfileView: FC<{}> = () =>
 
     return (
         <DraggableWindow uniqueKey="nitro-user-profile" windowPosition={ DraggableWindowPosition.CENTER }>
-            <div className={ cn('w-[540px] space-y-4') }>
+            <div className={ cn('w-[540px] space-y-6') }>
                 {/* ── Main Profile Card (1:1 v2 structure) ── */}
                 <Card className="overflow-hidden pt-0">
                     {/* Banner — v2: h-32 bg-gradient, here: animated GIF support */}
@@ -245,17 +245,17 @@ export const UserProfileView: FC<{}> = () =>
                             {/* v2: flex gap-2 (buttons right-aligned) */}
                             <div className="flex gap-2 shrink-0">
                                 { canSendFriendRequest && (
-                                    <Button size="sm" onClick={ addFriend }>
+                                    <Button onClick={ addFriend }>
                                         <UserPlus className="mr-2 size-4" />
                                         Freund
                                     </Button>
                                 ) }
-                                <Button variant="outline" size="sm" onClick={ () => CreateLinkEvent(`navigator/search/hotel_view/owner:${ userProfile.username }`) }>
+                                <Button variant="outline" onClick={ () => CreateLinkEvent(`navigator/search/hotel_view/owner:${ userProfile.username }`) }>
                                     <Home className="mr-2 size-4" />
                                     Räume
                                 </Button>
                                 { !isOwnProfile && userProfile.isMyFriend && (
-                                    <Button variant="outline" size="sm" onClick={ () => CreateLinkEvent(`friends/messenger/${ userProfile.username }`) }>
+                                    <Button variant="outline" onClick={ () => CreateLinkEvent(`friends/messenger/${ userProfile.username }`) }>
                                         <MessageSquare className="mr-2 size-4" />
                                         Nachricht
                                     </Button>
@@ -278,7 +278,7 @@ export const UserProfileView: FC<{}> = () =>
                 </Card>
 
                 {/* ── Stats Cards Grid (1:1 v2 structure) ── */}
-                <div className="grid gap-3 grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     { stats.map((stat) =>
                     {
                         const Icon = statIcons[stat.icon];

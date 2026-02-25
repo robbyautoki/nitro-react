@@ -171,7 +171,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
 
       </div>
 
-      <div className="fixed bottom-1 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto">
+      <div className="fixed bottom-1 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto w-[550px]">
         <div id="toolbar-chat-input-container" />
       </div>
       <div id="toolbar-friend-bar-container" className="hidden" />

@@ -1,7 +1,6 @@
 import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaTimes } from 'react-icons/fa';
 import { GroupItem, LocalizeText } from '../../../../api';
-import { Button, Flex } from '../../../../common';
 
 export interface InventoryFurnitureSearchViewProps
 {
@@ -16,32 +15,32 @@ export const InventoryFurnitureSearchView: FC<InventoryFurnitureSearchViewProps>
 
     useEffect(() =>
     {
-        let filteredGroupItems = [ ...groupItems ];
+        let filtered = [ ...groupItems ];
 
         if(searchValue && searchValue.length)
         {
-            const comparison = searchValue.toLocaleLowerCase();
-
-            filteredGroupItems = groupItems.filter(item =>
-            {
-                if(comparison && comparison.length)
-                {
-                    if(item.name.toLocaleLowerCase().includes(comparison)) return item;
-                }
-
-                return null;
-            });
+            const q = searchValue.toLocaleLowerCase();
+            filtered = groupItems.filter(item => item.name.toLocaleLowerCase().includes(q));
         }
 
-        setGroupItems(filteredGroupItems);
+        setGroupItems(filtered);
     }, [ groupItems, setGroupItems, searchValue ]);
 
     return (
-        <Flex gap={ 1 }>
-            <input type="text" className="form-control form-control-sm" placeholder={ LocalizeText('generic.search') } value={ searchValue } onChange={ event => setSearchValue(event.target.value) } />
-            <Button variant="primary">
-                <FaSearch className="fa-icon" />
-            </Button>
-        </Flex>
+        <div className="inv-search-wrap">
+            <FaSearch className="inv-search-icon" />
+            <input
+                type="text"
+                className="inv-search-input"
+                placeholder={ LocalizeText('generic.search') }
+                value={ searchValue }
+                onChange={ e => setSearchValue(e.target.value) }
+            />
+            { searchValue && (
+                <button className="inv-search-clear" onClick={ () => setSearchValue('') }>
+                    <FaTimes />
+                </button>
+            ) }
+        </div>
     );
 }

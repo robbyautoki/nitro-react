@@ -1,6 +1,6 @@
 import { MouseEventType } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { attemptItemPlacement, GroupItem } from '../../../../api';
+import { attemptItemPlacement, GetSessionDataManager, GroupItem } from '../../../../api';
 import { useInventoryFurni } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
 import { FaWrench } from 'react-icons/fa';
@@ -17,16 +17,25 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
 {
     const { groupItem = null, multiSelectMode = false, isMultiSelected = false, onMultiToggle = null } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
+    const [ showTooltip, setShowTooltip ] = useState(false);
     const [ contextMenu, setContextMenu ] = useState<{ x: number; y: number } | null>(null);
     const { selectedItem = null, setSelectedItem = null } = useInventoryFurni();
     const { categories, getItemCategories, toggleAssignment } = useInventoryCategories();
     const contextRef = useRef<HTMLDivElement>(null);
+    const tooltipTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
     const isActive = !multiSelectMode && groupItem === selectedItem;
     const count = groupItem.getUnlockedCount();
     const isLtd = groupItem.stuffData.uniqueNumber > 0;
     const ltdItemId = isLtd ? (groupItem.getLastItem()?.id || 0) : 0;
     const assignmentKey = isLtd && ltdItemId > 0 ? -ltdItemId : groupItem.type;
+
+    const sessionData = GetSessionDataManager();
+    const floorData = sessionData.getFloorItemData(groupItem.type);
+    const wallData = !floorData ? sessionData.getWallItemData(groupItem.type) : null;
+    const furniData = floorData || wallData;
+    const className = furniData?.className || '';
+    const isWall = groupItem.isWallItem;
 
     const onMouseEvent = (event: MouseEvent) =>
     {
@@ -54,6 +63,17 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
         }
     }
 
+    const onHoverEnter = useCallback(() =>
+    {
+        tooltipTimer.current = setTimeout(() => setShowTooltip(true), 350);
+    }, []);
+
+    const onHoverLeave = useCallback(() =>
+    {
+        if(tooltipTimer.current) clearTimeout(tooltipTimer.current);
+        setShowTooltip(false);
+    }, []);
+
     const onContextMenu = useCallback((e: MouseEvent) =>
     {
         e.preventDefault();
@@ -79,9 +99,10 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
         return () => document.removeEventListener('mousedown', handleClick);
     }, [ contextMenu ]);
 
+    useEffect(() => () => { if(tooltipTimer.current) clearTimeout(tooltipTimer.current); }, []);
+
     const itemCategories = getItemCategories(assignmentKey);
 
-    // Build class list
     let tileClass = 'inv-tile';
     if(isActive) tileClass += ' active';
     if(multiSelectMode && isMultiSelected) tileClass += ' multi-selected';
@@ -94,7 +115,8 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
                 className={ tileClass }
                 onMouseDown={ onMouseEvent }
                 onMouseUp={ onMouseEvent }
-                onMouseOut={ onMouseEvent }
+                onMouseOut={ e => { onMouseEvent(e); onHoverLeave(); } }
+                onMouseEnter={ onHoverEnter }
                 onDoubleClick={ onMouseEvent }
                 onContextMenu={ multiSelectMode ? undefined : onContextMenu }
             >
@@ -105,24 +127,31 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
                     onError={ e => { (e.target as HTMLImageElement).style.opacity = '0.2'; } }
                 />
 
-                {/* Multi-select checkbox */}
                 { multiSelectMode &&
                     <div className={ 'inv-tile-check' + (isMultiSelected ? ' checked' : '') }>
                         { isMultiSelected && '✓' }
                     </div> }
 
-                {/* LTD number */}
                 { isLtd &&
                     <span className="inv-tile-ltd">{ groupItem.stuffData.uniqueNumber }</span> }
 
-                {/* Count */}
                 { count > 1 &&
                     <span className="inv-tile-count">{ count }</span> }
 
-                {/* Durability wrench (shown if name hints breakable — visual only) */}
+                {/* Tooltip */}
+                { showTooltip && !contextMenu &&
+                    <div className="inv-tooltip">
+                        <div className="inv-tooltip-name">{ groupItem.name }</div>
+                        <div className="inv-tooltip-classname">{ className }</div>
+                        <div className="inv-tooltip-meta">
+                            <span>{ count }×</span>
+                            <span>·</span>
+                            <span>{ isWall ? 'Wand' : `${ (floorData as any)?.customParams?.split(',')[0] || '1' }×${ (floorData as any)?.customParams?.split(',')[1] || '1' }` }</span>
+                        </div>
+                        { isLtd && <div className="inv-tooltip-ltd">LTD #{ groupItem.stuffData.uniqueNumber }/{ groupItem.stuffData.uniqueSeries }</div> }
+                    </div> }
             </div>
 
-            {/* Context menu for category assignment */}
             { contextMenu && categories.length > 0 && (
                 <div
                     ref={ contextRef }

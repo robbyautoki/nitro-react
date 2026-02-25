@@ -1,7 +1,7 @@
 import { BadgePointLimitsEvent, ILinkEventTracker, IRoomSession, RoomEngineObjectEvent, RoomEngineObjectPlacedEvent, RoomPreviewer, RoomSessionEvent } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaTimes, FaBox, FaRobot, FaPaw, FaMedal } from 'react-icons/fa';
-import { AddEventLinkTracker, GetLocalization, GetRoomEngine, isObjectMoverRequested, LocalizeText, RemoveLinkEventTracker, setObjectMoverRequested, UnseenItemCategory } from '../../api';
+import { AddEventLinkTracker, GetConfiguration, GetLocalization, GetRoomEngine, isObjectMoverRequested, LocalizeText, RemoveLinkEventTracker, setObjectMoverRequested, UnseenItemCategory } from '../../api';
 import { DraggableWindow, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent } from '../../hooks';
 import { useInventoryCategories } from '../../hooks/inventory/useInventoryCategories';
@@ -44,6 +44,52 @@ export const InventoryView: FC<{}> = props =>
     const { categories, activeCategory, setActiveCategory } = useInventoryCategories();
 
     const totalItems = useMemo(() => groupItems.reduce((s, g) => s + g.getUnlockedCount(), 0), [ groupItems ]);
+
+    const ASSETS_URL = GetConfiguration<string>('asset.url', 'http://localhost:8080');
+
+    // Hotbar
+    interface HotbarSlot { item_base_id: number | null; public_name: string | null; item_name: string | null; sprite_id: number | null; }
+    const EMPTY_SLOT: HotbarSlot = { item_base_id: null, public_name: null, item_name: null, sprite_id: null };
+
+    const [ hotbarSlots, setHotbarSlots ] = useState<HotbarSlot[]>(() =>
+    {
+        try { const stored = JSON.parse(localStorage.getItem('habbo_hotbar') || '[]'); return Array.from({ length: 9 }, (_, i) => stored[i] || { ...EMPTY_SLOT }); }
+        catch { return Array.from({ length: 9 }, () => ({ ...EMPTY_SLOT })); }
+    });
+    const [ hotbarHovered, setHotbarHovered ] = useState<number | null>(null);
+
+    const saveHotbar = useCallback((slots: HotbarSlot[]) =>
+    {
+        setHotbarSlots(slots);
+        localStorage.setItem('habbo_hotbar', JSON.stringify(slots));
+    }, []);
+
+    const removeHotbarSlot = useCallback((index: number) =>
+    {
+        const next = [ ...hotbarSlots ];
+        next[index] = { ...EMPTY_SLOT };
+        saveHotbar(next);
+    }, [ hotbarSlots, saveHotbar ]);
+
+    // Listen for hotbar:set-slot events from InventoryFurnitureView
+    useEffect(() =>
+    {
+        const handler = (e: CustomEvent) =>
+        {
+            const { slot, ...data } = e.detail;
+            const next = [ ...hotbarSlots ];
+            const targetSlot = slot !== undefined ? slot : next.findIndex(s => !s || s.item_base_id === null);
+            if(targetSlot >= 0 && targetSlot < 9)
+            {
+                next[targetSlot] = data;
+                saveHotbar(next);
+            }
+        };
+        window.addEventListener('hotbar:set-slot', handler as EventListener);
+        return () => window.removeEventListener('hotbar:set-slot', handler as EventListener);
+    }, [ hotbarSlots, saveHotbar ]);
+
+    const getFurniIcon = (cn: string) => `${ ASSETS_URL }/c_images/${ cn.split('*')[0] }_icon.png`;
 
     const onClose = () =>
     {
@@ -198,6 +244,36 @@ export const InventoryView: FC<{}> = props =>
                         { currentTab === TAB_BADGES &&
                             <InventoryBadgeView /> }
                     </div>
+                </div>
+
+                {/* Hotbar */}
+                <div className="inv-hotbar">
+                    { hotbarSlots.map((slot, i) =>
+                    {
+                        const filled = slot && slot.item_base_id !== null;
+                        return (
+                            <div
+                                key={ i }
+                                className={ 'inv-hotbar-slot' + (filled ? ' filled' : ' empty') }
+                                onMouseEnter={ () => setHotbarHovered(i) }
+                                onMouseLeave={ () => setHotbarHovered(null) }
+                                title={ filled ? `${ slot.public_name }` : `Slot ${ i + 1 }` }
+                            >
+                                <span className="inv-hotbar-number">{ i + 1 }</span>
+                                { filled && slot.item_name && (
+                                    <img
+                                        className="inv-hotbar-icon"
+                                        src={ getFurniIcon(slot.item_name) }
+                                        alt=""
+                                        onError={ e => { (e.target as HTMLImageElement).style.opacity = '0.2'; } }
+                                    />
+                                ) }
+                                { filled && hotbarHovered === i && (
+                                    <button className="inv-hotbar-remove" onClick={ e => { e.stopPropagation(); removeHotbarSlot(i); } }>×</button>
+                                ) }
+                            </div>
+                        );
+                    }) }
                 </div>
             </div>
         </DraggableWindow>

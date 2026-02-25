@@ -1,12 +1,12 @@
 import { IRoomSession, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { attemptItemPlacement, CreateLinkEvent, FurniCategory, GetConfiguration, GetRoomEngine, GetSessionDataManager, GroupItem, LocalizeText, UnseenItemCategory } from '../../../../api';
 import { getAuthHeaders } from '../../../../api/utils/SessionTokenManager';
 import { LayoutRoomPreviewerView } from '../../../../common';
 import { useInventoryFurni, useInventoryUnseenTracker } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
-import { FaWrench, FaTrash, FaCheckSquare, FaTimes, FaBolt, FaStore, FaArrowUp } from 'react-icons/fa';
+import { FaWrench, FaTrash, FaCheckSquare, FaTimes, FaBolt, FaStore, FaArrowUp, FaPlus, FaTag } from 'react-icons/fa';
 import { InventoryDeleteDialog } from './InventoryDeleteDialog';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryFurnitureItemView } from './InventoryFurnitureItemView';
@@ -17,12 +17,6 @@ interface InventoryFurnitureViewProps
     roomSession: IRoomSession;
     roomPreviewer: RoomPreviewer;
 }
-
-const RARITY_META: Record<string, { label: string; cls: string }> = {
-    legendary: { label: 'LGD', cls: 'rarity-legendary' },
-    epic: { label: 'EPIC', cls: 'rarity-epic' },
-    rare: { label: 'RARE', cls: 'rarity-rare' },
-};
 
 export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 {
@@ -40,9 +34,45 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
     const [ deleteTarget, setDeleteTarget ] = useState<{ groupItem: GroupItem; maxCount: number } | null>(null);
     const [ showBatchDeleteDialog, setShowBatchDeleteDialog ] = useState(false);
     const [ showCategoryDropdown, setShowCategoryDropdown ] = useState(false);
+    const [ showInspectorCatPicker, setShowInspectorCatPicker ] = useState(false);
     const [ sortMode, setSortMode ] = useState<'name' | 'count' | 'rarity'>('name');
 
     const categoryFilteredItems = filterByCategory(groupItems, activeCategory);
+
+    // Sort the filtered items
+    const sortedItems = useMemo(() =>
+    {
+        const items = [ ...filteredGroupItems ];
+        switch(sortMode)
+        {
+            case 'count':
+                return items.sort((a, b) => b.getUnlockedCount() - a.getUnlockedCount());
+            case 'rarity':
+                return items.sort((a, b) =>
+                {
+                    const aScore = a.stuffData.uniqueNumber > 0 ? 1000 + a.stuffData.uniqueNumber : 0;
+                    const bScore = b.stuffData.uniqueNumber > 0 ? 1000 + b.stuffData.uniqueNumber : 0;
+                    return bScore - aScore;
+                });
+            default:
+                return items.sort((a, b) => a.name.localeCompare(b.name));
+        }
+    }, [ filteredGroupItems, sortMode ]);
+
+    // Inspector data for selected item
+    const inspectorData = useMemo(() =>
+    {
+        if(!selectedItem) return null;
+        const sessionData = GetSessionDataManager();
+        const floorData = sessionData.getFloorItemData(selectedItem.type);
+        const wallData = !floorData ? sessionData.getWallItemData(selectedItem.type) : null;
+        const furniData = floorData || wallData;
+        const className = furniData?.className || `type-${ selectedItem.type }`;
+        const isWall = selectedItem.isWallItem;
+        const isLtd = selectedItem.stuffData.uniqueNumber > 0;
+        const assignmentKey = isLtd ? -(selectedItem.getLastItem()?.id || 0) : selectedItem.type;
+        return { className, isWall, isLtd, furniData, assignmentKey };
+    }, [ selectedItem ]);
 
     const toggleMultiSelect = useCallback((group: GroupItem) =>
     {
@@ -222,25 +252,16 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
         }));
     }, [ selectedItem ]);
 
-    // Inspector helpers
-    const getSelectedRarity = (): string | null =>
-    {
-        if(!selectedItem) return null;
-        const name = (selectedItem.name || '').toLowerCase();
-        if(name.includes('legendary') || name.includes('ltd') || selectedItem.stuffData.uniqueNumber > 0) return null;
-        return null;
-    };
-
-    const getSelectedClassname = (): string =>
-    {
-        if(!selectedItem) return '';
-        const sessionData = GetSessionDataManager();
-        const floorData = sessionData.getFloorItemData(selectedItem.type);
-        const wallData = !floorData ? sessionData.getWallItemData(selectedItem.type) : null;
-        return (floorData || wallData)?.className || `type-${ selectedItem.type }`;
-    };
+    // Close inspector cat picker when selectedItem changes
+    useEffect(() => { setShowInspectorCatPicker(false); }, [ selectedItem ]);
 
     if(!groupItems || !groupItems.length) return <InventoryCategoryEmptyView title={ LocalizeText('inventory.empty.title') } desc={ LocalizeText('inventory.empty.desc') } />;
+
+    // Inspector category data
+    const selectedAssignmentKey = inspectorData?.assignmentKey ?? 0;
+    const selectedItemCategories = inspectorData ? getItemCategories(selectedAssignmentKey) : [];
+    const assignedCats = categories.filter(c => selectedItemCategories.includes(c.id));
+    const unassignedCats = categories.filter(c => !selectedItemCategories.includes(c.id));
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -261,7 +282,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                     <FaCheckSquare style={{ fontSize: '10px' }} />
                     <span>Multi</span>
                 </div>
-                <span className="inv-count">{ filteredGroupItems.length }/{ groupItems.length }</span>
+                <span className="inv-count">{ sortedItems.length }/{ groupItems.length }</span>
             </div>
 
             {/* Multi toolbar */}
@@ -276,7 +297,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                                     <div className="inv-multi-dropdown">
                                         { categories.map(cat => (
                                             <div key={ cat.id } className="inv-multi-dropdown-item" onClick={ () => handleBatchAssign(cat.id) }>
-                                                <span className="color-dot" style={{ backgroundColor: cat.color, width: 6, height: 6, borderRadius: '50%' }} />
+                                                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: cat.color, flexShrink: 0 }} />
                                                 { cat.name }
                                             </div>
                                         )) }
@@ -289,11 +310,11 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                     </div>
                 </div> }
 
-            {/* Item Grid */}
+            {/* Item Grid — uses sorted items */}
             <div className="inv-items-scroll">
                 <div className="inv-items-wrap">
-                    { filteredGroupItems.length > 0
-                        ? filteredGroupItems.map((item, index) =>
+                    { sortedItems.length > 0
+                        ? sortedItems.map((item, index) =>
                             <InventoryFurnitureItemView
                                 key={ index }
                                 groupItem={ item }
@@ -310,14 +331,14 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             </div>
 
             {/* Inspector Panel */}
-            { !multiSelectMode && selectedItem &&
+            { !multiSelectMode && selectedItem && inspectorData &&
                 <div className="inv-inspector">
                     <div className="inv-inspector-frame">
                         <div className="inv-inspector-detail">
                             <div className="inv-inspector-preview">
                                 <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 72 } />
-                                { selectedItem.stuffData.uniqueNumber > 0 &&
-                                    <span className="inv-tile-ltd" style={{ borderRadius: '0 0 0 4px' }}>LTD</span> }
+                                { inspectorData.isLtd &&
+                                    <span className="inv-inspector-ltd-corner">LTD</span> }
                             </div>
                             <div className="inv-inspector-info">
                                 <div className="inv-inspector-title-row">
@@ -328,12 +349,41 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                                     </button>
                                 </div>
                                 <div className="inv-inspector-meta">
-                                    <span className="inv-inspector-code">{ getSelectedClassname() }</span>
-                                    { selectedItem.stuffData.uniqueNumber > 0 &&
+                                    <span className="inv-inspector-code">{ inspectorData.className }</span>
+                                    { inspectorData.isLtd &&
                                         <span className="inv-inspector-ltd">#{ selectedItem.stuffData.uniqueNumber }/{ selectedItem.stuffData.uniqueSeries }</span> }
                                 </div>
                                 <div className="inv-inspector-meta">
-                                    <span className="inv-inspector-pill">{ selectedItem.isWallItem ? 'Wand' : 'Boden' }</span>
+                                    <span className="inv-inspector-pill">{ inspectorData.isWall ? 'Wand' : 'Boden' }</span>
+                                    { !inspectorData.isWall && inspectorData.furniData &&
+                                        <span className="inv-inspector-pill">{ (inspectorData.furniData as any).dimX || 1 }×{ (inspectorData.furniData as any).dimY || 1 }</span> }
+                                </div>
+                                {/* Category Chips */}
+                                <div className="inv-inspector-categories">
+                                    { assignedCats.map(cat => (
+                                        <span key={ cat.id } className="inv-cat-chip">
+                                            <span className="cat-chip-dot" style={{ backgroundColor: cat.color }} />
+                                            { cat.name }
+                                            <span className="cat-chip-remove" onClick={ () => toggleAssignment(selectedAssignmentKey, cat.id) }>×</span>
+                                        </span>
+                                    )) }
+                                    { unassignedCats.length > 0 && (
+                                        <div style={{ position: 'relative', display: 'inline-flex' }}>
+                                            <button className="inv-cat-add-btn" onClick={ () => setShowInspectorCatPicker(!showInspectorCatPicker) }>
+                                                <FaPlus style={{ fontSize: 7 }} />
+                                                <FaTag style={{ fontSize: 7 }} />
+                                            </button>
+                                            { showInspectorCatPicker &&
+                                                <div className="inv-cat-picker">
+                                                    { unassignedCats.map(cat => (
+                                                        <div key={ cat.id } className="inv-cat-picker-item" onClick={ () => { toggleAssignment(selectedAssignmentKey, cat.id); setShowInspectorCatPicker(false); } }>
+                                                            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: cat.color, flexShrink: 0 }} />
+                                                            { cat.name }
+                                                        </div>
+                                                    )) }
+                                                </div> }
+                                        </div>
+                                    ) }
                                 </div>
                                 { durabilityInfo &&
                                     <div className="inv-durability">

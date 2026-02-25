@@ -149,9 +149,16 @@
 }
 
 .inv-sidebar-icon {
-    font-size: 12px;
-    opacity: 0.5;
+    font-size: 13px;
+    opacity: 0.45;
     flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+
+    .inv-sidebar-item.active & {
+        opacity: 0.8;
+        color: #3b82f6;
+    }
 }
 
 .inv-sidebar-label {
@@ -1187,4 +1194,187 @@
         font-size: 12px;
         font-weight: 500;
     }
+}
+
+// ─── Search Wrap ────────────────────────────────
+
+.inv-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+}
+
+.inv-search-icon {
+    position: absolute;
+    left: 8px;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.inv-search-input {
+    width: 100%;
+    height: 24px;
+    padding: 0 24px 0 26px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.7);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &::placeholder {
+        color: rgba(0, 0, 0, 0.3);
+    }
+
+    &:focus {
+        border-color: rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+}
+
+.inv-search-clear {
+    position: absolute;
+    right: 4px;
+    background: none;
+    border: none;
+    color: rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    font-size: 9px;
+    padding: 2px;
+
+    &:hover {
+        color: rgba(0, 0, 0, 0.5);
+    }
+}
+
+// ─── Item Tooltip ───────────────────────────────
+
+.inv-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 8px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+    z-index: 100;
+    pointer-events: none;
+    white-space: nowrap;
+    min-width: 100px;
+    max-width: 220px;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: white;
+    }
+}
+
+.inv-tooltip-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inv-tooltip-classname {
+    font-family: monospace;
+    font-size: 9px;
+    color: rgba(0, 0, 0, 0.30);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inv-tooltip-meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.50);
+    margin-top: 2px;
+}
+
+.inv-tooltip-ltd {
+    font-size: 10px;
+    color: #d97706;
+    font-weight: 600;
+    margin-top: 1px;
+}
+
+// ─── Inspector Category Picker ──────────────────
+
+.inv-cat-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    background: transparent;
+    color: rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    transition: all 0.12s;
+
+    &:hover {
+        color: rgba(0, 0, 0, 0.50);
+        border-color: rgba(0, 0, 0, 0.25);
+    }
+}
+
+.inv-cat-picker {
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 0;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 4px;
+    min-width: 120px;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.inv-cat-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.70);
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover {
+        background: rgba(0, 0, 0, 0.04);
+    }
+}
+
+// ─── Inspector LTD Corner Badge ─────────────────
+
+.inv-inspector-ltd-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(245, 158, 11, 0.9);
+    color: white;
+    font-size: 6px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 0 0 0 4px;
+    line-height: 1.4;
 }

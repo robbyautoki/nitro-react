@@ -1,9 +1,10 @@
 import { BadgePointLimitsEvent, ILinkEventTracker, IRoomSession, RoomEngineObjectEvent, RoomEngineObjectPlacedEvent, RoomPreviewer, RoomSessionEvent } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { FaTimes, FaBox, FaRobot, FaPaw, FaMedal } from 'react-icons/fa';
 import { AddEventLinkTracker, GetLocalization, GetRoomEngine, isObjectMoverRequested, LocalizeText, RemoveLinkEventTracker, setObjectMoverRequested, UnseenItemCategory } from '../../api';
-import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
-import { useInventoryTrade, useInventoryUnseenTracker, useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent } from '../../hooks';
+import { DraggableWindow, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
+import { useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent } from '../../hooks';
+import { useInventoryCategories } from '../../hooks/inventory/useInventoryCategories';
 import { InventoryBadgeView } from './views/badge/InventoryBadgeView';
 import { InventoryBotView } from './views/bot/InventoryBotView';
 import { InventoryFurnitureView } from './views/furniture/InventoryFurnitureView';
@@ -17,6 +18,20 @@ const TAB_BADGES: string = 'inventory.badges';
 const TABS = [ TAB_FURNITURE, TAB_BOTS, TAB_PETS, TAB_BADGES ];
 const UNSEEN_CATEGORIES = [ UnseenItemCategory.FURNI, UnseenItemCategory.BOT, UnseenItemCategory.PET, UnseenItemCategory.BADGE ];
 
+const TAB_ICONS: Record<string, FC<any>> = {
+    [TAB_FURNITURE]: FaBox,
+    [TAB_BOTS]: FaRobot,
+    [TAB_PETS]: FaPaw,
+    [TAB_BADGES]: FaMedal,
+};
+
+const TAB_LABELS: Record<string, string> = {
+    [TAB_FURNITURE]: 'Möbel',
+    [TAB_BOTS]: 'Bots',
+    [TAB_PETS]: 'Haustiere',
+    [TAB_BADGES]: 'Abzeichen',
+};
+
 export const InventoryView: FC<{}> = props =>
 {
     const [ isVisible, setIsVisible ] = useState(false);
@@ -24,21 +39,22 @@ export const InventoryView: FC<{}> = props =>
     const [ roomSession, setRoomSession ] = useState<IRoomSession>(null);
     const [ roomPreviewer, setRoomPreviewer ] = useState<RoomPreviewer>(null);
     const { isTrading = false, stopTrading = null } = useInventoryTrade();
-    const { getCount = null, resetCategory = null } = useInventoryUnseenTracker();
+    const { getCount = null } = useInventoryUnseenTracker();
+    const { groupItems = [] } = useInventoryFurni();
+    const { categories, activeCategory, setActiveCategory } = useInventoryCategories();
+
+    const totalItems = useMemo(() => groupItems.reduce((s, g) => s + g.getUnlockedCount(), 0), [ groupItems ]);
 
     const onClose = () =>
     {
         if(isTrading) stopTrading();
-
         setIsVisible(false);
     }
 
     useRoomEngineEvent<RoomEngineObjectPlacedEvent>(RoomEngineObjectEvent.PLACED, event =>
     {
         if(!isObjectMoverRequested()) return;
-
         setObjectMoverRequested(false);
-
         if(!event.placedInRoom) setIsVisible(true);
     });
 
@@ -62,7 +78,6 @@ export const InventoryView: FC<{}> = props =>
     useMessageEvent<BadgePointLimitsEvent>(BadgePointLimitsEvent, event =>
     {
         const parser = event.getParser();
-
         for(const data of parser.data) GetLocalization().setBadgePointLimit(data.badgeId, data.limit);
     });
 
@@ -72,42 +87,26 @@ export const InventoryView: FC<{}> = props =>
             linkReceived: (url: string) =>
             {
                 const parts = url.split('/');
-
                 if(parts.length < 2) return;
-        
                 switch(parts[1])
                 {
-                    case 'show':
-                        setIsVisible(true);
-                        return;
-                    case 'hide':
-                        setIsVisible(false);
-                        return;
-                    case 'toggle':
-                        setIsVisible(prevValue => !prevValue);
-                        return;
+                    case 'show': setIsVisible(true); return;
+                    case 'hide': setIsVisible(false); return;
+                    case 'toggle': setIsVisible(prev => !prev); return;
                 }
             },
             eventUrlPrefix: 'inventory/'
         };
-
         AddEventLinkTracker(linkTracker);
-
         return () => RemoveLinkEventTracker(linkTracker);
     }, []);
 
     useEffect(() =>
     {
         setRoomPreviewer(new RoomPreviewer(GetRoomEngine(), ++RoomPreviewer.PREVIEW_COUNTER));
-
         return () =>
         {
-            setRoomPreviewer(prevValue =>
-            {
-                prevValue.dispose();
-
-                return null;
-            });
+            setRoomPreviewer(prev => { prev.dispose(); return null; });
         }
     }, []);
 
@@ -118,53 +117,89 @@ export const InventoryView: FC<{}> = props =>
 
     if(!isVisible) return null;
 
-    const TAB_LABELS: Record<string, string> = {
-        [TAB_FURNITURE]: 'Möbel',
-        [TAB_BOTS]: 'Bots',
-        [TAB_PETS]: 'Haustiere',
-        [TAB_BADGES]: 'Abzeichen',
-    };
+    if(isTrading)
+    {
+        return (
+            <NitroCardView uniqueKey={ 'inventory' } className="nitro-inventory" theme="primary-slim">
+                <NitroCardHeaderView headerText={ LocalizeText('inventory.title') } onCloseClick={ onClose } />
+                <NitroCardContentView>
+                    <InventoryTradeView cancelTrade={ onClose } />
+                </NitroCardContentView>
+            </NitroCardView>
+        );
+    }
+
+    const getCatCount = (catId: number) => groupItems.filter(g =>
+    {
+        const key = g.stuffData.uniqueNumber > 0 ? -(g.getLastItem()?.id || 0) : g.type;
+        return true; // simplified — category filtering is in useInventoryCategories
+    }).length;
 
     return (
-        <NitroCardView uniqueKey={ 'inventory' } className="nitro-inventory" theme={ isTrading ? 'primary-slim' : '' } >
-            { isTrading &&
-                <>
-                    <NitroCardHeaderView headerText={ LocalizeText('inventory.title') } onCloseClick={ onClose } />
-                    <NitroCardContentView>
-                        <InventoryTradeView cancelTrade={ onClose } />
-                    </NitroCardContentView>
-                </> }
-            { !isTrading &&
-                <div className="inv-layout">
-                    <div className="inv-sidebar drag-handler">
-                        <div className="inv-sidebar-title">Inventar</div>
-                        { TABS.map((name, index) =>
-                        {
-                            const unseenCount = getCount(UNSEEN_CATEGORIES[index]);
-                            return (
-                                <div key={ index } className={ 'inv-sidebar-item' + (currentTab === name ? ' active' : '') } onClick={ () => setCurrentTab(name) }>
-                                    <span>{ TAB_LABELS[name] || LocalizeText(name) }</span>
-                                    { unseenCount > 0 && <span className="inv-sidebar-badge">{ unseenCount }</span> }
+        <DraggableWindow uniqueKey="inventory" handleSelector=".inv-title-bar">
+            <div className="nitro-inventory inv-container">
+                {/* Title bar */}
+                <div className="inv-title-bar drag-handler">
+                    <div className="inv-title-left">
+                        <FaBox className="inv-title-icon" />
+                        <span className="inv-title-text">Inventar</span>
+                        <span className="inv-title-count">{ totalItems } Möbel</span>
+                    </div>
+                    <button className="inv-title-close" onClick={ onClose }>
+                        <FaTimes />
+                    </button>
+                </div>
+
+                <div className="inv-main">
+                    {/* Sidebar */}
+                    <div className="inv-sidebar">
+                        <div className="inv-sidebar-section">
+                            { TABS.map((name, index) =>
+                            {
+                                const Icon = TAB_ICONS[name];
+                                const unseenCount = getCount(UNSEEN_CATEGORIES[index]);
+                                return (
+                                    <div key={ index } className={ 'inv-sidebar-item' + (currentTab === name ? ' active' : '') } onClick={ () => setCurrentTab(name) }>
+                                        <Icon className="inv-sidebar-icon" />
+                                        <span className="inv-sidebar-label">{ TAB_LABELS[name] }</span>
+                                        { unseenCount > 0 && <span className="inv-sidebar-badge">{ unseenCount }</span> }
+                                    </div>
+                                );
+                            }) }
+                        </div>
+
+                        {/* Categories (only for furniture tab) */}
+                        { currentTab === TAB_FURNITURE && categories.length > 0 && (
+                            <div className="inv-sidebar-categories">
+                                <div className="inv-sidebar-divider" />
+                                <div className={ 'inv-sidebar-item' + (activeCategory === null ? ' active' : '') } onClick={ () => setActiveCategory(null) }>
+                                    <span className="inv-cat-dot" style={{ background: '#6b7280' }} />
+                                    <span className="inv-sidebar-label">Alle</span>
+                                    <span className="inv-sidebar-count">{ groupItems.length }</span>
                                 </div>
-                            );
-                        }) }
+                                { categories.map(cat => (
+                                    <div key={ cat.id } className={ 'inv-sidebar-item' + (activeCategory === cat.id ? ' active' : '') } onClick={ () => setActiveCategory(activeCategory === cat.id ? null : cat.id) }>
+                                        <span className="inv-cat-dot" style={{ background: cat.color }} />
+                                        <span className="inv-sidebar-label">{ cat.name }</span>
+                                    </div>
+                                )) }
+                            </div>
+                        ) }
                     </div>
+
+                    {/* Content */}
                     <div className="inv-content">
-                        <div className="inv-content-header">
-                            <FaTimes className="inv-close" onClick={ onClose } />
-                        </div>
-                        <div className="inv-content-body">
-                            { (currentTab === TAB_FURNITURE) &&
-                                <InventoryFurnitureView roomSession={ roomSession } roomPreviewer={ roomPreviewer } /> }
-                            { (currentTab === TAB_BOTS) &&
-                                <InventoryBotView roomSession={ roomSession } roomPreviewer={ roomPreviewer } /> }
-                            { (currentTab === TAB_PETS) &&
-                                <InventoryPetView roomSession={ roomSession } roomPreviewer={ roomPreviewer } /> }
-                            { (currentTab === TAB_BADGES) &&
-                                <InventoryBadgeView /> }
-                        </div>
+                        { currentTab === TAB_FURNITURE &&
+                            <InventoryFurnitureView roomSession={ roomSession } roomPreviewer={ roomPreviewer } /> }
+                        { currentTab === TAB_BOTS &&
+                            <InventoryBotView roomSession={ roomSession } roomPreviewer={ roomPreviewer } /> }
+                        { currentTab === TAB_PETS &&
+                            <InventoryPetView roomSession={ roomSession } roomPreviewer={ roomPreviewer } /> }
+                        { currentTab === TAB_BADGES &&
+                            <InventoryBadgeView /> }
                     </div>
-                </div> }
-        </NitroCardView>
+                </div>
+            </div>
+        </DraggableWindow>
     );
 }

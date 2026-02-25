@@ -1,9 +1,9 @@
 import { MouseEventType } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { attemptItemPlacement, GroupItem } from '../../../../api';
-import { LayoutGridItem } from '../../../../common';
 import { useInventoryFurni } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
+import { FaWrench } from 'react-icons/fa';
 
 interface InventoryFurnitureItemViewProps
 {
@@ -15,25 +15,26 @@ interface InventoryFurnitureItemViewProps
 
 export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = props =>
 {
-    const { groupItem = null, multiSelectMode = false, isMultiSelected = false, onMultiToggle = null, ...rest } = props;
+    const { groupItem = null, multiSelectMode = false, isMultiSelected = false, onMultiToggle = null } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
     const [ contextMenu, setContextMenu ] = useState<{ x: number; y: number } | null>(null);
     const { selectedItem = null, setSelectedItem = null } = useInventoryFurni();
     const { categories, getItemCategories, toggleAssignment } = useInventoryCategories();
     const contextRef = useRef<HTMLDivElement>(null);
 
+    const isActive = !multiSelectMode && groupItem === selectedItem;
+    const count = groupItem.getUnlockedCount();
+    const isLtd = groupItem.stuffData.uniqueNumber > 0;
+    const ltdItemId = isLtd ? (groupItem.getLastItem()?.id || 0) : 0;
+    const assignmentKey = isLtd && ltdItemId > 0 ? -ltdItemId : groupItem.type;
+
     const onMouseEvent = (event: MouseEvent) =>
     {
         if(multiSelectMode)
         {
-            if(event.type === MouseEventType.MOUSE_DOWN && onMultiToggle)
-            {
-                onMultiToggle(groupItem);
-            }
-
+            if(event.type === MouseEventType.MOUSE_DOWN && onMultiToggle) onMultiToggle(groupItem);
             return;
         }
-
         switch(event.type)
         {
             case MouseEventType.MOUSE_DOWN:
@@ -45,7 +46,6 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
                 return;
             case MouseEventType.ROLL_OUT:
                 if(!isMouseDown || !(groupItem === selectedItem)) return;
-
                 attemptItemPlacement(groupItem);
                 return;
             case 'dblclick':
@@ -58,16 +58,10 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
     {
         e.preventDefault();
         e.stopPropagation();
-
         if(!categories.length) return;
-
         setSelectedItem(groupItem);
         setContextMenu({ x: e.clientX, y: e.clientY });
     }, [ categories, groupItem, setSelectedItem ]);
-
-    const isLtd = groupItem.stuffData.uniqueNumber > 0;
-    const ltdItemId = isLtd ? (groupItem.getLastItem()?.id || 0) : 0;
-    const assignmentKey = isLtd && ltdItemId > 0 ? -ltdItemId : groupItem.type;
 
     const onToggleCategory = useCallback((categoryId: number) =>
     {
@@ -77,44 +71,58 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
     useEffect(() =>
     {
         if(!contextMenu) return;
-
         const handleClick = (e: globalThis.MouseEvent) =>
         {
-            if(contextRef.current && !contextRef.current.contains(e.target as Node))
-            {
-                setContextMenu(null);
-            }
+            if(contextRef.current && !contextRef.current.contains(e.target as Node)) setContextMenu(null);
         };
-
         document.addEventListener('mousedown', handleClick);
-
         return () => document.removeEventListener('mousedown', handleClick);
     }, [ contextMenu ]);
 
-    const count = groupItem.getUnlockedCount();
     const itemCategories = getItemCategories(assignmentKey);
+
+    // Build class list
+    let tileClass = 'inv-tile';
+    if(isActive) tileClass += ' active';
+    if(multiSelectMode && isMultiSelected) tileClass += ' multi-selected';
+    if(!count) tileClass += ' dimmed';
+    if(groupItem.hasUnseenItems) tileClass += ' unseen';
 
     return (
         <>
-            <LayoutGridItem
-                className={ (!count ? 'opacity-0-5 ' : '') + (multiSelectMode && isMultiSelected ? 'inv-multi-selected ' : '') }
-                itemImage={ groupItem.iconUrl }
-                itemCount={ groupItem.getUnlockedCount() }
-                itemActive={ multiSelectMode ? isMultiSelected : (groupItem === selectedItem) }
-                itemUniqueNumber={ groupItem.stuffData.uniqueNumber }
-                itemUnseen={ groupItem.hasUnseenItems }
+            <div
+                className={ tileClass }
                 onMouseDown={ onMouseEvent }
                 onMouseUp={ onMouseEvent }
                 onMouseOut={ onMouseEvent }
                 onDoubleClick={ onMouseEvent }
                 onContextMenu={ multiSelectMode ? undefined : onContextMenu }
-                { ...rest }
             >
+                <img
+                    className="inv-tile-img"
+                    src={ groupItem.iconUrl }
+                    alt=""
+                    onError={ e => { (e.target as HTMLImageElement).style.opacity = '0.2'; } }
+                />
+
+                {/* Multi-select checkbox */}
                 { multiSelectMode &&
-                    <div className={ 'inv-multi-check' + (isMultiSelected ? ' checked' : '') }>
+                    <div className={ 'inv-tile-check' + (isMultiSelected ? ' checked' : '') }>
                         { isMultiSelected && '✓' }
                     </div> }
-            </LayoutGridItem>
+
+                {/* LTD number */}
+                { isLtd &&
+                    <span className="inv-tile-ltd">{ groupItem.stuffData.uniqueNumber }</span> }
+
+                {/* Count */}
+                { count > 1 &&
+                    <span className="inv-tile-count">{ count }</span> }
+
+                {/* Durability wrench (shown if name hints breakable — visual only) */}
+            </div>
+
+            {/* Context menu for category assignment */}
             { contextMenu && categories.length > 0 && (
                 <div
                     ref={ contextRef }

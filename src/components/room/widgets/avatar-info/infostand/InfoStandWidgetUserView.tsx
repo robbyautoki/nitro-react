@@ -28,7 +28,7 @@ function SpriteLayer({ src, startDelay = 0 }: { src: string; startDelay?: number
     if(!visible) return null;
 
     return (
-        <img src={ src } alt="" draggable={ false } decoding="async" className="absolute inset-0 w-full h-full object-cover" style={ { willChange: 'transform', transform: 'translateZ(0)' } } />
+        <img src={ src } alt="" draggable={ false } decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" style={ { willChange: 'transform', transform: 'translateZ(0)' } } />
     );
 }
 

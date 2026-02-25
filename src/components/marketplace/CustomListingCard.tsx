@@ -158,7 +158,7 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, isWatched,
 
             {/* Actions */}
             <div className="flex items-center gap-1 shrink-0">
-                <ItemInfoTooltip listing={ listing } />
+                { mode === 'browse' && <ItemInfoTooltip listing={ listing } /> }
                 { mode === 'browse' && isMine && (
                     <Badge variant="outline" size="xs" className="text-muted-foreground/40">Eigenes</Badge>
                 ) }

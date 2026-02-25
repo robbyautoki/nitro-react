@@ -125,7 +125,7 @@ const useAvatarInfoWidgetState = () =>
 
             if(friends.find(friend => (friend.id === user.webID)))
             {
-                addedNameBubbles.push(new AvatarInfoName(user.roomIndex, RoomObjectCategory.UNIT, user.webID, user.name, user.type, true));
+                addedNameBubbles.push(new AvatarInfoName(user.roomIndex, RoomObjectCategory.UNIT, user.webID, user.name, user.type, true, -1, user.figure || ''));
             }
         });
 

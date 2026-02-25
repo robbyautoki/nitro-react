@@ -18,6 +18,7 @@ export class AvatarInfoUtilities
         let name: string = null;
         let userType = 0;
         let level = -1;
+        let figure = '';
 
         switch(category)
         {
@@ -62,6 +63,7 @@ export class AvatarInfoUtilities
                 id = userData.webID;
                 name = userData.name;
                 userType = userData.type;
+                figure = userData.figure || '';
 
                 if(userData.type === RoomObjectType.PET) level = userData.petLevel;
                 else if(userData.type === RoomObjectType.USER) level = getLevelFromScore(userData.activityPoints).level;
@@ -71,7 +73,7 @@ export class AvatarInfoUtilities
 
         if(!name || !name.length) return null;
 
-        return new AvatarInfoName(objectId, category, id, name, userType, false, level);
+        return new AvatarInfoName(objectId, category, id, name, userType, false, level, figure);
     }
 
     public static getFurniInfo(objectId: number, category: number): AvatarInfoFurni

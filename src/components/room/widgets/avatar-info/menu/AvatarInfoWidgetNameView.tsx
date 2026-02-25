@@ -5,6 +5,9 @@ import { getPrestigeFromBadges } from '../../../../../api/utils/PrestigeUtils';
 import { useRoom } from '../../../../../hooks';
 import { ContextMenuView } from '../../context-menu/ContextMenuView';
 
+const DEFAULT_NAMEPLATE_URL = 'https://cdn.discordapp.com/assets/content/7bb8e28111f5b9f6f142c9a9dc7b70336e74afca0ab9de4c035b35caf4305709';
+const DEFAULT_DECO_URL = 'https://cdn.discordapp.com/assets/content/9fd289ab5082a14f189b0333d38ef32082a97502ac6e72a09ace2a13a7b47724';
+
 interface AvatarInfoWidgetNameViewProps
 {
     nameInfo: AvatarInfoName;
@@ -30,9 +33,41 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
         const newClassNames: string[] = [ 'name-only' ];
 
         if(nameInfo.isFriend) newClassNames.push('is-friend');
+        if(nameInfo.userType === RoomObjectType.USER && nameInfo.figure) newClassNames.push('has-nameplate');
 
         return newClassNames;
     }, [ nameInfo ]);
+
+    const avatarHeadUrl = useMemo(() =>
+    {
+        if(!nameInfo.figure || nameInfo.userType !== RoomObjectType.USER) return '';
+
+        return `https://www.habbo.com/habbo-imaging/avatarimage?figure=${ encodeURIComponent(nameInfo.figure) }&headonly=1&direction=3&head_direction=3&size=l&gesture=sml`;
+    }, [ nameInfo ]);
+
+    const isUser = nameInfo.userType === RoomObjectType.USER;
+
+    if(isUser && nameInfo.figure)
+    {
+        return (
+            <ContextMenuView objectId={ nameInfo.roomIndex } category={ nameInfo.category } userType={ nameInfo.userType } fades={ (nameInfo.id !== GetSessionDataManager().userId) } classNames={ getClassNames } onClose={ onClose }>
+                <div className="nameplate-banner" style={{ backgroundImage: `url(${ DEFAULT_NAMEPLATE_URL })` }}>
+                    <div className="nameplate-avatar">
+                        <img src={ avatarHeadUrl } alt="" className="nameplate-head" draggable={ false } />
+                        <img src={ DEFAULT_DECO_URL } alt="" className="nameplate-deco" draggable={ false } />
+                    </div>
+                    <div className="nameplate-info">
+                        <div className="nameplate-name">
+                            { prestige > 0 && <span>{ prestige > 2 ? `🌟×${ prestige }` : '🌟'.repeat(prestige) }</span> }
+                            { nameInfo.name }
+                        </div>
+                        { nameInfo.level > 0 &&
+                            <span className="nameplate-level">Lv. { nameInfo.level }</span> }
+                    </div>
+                </div>
+            </ContextMenuView>
+        );
+    }
 
     return (
         <ContextMenuView objectId={ nameInfo.roomIndex } category={ nameInfo.category } userType={ nameInfo.userType } fades={ (nameInfo.id !== GetSessionDataManager().userId) } classNames={ getClassNames } onClose={ onClose }>

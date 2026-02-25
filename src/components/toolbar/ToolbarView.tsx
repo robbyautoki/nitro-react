@@ -193,7 +193,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
                   <span className="text-[9px] font-medium text-muted-foreground/60 leading-none">Voice</span>
                 </div>
               </PopoverTrigger>
-              <PopoverContent side="right" align="end" sideOffset={8} className="w-[260px] p-0 border-none bg-transparent shadow-none">
+              <PopoverContent side="right" align="end" sideOffset={16} className="w-[260px] p-0 border-none bg-transparent shadow-none">
                 <VoiceChannelView />
               </PopoverContent>
             </Popover>

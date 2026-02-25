@@ -2,7 +2,6 @@ import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { CreateLinkEvent, GetRoomSession } from '../../api';
 import { useMessageEvent } from '../../hooks';
-import { TextGif } from '../../components/ui/text-gif';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,12 +9,11 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
-  Headphones, Pause, Play, Volume2, VolumeX, Mic, X,
+  Home, Headphones, Pause, Play, Volume2, VolumeX, Mic, X,
   SkipForward, Repeat, Power, Music,
 } from 'lucide-react';
-import { LayoutAvatarImageView } from '../../common';
 
 declare global {
     interface Window {
@@ -440,67 +438,52 @@ export const RadioPanelView: FC<{}> = () => {
     if (!radioEnabled && !isStaff) return null;
 
     return (
-        <>
+        <TooltipProvider delayDuration={200}>
             <div ref={ytContainerRef} style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }} />
 
             <div className="fixed top-3 left-20 z-[65] pointer-events-auto flex flex-col gap-3">
-                <div className="inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl">
-                    {isInIframe && (
-                        <>
-                            <button
-                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
-                                onClick={() => window.parent.postMessage({ type: 'show-cms' }, '*')}
-                                title="Zurück zum CMS"
-                            >
-                                <svg className="size-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="3" y="3" width="7" height="7" rx="1" />
-                                    <rect x="14" y="3" width="7" height="7" rx="1" />
-                                    <rect x="3" y="14" width="7" height="7" rx="1" />
-                                    <rect x="14" y="14" width="7" height="7" rx="1" />
-                                </svg>
-                            </button>
-                            <div className="w-px h-5 bg-accent/50" />
-                        </>
-                    )}
+                <div className="inline-flex items-center gap-1 py-2 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-md">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/60 transition-colors" onClick={() => isInIframe ? window.parent.postMessage({ type: 'show-cms' }, '*') : null}>
+                                <Home className="size-4 text-muted-foreground/70" />
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="text-xs">Startseite</TooltipContent>
+                    </Tooltip>
+                    <div className="w-px h-5 bg-border/30" />
 
-                    <TextGif
-                        gifUrl="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmx6a3BzZ3pwajN0bnphZGlpcHI2ajA1cWpzaHBkbHJ0anVjeGcyeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wQHDnQmXZlpVuuPqey/giphy.gif"
-                        text="bahhos"
-                        size="sm"
-                        weight="bold"
-                    />
-                    <div className="w-px h-5 bg-accent/50" />
+                    <span className="text-sm font-bold px-2 tracking-tight">bahhos</span>
+                    <div className="w-px h-5 bg-border/30" />
 
                     {!radioEnabled ? (
-                        <span className="text-xs text-red-400/60 italic px-1">Aus</span>
+                        <span className="text-xs text-red-400/60 italic px-1.5">Aus</span>
                     ) : currentTrack ? (
                         <span className="text-xs text-muted-foreground truncate max-w-[180px] px-1.5">
                             {currentTrack.title} – {currentTrack.artist}
                         </span>
                     ) : (
-                        <span className="text-xs text-muted-foreground/40 italic px-1">Radio</span>
+                        <span className="text-xs text-muted-foreground/40 italic px-1.5">Radio</span>
                     )}
 
                     {needsInteraction && (
-                        <button className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors" onClick={handleUnlock}>
-                            <Play className="size-3.5 text-amber-400" />
-                        </button>
-                    )}
-
-                    {radioEnabled && currentTrack && (
-                        <button
-                            className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors"
-                            onClick={() => sendCommand(paused ? ':radio play' : ':radio pause')}
-                        >
-                            {paused
-                                ? <Play className="size-3.5 text-muted-foreground" strokeWidth={2.5} />
-                                : <Pause className="size-3.5 text-muted-foreground" strokeWidth={2.5} />
-                            }
+                        <button className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/60 transition-colors" onClick={handleUnlock}>
+                            <Play className="size-3.5 text-amber-500" />
                         </button>
                     )}
 
                     <button
-                        className="p-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                        className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/60 transition-colors"
+                        onClick={() => sendCommand(paused ? ':radio play' : ':radio pause')}
+                    >
+                        {paused
+                            ? <Play className="size-3.5 text-muted-foreground" strokeWidth={2.5} />
+                            : <Pause className="size-3.5 text-muted-foreground" strokeWidth={2.5} />
+                        }
+                    </button>
+
+                    <button
+                        className="p-1 rounded-lg cursor-pointer hover:bg-accent/60 transition-colors"
                         onClick={() => setMuted(v => !v)}
                     >
                         {muted || volume === 0
@@ -529,18 +512,18 @@ export const RadioPanelView: FC<{}> = () => {
                 </div>
 
                 {announcement && (
-                    <div className="min-w-[340px] max-w-[400px] flex items-start gap-3 p-3 rounded-xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl animate-in slide-in-from-top-2 fade-in duration-300">
+                    <div className="min-w-[340px] max-w-[400px] flex items-start gap-3 p-3 rounded-xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-md animate-in slide-in-from-top-2 fade-in duration-300">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
                                 <Mic className="size-3 text-muted-foreground shrink-0" />
-                                <span className="text-xs font-semibold text-foreground">{announcement.djName}</span>
-                                <Badge variant="outline" className="text-[10px] border-border/50 text-muted-foreground">Durchsage</Badge>
+                                <span className="text-xs font-semibold">{announcement.djName}</span>
+                                <Badge variant="outline" className="text-[10px]">Durchsage</Badge>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{announcement.message}</p>
                         </div>
                     </div>
                 )}
             </div>
-        </>
+        </TooltipProvider>
     );
 };

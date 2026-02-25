@@ -441,6 +441,19 @@ function SettingsPopover() {
 
 export const PurseView: FC<{}> = props => {
   const { purse = null, hcDisabled = false } = usePurse();
+  const { roomSession = null } = useRoom();
+  const { navigatorData = null } = useNavigator();
+  const [ isZoomedIn, setIsZoomedIn ] = useState(false);
+
+  const handleZoom = useCallback(() => {
+    if(!roomSession) return;
+    setIsZoomedIn(prev => {
+      let scale = GetRoomEngine().getRoomInstanceRenderingCanvasScale(roomSession.roomId, 1);
+      if(!prev) scale /= 2; else scale *= 2;
+      GetRoomEngine().setRoomInstanceRenderingCanvasScale(roomSession.roomId, 1, scale);
+      return !prev;
+    });
+  }, [roomSession]);
 
   const displayedCurrencies = useMemo(() => GetConfiguration<number[]>('system.currency.types', []), []);
   const currencyDisplayNumberShort = useMemo(() => GetConfiguration<boolean>('currency.display.number.short', false), []);
@@ -545,6 +558,46 @@ export const PurseView: FC<{}> = props => {
             <TooltipContent side="bottom" className="text-xs">{label}</TooltipContent>
           </Tooltip>
         ))}
+
+        { roomSession && (
+          <>
+            <div className="w-px h-6 bg-accent/50 mx-1.5" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={ () => CreateLinkEvent('navigator/toggle-room-info') }>
+                  <Info className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Raum Info</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={ handleZoom }>
+                  { isZoomedIn ? <ZoomOut className="w-4 h-4 text-muted-foreground" /> : <ZoomIn className="w-4 h-4 text-muted-foreground" /> }
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">{ isZoomedIn ? 'Herauszoomen' : 'Hineinzoomen' }</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={ () => CreateLinkEvent('chat-history/toggle') }>
+                  <MessageSquareDashed className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">Chat-Verlauf</TooltipContent>
+            </Tooltip>
+            { navigatorData?.canRate && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={ () => SendMessageComposer(new RateFlatMessageComposer(1)) }>
+                    <ThumbsUp className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">Raum bewerten</TooltipContent>
+              </Tooltip>
+            ) }
+          </>
+        ) }
 
         <div className="w-px h-6 bg-accent/50 mx-1.5" />
 

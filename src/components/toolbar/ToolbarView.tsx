@@ -152,9 +152,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
           {isMod &&
             <SidebarItem iconClass="icon-modtools" label="Mod Tools" onClick={() => CreateLinkEvent('mod-tools/toggle')} />}
 
-          {isInRoom && <div className="w-8 h-px bg-accent/50 my-1" />}
-          <div id="toolbar-room-tools-container" className={isInRoom ? "flex flex-col items-center gap-0.5" : "hidden"} />
-
           <div className="w-8 h-px bg-accent/50 my-1" />
 
           <SidebarItem iconClass="icon-friendall" label="Freunde" badge={requests.length} onClick={() => CreateLinkEvent('friends/toggle')} />

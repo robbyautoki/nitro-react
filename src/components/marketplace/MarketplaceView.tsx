@@ -68,7 +68,7 @@ export const MarketplaceView: FC<{}> = () =>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-h-0 overflow-auto px-4 pb-4 pt-2">
+                    <div className="flex-1 min-h-0 overflow-hidden px-4 pb-4 pt-2">
                         { currentTab === 'custom-browse' && <CustomMarketplaceBrowseView /> }
                         { currentTab === 'custom-my' && <CustomMarketplaceMyListingsView /> }
                         { currentTab === 'custom-sales' && <CustomMarketplaceSalesView /> }

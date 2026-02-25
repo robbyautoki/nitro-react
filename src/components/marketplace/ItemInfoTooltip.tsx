@@ -1,7 +1,8 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useRef, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { ItemInfo, CustomListing } from './CustomMarketplaceTypes';
+import { fmtC } from './marketplace-utils';
 import { Coins, TrendingUp, Hash, Shield, Package, BarChart3, Info } from 'lucide-react';
 
 const RARITY_LABELS: Record<string, string> = {
@@ -22,7 +23,6 @@ export const ItemInfoTooltip: FC<Props> = ({ listing }) =>
     const [ info, setInfo ] = useState<ItemInfo | null>(null);
     const [ loading, setLoading ] = useState(false);
     const fetched = useRef(false);
-
     const mainItem = listing.items[0];
 
     const onOpenChange = (open: boolean) =>
@@ -45,44 +45,42 @@ export const ItemInfoTooltip: FC<Props> = ({ listing }) =>
         <Tooltip delayDuration={ 150 } onOpenChange={ onOpenChange }>
             <TooltipTrigger asChild>
                 <button
-                    className="h-7 w-7 rounded-lg bg-white/[0.06] text-white/40 hover:text-white/80 hover:bg-white/10 transition-all flex items-center justify-center"
+                    className="h-6 w-6 rounded-md bg-accent/50 text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-all flex items-center justify-center"
                     title="Info"
                 >
-                    <Info className="size-3.5" />
+                    <Info className="w-3 h-3" />
                 </button>
             </TooltipTrigger>
             <TooltipContent
                 side="left"
                 sideOffset={ 8 }
-                className="w-[300px] p-0 rounded-xl border border-white/[0.08] bg-[rgba(12,12,16,0.97)] backdrop-blur-xl shadow-2xl text-white"
+                className="w-[280px] p-0 z-[9999]"
             >
                 { loading && (
-                    <div className="p-4 text-center text-white/30 text-[11px]">Laden...</div>
+                    <div className="p-4 text-center text-muted-foreground text-[11px]">Laden...</div>
                 ) }
 
                 { !loading && !info && (
-                    <div className="p-4 text-center text-white/30 text-[11px]">Keine Daten</div>
+                    <div className="p-4 text-center text-muted-foreground text-[11px]">Keine Daten</div>
                 ) }
 
                 { !loading && info && (
                     <div className="flex flex-col gap-2.5 p-3.5">
-                        {/* Item Name */}
-                        <div className="text-[13px] font-semibold text-white/90 leading-tight">{ info.public_name }</div>
+                        <div className="text-[13px] font-semibold leading-tight">{ info.public_name }</div>
 
-                        {/* Tags row */}
                         <div className="flex flex-wrap items-center gap-1.5">
                             { ltd && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 text-[10px] font-bold text-amber-400">
-                                    <Hash className="size-2.5" />
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 text-[10px] font-bold text-amber-500">
+                                    <Hash className="w-2.5 h-2.5" />
                                     LTD { ltd.num }/{ ltd.total }
                                 </span>
                             ) }
                             { info.seal && (
                                 <span
-                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold text-white"
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold"
                                     style={ { backgroundColor: info.seal.color + '30', color: info.seal.color } }
                                 >
-                                    <Shield className="size-2.5" />
+                                    <Shield className="w-2.5 h-2.5" />
                                     { info.seal.rarity_display }
                                 </span>
                             ) }
@@ -94,69 +92,64 @@ export const ItemInfoTooltip: FC<Props> = ({ listing }) =>
                                     { RARITY_LABELS[info.rarity_type.toLowerCase()] ?? info.rarity_type }
                                 </span>
                             ) }
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-500/10 text-[10px] text-blue-400/80">
-                                <Package className="size-2.5" />
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-500/10 text-[10px] text-blue-500">
+                                <Package className="w-2.5 h-2.5" />
                                 { info.in_circulation.toLocaleString() }x
                             </span>
                         </div>
 
-                        {/* Separator */}
-                        <div className="h-px bg-white/[0.06]" />
+                        <div className="h-px bg-border/40" />
 
-                        {/* Price Stats */}
                         <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
                             <div className="flex items-center gap-1.5">
-                                <Coins className="size-3 text-emerald-400/70 shrink-0" />
+                                <Coins className="w-3 h-3 text-emerald-500/70 shrink-0" />
                                 <div className="min-w-0">
-                                    <div className="text-[9px] text-white/35 uppercase tracking-wider">Letzter Verkauf</div>
-                                    <div className="text-[11px] text-white/80 font-medium">
-                                        { info.last_sale_price != null ? info.last_sale_price.toLocaleString() : '—' }
+                                    <div className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">Letzter Verkauf</div>
+                                    <div className="text-[11px] font-medium">
+                                        { info.last_sale_price != null ? fmtC(info.last_sale_price) : '—' }
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <TrendingUp className="size-3 text-blue-400/70 shrink-0" />
+                                <TrendingUp className="w-3 h-3 text-blue-500/70 shrink-0" />
                                 <div className="min-w-0">
-                                    <div className="text-[9px] text-white/35 uppercase tracking-wider">Durchschnitt</div>
-                                    <div className="text-[11px] text-white/80 font-medium">
-                                        { info.avg_price != null ? info.avg_price.toLocaleString() : '—' }
+                                    <div className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">Durchschnitt</div>
+                                    <div className="text-[11px] font-medium">
+                                        { info.avg_price != null ? fmtC(info.avg_price) : '—' }
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <BarChart3 className="size-3 text-amber-400/70 shrink-0" />
+                                <BarChart3 className="w-3 h-3 text-amber-500/70 shrink-0" />
                                 <div className="min-w-0">
-                                    <div className="text-[9px] text-white/35 uppercase tracking-wider">Verkäufe</div>
-                                    <div className="text-[11px] text-white/80 font-medium">{ info.total_sales }</div>
+                                    <div className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">Verkäufe</div>
+                                    <div className="text-[11px] font-medium">{ info.total_sales }</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-1.5">
-                                <Coins className="size-3 text-amber-400/70 shrink-0" />
+                                <Coins className="w-3 h-3 text-amber-500/70 shrink-0" />
                                 <div className="min-w-0">
-                                    <div className="text-[9px] text-white/35 uppercase tracking-wider">Listenpreis</div>
-                                    <div className="text-[11px] text-white/80 font-medium">{ listing.price.toLocaleString() }</div>
+                                    <div className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">Listenpreis</div>
+                                    <div className="text-[11px] font-medium">{ fmtC(listing.price) }</div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Bundle Contents */}
                         { listing.is_bundle && listing.items.length > 1 && (
                             <>
-                                <div className="h-px bg-white/[0.06]" />
+                                <div className="h-px bg-border/40" />
                                 <div>
-                                    <div className="text-[9px] font-bold text-white/35 uppercase tracking-wider mb-1">Bundle-Inhalt</div>
+                                    <div className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Bundle-Inhalt</div>
                                     <div className="flex flex-col gap-0.5">
-                                        { listing.items.map((item, i) =>
-                                        {
-                                            const itemLtd = item.limited_data && item.limited_data !== '0:0' ? item.limited_data : null;
-                                            return (
-                                                <div key={ i } className="flex items-center gap-1.5 text-[10px] text-white/55">
-                                                    <span className="text-white/25">{ i + 1 }.</span>
-                                                    <span className="truncate">{ item.public_name }</span>
-                                                    { itemLtd && <span className="text-[9px] text-amber-400 font-bold shrink-0">LTD { itemLtd }</span> }
-                                                </div>
-                                            );
-                                        }) }
+                                        { listing.items.map((item, i) => (
+                                            <div key={ i } className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                                                <span className="text-muted-foreground/30">{ i + 1 }.</span>
+                                                <span className="truncate">{ item.public_name }</span>
+                                                { item.limited_data && item.limited_data !== '0:0' && (
+                                                    <span className="text-[9px] text-amber-500 font-bold shrink-0">LTD { item.limited_data }</span>
+                                                ) }
+                                            </div>
+                                        )) }
                                     </div>
                                 </div>
                             </>

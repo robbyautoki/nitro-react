@@ -1,24 +1,37 @@
 import { FurnitureListComposer } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
-import { GetConfiguration, SendMessageComposer } from '../../api';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { SendMessageComposer } from '../../api';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { InventoryGroup } from './CustomMarketplaceTypes';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
-import { ShoppingBag, Search, X, Plus, Coins, Package, Check, AlertTriangle } from 'lucide-react';
-
-function getFurniIcon(itemName: string)
-{
-    const baseUrl = GetConfiguration<string>('image.library.url', 'http://localhost:8080/c_images/');
-    return `${ baseUrl }${ itemName.split('*')[0] }_icon.png`;
-}
+import { CurrencyIcon, ItemIcon } from './marketplace-components';
+import { fmtC } from './marketplace-utils';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
+    ShoppingBag, Search, X, Plus, Package, Check, AlertTriangle, Tag, Loader2,
+} from 'lucide-react';
 
 const DURATIONS = [
-    { value: 1, label: '1 Tag' },
-    { value: 3, label: '3 Tage' },
-    { value: 7, label: '7 Tage' },
-    { value: 14, label: '14 Tage' },
-    { value: 21, label: '21 Tage' },
-    { value: 30, label: '30 Tage' },
+    { value: '1', label: '1 Tag' },
+    { value: '3', label: '3 Tage' },
+    { value: '7', label: '7 Tage' },
+    { value: '14', label: '14 Tage' },
+    { value: '21', label: '21 Tage' },
+    { value: '30', label: '30 Tage' },
 ];
 
 const CURRENCIES = [
@@ -44,16 +57,14 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
     const [ searchQuery, setSearchQuery ] = useState('');
     const [ loading, setLoading ] = useState(true);
 
-    // Selected items for listing
+    const [ showInventory, setShowInventory ] = useState(false);
     const [ selected, setSelected ] = useState<SelectedItem[]>([]);
 
-    // Listing settings
     const [ price, setPrice ] = useState('');
     const [ currency, setCurrency ] = useState('credits');
-    const [ duration, setDuration ] = useState(7);
+    const [ duration, setDuration ] = useState('7');
     const [ note, setNote ] = useState('');
 
-    // State
     const [ submitting, setSubmitting ] = useState(false);
     const [ success, setSuccess ] = useState(false);
     const [ error, setError ] = useState('');
@@ -68,29 +79,30 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
 
     useEffect(() => { loadInventory(); }, [ loadInventory ]);
 
-    // Auto-select preselected item from inventory button
     useEffect(() =>
     {
         if(!preselectedItemBaseId || loading || inventory.length === 0) return;
-
         const group = inventory.find(g => g.item_base_id === preselectedItemBaseId);
         if(group)
         {
-            setSelected([{
+            setSelected([ {
                 item_base_id: group.item_base_id,
                 public_name: group.public_name,
                 item_name: group.item_name,
                 instance_ids: group.instance_ids,
                 quantity: 1,
                 available: group.count,
-            }]);
+            } ]);
         }
         setPreselectedItemBaseId(null);
     }, [ preselectedItemBaseId, loading, inventory, setPreselectedItemBaseId ]);
 
-    const filteredInventory = searchQuery.length >= 1
-        ? inventory.filter(g => g.public_name.toLowerCase().includes(searchQuery.toLowerCase()))
-        : inventory;
+    const filteredInventory = useMemo(() =>
+    {
+        if(!searchQuery) return inventory;
+        const q = searchQuery.toLowerCase();
+        return inventory.filter(g => g.public_name.toLowerCase().includes(q));
+    }, [ inventory, searchQuery ]);
 
     const addItem = (group: InventoryGroup) =>
     {
@@ -113,25 +125,18 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
         });
     };
 
-    const removeItem = (baseId: number) =>
-    {
-        setSelected(prev => prev.filter(s => s.item_base_id !== baseId));
-    };
+    const removeItem = (baseId: number) => setSelected(prev => prev.filter(s => s.item_base_id !== baseId));
 
     const updateQuantity = (baseId: number, qty: number) =>
     {
-        setSelected(prev =>
-            prev.map(s =>
-            {
-                if(s.item_base_id !== baseId) return s;
-                const clamped = Math.max(1, Math.min(qty, s.available));
-                return { ...s, quantity: clamped };
-            })
-        );
+        setSelected(prev => prev.map(s =>
+        {
+            if(s.item_base_id !== baseId) return s;
+            return { ...s, quantity: Math.max(1, Math.min(qty, s.available)) };
+        }));
     };
 
     const totalItemCount = selected.reduce((sum, s) => sum + s.quantity, 0);
-    const isBundle = selected.length > 1;
 
     const handleSubmit = async () =>
     {
@@ -142,18 +147,14 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
         setSubmitting(true);
         setError('');
 
-        // Collect item_ids: for each selected group, take quantity instance_ids
         const allItemIds: number[] = [];
-        for(const sel of selected)
-        {
-            allItemIds.push(...sel.instance_ids.slice(0, sel.quantity));
-        }
+        for(const sel of selected) allItemIds.push(...sel.instance_ids.slice(0, sel.quantity));
 
         const res = await CustomMarketplaceApi.createListing({
             item_ids: allItemIds,
             price: p,
             currency,
-            duration_days: duration,
+            duration_days: parseInt(duration),
             note: note.trim() || undefined,
         });
 
@@ -166,7 +167,6 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
             setPrice('');
             setNote('');
             loadInventory();
-            // Refresh the emulator-side inventory so items disappear from inventory panel
             SendMessageComposer(new FurnitureListComposer());
             setTimeout(() => setSuccess(false), 3000);
         }
@@ -176,193 +176,180 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
         }
     };
 
+    // Inventory Grid View
+    if(showInventory)
+    {
+        return (
+            <div className="flex flex-col h-full">
+                <div className="shrink-0 px-2.5 py-1.5 border-b border-border/30 flex items-center gap-2">
+                    <button onClick={ () => setShowInventory(false) } className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">&larr; Zurück</button>
+                    <div className="w-px h-3 bg-border/40" />
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground/50" />
+                        <Input placeholder="Inventar durchsuchen..." value={ searchQuery } onChange={ e => setSearchQuery(e.target.value) } className="pl-7 h-6 text-[11px]" />
+                    </div>
+                </div>
+                <ScrollArea className="flex-1 min-h-0">
+                    { loading ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                            <Loader2 className="w-6 h-6 animate-spin opacity-30 mb-1" /><p className="text-[10px]">Laden...</p>
+                        </div>
+                    ) : filteredInventory.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                            <Package className="w-6 h-6 opacity-20 mb-1" /><p className="text-[10px]">Nichts gefunden</p>
+                        </div>
+                    ) : (
+                        <div className="p-2 grid grid-cols-6 gap-1.5">
+                            { filteredInventory.map(item => (
+                                <Tooltip key={ item.item_base_id }>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            onClick={ () => { addItem(item); setShowInventory(false); setSearchQuery(''); } }
+                                            className="relative w-full aspect-square rounded-md border border-border/40 bg-muted/10 hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center transition-all"
+                                        >
+                                            <ItemIcon itemName={ item.item_name } className="w-8 h-8" />
+                                            { item.count > 1 && (
+                                                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] rounded-full bg-foreground/80 text-background text-[8px] font-bold flex items-center justify-center px-0.5">
+                                                    x{ item.count }
+                                                </span>
+                                            ) }
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" sideOffset={ 4 }>
+                                        <p className="font-semibold text-xs">{ item.public_name }</p>
+                                        <p className="text-[9px] text-muted-foreground">x{ item.count } verfügbar</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            )) }
+                        </div>
+                    ) }
+                </ScrollArea>
+            </div>
+        );
+    }
+
+    // Main Sell View
     return (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col items-center justify-center h-full px-6 gap-3">
             {/* Success Banner */}
             { success && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-500/[0.08] border border-emerald-500/20">
-                    <Check className="size-4 text-emerald-400" />
-                    <span className="text-xs text-emerald-300">Angebot erfolgreich erstellt!</span>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                    <Check className="w-4 h-4 text-emerald-500" />
+                    <span className="text-xs text-emerald-600">Angebot erfolgreich erstellt!</span>
                 </div>
             ) }
 
             {/* Error Banner */}
             { error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/[0.08] border border-red-500/20">
-                    <AlertTriangle className="size-4 text-red-400" />
-                    <span className="text-xs text-red-300">{ error }</span>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20">
+                    <AlertTriangle className="w-4 h-4 text-destructive" />
+                    <span className="text-xs text-destructive">{ error }</span>
                 </div>
             ) }
 
-            {/* Selected Items */}
-            { selected.length > 0 && (
-                <div className="flex flex-col gap-2">
-                    <span className="text-[11px] font-medium text-white/50">
-                        { isBundle ? 'Bundle' : 'Ausgewählt' } — { totalItemCount } Item{ totalItemCount !== 1 ? 's' : '' }
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                        { selected.map(sel => (
-                            <div key={ sel.item_base_id } className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.08]">
-                                <img
-                                    src={ getFurniIcon(sel.item_name) }
-                                    alt={ sel.public_name }
-                                    className="w-6 h-6 object-contain"
-                                    onError={ (e) => { (e.target as HTMLImageElement).style.display = 'none'; } }
-                                />
-                                <span className="text-[11px] text-white/70">{ sel.public_name }</span>
-                                { sel.available > 1 && (
-                                    <div className="flex items-center gap-1">
-                                        <button
-                                            className="size-4 rounded text-[10px] bg-white/[0.06] text-white/40 hover:bg-white/10"
-                                            onClick={ () => updateQuantity(sel.item_base_id, sel.quantity - 1) }
-                                        >-</button>
-                                        <span className="text-[10px] text-white/60 w-4 text-center">{ sel.quantity }</span>
-                                        <button
-                                            className="size-4 rounded text-[10px] bg-white/[0.06] text-white/40 hover:bg-white/10"
-                                            onClick={ () => updateQuantity(sel.item_base_id, sel.quantity + 1) }
-                                        >+</button>
-                                    </div>
-                                ) }
-                                <button
-                                    className="ml-1 p-0.5 rounded text-white/30 hover:text-red-400 transition-colors"
-                                    onClick={ () => removeItem(sel.item_base_id) }
-                                >
-                                    <X className="size-3" />
-                                </button>
-                            </div>
-                        )) }
-                    </div>
-                </div>
-            ) }
-
-            {/* Listing Settings */}
-            { selected.length > 0 && (
-                <div className="flex flex-col gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                    <div className="grid grid-cols-3 gap-2">
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] text-white/40">Preis</span>
-                            <div className="flex items-center gap-1">
-                                <Coins className="size-3 text-white/30" />
-                                <input
-                                    className="flex-1 h-7 px-2 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 outline-none focus:border-white/20"
-                                    type="number"
-                                    min={ 1 }
-                                    placeholder="0"
-                                    value={ price }
-                                    onChange={ e => setPrice(e.target.value) }
-                                />
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] text-white/40">Währung</span>
-                            <select
-                                className="h-7 px-2 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 outline-none"
-                                value={ currency }
-                                onChange={ e => setCurrency(e.target.value) }
-                            >
-                                { CURRENCIES.map(c => (
-                                    <option key={ c.value } value={ c.value } className="bg-zinc-900">{ c.label }</option>
-                                )) }
-                            </select>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="text-[10px] text-white/40">Dauer</span>
-                            <select
-                                className="h-7 px-2 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 outline-none"
-                                value={ duration }
-                                onChange={ e => setDuration(parseInt(e.target.value)) }
-                            >
-                                { DURATIONS.map(d => (
-                                    <option key={ d.value } value={ d.value } className="bg-zinc-900">{ d.label }</option>
-                                )) }
-                            </select>
-                        </div>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                        <span className="text-[10px] text-white/40">Notiz (optional)</span>
-                        <input
-                            className="h-7 px-2.5 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 placeholder-white/30 outline-none focus:border-white/20"
-                            type="text"
-                            maxLength={ 255 }
-                            placeholder="z.B. Preisverhandlung möglich..."
-                            value={ note }
-                            onChange={ e => setNote(e.target.value) }
-                        />
-                    </div>
-                    { price && parseInt(price) > 0 && (
-                        <div className="text-[10px] text-white/30 text-center">
-                            2% Marktplatz-Gebühr · Du erhältst: { Math.floor(parseInt(price) * 0.98) } { CURRENCIES.find(c => c.value === currency)?.label ?? currency }
-                        </div>
-                    ) }
-                    <button
-                        className="mt-1 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 text-[11px] font-semibold hover:bg-emerald-500/30 transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
-                        onClick={ handleSubmit }
-                        disabled={ submitting || !price || selected.length === 0 }
-                    >
-                        <ShoppingBag className="size-3.5" />
-                        { submitting ? 'Wird erstellt...' : `Angebot erstellen (${ totalItemCount } Item${ totalItemCount !== 1 ? 's' : '' })` }
-                    </button>
-                </div>
-            ) }
-
-            {/* Inventory Browser */}
-            <div className="flex flex-col gap-2">
-                <span className="text-[11px] font-medium text-white/50">Inventar</span>
-                <div className="flex items-center gap-2">
-                    <Search className="size-3 text-white/30" />
-                    <input
-                        className="flex-1 h-7 px-2.5 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 placeholder-white/30 outline-none focus:border-white/20"
-                        type="text"
-                        placeholder="Item suchen..."
-                        value={ searchQuery }
-                        onChange={ e => setSearchQuery(e.target.value) }
-                    />
-                </div>
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-amber-500" />
+            </div>
+            <div className="text-center">
+                <p className="text-[12px] font-semibold">Möbel verkaufen</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Wähle Möbelstücke aus deinem Inventar</p>
             </div>
 
-            { loading && <div className="text-center py-8 text-white/30 text-xs">Inventar wird geladen...</div> }
-
-            { !loading && filteredInventory.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-8 text-white/20">
-                    <Package className="size-8 mb-2" />
-                    <span className="text-xs">{ searchQuery ? 'Keine Items gefunden' : 'Inventar ist leer' }</span>
-                </div>
-            ) }
-
-            { !loading && (
-                <div className="grid grid-cols-2 gap-1.5 max-h-[300px] overflow-y-auto">
-                    { filteredInventory.map(group =>
-                    {
-                        const isSelected = selected.some(s => s.item_base_id === group.item_base_id);
-                        return (
-                            <button
-                                key={ group.item_base_id }
-                                className={ `flex items-center gap-2 p-2 rounded-lg border transition-all text-left ${
-                                    isSelected
-                                        ? 'bg-emerald-500/[0.08] border-emerald-500/20'
-                                        : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
-                                }` }
-                                onClick={ () => isSelected ? removeItem(group.item_base_id) : addItem(group) }
-                            >
-                                <div className="w-8 h-8 rounded bg-white/[0.05] flex items-center justify-center shrink-0 overflow-hidden">
-                                    <img
-                                        src={ getFurniIcon(group.item_name) }
-                                        alt={ group.public_name }
-                                        className="max-w-full max-h-full object-contain"
-                                        onError={ (e) => { (e.target as HTMLImageElement).style.display = 'none'; } }
-                                    />
+            <div className="w-full max-w-[320px] space-y-2">
+                {/* Selected Items */}
+                { selected.length > 0 ? (
+                    <div className="flex flex-col gap-1.5">
+                        { selected.map(sel => (
+                            <div key={ sel.item_base_id } className="flex items-center gap-2 p-2.5 rounded-lg border border-primary/20 bg-primary/5">
+                                <div className="w-10 h-10 rounded-md border border-border/40 bg-card flex items-center justify-center">
+                                    <ItemIcon itemName={ sel.item_name } className="w-8 h-8" />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="text-[11px] text-white/70 truncate">{ group.public_name }</div>
-                                    <div className="text-[10px] text-white/30">x{ group.count }</div>
+                                <div className="flex-1">
+                                    <p className="text-[11px] font-medium">{ sel.public_name }</p>
+                                    { sel.available > 1 && (
+                                        <div className="flex items-center gap-1 mt-0.5">
+                                            <button className="w-4 h-4 rounded text-[10px] bg-accent/50 text-muted-foreground hover:bg-accent" onClick={ () => updateQuantity(sel.item_base_id, sel.quantity - 1) }>-</button>
+                                            <span className="text-[10px] text-muted-foreground w-4 text-center">{ sel.quantity }</span>
+                                            <button className="w-4 h-4 rounded text-[10px] bg-accent/50 text-muted-foreground hover:bg-accent" onClick={ () => updateQuantity(sel.item_base_id, sel.quantity + 1) }>+</button>
+                                            <span className="text-[9px] text-muted-foreground/50 ml-1">von { sel.available }</span>
+                                        </div>
+                                    ) }
                                 </div>
-                                { isSelected && <Check className="size-3 text-emerald-400 shrink-0" /> }
-                                { !isSelected && <Plus className="size-3 text-white/20 shrink-0" /> }
-                            </button>
-                        );
-                    }) }
-                </div>
-            ) }
+                                <button onClick={ () => removeItem(sel.item_base_id) }><X className="w-3.5 h-3.5 text-muted-foreground/40 hover:text-foreground" /></button>
+                            </div>
+                        )) }
+                        <button
+                            className="flex items-center justify-center gap-1 p-1.5 rounded-lg border border-dashed border-border/50 bg-muted/10 text-[10px] text-muted-foreground hover:border-primary/30 transition-colors"
+                            onClick={ () => setShowInventory(true) }
+                        >
+                            <Plus className="w-3 h-3" />Weiteres Item hinzufügen
+                        </button>
+                    </div>
+                ) : (
+                    <div
+                        className="flex items-center gap-2 p-2.5 rounded-lg border border-dashed border-border/50 bg-muted/10 cursor-pointer hover:border-primary/30 transition-colors"
+                        onClick={ () => setShowInventory(true) }
+                    >
+                        <div className="w-10 h-10 rounded-md bg-muted/30 flex items-center justify-center">
+                            <Plus className="w-4 h-4 text-muted-foreground/40" />
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-medium">Aus Inventar wählen</p>
+                            <p className="text-[9px] text-muted-foreground/50">Klicke zum Auswählen</p>
+                        </div>
+                    </div>
+                ) }
+
+                {/* Listing Settings */}
+                { selected.length > 0 && (
+                    <div className="flex flex-col gap-2 p-3 rounded-lg border border-border/40 bg-card">
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] text-muted-foreground">Preis</span>
+                                <div className="relative">
+                                    <CurrencyIcon type={ currency } className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5" />
+                                    <Input type="number" min={ 1 } placeholder="0" value={ price } onChange={ e => setPrice(e.target.value) } className="pl-7 h-7 text-[11px]" />
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] text-muted-foreground">Währung</span>
+                                <Select value={ currency } onValueChange={ setCurrency }>
+                                    <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        { CURRENCIES.map(c => <SelectItem key={ c.value } value={ c.value }>{ c.label }</SelectItem>) }
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <span className="text-[10px] text-muted-foreground">Dauer</span>
+                                <Select value={ duration } onValueChange={ setDuration }>
+                                    <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        { DURATIONS.map(d => <SelectItem key={ d.value } value={ d.value }>{ d.label }</SelectItem>) }
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <span className="text-[10px] text-muted-foreground">Notiz (optional)</span>
+                            <Input type="text" maxLength={ 255 } placeholder="z.B. Preisverhandlung möglich..." value={ note } onChange={ e => setNote(e.target.value) } className="h-7 text-[11px]" />
+                        </div>
+                        { price && parseInt(price) > 0 && (
+                            <div className="text-[10px] text-muted-foreground/50 text-center">
+                                2% Marktplatz-Gebühr · Du erhältst: { fmtC(Math.floor(parseInt(price) * 0.98)) } { CURRENCIES.find(c => c.value === currency)?.label ?? currency }
+                            </div>
+                        ) }
+                        <Button
+                            className="w-full h-7 text-[11px] bg-amber-600 hover:bg-amber-700 text-white"
+                            disabled={ submitting || !price || selected.length === 0 }
+                            onClick={ handleSubmit }
+                        >
+                            <Tag className="w-3 h-3 mr-1" />
+                            { submitting ? 'Wird erstellt...' : `Angebot erstellen (${ totalItemCount } Item${ totalItemCount !== 1 ? 's' : '' })` }
+                        </Button>
+                    </div>
+                ) }
+            </div>
         </div>
     );
 };

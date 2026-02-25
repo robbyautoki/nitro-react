@@ -2,30 +2,42 @@ import { FC, useState, useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, BarChart, Bar } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
-import { Search, TrendingUp, TrendingDown, Minus, Coins, BarChart3 } from 'lucide-react';
+import { CurrencyIcon } from './marketplace-components';
+import { fmtC } from './marketplace-utils';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Search, TrendingUp, TrendingDown, Minus, BarChart3, ArrowUp, ArrowDown } from 'lucide-react';
 
-const priceChartConfig: ChartConfig = {
+const chartConfig: ChartConfig = {
     averagePrice: {
         label: 'Ø Preis',
-        color: 'rgb(52, 211, 153)',
+        color: 'hsl(var(--primary))',
     },
     soldAmount: {
         label: 'Verkauft',
-        color: 'rgb(96, 165, 250)',
+        color: 'hsl(var(--chart-2))',
     },
 };
 
 export const MarketplacePriceChartView: FC<{}> = () =>
 {
     const { itemStats, requestItemStats } = useMarketplace();
-    const [ furniType, setFurniType ] = useState(1); // 1=floor, 2=wall
+    const [ furniType, setFurniType ] = useState('1');
     const [ furniIdInput, setFurniIdInput ] = useState('');
 
     const doSearch = () =>
     {
         const id = parseInt(furniIdInput);
         if(isNaN(id) || id <= 0) return;
-        requestItemStats(furniType, id);
+        requestItemStats(parseInt(furniType), id);
     };
 
     const chartData = useMemo(() =>
@@ -33,12 +45,12 @@ export const MarketplacePriceChartView: FC<{}> = () =>
         if(!itemStats?.history?.length) return [];
         return itemStats.history
             .map(h => ({
-                day: `${ h.dayOffset }d ago`,
+                day: `${ h.dayOffset }d`,
                 dayOffset: h.dayOffset,
                 averagePrice: h.averagePrice,
                 soldAmount: h.soldAmount,
             }))
-            .sort((a, b) => b.dayOffset - a.dayOffset); // oldest first
+            .sort((a, b) => b.dayOffset - a.dayOffset);
     }, [ itemStats ]);
 
     const trend = useMemo(() =>
@@ -50,118 +62,130 @@ export const MarketplacePriceChartView: FC<{}> = () =>
         return ((recent - older) / older) * 100;
     }, [ chartData ]);
 
+    const prices = chartData.map(d => d.averagePrice);
+    const avg = prices.length > 0 ? Math.round(prices.reduce((a, b) => a + b, 0) / prices.length) : 0;
+    const min = prices.length > 0 ? Math.min(...prices) : 0;
+    const max = prices.length > 0 ? Math.max(...prices) : 0;
+
     return (
-        <div className="flex flex-col gap-4">
-            {/* Search */}
-            <div className="flex flex-col gap-2">
-                <span className="text-[11px] text-white/40">Preisverlauf für ein Möbelstück nachschlagen</span>
+        <div className="flex flex-col h-full">
+            {/* Search Bar */}
+            <div className="shrink-0 px-3 pt-2 pb-1.5 border-b border-border/30">
                 <div className="flex items-center gap-2">
-                    <select
-                        className="h-7 px-2 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 outline-none"
-                        value={ furniType }
-                        onChange={ e => setFurniType(parseInt(e.target.value)) }
-                    >
-                        <option value={ 1 } className="bg-zinc-900">Bodenmöbel</option>
-                        <option value={ 2 } className="bg-zinc-900">Wandmöbel</option>
-                    </select>
-                    <input
-                        className="flex-1 h-7 px-2.5 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] text-white/80 placeholder-white/30 outline-none focus:border-white/20"
-                        type="number"
-                        min={ 1 }
-                        placeholder="Möbel-ID"
-                        value={ furniIdInput }
-                        onChange={ e => setFurniIdInput(e.target.value) }
-                        onKeyDown={ e => e.key === 'Enter' && doSearch() }
-                    />
-                    <button
-                        className="h-7 px-3 rounded-lg bg-white/[0.1] text-white/80 text-[11px] font-medium hover:bg-white/[0.15] transition-all flex items-center gap-1"
-                        onClick={ doSearch }
-                    >
-                        <Search className="size-3" />
-                        Suchen
-                    </button>
+                    <Select value={ furniType } onValueChange={ setFurniType }>
+                        <SelectTrigger className="w-28 h-7 text-[11px]">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="1">Bodenmöbel</SelectItem>
+                            <SelectItem value="2">Wandmöbel</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground/50" />
+                        <Input
+                            type="number"
+                            min={ 1 }
+                            placeholder="Möbel-ID eingeben..."
+                            value={ furniIdInput }
+                            onChange={ e => setFurniIdInput(e.target.value) }
+                            onKeyDown={ e => e.key === 'Enter' && doSearch() }
+                            className="pl-7 h-7 text-[11px]"
+                        />
+                    </div>
+                    <Button variant="outline" size="sm" className="h-7 text-[10px] px-2.5" onClick={ doSearch }>
+                        <Search className="w-3 h-3 mr-1" />Suchen
+                    </Button>
                 </div>
             </div>
 
             { !itemStats && (
-                <div className="flex flex-col items-center justify-center py-12 text-white/20">
-                    <BarChart3 className="size-10 mb-2" />
+                <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground">
+                    <BarChart3 className="w-10 h-10 opacity-20 mb-2" />
                     <span className="text-xs">Gib eine Möbel-ID ein um den Preisverlauf zu sehen</span>
                 </div>
             ) }
 
             { itemStats && (
-                <>
-                    {/* Stats Summary */}
-                    <div className="grid grid-cols-3 gap-2">
-                        <div className="flex flex-col items-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                            <Coins className="size-4 text-amber-400/60 mb-1" />
-                            <span className="text-sm font-semibold text-white/90">{ itemStats.averagePrice.toLocaleString() }</span>
-                            <span className="text-[10px] text-white/30">Ø Preis</span>
+                <div className="flex flex-col flex-1 min-h-0">
+                    {/* Stats Row */}
+                    <div className="shrink-0 flex items-center justify-end gap-4 px-3 py-2 border-b border-border/30">
+                        <div className="text-center">
+                            <p className="text-[9px] text-muted-foreground">Ø Preis</p>
+                            <p className="text-[11px] font-bold tabular-nums flex items-center gap-0.5 justify-center">
+                                <CurrencyIcon type="credits" className="w-3 h-3" />{ fmtC(itemStats.averagePrice) }
+                            </p>
                         </div>
-                        <div className="flex flex-col items-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                            <span className="text-sm font-semibold text-white/90">{ itemStats.offerCount }</span>
-                            <span className="text-[10px] text-white/30 mt-1">Aktive Angebote</span>
+                        <div className="text-center">
+                            <p className="text-[9px] text-muted-foreground">Min</p>
+                            <p className="text-[11px] font-bold tabular-nums text-emerald-500 flex items-center gap-0.5 justify-center">
+                                <CurrencyIcon type="credits" className="w-3 h-3" />{ fmtC(min) }
+                            </p>
                         </div>
-                        <div className="flex flex-col items-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                            { trend > 0 && <TrendingUp className="size-4 text-emerald-400/60 mb-1" /> }
-                            { trend < 0 && <TrendingDown className="size-4 text-red-400/60 mb-1" /> }
-                            { trend === 0 && <Minus className="size-4 text-white/30 mb-1" /> }
-                            <span className={ `text-sm font-semibold ${ trend > 0 ? 'text-emerald-400' : trend < 0 ? 'text-red-400' : 'text-white/50' }` }>
-                                { trend > 0 ? '+' : '' }{ trend.toFixed(1) }%
-                            </span>
-                            <span className="text-[10px] text-white/30">Trend</span>
+                        <div className="text-center">
+                            <p className="text-[9px] text-muted-foreground">Max</p>
+                            <p className="text-[11px] font-bold tabular-nums text-red-500 flex items-center gap-0.5 justify-center">
+                                <CurrencyIcon type="credits" className="w-3 h-3" />{ fmtC(max) }
+                            </p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-[9px] text-muted-foreground">Angebote</p>
+                            <p className="text-[11px] font-bold tabular-nums">{ itemStats.offerCount }</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-[9px] text-muted-foreground">Trend</p>
+                            <p className={ `text-[11px] font-bold tabular-nums flex items-center gap-0.5 ${ trend >= 0 ? 'text-emerald-500' : 'text-red-500' }` }>
+                                { trend >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" /> }
+                                { trend >= 0 ? '+' : '' }{ trend.toFixed(1) }%
+                            </p>
                         </div>
                     </div>
 
                     {/* Price Chart */}
                     { chartData.length > 0 && (
-                        <div className="flex flex-col gap-2">
-                            <span className="text-[11px] font-medium text-white/50">Preisverlauf</span>
-                            <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3">
-                                <ChartContainer config={ priceChartConfig } className="h-[200px] w-full">
-                                    <AreaChart data={ chartData } margin={ { top: 5, right: 5, left: 0, bottom: 0 } }>
-                                        <defs>
-                                            <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="rgb(52, 211, 153)" stopOpacity={ 0.3 } />
-                                                <stop offset="95%" stopColor="rgb(52, 211, 153)" stopOpacity={ 0 } />
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                                        <XAxis dataKey="day" tick={ { fontSize: 10, fill: 'rgba(255,255,255,0.3)' } } />
-                                        <YAxis tick={ { fontSize: 10, fill: 'rgba(255,255,255,0.3)' } } width={ 50 } />
-                                        <ChartTooltip content={ <ChartTooltipContent /> } />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="averagePrice"
-                                            stroke="rgb(52, 211, 153)"
-                                            strokeWidth={ 2 }
-                                            fill="url(#priceGradient)"
-                                        />
-                                    </AreaChart>
-                                </ChartContainer>
-                            </div>
+                        <div className="flex-1 min-h-0 px-2 py-3">
+                            <div className="text-[10px] font-medium text-muted-foreground mb-1 px-1">Preisverlauf</div>
+                            <ChartContainer config={ chartConfig } className="h-[180px] w-full">
+                                <AreaChart data={ chartData } margin={ { top: 4, right: 8, left: 0, bottom: 0 } }>
+                                    <defs>
+                                        <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={ 0.2 } />
+                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={ 0 } />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={ 0.3 } />
+                                    <XAxis dataKey="day" tick={ { fontSize: 9 } } tickLine={ false } axisLine={ false } interval={ 4 } />
+                                    <YAxis tick={ { fontSize: 9 } } tickLine={ false } axisLine={ false } width={ 40 } domain={ [ 'dataMin - 10', 'dataMax + 10' ] } />
+                                    <ChartTooltip content={ <ChartTooltipContent /> } />
+                                    <Area type="monotone" dataKey="averagePrice" stroke="hsl(var(--primary))" strokeWidth={ 2 } fill="url(#priceGrad)" />
+                                </AreaChart>
+                            </ChartContainer>
                         </div>
                     ) }
 
                     {/* Volume Chart */}
                     { chartData.length > 0 && (
-                        <div className="flex flex-col gap-2">
-                            <span className="text-[11px] font-medium text-white/50">Verkaufsvolumen</span>
-                            <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3">
-                                <ChartContainer config={ priceChartConfig } className="h-[120px] w-full">
-                                    <BarChart data={ chartData } margin={ { top: 5, right: 5, left: 0, bottom: 0 } }>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                                        <XAxis dataKey="day" tick={ { fontSize: 10, fill: 'rgba(255,255,255,0.3)' } } />
-                                        <YAxis tick={ { fontSize: 10, fill: 'rgba(255,255,255,0.3)' } } width={ 30 } />
-                                        <ChartTooltip content={ <ChartTooltipContent /> } />
-                                        <Bar dataKey="soldAmount" fill="rgb(96, 165, 250)" radius={ [ 3, 3, 0, 0 ] } opacity={ 0.7 } />
-                                    </BarChart>
-                                </ChartContainer>
-                            </div>
+                        <div className="shrink-0 px-2 pb-3">
+                            <div className="text-[10px] font-medium text-muted-foreground mb-1 px-1">Verkaufsvolumen</div>
+                            <ChartContainer config={ chartConfig } className="h-[100px] w-full">
+                                <BarChart data={ chartData } margin={ { top: 4, right: 8, left: 0, bottom: 0 } }>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={ 0.3 } />
+                                    <XAxis dataKey="day" tick={ { fontSize: 9 } } tickLine={ false } axisLine={ false } interval={ 4 } />
+                                    <YAxis tick={ { fontSize: 9 } } tickLine={ false } axisLine={ false } width={ 30 } />
+                                    <ChartTooltip content={ <ChartTooltipContent /> } />
+                                    <Bar dataKey="soldAmount" fill="hsl(var(--chart-2))" radius={ [ 3, 3, 0, 0 ] } opacity={ 0.7 } />
+                                </BarChart>
+                            </ChartContainer>
                         </div>
                     ) }
-                </>
+
+                    { chartData.length === 0 && (
+                        <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground">
+                            <BarChart3 className="w-8 h-8 opacity-20 mb-2" />
+                            <span className="text-xs">Keine Verlaufsdaten vorhanden</span>
+                        </div>
+                    ) }
+                </div>
             ) }
         </div>
     );

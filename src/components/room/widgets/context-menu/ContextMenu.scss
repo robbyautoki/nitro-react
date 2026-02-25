@@ -78,9 +78,8 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 70px;
-                height: 70px;
-                object-fit: contain;
+                width: 150px;
+                height: 150px;
                 image-rendering: pixelated;
                 z-index: 1;
             }
@@ -90,8 +89,8 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 70px;
-                height: 70px;
+                width: 100px;
+                height: 100px;
                 object-fit: contain;
                 z-index: 2;
                 pointer-events: none;

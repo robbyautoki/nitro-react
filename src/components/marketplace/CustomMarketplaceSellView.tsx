@@ -195,8 +195,10 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
                             <Loader2 className="w-6 h-6 animate-spin opacity-30 mb-1" /><p className="text-[10px]">Laden...</p>
                         </div>
                     ) : filteredInventory.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                            <Package className="w-6 h-6 opacity-20 mb-1" /><p className="text-[10px]">Nichts gefunden</p>
+                        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground px-6 text-center">
+                            <Package className="w-6 h-6 opacity-20 mb-1" />
+                            <p className="text-[10px] font-medium">{ searchQuery ? 'Keine Items gefunden' : 'Keine Möbel verfügbar' }</p>
+                            { !searchQuery && <p className="text-[9px] text-muted-foreground/50 mt-1">Items müssen im Inventar (nicht platziert) und für den Marktplatz freigegeben sein.</p> }
                         </div>
                     ) : (
                         <div className="p-2 grid grid-cols-6 gap-1.5">

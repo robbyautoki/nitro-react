@@ -1,11 +1,8 @@
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { Store, Package, BarChart3, History, MessageCircle, ShoppingBag, X } from 'lucide-react';
 import { DraggableWindow, DraggableWindowPosition } from '../../common';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Separator } from '@/components/ui/separator';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
-import { MarketplaceBrowseView } from './MarketplaceBrowseView';
-import { MarketplaceOwnOffersView } from './MarketplaceOwnOffersView';
 import { MarketplacePriceChartView } from './MarketplacePriceChartView';
 import { CustomMarketplaceBrowseView } from './CustomMarketplaceBrowseView';
 import { CustomMarketplaceSalesView } from './CustomMarketplaceSalesView';
@@ -22,18 +19,51 @@ const TABS = [
     { id: 'charts', label: 'Preisverlauf', icon: BarChart3 },
 ] as const;
 
+const MIN_W = 600;
+const MIN_H = 420;
+const MAX_W = 1000;
+const MAX_H = 750;
+
 export const MarketplaceView: FC<{}> = () =>
 {
     const { isVisible, setIsVisible, currentTab, setCurrentTab } = useMarketplace();
     const onClose = useCallback(() => setIsVisible(false), [ setIsVisible ]);
+
+    const [ size, setSize ] = useState({ w: 820, h: 580 });
+    const resizeRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null);
+
+    useEffect(() =>
+    {
+        const onMove = (e: PointerEvent) =>
+        {
+            if(!resizeRef.current) return;
+            setSize({
+                w: Math.min(MAX_W, Math.max(MIN_W, resizeRef.current.startW + e.clientX - resizeRef.current.startX)),
+                h: Math.min(MAX_H, Math.max(MIN_H, resizeRef.current.startH + e.clientY - resizeRef.current.startY)),
+            });
+        };
+        const onUp = () => { resizeRef.current = null; };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        return () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
+    }, []);
+
+    const onResizeStart = useCallback((e: React.PointerEvent) =>
+    {
+        e.preventDefault();
+        e.stopPropagation();
+        resizeRef.current = { startX: e.clientX, startY: e.clientY, startW: size.w, startH: size.h };
+    }, [ size ]);
 
     if(!isVisible) return null;
 
     return (
         <TooltipProvider delayDuration={ 150 }>
             <DraggableWindow uniqueKey="marketplace" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-                <div className="w-[820px] max-h-[85vh] rounded-xl border border-border/60 bg-card shadow-2xl overflow-hidden flex flex-col">
-
+                <div
+                    className="rounded-xl border border-border/60 bg-card shadow-2xl overflow-hidden flex flex-col relative"
+                    style={ { width: size.w, height: size.h } }
+                >
                     {/* Title Bar */}
                     <div className="drag-handler shrink-0 flex items-center justify-between px-3 py-2 border-b border-border/40 bg-muted/20 cursor-grab active:cursor-grabbing select-none">
                         <div className="flex items-center gap-2">
@@ -68,13 +98,23 @@ export const MarketplaceView: FC<{}> = () =>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-h-0 overflow-hidden px-4 pb-4 pt-2">
+                    <div className="flex-1 min-h-0 overflow-hidden">
                         { currentTab === 'custom-browse' && <CustomMarketplaceBrowseView /> }
                         { currentTab === 'custom-my' && <CustomMarketplaceMyListingsView /> }
                         { currentTab === 'custom-sales' && <CustomMarketplaceSalesView /> }
                         { currentTab === 'custom-offers' && <CustomMarketplaceOffersView /> }
                         { currentTab === 'custom-sell' && <CustomMarketplaceSellView /> }
                         { currentTab === 'charts' && <MarketplacePriceChartView /> }
+                    </div>
+
+                    {/* Resize Handle */}
+                    <div
+                        className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize z-20 flex items-end justify-end"
+                        onPointerDown={ onResizeStart }
+                    >
+                        <svg width="10" height="10" viewBox="0 0 10 10" className="text-muted-foreground/30">
+                            <path d="M9 1L1 9M9 5L5 9M9 8L8 9" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                        </svg>
                     </div>
                 </div>
             </DraggableWindow>

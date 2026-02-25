@@ -21,7 +21,7 @@ const ZOOM_GAP = 8;
 
 export const CatalogInspectorView: FC<{}> = () =>
 {
-    const { currentOffer = null, purchaseOptions = null, setPurchaseOptions = null } = useCatalog();
+    const { currentOffer = null, purchaseOptions = null, setPurchaseOptions = null, setCurrentOffer = null } = useCatalog();
     const { rarityData } = useFurnitureRarity(currentOffer?.product?.productClassId ?? 0);
     const previewRef = useRef<HTMLDivElement>(null);
     const zoomRef = useRef<HTMLDivElement>(null);
@@ -183,6 +183,14 @@ export const CatalogInspectorView: FC<{}> = () =>
                         <CatalogAddOnBadgeWidgetView className="scale-[2]" />
                     </div>
                 ) }
+
+                {/* Close button */}
+                <button
+                    onClick={ () => setCurrentOffer(null) }
+                    className="absolute top-2.5 left-2.5 p-1.5 rounded-lg bg-black/40 backdrop-blur-sm text-white/50 hover:text-white/90 hover:bg-black/60 transition-colors z-10"
+                >
+                    <X className="w-3.5 h-3.5" />
+                </button>
 
                 {/* Variant controls */}
                 <div className="absolute top-2.5 right-2.5 flex gap-1">

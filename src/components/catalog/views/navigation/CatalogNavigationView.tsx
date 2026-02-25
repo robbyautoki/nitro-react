@@ -12,6 +12,17 @@ import { CatalogNavigationSetView } from './CatalogNavigationSetView';
 
 const stripPageId = (text: string) => text?.replace(/\s*\(\d+\)$/, '') ?? '';
 
+const getTotalOffers = (node: any): number =>
+{
+    let total = node.offerIds?.length || 0;
+    for(const child of (node.children || []))
+    {
+        if(!child.isVisible) continue;
+        total += getTotalOffers(child);
+    }
+    return total;
+};
+
 const findNodeByPageId = (node: ICatalogNode, pageId: number): ICatalogNode | null =>
 {
     if(node.pageId === pageId) return node;
@@ -113,6 +124,7 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                         <span className="flex-1 text-left truncate text-xs font-bold uppercase tracking-wide text-muted-foreground/70">
                             { stripPageId(topNode.localization) }
                         </span>
+                        { (() => { const count = getTotalOffers(topNode); return count > 0 ? <span className="text-[10px] text-muted-foreground/40 tabular-nums shrink-0">{ count.toLocaleString('de-DE') }</span> : null; })() }
                         <ChevronRight className={ `w-3.5 h-3.5 shrink-0 text-muted-foreground/30 transition-transform duration-200 ${ isOpen ? 'rotate-90' : '' }` } />
                     </button>
                     <div

@@ -1,11 +1,12 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaTimes, FaList, FaClock, FaFire } from 'react-icons/fa';
+import { X, PanelLeftClose, PanelLeft, Clock, Flame, ShieldCheck } from 'lucide-react';
 import { AddEventLinkTracker, CatalogType, GetSessionDataManager, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
 import { CatalogPurchasedEvent } from '../../events';
 import { useCatalog, useUiEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
 import { Button } from '../ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { CatalogInspectorView } from './views/CatalogInspectorView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
@@ -295,7 +296,19 @@ export const CatalogView: FC<{}> = props =>
                         className="drag-handler relative flex items-center gap-3 px-4 shrink-0 border-b border-black/[0.06] h-14 cursor-move select-none overflow-hidden"
                         style={ { backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.02) 1px, transparent 0)', backgroundSize: '16px 16px' } }
                     >
-                        <div className="flex items-center gap-1.5 shrink-0 min-w-0 overflow-hidden">
+                        <TooltipProvider delayDuration={ 300 }>
+                        { !navigationHidden && (
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon-xs" className="shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setNavOverlay(v => !v) }>
+                                        { navOverlay ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" /> }
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">{ navOverlay ? 'Sidebar ausblenden' : 'Sidebar einblenden' }</TooltipContent>
+                            </Tooltip>
+                        ) }
+
+                        <div className="flex items-center gap-1.5 shrink-0 min-w-0 overflow-hidden flex-1">
                             <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-black/30 shrink-0">
                                 { staffView ? 'Staff Katalog' : LocalizeText('catalog.title') }
                             </span>
@@ -307,40 +320,54 @@ export const CatalogView: FC<{}> = props =>
                             )) }
                         </div>
 
-                        <div className="flex-1" />
-
                         <div className="w-[220px] shrink-0" onMouseDown={ e => e.stopPropagation() }>
                             <CatalogSearchView />
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0" onMouseDown={ e => e.stopPropagation() }>
-                            <button
-                                className={ `appearance-none border rounded-md p-1.5 transition-colors ${ virtualPage === 'recent' ? 'bg-black/[0.06] border-black/15 text-black/60' : 'bg-transparent border-black/8 text-black/20 hover:text-black/50 hover:border-black/15' }` }
-                                onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'recent' })) }
-                                title="Zuletzt gekauft"
-                            >
-                                <FaClock className="text-[10px]" />
-                            </button>
-                            <button
-                                className={ `appearance-none border rounded-md p-1.5 transition-colors ${ virtualPage === 'frequent' ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' : 'bg-transparent border-black/8 text-black/20 hover:text-black/50 hover:border-black/15' }` }
-                                onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'frequent' })) }
-                                title="Am meisten gekauft"
-                            >
-                                <FaFire className="text-[10px]" />
-                            </button>
+                        <div className="flex items-center gap-1 shrink-0" onMouseDown={ e => e.stopPropagation() }>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon-xs"
+                                        className={ virtualPage === 'recent' ? 'bg-primary/10 text-primary' : '' }
+                                        onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'recent' })) }
+                                    >
+                                        <Clock className="w-3.5 h-3.5" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">Zuletzt gekauft</TooltipContent>
+                            </Tooltip>
 
-                            { isMod &&
-                                <button
-                                    className={ `appearance-none border rounded-md px-2 py-1 text-[9px] font-semibold uppercase tracking-wider transition-colors ${ staffView ? 'bg-amber-500/10 border-amber-500/30 text-amber-600' : 'bg-transparent border-black/8 text-black/30 hover:text-black/50 hover:border-black/15' }` }
-                                    onClick={ () => setStaffView(v => !v) }
-                                >
-                                    Staff
-                                </button> }
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon-xs"
+                                        className={ virtualPage === 'frequent' ? 'bg-primary/10 text-primary' : '' }
+                                        onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'frequent' })) }
+                                    >
+                                        <Flame className={ `w-3.5 h-3.5 ${ virtualPage !== 'frequent' ? 'text-orange-400' : '' }` } />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">Meist gekauft</TooltipContent>
+                            </Tooltip>
 
-                            { !navigationHidden &&
-                                <Button variant="ghost" size="icon-sm" className="xl:hidden" onClick={ () => setNavOverlay(v => !v) }>
-                                    <FaList className="size-3" />
-                                </Button> }
+                            { isMod && (
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon-xs"
+                                            className={ staffView ? 'bg-primary/10 text-primary' : '' }
+                                            onClick={ () => setStaffView(v => !v) }
+                                        >
+                                            <ShieldCheck className="w-3.5 h-3.5" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">{ staffView ? 'Normal-Katalog' : 'Staff-Katalog' }</TooltipContent>
+                                </Tooltip>
+                            ) }
                         </div>
 
                         <button
@@ -348,8 +375,9 @@ export const CatalogView: FC<{}> = props =>
                             onMouseDown={ e => e.stopPropagation() }
                             onClick={ () => setIsVisible(false) }
                         >
-                            <FaTimes className="text-[11px]" />
+                            <X className="w-3.5 h-3.5" />
                         </button>
+                        </TooltipProvider>
                     </div>
 
                     {/* Content: Sidebar | Grid | Inspector */}

@@ -114,7 +114,7 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                         <label className="text-xs text-muted-foreground w-[80px] shrink-0">{ LocalizeText('navigator.category') }</label>
                         <Select value={ String(roomData.categoryId) } onValueChange={ val => handleChange('category', val) }>
                             <SelectTrigger className="h-7 text-xs flex-1"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 { categories && categories.map(category => (
                                     <SelectItem key={ category.id } value={ String(category.id) } className="text-xs">{ LocalizeText(category.name) }</SelectItem>
                                 )) }
@@ -125,7 +125,7 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                         <label className="text-xs text-muted-foreground w-[80px] shrink-0">{ LocalizeText('navigator.maxvisitors') }</label>
                         <Select value={ String(roomData.userCount) } onValueChange={ val => handleChange('max_visitors', val) }>
                             <SelectTrigger className="h-7 text-xs flex-1"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 { GetMaxVisitorsList && GetMaxVisitorsList.map(value => (
                                     <SelectItem key={ value } value={ String(value) } className="text-xs">{ value }</SelectItem>
                                 )) }
@@ -136,7 +136,7 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                         <label className="text-xs text-muted-foreground w-[80px] shrink-0">{ LocalizeText('navigator.tradesettings') }</label>
                         <Select value={ String(roomData.tradeState) } onValueChange={ val => handleChange('trade_state', val) }>
                             <SelectTrigger className="h-7 text-xs flex-1"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 <SelectItem value="0" className="text-xs">{ LocalizeText('navigator.roomsettings.trade_not_allowed') }</SelectItem>
                                 <SelectItem value="1" className="text-xs">{ LocalizeText('navigator.roomsettings.trade_not_with_Controller') }</SelectItem>
                                 <SelectItem value="2" className="text-xs">{ LocalizeText('navigator.roomsettings.trade_allowed') }</SelectItem>

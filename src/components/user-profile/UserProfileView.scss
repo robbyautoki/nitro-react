@@ -1,16 +1,5 @@
-// Minimal SCSS for UserProfileView - most styling is inline Tailwind now
-
-// Group information view inside light profile needs light text overrides
-.nitro-group-information {
-    color: #18181b; // zinc-900
-
-    .group-badge {
-        background: #f4f4f5; // zinc-100
-        border-radius: 8px;
-    }
-}
-
-// No-group spritesheets (still needed for group tab)
+// Minimal SCSS — most styling is inline Tailwind now
+// Group badge rendering needs spritesheet support
 .no-group-spritesheet {
     background: transparent url('@/assets/images/groups/no-group-spritesheet.png') no-repeat;
 

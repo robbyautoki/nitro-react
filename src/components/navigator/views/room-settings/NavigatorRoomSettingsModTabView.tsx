@@ -91,7 +91,7 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
                             <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.moderation.mute.header') }</span>
                             <Select value={ String(roomData.moderationSettings.allowMute) } onValueChange={ val => handleChange('moderation_mute', val) }>
                                 <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="z-[9999]">
                                     <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
                                     <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
                                 </SelectContent>
@@ -102,7 +102,7 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
                             <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.moderation.kick.header') }</span>
                             <Select value={ String(roomData.moderationSettings.allowKick) } onValueChange={ val => handleChange('moderation_kick', val) }>
                                 <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="z-[9999]">
                                     <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
                                     <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
                                     <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_ALL) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.all') }</SelectItem>
@@ -114,7 +114,7 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
                             <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.moderation.ban.header') }</span>
                             <Select value={ String(roomData.moderationSettings.allowBan) } onValueChange={ val => handleChange('moderation_ban', val) }>
                                 <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="z-[9999]">
                                     <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
                                     <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
                                 </SelectContent>

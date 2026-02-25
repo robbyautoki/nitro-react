@@ -31,7 +31,7 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
 
                         <Select value={ String(roomData.chatSettings.mode) } onValueChange={ val => handleChange('bubble_mode', val) }>
                             <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 <SelectItem value={ String(RoomChatSettings.CHAT_MODE_FREE_FLOW) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.mode.free.flow') }</SelectItem>
                                 <SelectItem value={ String(RoomChatSettings.CHAT_MODE_LINE_BY_LINE) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.mode.line.by.line') }</SelectItem>
                             </SelectContent>
@@ -39,7 +39,7 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
 
                         <Select value={ String(roomData.chatSettings.weight) } onValueChange={ val => handleChange('chat_weight', val) }>
                             <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_NORMAL) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.bubbles.width.normal') }</SelectItem>
                                 <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_THIN) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.bubbles.width.thin') }</SelectItem>
                                 <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_WIDE) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.bubbles.width.wide') }</SelectItem>
@@ -48,7 +48,7 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
 
                         <Select value={ String(roomData.chatSettings.speed) } onValueChange={ val => handleChange('bubble_speed', val) }>
                             <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_FAST) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.speed.fast') }</SelectItem>
                                 <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_NORMAL) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.speed.normal') }</SelectItem>
                                 <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_SLOW) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.speed.slow') }</SelectItem>
@@ -57,7 +57,7 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
 
                         <Select value={ String(roomData.chatSettings.protection) } onValueChange={ val => handleChange('flood_protection', val) }>
                             <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_LOOSE) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.flood.loose') }</SelectItem>
                                 <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_NORMAL) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.flood.normal') }</SelectItem>
                                 <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_STRICT) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.flood.strict') }</SelectItem>
@@ -80,7 +80,7 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
 
                         <Select value={ String(roomData.wallThickness) } onValueChange={ val => handleChange('wall_thickness', val) }>
                             <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 <SelectItem value="0" className="text-xs">{ LocalizeText('navigator.roomsettings.wall_thickness.normal') }</SelectItem>
                                 <SelectItem value="1" className="text-xs">{ LocalizeText('navigator.roomsettings.wall_thickness.thick') }</SelectItem>
                                 <SelectItem value="-1" className="text-xs">{ LocalizeText('navigator.roomsettings.wall_thickness.thin') }</SelectItem>
@@ -90,7 +90,7 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
 
                         <Select value={ String(roomData.floorThickness) } onValueChange={ val => handleChange('floor_thickness', val) }>
                             <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="z-[9999]">
                                 <SelectItem value="0" className="text-xs">{ LocalizeText('navigator.roomsettings.floor_thickness.normal') }</SelectItem>
                                 <SelectItem value="1" className="text-xs">{ LocalizeText('navigator.roomsettings.floor_thickness.thick') }</SelectItem>
                                 <SelectItem value="-1" className="text-xs">{ LocalizeText('navigator.roomsettings.floor_thickness.thin') }</SelectItem>

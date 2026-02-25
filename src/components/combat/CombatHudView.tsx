@@ -26,7 +26,6 @@ export const CombatHudView: FC<{}> = () =>
         const p = parser.parameters;
         const userId = parseInt(p?.get('user_id') || '0');
 
-        // Only show own HP bar
         if (userId !== GetSessionDataManager().userId) return;
 
         const hp = parseInt(p?.get('hp') || '0');
@@ -40,7 +39,6 @@ export const CombatHudView: FC<{}> = () =>
             return next;
         });
 
-        // Auto-hide after 15s if full HP and not dead
         if (hp >= maxHp && !dead) {
             setTimeout(() => {
                 setHpMap(prev => {
@@ -95,53 +93,24 @@ export const CombatHudView: FC<{}> = () =>
 
                 const hpPercent = Math.max(0, Math.min((data.hp / data.maxHp) * 100, 100));
                 const barColor = data.dead
-                    ? '#ef4444'
+                    ? 'bg-red-500'
                     : hpPercent > 60
-                        ? '#22c55e'
+                        ? 'bg-emerald-500'
                         : hpPercent > 30
-                            ? '#facc15'
-                            : '#ef4444';
+                            ? 'bg-amber-500'
+                            : 'bg-red-500';
 
                 return (
-                    <div key={userId} style={{
-                        position: 'fixed',
-                        left: pos.x,
-                        top: pos.y + 6,
-                        transform: 'translateX(-50%)',
-                        zIndex: 100,
-                        pointerEvents: 'none',
-                    }}>
-                        <div style={{
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
-                            background: 'rgba(0,0,0,0.75)', borderRadius: 6, padding: '2px 5px',
-                            border: `1px solid ${data.dead ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.15)'}`,
-                            minWidth: 60,
-                        }}>
+                    <div key={userId} className="fixed z-[100] pointer-events-none -translate-x-1/2" style={{ left: pos.x, top: pos.y + 6 }}>
+                        <div className={ `flex flex-col items-center gap-px rounded-md px-1.5 py-0.5 min-w-[60px] border bg-card/90 backdrop-blur-sm ${ data.dead ? 'border-red-500/40' : 'border-border/40' }` }>
                             {data.dead ? (
-                                <div style={{
-                                    fontSize: 9, fontWeight: 700, color: '#ef4444',
-                                    textShadow: '0 1px 2px rgba(0,0,0,0.9)',
-                                }}>
-                                    KO
-                                </div>
+                                <div className="text-[9px] font-bold text-red-500">KO</div>
                             ) : (
                                 <>
-                                    <div style={{
-                                        width: '100%', height: 5, borderRadius: 3, overflow: 'hidden',
-                                        background: 'rgba(255,255,255,0.15)',
-                                    }}>
-                                        <div style={{
-                                            height: '100%', borderRadius: 3,
-                                            width: `${hpPercent}%`,
-                                            background: barColor,
-                                            transition: 'width 0.3s ease',
-                                        }} />
+                                    <div className="w-full h-[5px] rounded-full overflow-hidden bg-muted">
+                                        <div className={ `h-full rounded-full transition-[width] duration-300 ease-out ${ barColor }` } style={{ width: `${hpPercent}%` }} />
                                     </div>
-                                    <div style={{
-                                        fontSize: 8, fontWeight: 700, color: '#fff',
-                                        textShadow: '0 1px 2px rgba(0,0,0,0.9)',
-                                        whiteSpace: 'nowrap',
-                                    }}>
+                                    <div className="text-[8px] font-bold text-foreground whitespace-nowrap">
                                         {data.hp}/{data.maxHp}
                                     </div>
                                 </>

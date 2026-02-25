@@ -1,23 +1,21 @@
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { useMessageEvent } from '../../hooks';
+import { Frame, FramePanel } from '../ui/frame';
 
 export const ArrestToastView: FC<{}> = props =>
 {
-    // Arrest toast state (no auto-dismiss, dismissed by server)
     const [ arrestVisible, setArrestVisible ] = useState(false);
     const [ arrestFading, setArrestFading ] = useState(false);
     const [ arrestMessage, setArrestMessage ] = useState('');
     const [ reasonText, setReasonText ] = useState('');
 
-    // Timer toast state
     const [ timerVisible, setTimerVisible ] = useState(false);
     const [ timerFading, setTimerFading ] = useState(false);
     const [ timerUntil, setTimerUntil ] = useState(0);
     const [ timerText, setTimerText ] = useState('');
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    // Listen for jail notification events
     useMessageEvent<NotificationDialogMessageEvent>(NotificationDialogMessageEvent, event =>
     {
         const parser = event.getParser();
@@ -66,7 +64,6 @@ export const ArrestToastView: FC<{}> = props =>
         }
     });
 
-    // Timer countdown interval
     useEffect(() =>
     {
         if(!timerVisible || timerUntil <= 0)
@@ -82,8 +79,6 @@ export const ArrestToastView: FC<{}> = props =>
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
             setTimerText(`${ String(minutes).padStart(2, '0') }:${ String(seconds).padStart(2, '0') }`);
-
-            // No auto-dismiss: only server's jail.timer.end can hide the toast
         };
 
         updateTimer();
@@ -96,28 +91,34 @@ export const ArrestToastView: FC<{}> = props =>
         <>
             { arrestVisible && (
                 <div className={ `fixed top-20 left-1/2 -translate-x-1/2 z-[100] pointer-events-none transition-all duration-500 ${ arrestFading ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0' }` }>
-                    <div className="px-6 py-3 rounded-2xl backdrop-blur-2xl bg-black/60 border border-white/[0.08] shadow-lg">
-                        <p className="text-sm text-white/90 font-medium tracking-wide">
-                            <span className="text-red-400 font-bold">{ arrestMessage }</span>
-                        </p>
-                        { reasonText && (
-                            <p className="text-xs text-white/60 mt-1 tracking-wide">
-                                Grund: <span className="text-white/80">{ reasonText }</span>
-                            </p>
-                        ) }
-                    </div>
+                    <Frame className="max-w-sm">
+                        <FramePanel className="!p-0">
+                            <div className="px-6 py-3 text-center">
+                                <div className="text-sm font-semibold text-red-500">{ arrestMessage }</div>
+                                { reasonText && (
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                        Grund: <span className="text-foreground">{ reasonText }</span>
+                                    </div>
+                                ) }
+                            </div>
+                        </FramePanel>
+                    </Frame>
                 </div>
             ) }
             { timerVisible && (
                 <div className={ `fixed ${ arrestVisible ? 'top-32' : 'top-20' } left-1/2 -translate-x-1/2 z-[100] pointer-events-none transition-all duration-500 ${ timerFading ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0' }` }>
-                    <div className="px-6 py-3 rounded-2xl backdrop-blur-2xl bg-black/60 border border-white/[0.08] shadow-lg">
-                        <p className="text-sm text-white/90 font-medium tracking-wide">
-                            { reasonText
-                                ? <>Du bist inhaftiert wegen: <span className="text-white/80">{ reasonText }</span>. Noch <span className="text-amber-300 font-bold">{ timerText }</span> Minuten.</>
-                                : <>Du bist inhaftiert. Noch <span className="text-amber-300 font-bold">{ timerText }</span> Minuten.</>
-                            }
-                        </p>
-                    </div>
+                    <Frame className="max-w-sm">
+                        <FramePanel className="!p-0">
+                            <div className="px-6 py-3 text-center">
+                                <div className="text-sm text-muted-foreground">
+                                    { reasonText
+                                        ? <>Du bist inhaftiert wegen: <span className="text-foreground">{ reasonText }</span>. Noch <span className="font-bold text-amber-500">{ timerText }</span> Minuten.</>
+                                        : <>Du bist inhaftiert. Noch <span className="font-bold text-amber-500">{ timerText }</span> Minuten.</>
+                                    }
+                                </div>
+                            </div>
+                        </FramePanel>
+                    </Frame>
                 </div>
             ) }
         </>

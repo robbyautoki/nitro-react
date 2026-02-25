@@ -1,17 +1,11 @@
 import { FC, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { GetRoomSession } from '../../api';
 import { useMessageEvent } from '../../hooks';
-
-const BG_CARD = 'rgba(0,0,0,0.2)';
-const WHITE40 = 'rgba(255,255,255,0.4)';
-const GREEN = '#22c55e';
-const YELLOW = '#facc15';
-const RED = '#ef4444';
-const CYAN = '#06b6d4';
-const ORANGE = '#fb923c';
-const PURPLE = '#a855f7';
+import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
+import { Frame, FramePanel } from '../ui/frame';
+import { Button } from '../ui/button';
+import { Swords, Shield, X } from 'lucide-react';
 
 interface WeaponInfo {
     name: string;
@@ -35,10 +29,10 @@ interface ShopData {
 }
 
 const WEAPON_META: Record<string, { emoji: string; color: string; desc: string; displayName: string }> = {
-    bat: { emoji: '🏏', color: ORANGE, desc: 'Basis-Waffe', displayName: 'Schläger' },
-    lockpick: { emoji: '🔑', color: WHITE40, desc: 'Tool für Crime', displayName: 'Lockpick' },
-    axe: { emoji: '🪓', color: RED, desc: 'Mittlere Waffe', displayName: 'Axt' },
-    sword: { emoji: '⚔️', color: PURPLE, desc: 'Stärkste Waffe', displayName: 'Schwert' },
+    bat: { emoji: '🏏', color: 'text-orange-500', desc: 'Basis-Waffe', displayName: 'Schläger' },
+    lockpick: { emoji: '🔑', color: 'text-muted-foreground', desc: 'Tool für Crime', displayName: 'Lockpick' },
+    axe: { emoji: '🪓', color: 'text-red-500', desc: 'Mittlere Waffe', displayName: 'Axt' },
+    sword: { emoji: '⚔️', color: 'text-purple-500', desc: 'Stärkste Waffe', displayName: 'Schwert' },
 };
 
 export const CombatShopView: FC<{}> = () =>
@@ -89,9 +83,7 @@ export const CombatShopView: FC<{}> = () =>
         if (session) {
             session.sendChatMessage(`:combat buy ${itemName}`, 0);
             setBought(itemName);
-            setTimeout(() => {
-                setIsVisible(false);
-            }, 1200);
+            setTimeout(() => setIsVisible(false), 1200);
         }
     };
 
@@ -108,149 +100,93 @@ export const CombatShopView: FC<{}> = () =>
     return (
         <div className="fixed inset-0 z-[250] flex items-center justify-center pointer-events-auto">
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsVisible(false)} />
-
-            <div className="relative w-[440px] max-h-[85vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
-                <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(85vh-4px)]">
-
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-red-500/[0.08] to-transparent shrink-0">
-                        <div className="flex items-center gap-2.5">
-                            <span className="text-lg">⚔️</span>
-                            <span className="text-sm font-semibold text-white/90 tracking-tight">Waffen-Shop</span>
-                        </div>
-                        <button className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all"
-                            onClick={() => setIsVisible(false)}>
-                            <FaTimes className="size-3" />
-                        </button>
-                    </div>
-
-                    <div className="flex-1 min-h-0 overflow-auto px-5 pb-5 pt-4 flex flex-col gap-4">
-
-                        {/* Balance */}
-                        <div className="flex items-center justify-center gap-4 text-xs">
-                            <div className="flex items-center gap-1.5">
-                                <span>💰</span>
-                                <span className="font-bold" style={{ color: YELLOW }}>{data.credits.toLocaleString()}</span>
-                                <span style={{ color: WHITE40 }}>Credits</span>
+            <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
+                <div className="w-[440px]">
+                    <Frame className="relative">
+                        <div className="drag-handler absolute inset-0 cursor-move" />
+                        <FramePanel className="overflow-hidden p-0! relative z-10">
+                            <div className="flex items-center justify-between px-4 py-2.5 border-b">
+                                <div className="flex items-center gap-2">
+                                    <Swords className="size-4 text-red-500" />
+                                    <span className="text-sm font-semibold">Waffen-Shop</span>
+                                </div>
+                                <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={() => setIsVisible(false)}>
+                                    <X className="size-3.5" />
+                                </button>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                                <span>⚔️</span>
-                                <span className="font-bold text-white/90">{WEAPON_META[data.equippedWeapon]?.displayName || 'Fäuste'}</span>
-                                <span style={{ color: WHITE40 }}>ausgerüstet</span>
-                            </div>
-                        </div>
 
-                        {/* Weapons */}
-                        <div className="flex flex-col gap-2">
-                            {data.weapons.map(weapon => {
-                                const justBought = bought === weapon.name;
-                                const canAfford = data.credits >= weapon.cost;
-                                const isEquipped = data.equippedWeapon === weapon.name;
+                            <div className="px-4 py-3 space-y-3 max-h-[70vh] overflow-auto">
+                                <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                                    <span>💰 <span className="font-semibold text-foreground">{data.credits.toLocaleString()}</span> Credits</span>
+                                    <span>⚔️ <span className="font-semibold text-foreground">{WEAPON_META[data.equippedWeapon]?.displayName || 'Fäuste'}</span> ausgerüstet</span>
+                                </div>
 
-                                return (
-                                    <div key={weapon.name}
-                                        className="flex items-center gap-3 p-3 rounded-xl border transition-all"
-                                        style={{
-                                            background: BG_CARD,
-                                            borderColor: isEquipped ? `${GREEN}40` : justBought ? `${GREEN}40` : 'rgba(255,255,255,0.06)',
-                                        }}>
-                                        <span className="text-2xl">{weapon.emoji}</span>
+                                <div className="space-y-2">
+                                    {data.weapons.map(weapon => {
+                                        const justBought = bought === weapon.name;
+                                        const canAfford = data.credits >= weapon.cost;
+                                        const isEquipped = data.equippedWeapon === weapon.name;
+
+                                        return (
+                                            <div key={weapon.name} className={ `flex items-center gap-3 p-3 rounded-lg border transition-all ${ isEquipped ? 'border-emerald-500/30' : justBought ? 'border-emerald-500/30' : 'border-border' }` }>
+                                                <span className="text-2xl">{weapon.emoji}</span>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-semibold text-foreground">{weapon.displayName}</span>
+                                                        {isEquipped && <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-500">Ausgerüstet</span>}
+                                                    </div>
+                                                    <div className="text-[11px] text-muted-foreground">{weapon.desc}</div>
+                                                    <div className="flex items-center gap-3 mt-1 text-[11px]">
+                                                        {weapon.damage > 0 && <span className="text-red-500">⚔️ {weapon.damage} Schaden</span>}
+                                                        <span className="text-amber-500">💰 {weapon.cost} Credits</span>
+                                                    </div>
+                                                </div>
+                                                {weapon.owned ? (
+                                                    <Button size="sm" variant={ isEquipped ? 'default' : 'outline' } disabled={ isEquipped } onClick={ () => handleEquip(weapon.name) }>
+                                                        { isEquipped ? '✓' : 'Anlegen' }
+                                                    </Button>
+                                                ) : (
+                                                    <Button size="sm" variant="outline" disabled={ !canAfford || !!bought } onClick={ () => handleBuy(weapon.name) }>
+                                                        { justBought ? '✓' : 'Kaufen' }
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+
+                                    <div className={ `flex items-center gap-3 p-3 rounded-lg border transition-all ${ data.armourEquipped ? 'border-cyan-500/30' : 'border-border' }` }>
+                                        <span className="text-2xl">🛡️</span>
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm font-semibold text-white/90">{weapon.displayName}</span>
-                                                {isEquipped && <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">Ausgerüstet</span>}
+                                                <span className="text-sm font-semibold text-foreground">Rüstung</span>
+                                                {data.armourEquipped && <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-500">Angelegt</span>}
                                             </div>
-                                            <div className="text-[11px]" style={{ color: WHITE40 }}>{weapon.desc}</div>
+                                            <div className="text-[11px] text-muted-foreground">Reduziert eingehenden Schaden</div>
                                             <div className="flex items-center gap-3 mt-1 text-[11px]">
-                                                {weapon.damage > 0 && <span style={{ color: RED }}>⚔️ {weapon.damage} Schaden</span>}
-                                                <span style={{ color: YELLOW }}>💰 {weapon.cost} Credits</span>
+                                                <span className="text-cyan-500">🛡️ -{data.armourReduction}% Schaden</span>
+                                                <span className="text-amber-500">💰 {data.armourCost} Credits</span>
                                             </div>
                                         </div>
-                                        {weapon.owned ? (
-                                            <button
-                                                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                                                style={{
-                                                    background: isEquipped ? `${GREEN}20` : 'rgba(255,255,255,0.05)',
-                                                    color: isEquipped ? GREEN : 'rgba(255,255,255,0.6)',
-                                                    border: `1px solid ${isEquipped ? `${GREEN}30` : 'rgba(255,255,255,0.1)'}`,
-                                                    cursor: isEquipped ? 'default' : 'pointer',
-                                                }}
-                                                disabled={isEquipped}
-                                                onClick={() => handleEquip(weapon.name)}>
-                                                {isEquipped ? '✓' : 'Anlegen'}
-                                            </button>
+                                        {data.armourOwned ? (
+                                            <Button size="sm" variant={ data.armourEquipped ? 'default' : 'outline' } disabled={ data.armourEquipped } onClick={ () => handleEquip('armour') }>
+                                                { data.armourEquipped ? '✓' : 'Anlegen' }
+                                            </Button>
                                         ) : (
-                                            <button
-                                                className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                                                style={{
-                                                    background: justBought ? GREEN : canAfford ? `${weapon.color}20` : 'rgba(255,255,255,0.03)',
-                                                    color: justBought ? '#fff' : canAfford ? weapon.color : 'rgba(255,255,255,0.2)',
-                                                    border: `1px solid ${justBought ? GREEN : canAfford ? `${weapon.color}30` : 'rgba(255,255,255,0.06)'}`,
-                                                    cursor: canAfford && !bought ? 'pointer' : 'not-allowed',
-                                                }}
-                                                disabled={!canAfford || !!bought}
-                                                onClick={() => handleBuy(weapon.name)}>
-                                                {justBought ? '✓' : 'Kaufen'}
-                                            </button>
+                                            <Button size="sm" variant="outline" disabled={ data.credits < data.armourCost || !!bought } onClick={ () => handleBuy('armour') }>
+                                                { bought === 'armour' ? '✓' : 'Kaufen' }
+                                            </Button>
                                         )}
                                     </div>
-                                );
-                            })}
-
-                            {/* Armour */}
-                            <div className="flex items-center gap-3 p-3 rounded-xl border transition-all"
-                                style={{
-                                    background: BG_CARD,
-                                    borderColor: data.armourEquipped ? `${CYAN}40` : 'rgba(255,255,255,0.06)',
-                                }}>
-                                <span className="text-2xl">🛡️</span>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-semibold text-white/90">Rüstung</span>
-                                        {data.armourEquipped && <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400">Angelegt</span>}
-                                    </div>
-                                    <div className="text-[11px]" style={{ color: WHITE40 }}>Reduziert eingehenden Schaden</div>
-                                    <div className="flex items-center gap-3 mt-1 text-[11px]">
-                                        <span style={{ color: CYAN }}>🛡️ -{data.armourReduction}% Schaden</span>
-                                        <span style={{ color: YELLOW }}>💰 {data.armourCost} Credits</span>
-                                    </div>
                                 </div>
-                                {data.armourOwned ? (
-                                    <button
-                                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                                        style={{
-                                            background: data.armourEquipped ? `${CYAN}20` : 'rgba(255,255,255,0.05)',
-                                            color: data.armourEquipped ? CYAN : 'rgba(255,255,255,0.6)',
-                                            border: `1px solid ${data.armourEquipped ? `${CYAN}30` : 'rgba(255,255,255,0.1)'}`,
-                                            cursor: data.armourEquipped ? 'default' : 'pointer',
-                                        }}
-                                        disabled={data.armourEquipped}
-                                        onClick={() => handleEquip('armour')}>
-                                        {data.armourEquipped ? '✓' : 'Anlegen'}
-                                    </button>
-                                ) : (
-                                    <button
-                                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                                        style={{
-                                            background: bought === 'armour' ? GREEN : data.credits >= data.armourCost ? `${CYAN}20` : 'rgba(255,255,255,0.03)',
-                                            color: bought === 'armour' ? '#fff' : data.credits >= data.armourCost ? CYAN : 'rgba(255,255,255,0.2)',
-                                            border: `1px solid ${bought === 'armour' ? GREEN : data.credits >= data.armourCost ? `${CYAN}30` : 'rgba(255,255,255,0.06)'}`,
-                                            cursor: data.credits >= data.armourCost && !bought ? 'pointer' : 'not-allowed',
-                                        }}
-                                        disabled={data.credits < data.armourCost || !!bought}
-                                        onClick={() => handleBuy('armour')}>
-                                        {bought === 'armour' ? '✓' : 'Kaufen'}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
 
-                        <div className="text-center text-[10px]" style={{ color: WHITE40 }}>
-                            Nutze :combat equip/unequip zum Ausrüsten
-                        </div>
-                    </div>
+                                <div className="text-center text-[10px] text-muted-foreground">
+                                    Nutze :combat equip/unequip zum Ausrüsten
+                                </div>
+                            </div>
+                        </FramePanel>
+                    </Frame>
                 </div>
-            </div>
+            </DraggableWindow>
         </div>
     );
 };

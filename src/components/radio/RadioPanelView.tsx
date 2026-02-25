@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Frame, FramePanel } from '@/components/ui/frame';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -512,15 +513,21 @@ export const RadioPanelView: FC<{}> = () => {
                 </div>
 
                 {announcement && (
-                    <div className="min-w-[340px] max-w-[400px] flex items-start gap-3 p-3 rounded-xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl animate-in slide-in-from-top-2 fade-in duration-300">
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                                <Mic className="size-3 text-muted-foreground shrink-0" />
-                                <span className="text-xs font-semibold">{announcement.djName}</span>
-                                <Badge variant="outline" className="text-[10px]">Durchsage</Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{announcement.message}</p>
-                        </div>
+                    <div className="min-w-[340px] max-w-[400px] animate-in slide-in-from-top-2 fade-in duration-300">
+                        <Frame>
+                            <FramePanel className="!p-0">
+                                <div className="flex items-start gap-3 p-3">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-1.5">
+                                            <Mic className="size-3 text-muted-foreground shrink-0" />
+                                            <span className="text-xs font-semibold">{announcement.djName}</span>
+                                            <Badge variant="outline" className="text-[10px]">Durchsage</Badge>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{announcement.message}</p>
+                                    </div>
+                                </div>
+                            </FramePanel>
+                        </Frame>
                     </div>
                 )}
             </div>

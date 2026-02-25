@@ -1,9 +1,11 @@
 import { FC, useCallback, useEffect, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { Home, ShoppingCart, AlertTriangle } from 'lucide-react';
+import { Home, ShoppingCart, AlertTriangle, X } from 'lucide-react';
 import { RoomSessionEvent } from '@nitrots/nitro-renderer';
 import { GetConfiguration, GetRoomSession, GetSessionDataManager } from '../../api';
 import { useRoom, useRoomSessionManagerEvent } from '../../hooks';
+import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
+import { Frame, FramePanel } from '../ui/frame';
+import { Button } from '../ui/button';
 
 interface RoomSaleData {
     room: string;
@@ -106,97 +108,86 @@ export const RoomSaleView: FC<{}> = () =>
     if(showPanel)
     {
         return (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-auto">
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={ onClose } />
-
-                <div className="relative w-[420px] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
-                    <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)]">
-
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent">
-                            <div className="flex items-center gap-2.5">
-                                <Home className="size-4 text-emerald-400/80" />
-                                <span className="text-sm font-semibold text-white/90 tracking-tight">Raum kaufen</span>
-                            </div>
-                            <button className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all" onClick={ onClose }>
-                                <FaTimes className="size-3" />
-                            </button>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-5 space-y-4">
-                            <div>
-                                <div className="text-base font-bold text-white/90">{ saleData.room }</div>
-                                <div className="text-xs text-white/40 mt-0.5">Verkäufer: { saleData.owner }</div>
+            <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
+                <div className="w-[420px]">
+                    <Frame className="relative">
+                        <div className="drag-handler absolute inset-0 cursor-move" />
+                        <FramePanel className="overflow-hidden p-0! relative z-10">
+                            <div className="flex items-center justify-between px-4 py-2.5 border-b">
+                                <div className="flex items-center gap-2">
+                                    <Home className="size-4 text-emerald-500" />
+                                    <span className="text-sm font-semibold">Raum kaufen</span>
+                                </div>
+                                <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={ onClose }>
+                                    <X className="size-3.5" />
+                                </button>
                             </div>
 
-                            <div className="rounded-lg bg-white/[0.04] border border-white/[0.06] p-3 space-y-2">
-                                <div className="flex justify-between text-xs">
-                                    <span className="text-white/50">Preis</span>
-                                    <span className="font-bold text-yellow-400">{ saleData.price.toLocaleString() } { saleData.currency }</span>
+                            <div className="px-4 py-3 space-y-3">
+                                <div>
+                                    <div className="text-base font-bold text-foreground">{ saleData.room }</div>
+                                    <div className="text-xs text-muted-foreground mt-0.5">Verkäufer: { saleData.owner }</div>
                                 </div>
-                                <div className="flex justify-between text-xs">
-                                    <span className="text-white/50">Möbel</span>
-                                    <span className="text-white/80">{ saleData.items }</span>
-                                </div>
-                                <div className="flex justify-between text-xs">
-                                    <span className="text-white/50">Bots</span>
-                                    <span className="text-white/80">{ saleData.bots }</span>
-                                </div>
-                                <div className="flex justify-between text-xs">
-                                    <span className="text-white/50">Haustiere</span>
-                                    <span className="text-white/80">{ saleData.pets }</span>
-                                </div>
-                                { saleData.limiteds > 0 && (
+
+                                <div className="rounded-lg border p-3 space-y-2">
                                     <div className="flex justify-between text-xs">
-                                        <span className="text-orange-400 font-semibold">Limitierte Items</span>
-                                        <span className="text-orange-400 font-bold">{ saleData.limiteds }</span>
+                                        <span className="text-muted-foreground">Preis</span>
+                                        <span className="font-bold text-amber-500">{ saleData.price.toLocaleString() } { saleData.currency }</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-muted-foreground">Möbel</span>
+                                        <span className="text-foreground">{ saleData.items }</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-muted-foreground">Bots</span>
+                                        <span className="text-foreground">{ saleData.bots }</span>
+                                    </div>
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-muted-foreground">Haustiere</span>
+                                        <span className="text-foreground">{ saleData.pets }</span>
+                                    </div>
+                                    { saleData.limiteds > 0 && (
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-orange-500 font-semibold">Limitierte Items</span>
+                                            <span className="text-orange-500 font-bold">{ saleData.limiteds }</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                { saleData.limiteds > 0 && (
+                                    <div className="flex items-start gap-2 rounded-lg border border-orange-500/20 bg-orange-500/5 p-2.5">
+                                        <AlertTriangle className="size-4 text-orange-500 shrink-0 mt-0.5" />
+                                        <div className="text-[11px] text-orange-500/80 leading-relaxed">
+                                            Dieser Raum enthält { saleData.limiteds } limitierte Items. Diese werden mit dem Kauf übertragen.
+                                        </div>
+                                    </div>
+                                )}
+
+                                { !confirming ? (
+                                    <Button className="w-full" size="sm" onClick={ () => setConfirming(true) }>
+                                        <ShoppingCart className="size-4" />
+                                        Raum kaufen
+                                    </Button>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="text-xs text-center text-red-500 font-semibold">
+                                            Bist du sicher? { saleData.price.toLocaleString() } { saleData.currency } werden abgezogen!
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button variant="outline" size="sm" className="flex-1" onClick={ () => setConfirming(false) }>
+                                                Abbrechen
+                                            </Button>
+                                            <Button variant="destructive" size="sm" className="flex-1" onClick={ onBuyConfirm }>
+                                                Ja, kaufen!
+                                            </Button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
-
-                            { saleData.limiteds > 0 && (
-                                <div className="flex items-start gap-2 rounded-lg bg-orange-500/10 border border-orange-500/20 p-2.5">
-                                    <AlertTriangle className="size-4 text-orange-400 shrink-0 mt-0.5" />
-                                    <div className="text-[11px] text-orange-300/80 leading-relaxed">
-                                        Dieser Raum enthält { saleData.limiteds } limitierte Items. Diese werden mit dem Kauf übertragen.
-                                    </div>
-                                </div>
-                            )}
-
-                            { !confirming ? (
-                                <button
-                                    className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold transition-colors flex items-center justify-center gap-2"
-                                    onClick={ () => setConfirming(true) }
-                                >
-                                    <ShoppingCart className="size-4" />
-                                    Raum kaufen
-                                </button>
-                            ) : (
-                                <div className="space-y-2">
-                                    <div className="text-xs text-center text-red-400 font-semibold">
-                                        Bist du sicher? { saleData.price.toLocaleString() } { saleData.currency } werden abgezogen!
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            className="flex-1 py-2 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-white/70 text-xs font-medium transition-colors"
-                                            onClick={ () => setConfirming(false) }
-                                        >
-                                            Abbrechen
-                                        </button>
-                                        <button
-                                            className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-colors"
-                                            onClick={ onBuyConfirm }
-                                        >
-                                            Ja, kaufen!
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                        </FramePanel>
+                    </Frame>
                 </div>
-            </div>
+            </DraggableWindow>
         );
     }
 
@@ -204,26 +195,26 @@ export const RoomSaleView: FC<{}> = () =>
     {
         return (
             <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[90] pointer-events-auto">
-                <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-emerald-500/20 bg-[rgba(12,12,16,0.95)] backdrop-blur-xl shadow-lg">
-                    <Home className="size-4 text-emerald-400" />
-                    <div className="text-xs text-white/80">
-                        <span className="font-semibold text-emerald-400">Raum zu verkaufen!</span>
-                        { ' ' }{ saleData.price.toLocaleString() } { saleData.currency }
-                        { ' · ' }{ saleData.items } Möbel
-                    </div>
-                    <button
-                        className="px-3 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold transition-colors"
-                        onClick={ () => { setShowPanel(true); setShowBanner(false); } }
-                    >
-                        Details
-                    </button>
-                    <button
-                        className="p-1 rounded text-white/30 hover:text-white/70 transition-colors"
-                        onClick={ onDismissBanner }
-                    >
-                        <FaTimes className="size-2.5" />
-                    </button>
-                </div>
+                <Frame>
+                    <FramePanel className="!p-0">
+                        <div className="flex items-center gap-3 px-4 py-3">
+                            <Home className="size-5 text-emerald-500 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-foreground">Raum zu verkaufen!</div>
+                                <div className="text-xs text-muted-foreground">
+                                    { saleData.price.toLocaleString() } { saleData.currency }
+                                    { ' · ' }{ saleData.items } Möbel
+                                </div>
+                            </div>
+                            <Button size="sm" onClick={ () => { setShowPanel(true); setShowBanner(false); } }>
+                                Details
+                            </Button>
+                            <button className="p-1 rounded text-muted-foreground hover:text-foreground" onClick={ onDismissBanner }>
+                                <X className="size-3" />
+                            </button>
+                        </div>
+                    </FramePanel>
+                </Frame>
             </div>
         );
     }

@@ -90,36 +90,12 @@ export const GymProgressView: FC<{}> = () =>
                 const tickPercent = Math.min((data.elapsed / data.tickSeconds) * 100, 100);
 
                 return (
-                    <div key={userId} style={{
-                        position: 'fixed',
-                        left: pos.x,
-                        top: pos.y + 14,
-                        transform: 'translateX(-50%)',
-                        zIndex: 100,
-                        pointerEvents: 'none',
-                    }}>
-                        <div style={{
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                            background: 'rgba(0,0,0,0.7)', borderRadius: 6, padding: '3px 6px',
-                            border: '1px solid rgba(255,255,255,0.15)',
-                            minWidth: 70,
-                        }}>
-                            <div style={{
-                                width: '100%', height: 6, borderRadius: 3, overflow: 'hidden',
-                                background: 'rgba(255,255,255,0.15)',
-                            }}>
-                                <div style={{
-                                    height: '100%', borderRadius: 3,
-                                    width: `${tickPercent}%`,
-                                    background: 'linear-gradient(90deg, #06b6d4, #3b82f6)',
-                                    transition: 'width 9.5s linear',
-                                }} />
+                    <div key={userId} className="fixed z-[100] pointer-events-none -translate-x-1/2" style={{ left: pos.x, top: pos.y + 14 }}>
+                        <div className="flex flex-col items-center gap-0.5 rounded-md border border-border/40 bg-card/90 backdrop-blur-sm px-1.5 py-1 min-w-[70px]">
+                            <div className="w-full h-1.5 rounded-full overflow-hidden bg-muted">
+                                <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-[width] duration-[9500ms] linear" style={{ width: `${tickPercent}%` }} />
                             </div>
-                            <div style={{
-                                fontSize: 9, fontWeight: 700, color: '#fff',
-                                textShadow: '0 1px 2px rgba(0,0,0,0.9)',
-                                whiteSpace: 'nowrap',
-                            }}>
+                            <div className="text-[9px] font-bold text-foreground whitespace-nowrap">
                                 {data.xp}/{data.xpMax} XP
                             </div>
                         </div>

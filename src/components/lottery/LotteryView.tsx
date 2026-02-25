@@ -1,6 +1,8 @@
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useMessageEvent } from '../../hooks';
+import { Frame, FramePanel } from '../ui/frame';
+import { Ticket, PartyPopper, Frown } from 'lucide-react';
 
 type LotteryMode = 'idle' | 'countdown' | 'result' | 'no_winner';
 
@@ -10,13 +12,11 @@ export const LotteryView: FC<{}> = () =>
     const [ visible, setVisible ] = useState(false);
     const [ fading, setFading ] = useState(false);
 
-    // Countdown state
     const [ secondsLeft, setSecondsLeft ] = useState(0);
     const [ jackpot, setJackpot ] = useState('0');
     const [ tickets, setTickets ] = useState('0');
     const [ price, setPrice ] = useState('10');
 
-    // Result state
     const [ winner, setWinner ] = useState('');
     const [ prize, setPrize ] = useState('0');
     const [ nextDraw, setNextDraw ] = useState('20:00');
@@ -47,7 +47,6 @@ export const LotteryView: FC<{}> = () =>
         }
     }, [ clearTimers ]);
 
-    // Listen for lottery notification events
     useMessageEvent<NotificationDialogMessageEvent>(NotificationDialogMessageEvent, event =>
     {
         const parser = event.getParser();
@@ -64,7 +63,6 @@ export const LotteryView: FC<{}> = () =>
 
             showView('countdown');
 
-            // Start countdown timer
             timerRef.current = setInterval(() =>
             {
                 setSecondsLeft(prev =>
@@ -72,7 +70,6 @@ export const LotteryView: FC<{}> = () =>
                     if(prev <= 1)
                     {
                         if(timerRef.current) clearInterval(timerRef.current);
-                        // Don't hide — the result event will replace it
                         return 0;
                     }
                     return prev - 1;
@@ -98,7 +95,6 @@ export const LotteryView: FC<{}> = () =>
         }
     });
 
-    // Cleanup on unmount
     useEffect(() => () => clearTimers(), [ clearTimers ]);
 
     if(!visible || mode === 'idle') return null;
@@ -117,59 +113,61 @@ export const LotteryView: FC<{}> = () =>
 
     return (
         <div className={ `fixed top-20 left-1/2 -translate-x-1/2 z-[100] pointer-events-none transition-all duration-500 ${ fading ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0' }` }>
-            <div className="px-6 py-4 rounded-2xl backdrop-blur-2xl bg-black/70 border border-white/[0.08] shadow-lg min-w-[320px]">
-                { mode === 'countdown' && (
-                    <div className="text-center space-y-1.5">
-                        <div className="flex items-center justify-center gap-2">
-                            <span className="text-lg">🎰</span>
-                            <span className="text-sm font-bold text-amber-300 uppercase tracking-wider">
-                                Lotto Ziehung in { formatTime(secondsLeft) }
-                            </span>
+            <Frame className="min-w-[320px]">
+                <FramePanel className="!p-0">
+                    { mode === 'countdown' && (
+                        <div className="px-5 py-3 text-center space-y-1.5">
+                            <div className="flex items-center justify-center gap-2">
+                                <Ticket className="size-4 text-amber-500" />
+                                <span className="text-sm font-bold text-amber-500 uppercase tracking-wider">
+                                    Lotto Ziehung in { formatTime(secondsLeft) }
+                                </span>
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                                Jackpot: <span className="text-emerald-500 font-semibold">{ formatCredits(jackpot) } Credits</span>
+                                <span className="mx-2 text-muted-foreground/50">|</span>
+                                { tickets } Tickets
+                            </div>
+                            <div className="text-xs text-muted-foreground/70">
+                                :lotto buy — Jetzt Ticket kaufen! ({ price } Credits)
+                            </div>
                         </div>
-                        <div className="text-xs text-white/70">
-                            Jackpot: <span className="text-emerald-400 font-semibold">{ formatCredits(jackpot) } Credits</span>
-                            <span className="mx-2 text-white/30">|</span>
-                            { tickets } Tickets
-                        </div>
-                        <div className="text-xs text-white/50">
-                            :lotto buy — Jetzt Ticket kaufen! ({ price } Credits)
-                        </div>
-                    </div>
-                ) }
+                    ) }
 
-                { mode === 'result' && (
-                    <div className="text-center space-y-1.5">
-                        <div className="flex items-center justify-center gap-2">
-                            <span className="text-lg">🎉</span>
-                            <span className="text-sm font-bold text-amber-300 uppercase tracking-wider">
-                                Lotto Gewinner!
-                            </span>
-                            <span className="text-lg">🎉</span>
+                    { mode === 'result' && (
+                        <div className="px-5 py-3 text-center space-y-1.5">
+                            <div className="flex items-center justify-center gap-2">
+                                <PartyPopper className="size-4 text-amber-500" />
+                                <span className="text-sm font-bold text-amber-500 uppercase tracking-wider">
+                                    Lotto Gewinner!
+                                </span>
+                                <PartyPopper className="size-4 text-amber-500" />
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                                <span className="text-amber-400 font-bold">{ winner }</span> hat{' '}
+                                <span className="text-emerald-500 font-bold">{ formatCredits(prize) } Credits</span> gewonnen!
+                            </div>
+                            <div className="text-xs text-muted-foreground/70">
+                                Nächste Ziehung: { nextDraw } Uhr
+                            </div>
                         </div>
-                        <div className="text-sm text-white/90">
-                            <span className="text-amber-200 font-bold">{ winner }</span> hat{' '}
-                            <span className="text-emerald-400 font-bold">{ formatCredits(prize) } Credits</span> gewonnen!
-                        </div>
-                        <div className="text-xs text-white/50">
-                            Naechste Ziehung: { nextDraw } Uhr
-                        </div>
-                    </div>
-                ) }
+                    ) }
 
-                { mode === 'no_winner' && (
-                    <div className="text-center space-y-1.5">
-                        <div className="flex items-center justify-center gap-2">
-                            <span className="text-lg">🎰</span>
-                            <span className="text-sm font-bold text-white/80 uppercase tracking-wider">
-                                Kein Gewinner heute
-                            </span>
+                    { mode === 'no_winner' && (
+                        <div className="px-5 py-3 text-center space-y-1">
+                            <div className="flex items-center justify-center gap-2">
+                                <Frown className="size-4 text-muted-foreground" />
+                                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                                    Kein Gewinner heute
+                                </span>
+                            </div>
+                            <div className="text-xs text-muted-foreground/70">
+                                Niemand hat teilgenommen. Nächste Ziehung: { nextDraw } Uhr
+                            </div>
                         </div>
-                        <div className="text-xs text-white/70">
-                            Niemand hat teilgenommen. Naechste Ziehung: { nextDraw } Uhr
-                        </div>
-                    </div>
-                ) }
-            </div>
+                    ) }
+                </FramePanel>
+            </Frame>
         </div>
     );
 }

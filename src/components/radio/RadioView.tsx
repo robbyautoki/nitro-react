@@ -1,8 +1,10 @@
 import { ILinkEventTracker, NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { AddEventLinkTracker, CreateLinkEvent, GetRoomSession, RemoveLinkEventTracker } from '../../api';
-import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { useMessageEvent } from '../../hooks';
+import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
+import { Frame, FramePanel } from '../ui/frame';
+import { Radio, X } from 'lucide-react';
 
 /* ── Types ── */
 
@@ -391,13 +393,25 @@ export const RadioView: FC<{}> = () =>
     const visibleTabs = TAB_ALL.filter(t => !t.staffOnly || isStaff);
 
     // ── Shared input class ──
-    const inputClass = 'w-full px-2.5 py-1.5 text-[11px] rounded-lg bg-white/5 border border-white/[0.08] text-white/80 placeholder:text-white/25 outline-none focus:border-white/20 transition-colors';
+    const inputClass = 'w-full px-2.5 py-1.5 text-[11px] rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-ring transition-colors';
     const btnClass = 'px-3 py-1.5 text-[11px] rounded-lg font-medium transition-colors';
 
     return (
-        <NitroCardView uniqueKey="radio" className="nitro-radio" style={{ width: '420px' }}>
-            <NitroCardHeaderView headerText="BAHHOS RADIO" onCloseClick={ () => setIsVisible(false) } />
-            <NitroCardContentView>
+        <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
+            <div className="w-[420px]">
+            <Frame className="relative">
+                <div className="drag-handler absolute inset-0 cursor-move" />
+                <FramePanel className="overflow-hidden p-0! relative z-10">
+                    <div className="flex items-center justify-between px-4 py-2.5 border-b">
+                        <div className="flex items-center gap-2">
+                            <Radio className="size-4 text-purple-500" />
+                            <span className="text-sm font-semibold">BAHHOS RADIO</span>
+                        </div>
+                        <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={ () => setIsVisible(false) }>
+                            <X className="size-3.5" />
+                        </button>
+                    </div>
+                    <div className="px-4 py-3">
                 <div className="flex flex-col h-full">
                     {/* ── Tab Bar ── */}
                     <div className="flex gap-1 mb-3 border-b border-white/[0.06] pb-2">
@@ -820,7 +834,10 @@ export const RadioView: FC<{}> = () =>
                         </div>
                     ) }
                 </div>
-            </NitroCardContentView>
-        </NitroCardView>
+                    </div>
+                </FramePanel>
+            </Frame>
+            </div>
+        </DraggableWindow>
     );
 };

@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { useSessionInfo } from '../../hooks';
+import { Frame, FramePanel } from '../ui/frame';
 
 export const WelcomeToastView: FC<{}> = props =>
 {
@@ -34,11 +35,15 @@ export const WelcomeToastView: FC<{}> = props =>
 
     return (
         <div className={ `fixed top-20 left-1/2 -translate-x-1/2 z-[100] pointer-events-none transition-all duration-500 ${ fading ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0' }` }>
-            <div className="px-6 py-3 rounded-2xl backdrop-blur-2xl bg-black/60 border border-white/[0.08] shadow-lg">
-                <p className="text-sm text-white/90 font-medium tracking-wide">
-                    Willkommen zurück, <span className="text-amber-300 font-bold">{ userInfo.username }</span>!
-                </p>
-            </div>
+            <Frame className="max-w-sm">
+                <FramePanel className="!p-0">
+                    <div className="px-5 py-2.5 text-center">
+                        <span className="text-sm text-muted-foreground font-medium">
+                            Willkommen zurück, <span className="text-amber-500 font-bold">{ userInfo.username }</span>!
+                        </span>
+                    </div>
+                </FramePanel>
+            </Frame>
         </div>
     );
 }

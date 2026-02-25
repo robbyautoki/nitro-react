@@ -1,6 +1,8 @@
 import { FC, useCallback, useState } from 'react';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { useMessageEvent } from '../../hooks';
+import { Frame, FramePanel } from '../ui/frame';
+import { Trophy } from 'lucide-react';
 
 interface WinToast {
     id: number;
@@ -38,28 +40,22 @@ export const WinNotification: FC<{}> = () =>
     return (
         <div className="fixed top-4 right-4 z-[300] flex flex-col gap-2 pointer-events-none" style={{ maxWidth: 320 }}>
             { toasts.map(toast => (
-                <div
-                    key={ toast.id }
-                    className="pointer-events-auto animate-in slide-in-from-right fade-in duration-300"
-                    style={{
-                        background: 'rgba(12,12,16,0.95)',
-                        border: '1px solid rgba(251,146,60,0.2)',
-                        borderRadius: 12,
-                        padding: '10px 14px',
-                        backdropFilter: 'blur(12px)',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                    }}>
-                    <div className="flex items-center gap-2.5">
-                        <span className="text-lg">🏆</span>
-                        <div>
-                            <div className="text-xs font-semibold text-white/90">
-                                { toast.username } hat einen Win erhalten!
+                <div key={ toast.id } className="pointer-events-auto animate-in slide-in-from-right fade-in duration-300">
+                    <Frame>
+                        <FramePanel className="!p-0">
+                            <div className="flex items-center gap-2.5 px-3.5 py-2.5">
+                                <Trophy className="size-5 text-amber-500 shrink-0" />
+                                <div>
+                                    <div className="text-xs font-semibold text-foreground">
+                                        { toast.username } hat einen Win erhalten!
+                                    </div>
+                                    <div className="text-[10px] text-amber-500/80 mt-0.5">
+                                        Level { toast.level }
+                                    </div>
+                                </div>
                             </div>
-                            <div className="text-[10px] text-amber-400/70 mt-0.5">
-                                Level { toast.level }
-                            </div>
-                        </div>
-                    </div>
+                        </FramePanel>
+                    </Frame>
                 </div>
             )) }
         </div>

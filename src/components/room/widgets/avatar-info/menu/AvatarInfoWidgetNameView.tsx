@@ -1,8 +1,7 @@
-import { RoomObjectType } from '@nitrots/nitro-renderer';
+import { AvatarScaleType, AvatarSetType, RoomObjectType } from '@nitrots/nitro-renderer';
 import { FC, useMemo } from 'react';
-import { AvatarInfoName, GetSessionDataManager } from '../../../../../api';
+import { AvatarInfoName, GetAvatarRenderManager, GetSessionDataManager } from '../../../../../api';
 import { getPrestigeFromBadges } from '../../../../../api/utils/PrestigeUtils';
-import { LayoutAvatarImageView } from '../../../../../common';
 import { useRoom } from '../../../../../hooks';
 import { ContextMenuView } from '../../context-menu/ContextMenuView';
 
@@ -39,6 +38,30 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
         return newClassNames;
     }, [ nameInfo ]);
 
+    const avatarHeadUrl = useMemo(() =>
+    {
+        if(!nameInfo.figure || nameInfo.userType !== RoomObjectType.USER) return '';
+
+        try
+        {
+            const avatarImage = GetAvatarRenderManager().createAvatarImage(nameInfo.figure, AvatarScaleType.LARGE, null, null, null);
+
+            if(!avatarImage) return '';
+
+            avatarImage.setDirection(AvatarSetType.HEAD, 3);
+
+            const image = avatarImage.getCroppedImage(AvatarSetType.HEAD);
+
+            avatarImage.dispose();
+
+            return image?.src || '';
+        }
+        catch
+        {
+            return '';
+        }
+    }, [ nameInfo.figure, nameInfo.userType ]);
+
     const isUser = nameInfo.userType === RoomObjectType.USER;
 
     if(isUser && nameInfo.figure)
@@ -47,7 +70,7 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
             <ContextMenuView objectId={ nameInfo.roomIndex } category={ nameInfo.category } userType={ nameInfo.userType } fades={ (nameInfo.id !== GetSessionDataManager().userId) } classNames={ getClassNames } onClose={ onClose }>
                 <div className="nameplate-banner" style={{ backgroundImage: `url(${ DEFAULT_NAMEPLATE_URL })` }}>
                     <div className="nameplate-avatar">
-                        <LayoutAvatarImageView figure={ nameInfo.figure } headOnly={ true } direction={ 3 } className="nameplate-head" />
+                        { avatarHeadUrl && <img src={ avatarHeadUrl } alt="" className="nameplate-head" draggable={ false } /> }
                         <img src={ DEFAULT_DECO_URL } alt="" className="nameplate-deco" draggable={ false } />
                     </div>
                     <div className="nameplate-info">

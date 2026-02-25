@@ -78,6 +78,7 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%) scale(0.6);
+                object-fit: contain;
                 image-rendering: pixelated;
                 z-index: 1;
             }

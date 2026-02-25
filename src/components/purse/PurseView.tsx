@@ -1,8 +1,8 @@
-import { FriendlyTime, HabboClubLevelEnum } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useMemo, useState } from 'react';
-import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, LocalizeFormattedNumber, LocalizeShortNumber, LocalizeText, getAuthHeaders } from '../../api';
+import { FriendlyTime, HabboClubLevelEnum, RateFlatMessageComposer } from '@nitrots/nitro-renderer';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, LocalizeFormattedNumber, LocalizeShortNumber, LocalizeText, SendMessageComposer, getAuthHeaders } from '../../api';
 import { LayoutCurrencyIcon } from '../../common';
-import { useAchievements, usePurse } from '../../hooks';
+import { useAchievements, useNavigator, usePurse, useRoom } from '../../hooks';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import {
   HelpCircle, ShieldAlert, MessageCircle, Scale, Settings,
   User, MessageSquare, Check, ChevronLeft, ChevronRight, Send,
   Loader2, CheckCircle2, Clock, AlertTriangle, Sparkles, Gift,
+  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp,
 } from 'lucide-react';
 
 function CurrencyIcon({ type }: { type: string }) {

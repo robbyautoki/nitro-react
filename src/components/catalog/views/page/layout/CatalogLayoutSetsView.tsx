@@ -52,21 +52,21 @@ const DIFFICULTY_LABELS: Record<string, string> = {
     expert: 'Experte',
 };
 
-const WHITE = '#ffffff';
-const WHITE60 = 'rgba(255,255,255,0.6)';
-const WHITE40 = 'rgba(255,255,255,0.4)';
-const WHITE30 = 'rgba(255,255,255,0.3)';
-const WHITE70 = 'rgba(255,255,255,0.7)';
-const WHITE90 = 'rgba(255,255,255,0.9)';
-const WHITE10 = 'rgba(255,255,255,0.1)';
-const BG_CARD = 'rgba(0,0,0,0.2)';
-const GREEN = '#22c55e';
-const GREEN_BG = 'rgba(20,83,45,0.3)';
-const BLUE = '#3b82f6';
-const YELLOW = '#facc15';
-const BLUE_LIGHT = '#60a5fa';
-const GREEN_LIGHT = '#4ade80';
-const ORANGE = '#fb923c';
+const WHITE = '#000000';
+const WHITE60 = 'rgba(0,0,0,0.50)';
+const WHITE40 = 'rgba(0,0,0,0.40)';
+const WHITE30 = 'rgba(0,0,0,0.30)';
+const WHITE70 = 'rgba(0,0,0,0.60)';
+const WHITE90 = 'rgba(0,0,0,0.85)';
+const WHITE10 = 'rgba(0,0,0,0.06)';
+const BG_CARD = 'rgba(0,0,0,0.03)';
+const GREEN = '#16a34a';
+const GREEN_BG = 'rgba(22,163,74,0.1)';
+const BLUE = '#2563eb';
+const YELLOW = '#ca8a04';
+const BLUE_LIGHT = '#3b82f6';
+const GREEN_LIGHT = '#22c55e';
+const ORANGE = '#ea580c';
 
 function useOwnedClassNames()
 {
@@ -432,11 +432,11 @@ export const CatalogLayoutSetsDetailView: FC<CatalogLayoutProps> = props =>
                                     title="Im Raum platzieren (Vorschau)"
                                     style={{
                                         flexShrink: 0, padding: '2px 6px', borderRadius: 4, fontSize: 10,
-                                        background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+                                        background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)',
                                         color: WHITE60, cursor: 'pointer', transition: 'background 0.15s',
                                     }}
-                                    onMouseEnter={ (e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; e.currentTarget.style.color = WHITE; } }
-                                    onMouseLeave={ (e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = WHITE60; } }
+                                    onMouseEnter={ (e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.08)'; e.currentTarget.style.color = WHITE; } }
+                                    onMouseLeave={ (e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.04)'; e.currentTarget.style.color = WHITE60; } }
                                 >📦</button>
                             </div>
                         );

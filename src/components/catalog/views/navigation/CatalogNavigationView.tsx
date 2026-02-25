@@ -104,9 +104,9 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
             const isOpen = openSection === topNode.pageId || hasActiveChild;
 
             return (
-                <div key={ index } className={ index > 0 ? 'border-t border-white/[0.04]' : '' }>
+                <div key={ index } className={ index > 0 ? 'border-t border-black/[0.04]' : '' }>
                     <div
-                        className={ `px-3 pt-2.5 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] select-none flex items-center gap-2 cursor-pointer transition-colors ${ isOpen ? 'text-white/50' : 'text-white/25 hover:text-white/40' }` }
+                        className={ `px-3 pt-2.5 pb-1.5 text-[9px] font-bold uppercase tracking-[0.15em] select-none flex items-center gap-2 cursor-pointer transition-colors ${ isOpen ? 'text-black/50' : 'text-black/20 hover:text-black/40' }` }
                         onClick={ () => setOpenSection(isOpen && !hasActiveChild ? null : topNode.pageId) }
                     >
                         <CatalogIconView icon={ topNode.iconId } />
@@ -132,7 +132,7 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
         }
 
         return (
-            <div key={ index } className={ `px-1 ${ index > 0 ? 'border-t border-white/[0.04] pt-1' : '' }` }>
+            <div key={ index } className={ `px-1 ${ index > 0 ? 'border-t border-black/[0.04] pt-1' : '' }` }>
                 <CatalogNavigationItemView node={ topNode } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(topNode.pageId) } />
             </div>
         );
@@ -172,7 +172,7 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                                     }) }
                                 </div> }
                         </div>
-                        <div className="mx-3 my-1 border-t border-white/[0.06]" />
+                        <div className="mx-3 my-1 border-t border-black/[0.06]" />
                     </> }
 
                     {/* ── User Catalog Section ── */}

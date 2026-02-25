@@ -70,9 +70,9 @@ export const CatalogBadgeSelectorWidgetView: FC<CatalogBadgeSelectorWidgetViewPr
                     <div
                         key={ index }
                         className={ cn(
-                            'relative flex items-center justify-center rounded-lg border bg-white/[0.06] cursor-pointer overflow-hidden transition-all aspect-square',
-                            'hover:border-white/[0.12]',
-                            (currentBadgeCode === badgeCode) ? 'border-white/30 bg-white/[0.05] ring-1 ring-white/20' : 'border-white/[0.08]'
+                            'relative flex items-center justify-center rounded-lg border bg-black/[0.04] cursor-pointer overflow-hidden transition-all aspect-square',
+                            'hover:border-black/[0.08]',
+                            (currentBadgeCode === badgeCode) ? 'border-black/20 bg-black/[0.03] ring-1 ring-black/15' : 'border-black/[0.06]'
                         ) }
                         onClick={ event => setCurrentBadgeCode(badgeCode) }
                     >

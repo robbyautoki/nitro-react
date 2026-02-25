@@ -287,22 +287,22 @@ export const CatalogView: FC<{}> = props =>
         <>
             <DraggableWindow uniqueKey="catalog" windowPosition={ DraggableWindowPosition.CENTER }>
                 <div
-                    className="nitro-catalog relative flex flex-col rounded-2xl border border-white/[0.09] bg-[rgba(10,10,14,0.98)] shadow-[0_24px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl overflow-hidden"
+                    className="nitro-catalog relative flex flex-col rounded-2xl border border-black/[0.08] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] overflow-hidden"
                     style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `${ catalogSize.height }px` } }
                 >
                     {/* Header */}
                     <div
-                        className="drag-handler relative flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-14 cursor-move select-none overflow-hidden"
-                        style={ { backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)', backgroundSize: '16px 16px' } }
+                        className="drag-handler relative flex items-center gap-3 px-4 shrink-0 border-b border-black/[0.06] h-14 cursor-move select-none overflow-hidden"
+                        style={ { backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.02) 1px, transparent 0)', backgroundSize: '16px 16px' } }
                     >
                         <div className="flex items-center gap-1.5 shrink-0 min-w-0 overflow-hidden">
-                            <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-white/30 shrink-0">
+                            <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-black/30 shrink-0">
                                 { staffView ? 'Staff Katalog' : LocalizeText('catalog.title') }
                             </span>
                             { breadcrumb.map((label, i) => (
                                 <Fragment key={ i }>
-                                    <span className="text-[11px] text-white/20 shrink-0">›</span>
-                                    <span className="text-[12px] text-white/50 truncate">{ label }</span>
+                                    <span className="text-[11px] text-black/15 shrink-0">›</span>
+                                    <span className="text-[12px] text-black/50 truncate">{ label }</span>
                                 </Fragment>
                             )) }
                         </div>
@@ -315,14 +315,14 @@ export const CatalogView: FC<{}> = props =>
 
                         <div className="flex items-center gap-1.5 shrink-0" onMouseDown={ e => e.stopPropagation() }>
                             <button
-                                className={ `appearance-none border rounded-md p-1.5 transition-colors ${ virtualPage === 'recent' ? 'bg-white/[0.1] border-white/20 text-white/70' : 'bg-transparent border-white/10 text-white/25 hover:text-white/50 hover:border-white/20' }` }
+                                className={ `appearance-none border rounded-md p-1.5 transition-colors ${ virtualPage === 'recent' ? 'bg-black/[0.06] border-black/15 text-black/60' : 'bg-transparent border-black/8 text-black/20 hover:text-black/50 hover:border-black/15' }` }
                                 onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'recent' })) }
                                 title="Zuletzt gekauft"
                             >
                                 <FaClock className="text-[10px]" />
                             </button>
                             <button
-                                className={ `appearance-none border rounded-md p-1.5 transition-colors ${ virtualPage === 'frequent' ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' : 'bg-transparent border-white/10 text-white/25 hover:text-white/50 hover:border-white/20' }` }
+                                className={ `appearance-none border rounded-md p-1.5 transition-colors ${ virtualPage === 'frequent' ? 'bg-orange-500/20 border-orange-500/40 text-orange-400' : 'bg-transparent border-black/8 text-black/20 hover:text-black/50 hover:border-black/15' }` }
                                 onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'frequent' })) }
                                 title="Am meisten gekauft"
                             >
@@ -331,7 +331,7 @@ export const CatalogView: FC<{}> = props =>
 
                             { isMod &&
                                 <button
-                                    className={ `appearance-none border rounded-md px-2 py-1 text-[9px] font-semibold uppercase tracking-wider transition-colors ${ staffView ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-transparent border-white/10 text-white/30 hover:text-white/50 hover:border-white/20' }` }
+                                    className={ `appearance-none border rounded-md px-2 py-1 text-[9px] font-semibold uppercase tracking-wider transition-colors ${ staffView ? 'bg-amber-500/10 border-amber-500/30 text-amber-600' : 'bg-transparent border-black/8 text-black/30 hover:text-black/50 hover:border-black/15' }` }
                                     onClick={ () => setStaffView(v => !v) }
                                 >
                                     Staff
@@ -344,7 +344,7 @@ export const CatalogView: FC<{}> = props =>
                         </div>
 
                         <button
-                            className="appearance-none border-0 bg-transparent rounded-md p-1 text-white/25 hover:bg-white/[0.06] hover:text-white/70 transition-colors shrink-0"
+                            className="appearance-none border-0 bg-transparent rounded-md p-1 text-black/20 hover:bg-black/[0.04] hover:text-black/60 transition-colors shrink-0"
                             onMouseDown={ e => e.stopPropagation() }
                             onClick={ () => setIsVisible(false) }
                         >
@@ -356,7 +356,7 @@ export const CatalogView: FC<{}> = props =>
                     <div className="flex-1 min-h-0 overflow-hidden flex relative">
 
                         { !navigationHidden && (
-                            <div className={ `w-[210px] min-w-[210px] flex-col min-h-0 border-r border-white/[0.06] hidden xl:flex ${ navOverlay ? '!flex absolute inset-y-0 left-0 z-20 bg-[rgba(10,10,14,0.98)] border-r border-white/[0.08]' : '' }` }>
+                            <div className={ `w-[210px] min-w-[210px] flex-col min-h-0 border-r border-black/[0.06] hidden xl:flex ${ navOverlay ? '!flex absolute inset-y-0 left-0 z-20 bg-white border-r border-black/[0.06]' : '' }` }>
                                 <CatalogNavigationView staffView={ staffView } />
                             </div>
                         ) }

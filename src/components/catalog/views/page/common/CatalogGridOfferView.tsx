@@ -71,7 +71,7 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                                 ? 'border-emerald-400/80 shadow-[0_0_14px_rgba(52,211,153,0.4)] bg-emerald-500/10 z-10'
                                 : itemActive
                                     ? 'border-indigo-400/80 shadow-[0_0_14px_rgba(99,102,241,0.55)] bg-indigo-500/10 z-10'
-                                    : 'border-white/[0.07]',
+                                    : 'border-black/[0.06]',
                             isSoldOut && 'opacity-40 grayscale'
                         ) }
                         style={ (iconUrl && !isUnique) ? { backgroundImage: `url(${ iconUrl })`, backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundSize: 'contain' } : undefined }
@@ -95,33 +95,33 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                         { (offer.product.productType === ProductTypeEnum.ROBOT) &&
                             <LayoutAvatarImageView figure={ offer.product.extraParam } headOnly={ true } direction={ 3 } /> }
                         { !isUnique &&
-                            <div className="absolute bottom-0 inset-x-0 flex items-center justify-center py-[2px] bg-black/50 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            <div className="absolute bottom-0 inset-x-0 flex items-center justify-center py-[2px] bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                 { (offer.priceInCredits > 0) &&
-                                    <span className="text-[8px] font-bold text-amber-300">{ offer.priceInCredits }</span> }
+                                    <span className="text-[8px] font-bold text-amber-600">{ offer.priceInCredits }</span> }
                                 { (offer.priceInCredits > 0 && offer.priceInActivityPoints > 0) &&
-                                    <span className="text-[7px] text-white/30 mx-0.5">+</span> }
+                                    <span className="text-[7px] text-black/30 mx-0.5">+</span> }
                                 { (offer.priceInActivityPoints > 0) &&
-                                    <span className="text-[8px] font-bold text-cyan-300">{ offer.priceInActivityPoints }</span> }
+                                    <span className="text-[8px] font-bold text-cyan-600">{ offer.priceInActivityPoints }</span> }
                                 { (offer.priceInCredits === 0 && offer.priceInActivityPoints === 0) &&
-                                    <span className="text-[8px] font-bold text-emerald-300">Free</span> }
+                                    <span className="text-[8px] font-bold text-emerald-600">Free</span> }
                             </div> }
                     </div>
                 </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={ 6 } className="max-w-[220px] bg-[rgba(10,10,14,0.95)] text-white border border-white/10">
+                <TooltipContent side="top" sideOffset={ 6 } className="max-w-[220px] bg-white text-black/85 border border-black/8 shadow-lg">
                     <div className="flex flex-col gap-0.5">
                         <span className="font-semibold text-[11px]">{ offer.localizationName }</span>
                         <div className="flex items-center gap-1.5 text-[10px] opacity-80">
                             { (offer.priceInCredits > 0) &&
-                                <span className="text-amber-300">{ offer.priceInCredits } Credits</span> }
+                                <span className="text-amber-600">{ offer.priceInCredits } Credits</span> }
                             { (offer.priceInCredits > 0 && offer.priceInActivityPoints > 0) &&
-                                <span className="text-white/30">+</span> }
+                                <span className="text-black/30">+</span> }
                             { (offer.priceInActivityPoints > 0) &&
-                                <span className="text-cyan-300">{ offer.priceInActivityPoints } Diamonds</span> }
+                                <span className="text-cyan-600">{ offer.priceInActivityPoints } Diamonds</span> }
                             { (offer.priceInCredits === 0 && offer.priceInActivityPoints === 0) &&
-                                <span className="text-emerald-300">Kostenlos</span> }
+                                <span className="text-emerald-600">Kostenlos</span> }
                         </div>
                         { isUnique &&
-                            <span className="text-[10px] text-amber-400">Limited: { product.uniqueLimitedItemsLeft }/{ product.uniqueLimitedItemSeriesSize }</span> }
+                            <span className="text-[10px] text-amber-600">Limited: { product.uniqueLimitedItemsLeft }/{ product.uniqueLimitedItemSeriesSize }</span> }
                     </div>
                 </TooltipContent>
             </Tooltip>

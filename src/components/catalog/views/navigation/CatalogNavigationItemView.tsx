@@ -25,12 +25,12 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                 className={ cn(
                     'group/item px-3 py-[3px] text-[11px] cursor-pointer select-none transition-colors rounded-sm flex items-center gap-2 border-l-2',
                     node.isActive
-                        ? 'text-white/90 bg-white/[0.07] font-medium border-sky-400/60'
-                        : 'text-white/40 hover:text-white/70 hover:bg-white/[0.04] border-transparent'
+                        ? 'text-black/85 bg-black/[0.04] font-medium border-sky-400/60'
+                        : 'text-black/40 hover:text-black/60 hover:bg-black/[0.03] border-transparent'
                 ) }
                 onClick={ () => activateNode(node) }
             >
-                <div className="w-5 h-5 rounded bg-white/[0.05] flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 rounded bg-black/[0.03] flex items-center justify-center shrink-0">
                     <CatalogIconView icon={ node.iconId } />
                 </div>
                 <span className="truncate flex-1">{ node.localization?.replace(/\s*\(\d+\)$/, '') }</span>
@@ -41,11 +41,11 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                     >
                         { isFavorite
                             ? <FaStar className="text-[8px] text-amber-400/70" />
-                            : <FaRegStar className="text-[8px] text-white/25 hover:text-amber-400/50" /> }
+                            : <FaRegStar className="text-[8px] text-black/20 hover:text-amber-400/50" /> }
                     </button> }
             </div>
             { node.isOpen && node.isBranch &&
-                <div className="ml-3 border-l border-white/[0.05] pl-0.5 mt-0.5">
+                <div className="ml-3 border-l border-black/[0.05] pl-0.5 mt-0.5">
                     <CatalogNavigationSetView node={ node } child={ true } />
                 </div> }
         </div>

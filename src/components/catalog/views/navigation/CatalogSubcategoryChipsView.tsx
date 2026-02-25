@@ -17,7 +17,7 @@ export const CatalogSubcategoryChipsView: FC<{}> = () =>
     if(visibleChildren.length < 2) return null;
 
     return (
-        <div className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto catalog-chip-scroll shrink-0 border-b border-white/[0.04]">
+        <div className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto catalog-chip-scroll shrink-0 border-b border-black/[0.04]">
             { visibleChildren.map((child: ICatalogNode, i: number) =>
             (
                 <button
@@ -25,8 +25,8 @@ export const CatalogSubcategoryChipsView: FC<{}> = () =>
                     className={ cn(
                         'shrink-0 px-2.5 py-[3px] rounded-full text-[10px] font-medium transition-all cursor-pointer select-none border',
                         child.isActive
-                            ? 'bg-white/[0.12] text-white/90 border-white/[0.15]'
-                            : 'bg-transparent text-white/40 border-transparent hover:text-white/60 hover:bg-white/[0.05]'
+                            ? 'bg-primary/10 text-black/85 border-black/[0.10]'
+                            : 'bg-transparent text-black/40 border-transparent hover:text-black/60 hover:bg-black/[0.03]'
                     ) }
                     onClick={ () => activateNode(child) }
                 >

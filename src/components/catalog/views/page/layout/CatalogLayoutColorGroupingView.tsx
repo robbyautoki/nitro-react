@@ -147,7 +147,7 @@ export const CatalogLayoutColorGroupingView : FC<CatalogLayoutColorGroupViewProp
                                     key={ index }
                                     className={ cn(
                                         'aspect-square rounded-lg border-2 cursor-pointer transition-all',
-                                        isActive ? 'border-indigo-400/80 ring-1 ring-indigo-400/40 scale-105' : 'border-white/[0.12] hover:border-white/[0.25]'
+                                        isActive ? 'border-indigo-400/80 ring-1 ring-indigo-400/40 scale-105' : 'border-black/[0.12] hover:border-black/[0.25]'
                                     ) }
                                     style={ { backgroundColor: ColorConverter.int2rgb(color) } }
                                     onClick={ event => selectColor(index, currentOffer.product.furnitureData.className) }

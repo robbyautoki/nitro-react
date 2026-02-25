@@ -51,7 +51,7 @@ export const OfferWindowView = (props: { offer: TargetedOfferData, setOpen: Disp
         </NitroCardSubHeaderView>
         <NitroCardContentView gap={ 1 }>
             <Flex gap={ 1 } fullHeight>
-                <Flex gap={ 1 } column className="w-3/4 text-white/90">
+                <Flex gap={ 1 } column className="w-3/4 text-black/85">
                     <Column className="bg-yellow-500 p-2" fullHeight>
                         <h4>
                             { LocalizeText(offer.title) }

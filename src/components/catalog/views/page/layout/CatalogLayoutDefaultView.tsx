@@ -25,7 +25,7 @@ export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = props =>
             { GetConfiguration('catalog.headers') &&
                 <CatalogHeaderView imageUrl={ currentPage.localization.getImage(0) } /> }
             { pageText && (
-                <div className="shrink-0 px-3 py-2 border-b border-white/[0.04]">
+                <div className="shrink-0 px-3 py-2 border-b border-black/[0.04]">
                     <div className="catalog-page-text text-[11px] leading-relaxed" dangerouslySetInnerHTML={ { __html: pageText } } />
                 </div>
             ) }

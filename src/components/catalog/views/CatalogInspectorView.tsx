@@ -11,7 +11,7 @@ import { CatalogViewProductWidgetView } from './page/widgets/CatalogViewProductW
 import { Button } from '../../ui/button';
 import { Separator } from '../../ui/separator';
 
-const ROOM_BG_SVG = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="280" height="200" viewBox="0 0 280 200"><rect fill="#111114" width="280" height="200"/><polygon points="140,50 280,120 140,190 0,120" fill="#1a1a2e"/><polygon points="0,120 0,50 140,50 140,120" fill="#15152a" opacity="0.6"/><polygon points="280,120 280,50 140,50 140,120" fill="#0e0e20" opacity="0.6"/><line x1="0" y1="50" x2="140" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/><line x1="280" y1="50" x2="140" y2="120" stroke="rgba(255,255,255,0.06)" stroke-width="1"/></svg>`)}`;
+const ROOM_BG_SVG = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="280" height="200" viewBox="0 0 280 200"><rect fill="#f0f1f3" width="280" height="200"/><polygon points="140,50 280,120 140,190 0,120" fill="#e2e4e8"/><polygon points="0,120 0,50 140,50 140,120" fill="#e8eaed" opacity="0.6"/><polygon points="280,120 280,50 140,50 140,120" fill="#dcdfe3" opacity="0.6"/><line x1="0" y1="50" x2="140" y2="120" stroke="rgba(0,0,0,0.06)" stroke-width="1"/><line x1="280" y1="50" x2="140" y2="120" stroke="rgba(0,0,0,0.06)" stroke-width="1"/></svg>`)}`;
 
 const ZOOM_SIZE = 300;
 const ZOOM_GAP = 8;
@@ -73,11 +73,11 @@ export const CatalogInspectorView: FC<{}> = () =>
         const totalPoints = selectedOffers.reduce((sum, o) => sum + o.priceInActivityPoints, 0);
 
         return (
-            <div className="w-[260px] shrink-0 border-l border-white/[0.06] flex flex-col bg-[rgba(10,10,14,0.98)] overflow-y-auto catalog-inspector-enter" style={ { scrollbarWidth: 'thin' } }>
+            <div className="w-[260px] shrink-0 border-l border-black/[0.06] flex flex-col bg-white overflow-y-auto catalog-inspector-enter" style={ { scrollbarWidth: 'thin' } }>
                 <div className="p-4 flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                        <span className="text-2xl font-black text-white/90">{ selectedOffers.length }</span>
-                        <span className="text-xs text-white/40">Items ausgewählt</span>
+                        <span className="text-2xl font-black text-black/85">{ selectedOffers.length }</span>
+                        <span className="text-xs text-black/40">Items ausgewählt</span>
                     </div>
 
                     <div className="flex flex-wrap gap-1.5">
@@ -93,19 +93,19 @@ export const CatalogInspectorView: FC<{}> = () =>
                                     style={ iconUrl ? { backgroundImage: `url(${ iconUrl })`, backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundSize: 'contain' } : undefined }
                                     title={ offer.localizationName }
                                 >
-                                    { !iconUrl && <span className="text-[7px] text-white/40 text-center leading-tight px-0.5 truncate">{ offer.localizationName }</span> }
+                                    { !iconUrl && <span className="text-[7px] text-black/40 text-center leading-tight px-0.5 truncate">{ offer.localizationName }</span> }
                                 </div>
                             );
                         }) }
                     </div>
 
-                    <Separator className="bg-white/[0.06]" />
+                    <Separator className="bg-black/[0.04]" />
 
                     <div className="flex items-center gap-2 flex-wrap">
-                        { totalCredits > 0 && <span className="text-sm font-bold text-amber-300">{ totalCredits } Credits</span> }
-                        { totalCredits > 0 && totalPoints > 0 && <span className="text-white/30 text-xs">+</span> }
-                        { totalPoints > 0 && <span className="text-sm font-bold text-cyan-300">{ totalPoints } Diamonds</span> }
-                        { totalCredits === 0 && totalPoints === 0 && <span className="text-sm font-bold text-emerald-300">Kostenlos</span> }
+                        { totalCredits > 0 && <span className="text-sm font-bold text-amber-600">{ totalCredits } Credits</span> }
+                        { totalCredits > 0 && totalPoints > 0 && <span className="text-black/30 text-xs">+</span> }
+                        { totalPoints > 0 && <span className="text-sm font-bold text-cyan-600">{ totalPoints } Diamonds</span> }
+                        { totalCredits === 0 && totalPoints === 0 && <span className="text-sm font-bold text-emerald-600">Kostenlos</span> }
                     </div>
 
                     <CatalogPurchaseWidgetView />
@@ -119,12 +119,12 @@ export const CatalogInspectorView: FC<{}> = () =>
     const isFree = priceCredits === 0 && pricePoints === 0;
 
     return (
-        <div className="w-[260px] shrink-0 border-l border-white/[0.06] flex flex-col bg-[rgba(10,10,14,0.98)] overflow-y-auto catalog-inspector-enter" style={ { scrollbarWidth: 'thin' } }>
+        <div className="w-[260px] shrink-0 border-l border-black/[0.06] flex flex-col bg-white overflow-y-auto catalog-inspector-enter" style={ { scrollbarWidth: 'thin' } }>
             {/* Room Preview Area */}
             <div
                 ref={ previewRef }
-                className="relative h-[200px] shrink-0 overflow-hidden border-b border-white/[0.06] cursor-zoom-in catalog-inspector-hero"
-                style={ { backgroundColor: '#111114' } }
+                className="relative h-[200px] shrink-0 overflow-hidden border-b border-black/[0.06] cursor-zoom-in catalog-inspector-hero"
+                style={ { backgroundColor: '#f0f1f3' } }
                 onMouseEnter={ () =>
                 {
                     if(hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
@@ -138,7 +138,7 @@ export const CatalogInspectorView: FC<{}> = () =>
                 } }
             >
                 <div className="absolute inset-0 opacity-40" style={ { backgroundImage: `url('${ ROOM_BG_SVG }')`, backgroundSize: 'cover', backgroundPosition: 'center' } } />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111114]/60 via-transparent to-[#111114]/30" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white/60 via-transparent to-white/30" />
 
                 { (currentOffer.product?.productType !== ProductTypeEnum.BADGE) ? (
                     <div className="relative h-full">
@@ -165,10 +165,10 @@ export const CatalogInspectorView: FC<{}> = () =>
                         height: ZOOM_SIZE,
                         zIndex: 99999,
                         borderRadius: 12,
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        boxShadow: '0 16px 48px rgba(0,0,0,0.8)',
+                        border: '1px solid rgba(0,0,0,0.08)',
+                        boxShadow: '0 16px 48px rgba(0,0,0,0.12)',
                         backdropFilter: 'blur(16px)',
-                        backgroundColor: 'rgba(10,10,14,0.95)',
+                        backgroundColor: 'rgba(255,255,255,0.95)',
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'center',
                         backgroundSize: 'contain',
@@ -182,8 +182,8 @@ export const CatalogInspectorView: FC<{}> = () =>
             {/* Item Info */}
             <div className="flex flex-col gap-3 p-4 flex-1">
                 <div>
-                    <h3 className="text-sm font-bold text-white/90 leading-tight">{ currentOffer.localizationName }</h3>
-                    <p className="text-[10px] text-white/30 font-mono mt-0.5 truncate">{ currentOffer.localizationDescription }</p>
+                    <h3 className="text-sm font-bold text-black/85 leading-tight">{ currentOffer.localizationName }</h3>
+                    <p className="text-[10px] text-black/30 font-mono mt-0.5 truncate">{ currentOffer.localizationDescription }</p>
                 </div>
 
                 {/* Rarity */}
@@ -202,14 +202,14 @@ export const CatalogInspectorView: FC<{}> = () =>
                             </span>
                         ) }
                         { rarityData.circulation > 0 && (
-                            <span className="text-[10px] text-white/40">{ rarityData.circulation.toLocaleString() } im Umlauf</span>
+                            <span className="text-[10px] text-black/40">{ rarityData.circulation.toLocaleString() } im Umlauf</span>
                         ) }
                     </div>
                 ) }
 
                 <CatalogLimitedItemWidgetView fullWidth />
 
-                <Separator className="bg-white/[0.06]" />
+                <Separator className="bg-black/[0.04]" />
 
                 {/* Price */}
                 <div>
@@ -217,17 +217,17 @@ export const CatalogInspectorView: FC<{}> = () =>
                         { priceCredits > 0 && (
                             <div className="flex items-center gap-1.5">
                                 <CurrencyImg type={ -1 } className="w-5 h-5" />
-                                <span className="text-lg font-black tabular-nums text-amber-400">{ priceCredits.toLocaleString('de-DE') }</span>
+                                <span className="text-lg font-black tabular-nums text-amber-600">{ priceCredits.toLocaleString('de-DE') }</span>
                             </div>
                         ) }
-                        { priceCredits > 0 && pricePoints > 0 && <span className="text-white/30 text-xs">+</span> }
+                        { priceCredits > 0 && pricePoints > 0 && <span className="text-black/30 text-xs">+</span> }
                         { pricePoints > 0 && (
                             <div className="flex items-center gap-1.5">
                                 <CurrencyImg type={ currentOffer.activityPointType } className="w-5 h-5" />
-                                <span className="text-lg font-black tabular-nums text-cyan-400">{ pricePoints.toLocaleString('de-DE') }</span>
+                                <span className="text-lg font-black tabular-nums text-cyan-600">{ pricePoints.toLocaleString('de-DE') }</span>
                             </div>
                         ) }
-                        { isFree && <span className="text-lg font-black text-emerald-400">Kostenlos</span> }
+                        { isFree && <span className="text-lg font-black text-emerald-600">Kostenlos</span> }
                     </div>
                 </div>
 
@@ -250,7 +250,7 @@ export const CatalogInspectorView: FC<{}> = () =>
                     </div>
                 ) }
 
-                <Separator className="bg-white/[0.06]" />
+                <Separator className="bg-black/[0.04]" />
 
                 {/* Purchase */}
                 <CatalogPurchaseWidgetView />

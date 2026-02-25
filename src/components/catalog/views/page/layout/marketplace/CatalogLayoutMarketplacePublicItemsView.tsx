@@ -132,39 +132,39 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     });
 
     return (
-        <div className="flex flex-col h-full gap-3 bg-[#0a0a0a] rounded-xl p-3 border border-white/[0.04]">
+        <div className="flex flex-col h-full gap-3 bg-white rounded-xl p-3 border border-black/[0.04]">
             <div className="flex gap-1">
-                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'bg-white/[0.12] text-white/90 border-white/[0.15]' : 'bg-transparent text-white/40 border-transparent hover:text-white/60 hover:bg-white/[0.05]' }` } onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
+                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'bg-primary/10 text-black/85 border-black/[0.10]' : 'bg-transparent text-black/40 border-transparent hover:text-black/60 hover:bg-black/[0.03]' }` } onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
                     { LocalizeText('catalog.marketplace.search_by_activity') }
                 </button>
-                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.BY_VALUE ? 'bg-white/[0.12] text-white/90 border-white/[0.15]' : 'bg-transparent text-white/40 border-transparent hover:text-white/60 hover:bg-white/[0.05]' }` } onClick={ () => setSearchType(MarketplaceSearchType.BY_VALUE) }>
+                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.BY_VALUE ? 'bg-primary/10 text-black/85 border-black/[0.10]' : 'bg-transparent text-black/40 border-transparent hover:text-black/60 hover:bg-black/[0.03]' }` } onClick={ () => setSearchType(MarketplaceSearchType.BY_VALUE) }>
                     { LocalizeText('catalog.marketplace.search_by_value') }
                 </button>
-                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.ADVANCED ? 'bg-white/[0.12] text-white/90 border-white/[0.15]' : 'bg-transparent text-white/40 border-transparent hover:text-white/60 hover:bg-white/[0.05]' }` } onClick={ () => setSearchType(MarketplaceSearchType.ADVANCED) }>
+                <button className={ `appearance-none px-3 py-1.5 text-xs rounded-full font-medium transition-all border ${ searchType === MarketplaceSearchType.ADVANCED ? 'bg-primary/10 text-black/85 border-black/[0.10]' : 'bg-transparent text-black/40 border-transparent hover:text-black/60 hover:bg-black/[0.03]' }` } onClick={ () => setSearchType(MarketplaceSearchType.ADVANCED) }>
                     { LocalizeText('catalog.marketplace.search_advanced') }
                 </button>
             </div>
             
-            <div className="bg-black/50 p-3 rounded-lg border border-white/[0.05]">
+            <div className="bg-black/[0.02] p-3 rounded-lg border border-black/[0.05]">
                 <SearchFormView sortTypes={ getSortTypes } searchType={ searchType } onSearch={ requestOffers } />
             </div>
             
             <div className="flex flex-col gap-1.5 flex-1 min-h-0">
-                <div className="flex items-center justify-between shrink-0 px-2 mt-2 border-b border-white/[0.08] pb-2">
-                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.1em]">
+                <div className="flex items-center justify-between shrink-0 px-2 mt-2 border-b border-black/[0.06] pb-2">
+                    <span className="text-[10px] font-bold text-black/30 uppercase tracking-[0.1em]">
                         { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.size.toString() ]) }
                     </span>
-                    <div className="flex items-center text-[10px] font-bold text-white/30 uppercase tracking-[0.1em] gap-8 pr-[70px]">
+                    <div className="flex items-center text-[10px] font-bold text-black/30 uppercase tracking-[0.1em] gap-8 pr-[70px]">
                         <span className="w-16 text-right">Spread</span>
                         <span className="w-16 text-right">Price</span>
                     </div>
                 </div>
                 
-                <div className="flex flex-col overflow-auto h-full rounded border border-white/[0.04] bg-[#050505]">
+                <div className="flex flex-col overflow-auto h-full rounded border border-black/[0.04] bg-white">
                     { offers.size > 0 ? (
                         Array.from(offers.values()).map( (entry, index) => <CatalogLayoutMarketplaceItemView key={ index } offerData={ entry } type={ PUBLIC_OFFER } onClick={ purchaseItem } />)
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-white/20 text-xs gap-2 py-8">
+                        <div className="flex-1 flex flex-col items-center justify-center text-black/15 text-xs gap-2 py-8">
                             <span className="text-2xl font-mono opacity-50">¯\_(ツ)_/¯</span>
                             No market data available.
                         </div>

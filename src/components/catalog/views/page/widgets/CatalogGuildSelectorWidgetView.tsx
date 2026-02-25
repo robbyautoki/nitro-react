@@ -50,7 +50,7 @@ export const CatalogGuildSelectorWidgetView: FC<{}> = props =>
     if(!groups || !groups.length)
     {
         return (
-            <Base className="bg-muted rounded p-1 text-white/90 text-center">
+            <Base className="bg-muted rounded p-1 text-black/85 text-center">
                 { LocalizeText('catalog.guild_selector.members_only') }
                 <Button className="mt-1">
                     { LocalizeText('catalog.guild_selector.find_groups') }

@@ -208,17 +208,17 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
                 { !colorsShowing && (sellablePalettes.length > 0) && sellablePalettes.map((palette, index) =>
                 {
                     return (
-                        <div key={ index } className={ `flex items-center justify-center p-1 rounded-lg border cursor-pointer transition-colors ${ selectedPaletteIndex === index ? 'border-indigo-400/80 bg-indigo-500/10 shadow-sm' : 'border-white/[0.07] bg-white/[0.04] hover:border-white/[0.15]' }` } onClick={ event => setSelectedPaletteIndex(index) }>
+                        <div key={ index } className={ `flex items-center justify-center p-1 rounded-lg border cursor-pointer transition-colors ${ selectedPaletteIndex === index ? 'border-indigo-400/80 bg-indigo-500/10 shadow-sm' : 'border-black/[0.06] bg-black/[0.03] hover:border-black/[0.10]' }` } onClick={ event => setSelectedPaletteIndex(index) }>
                             <LayoutPetImageView typeId={ petIndex } paletteId={ palette.paletteId } direction={ 2 } headOnly={ true } />
                         </div>
                     );
                 }) }
                 { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <div key={ index } className={ `w-full aspect-square rounded-lg border-2 cursor-pointer transition-all ${ selectedColorIndex === index ? 'border-primary shadow-sm scale-105' : 'border-border hover:border-border' }` } style={ { backgroundColor: ColorConverter.int2rgb(colorSet[0]) } } onClick={ event => setSelectedColorIndex(index) } />) }
             </div>
-            <div className="flex flex-col gap-2 p-2.5 bg-white/[0.05] rounded-lg border border-white/[0.07] shrink-0">
+            <div className="flex flex-col gap-2 p-2.5 bg-black/[0.03] rounded-lg border border-black/[0.06] shrink-0">
                 <div className="relative overflow-hidden">
                     <CatalogViewProductWidgetView />
-                    <CatalogAddOnBadgeWidgetView position="absolute" className="bg-white/[0.05] rounded bottom-1 right-1" />
+                    <CatalogAddOnBadgeWidgetView position="absolute" className="bg-black/[0.03] rounded bottom-1 right-1" />
                     { ((petIndex > -1) && (petIndex <= 7)) &&
                         <button className="appearance-none border-0 absolute bottom-1 left-1 p-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" onClick={ event => setColorsShowing(!colorsShowing) }>
                             <FaFillDrip className="text-xs" />

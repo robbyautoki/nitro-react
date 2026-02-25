@@ -215,7 +215,7 @@ export const CatalogGiftView: FC<{}> = props =>
     return (
         <NitroCardView uniqueKey="catalog-gift" className="nitro-catalog-gift" theme="primary-slim">
             <NitroCardHeaderView headerText={ LocalizeText('catalog.gift_wrapping.title') } onCloseClick={ onClose } />
-            <NitroCardContentView className="text-white/90">
+            <NitroCardContentView className="text-black/85">
                 <FormGroup column>
                     <Text>{ LocalizeText('catalog.gift_wrapping.receiver') }</Text>
                     <Input type="text" className={ classNames('h-8 text-xs', receiverNotFound && 'border-red-500') } value={ receiverName } onChange={ (e) => onTextChanged(e) } />
@@ -275,7 +275,7 @@ export const CatalogGiftView: FC<{}> = props =>
                         { LocalizeText('catalog.gift_wrapping.pick_color') }
                     </Text>
                     <ButtonGroup fullWidth>
-                        { colors.map(color => <Button key={ color.id } size="icon" className={ `h-6 w-6 rounded-full border-2 ${ color.id === selectedColorId ? 'border-white/80 ring-2 ring-white/20' : 'border-transparent' }` } disabled={ !isColorable } style={ { backgroundColor: color.color } } onClick={ () => setSelectedColorId(color.id) } />) }
+                        { colors.map(color => <Button key={ color.id } size="icon" className={ `h-6 w-6 rounded-full border-2 ${ color.id === selectedColorId ? 'border-white/80 ring-2 ring-black/15' : 'border-transparent' }` } disabled={ !isColorable } style={ { backgroundColor: color.color } } onClick={ () => setSelectedColorId(color.id) } />) }
                     </ButtonGroup>
                 </Column>
                 <Flex justifyContent="between" alignItems="center">

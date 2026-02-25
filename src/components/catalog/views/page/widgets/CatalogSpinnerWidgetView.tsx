@@ -36,7 +36,7 @@ export const CatalogSpinnerWidgetView: FC<{}> = props =>
 
     return (
         <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-widest text-white/30 font-semibold flex-1">
+            <span className="text-[10px] uppercase tracking-widest text-black/30 font-semibold flex-1">
                 { LocalizeText('catalog.bundlewidget.spinner.select.amount') }
             </span>
             <div className="flex items-center gap-1">

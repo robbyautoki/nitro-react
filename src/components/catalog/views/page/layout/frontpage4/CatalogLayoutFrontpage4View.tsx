@@ -78,7 +78,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                         onSlideClick={ (index) => selectSlide(slides[index]) }
                     />
                 ) : (
-                    <div className="flex items-center justify-center h-full text-white/20 text-sm">
+                    <div className="flex items-center justify-center h-full text-black/15 text-sm">
                         { LocalizeText('catalog.frontpage.no_items') }
                     </div>
                 ) }
@@ -86,10 +86,10 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
 
             {/* ── Recently Purchased ──────────────────────────── */}
             { recentPurchases.length > 0 && (
-                <div className="shrink-0 border-t border-white/[0.06] px-4 py-2.5">
+                <div className="shrink-0 border-t border-black/[0.06] px-4 py-2.5">
                     <div className="flex items-center gap-2 mb-2">
-                        <FaShoppingBag className="text-[9px] text-white/25" />
-                        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/25">
+                        <FaShoppingBag className="text-[9px] text-black/20" />
+                        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-black/20">
                             { LocalizeText('catalog.frontpage.recent_purchases') }
                         </span>
                     </div>
@@ -97,7 +97,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                         { recentPurchases.map((item, i) => (
                             <button
                                 key={ i }
-                                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.07] hover:bg-white/[0.09] hover:border-white/[0.12] transition-colors shrink-0"
+                                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/[0.03] border border-black/[0.06] hover:bg-black/[0.05] hover:border-black/[0.08] transition-colors shrink-0"
                                 onClick={ () => item.offerId > 0 && openPageByOfferId(item.offerId) }
                             >
                                 { item.iconUrl &&
@@ -106,9 +106,9 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                                         style={ { backgroundImage: `url(${ item.iconUrl })` } }
                                     /> }
                                 <div className="flex flex-col items-start min-w-0">
-                                    <span className="text-[10px] text-white/70 truncate max-w-[90px]">{ item.name }</span>
+                                    <span className="text-[10px] text-black/60 truncate max-w-[90px]">{ item.name }</span>
                                     { item.priceCredits > 0 &&
-                                        <span className="text-[9px] text-amber-400/70">{ item.priceCredits } Credits</span> }
+                                        <span className="text-[9px] text-amber-600/70">{ item.priceCredits } Credits</span> }
                                 </div>
                             </button>
                         )) }
@@ -118,10 +118,10 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
 
             {/* ── Most Purchased ───────────────────────────── */}
             { frequentPurchases.length > 0 && (
-                <div className="shrink-0 border-t border-white/[0.06] px-4 py-2.5">
+                <div className="shrink-0 border-t border-black/[0.06] px-4 py-2.5">
                     <div className="flex items-center gap-2 mb-2">
                         <FaFire className="text-[9px] text-orange-400/60" />
-                        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/25">
+                        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-black/20">
                             Meist gekauft
                         </span>
                     </div>
@@ -129,7 +129,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                         { frequentPurchases.map((item, i) => (
                             <button
                                 key={ i }
-                                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.07] hover:bg-white/[0.09] hover:border-white/[0.12] transition-colors shrink-0"
+                                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-black/[0.03] border border-black/[0.06] hover:bg-black/[0.05] hover:border-black/[0.08] transition-colors shrink-0"
                                 onClick={ () => item.offerId > 0 && openPageByOfferId(item.offerId) }
                             >
                                 { item.iconUrl &&
@@ -138,7 +138,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                                         style={ { backgroundImage: `url(${ item.iconUrl })`, imageRendering: 'pixelated' } }
                                     /> }
                                 <div className="flex flex-col items-start min-w-0">
-                                    <span className="text-[10px] text-white/70 truncate max-w-[90px]">{ item.name }</span>
+                                    <span className="text-[10px] text-black/60 truncate max-w-[90px]">{ item.name }</span>
                                     <span className="text-[9px] text-orange-400/70">×{ item.count || 1 }</span>
                                 </div>
                             </button>
@@ -148,7 +148,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
             ) }
 
             {/* ── Voucher ─────────────────────────────────────── */}
-            <div className="shrink-0 border-t border-white/[0.06] px-4 py-2.5">
+            <div className="shrink-0 border-t border-black/[0.06] px-4 py-2.5">
                 <CatalogRedeemVoucherView text={ page.localization.getText(1) } />
             </div>
         </div>

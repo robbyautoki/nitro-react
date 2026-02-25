@@ -53,15 +53,15 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
         const diff = offerData.price - offerData.averagePrice;
         const percentage = Math.round((diff / offerData.averagePrice) * 100);
         
-        if(diff === 0) return { text: '±0%', className: 'text-white/40' };
-        if(diff < 0) return { text: `${percentage}%`, className: 'text-emerald-400 bg-emerald-400/10' };
-        return { text: `+${percentage}%`, className: 'text-rose-400 bg-rose-400/10' };
+        if(diff === 0) return { text: '±0%', className: 'text-black/40' };
+        if(diff < 0) return { text: `${percentage}%`, className: 'text-emerald-600 bg-emerald-500/10' };
+        return { text: `+${percentage}%`, className: 'text-rose-600 bg-rose-500/10' };
     }, [ offerData, type ]);
 
     return (
-        <div className="flex items-center gap-3 px-3 py-2 bg-[#0a0a0a] border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors group">
+        <div className="flex items-center gap-3 px-3 py-2 bg-white border-b border-black/[0.04] hover:bg-black/[0.02] transition-colors group">
             {/* Item Image */}
-            <div className="w-10 h-10 shrink-0 bg-white/[0.02] border border-white/[0.05] rounded overflow-hidden flex items-center justify-center">
+            <div className="w-10 h-10 shrink-0 bg-black/[0.02] border border-black/[0.05] rounded overflow-hidden flex items-center justify-center">
                 <div className="w-8 h-8 bg-center bg-no-repeat opacity-80 group-hover:opacity-100 transition-opacity"
                     style={ { backgroundImage: `url(${ GetImageIconUrlForProduct(((offerData.furniType === MarketplaceOfferData.TYPE_FLOOR) ? ProductTypeEnum.FLOOR : ProductTypeEnum.WALL), offerData.furniId, offerData.extraData) })` } } 
                 />
@@ -69,20 +69,20 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
 
             {/* Title & Info */}
             <div className="flex-1 min-w-0">
-                <div className="text-[11px] font-bold text-white/90 truncate uppercase tracking-wide">
+                <div className="text-[11px] font-bold text-black/85 truncate uppercase tracking-wide">
                     { getMarketplaceOfferTitle }
                 </div>
                 { (type === OWN_OFFER) && (
-                    <div className="text-[10px] text-white/40 mt-0.5 font-mono">
+                    <div className="text-[10px] text-black/40 mt-0.5 font-mono">
                         { offerTime() }
                     </div>
                 ) }
                 { (type === PUBLIC_OFFER) && (
-                    <div className="text-[10px] text-white/40 mt-0.5 font-mono flex items-center gap-2">
+                    <div className="text-[10px] text-black/40 mt-0.5 font-mono flex items-center gap-2">
                         <span>VOL: { offerData.offerCount }</span>
                         { offerData.averagePrice > 0 && (
                             <>
-                                <span className="text-white/20">|</span>
+                                <span className="text-black/15">|</span>
                                 <span>Ø { offerData.averagePrice }c</span>
                             </>
                         ) }
@@ -92,8 +92,8 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
 
             {/* Price Data */}
             <div className="flex flex-col items-end shrink-0 mr-4">
-                <div className="text-[14px] font-bold text-amber-400 font-mono tabular-nums leading-none">
-                    { offerData.price }<span className="text-[10px] text-amber-400/50 ml-0.5">c</span>
+                <div className="text-[14px] font-bold text-amber-600 font-mono tabular-nums leading-none">
+                    { offerData.price }<span className="text-[10px] text-amber-600/50 ml-0.5">c</span>
                 </div>
                 { priceDeltaInfo && (
                     <div className={ cn("text-[9px] font-bold px-1 rounded mt-1 font-mono", priceDeltaInfo.className) }>
@@ -106,7 +106,7 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
             <div className="shrink-0">
                 { ((type === OWN_OFFER) && (offerData.status !== MarketPlaceOfferState.SOLD)) &&
                     <button 
-                        className="h-7 px-3 bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 rounded text-[10px] font-bold text-white/80 uppercase tracking-wider transition-colors"
+                        className="h-7 px-3 bg-black/[0.03] hover:bg-black/[0.06] border border-black/8 rounded text-[10px] font-bold text-black/60 uppercase tracking-wider transition-colors"
                         onClick={ () => onClick(offerData) }
                     >
                         { LocalizeText('catalog.marketplace.offer.pick') }
@@ -114,7 +114,7 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
                 }
                 { type === PUBLIC_OFFER &&
                     <button 
-                        className="h-8 px-4 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 rounded text-[11px] font-bold text-emerald-400 uppercase tracking-wider transition-colors"
+                        className="h-8 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded text-[11px] font-bold text-emerald-600 uppercase tracking-wider transition-colors"
                         onClick={ () => onClick(offerData) }
                     >
                         { LocalizeText('buy') }

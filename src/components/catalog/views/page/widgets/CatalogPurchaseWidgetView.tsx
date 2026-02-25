@@ -286,7 +286,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                         <Button
                             variant="ghost"
                             size="sm"
-                            className="flex-1 text-[10px] px-1 text-emerald-400 bg-emerald-500/10"
+                            className="flex-1 text-[10px] px-1 text-emerald-600 bg-emerald-500/10"
                             onClick={ () => setPurchaseOptions(prev => ({ ...prev, multiSelectMode: false })) }
                         >
                             ✓ Auswahl
@@ -294,7 +294,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                     <Button
                         variant="ghost"
                         size="sm"
-                        className={ 'flex-1 text-[10px] px-1 ' + (catalogPlaceMultipleObjects ? 'text-blue-400 bg-blue-500/10' : 'text-white/40 hover:text-white/70') }
+                        className={ 'flex-1 text-[10px] px-1 ' + (catalogPlaceMultipleObjects ? 'text-blue-600 bg-blue-500/10' : 'text-black/40 hover:text-black/60') }
                         onClick={ () => {
                             const newVal = !catalogPlaceMultipleObjects;
                             setCatalogPlaceMultipleObjects(newVal);
@@ -316,7 +316,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="shrink-0 text-[10px] text-white/40 hover:text-white/70 px-2"
+                        className="shrink-0 text-[10px] text-black/40 hover:text-black/60 px-2"
                         disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
                         onClick={ () => purchase(true) }
                     >
@@ -325,7 +325,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                 <Button
                     variant="ghost"
                     size="sm"
-                    className={ 'flex-1 text-[10px] px-1 ' + (catalogPlaceMultipleObjects ? 'text-blue-400 bg-blue-500/10' : 'text-white/40 hover:text-white/70') }
+                    className={ 'flex-1 text-[10px] px-1 ' + (catalogPlaceMultipleObjects ? 'text-blue-600 bg-blue-500/10' : 'text-black/40 hover:text-black/60') }
                     onClick={ () => {
                         const newVal = !catalogPlaceMultipleObjects;
                         setCatalogPlaceMultipleObjects(newVal);
@@ -335,7 +335,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                     Platzieren
                 </Button>
             </div>
-            <p className="text-[10px] text-white/30 text-center mt-1">⌘/Strg + Klick = Mehrfachauswahl</p>
+            <p className="text-[10px] text-black/30 text-center mt-1">⌘/Strg + Klick = Mehrfachauswahl</p>
         </div>
     );
 }

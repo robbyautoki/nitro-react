@@ -37,37 +37,37 @@ export const CatalogLayoutPets3View: FC<CatalogLayoutProps> = props =>
 
                 {/* Hero: Image + Title */}
                 { (teaserImage || title) &&
-                    <div className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+                    <div className="flex items-center gap-3 p-3.5 rounded-xl bg-black/[0.03] border border-black/[0.06]">
                         { teaserImage &&
                             <img src={ teaserImage } alt="" className="w-16 h-16 object-contain shrink-0 rounded-lg" /> }
                         { title &&
-                            <div className="catalog-page-text text-sm font-bold text-white/90" dangerouslySetInnerHTML={ { __html: title } } /> }
+                            <div className="catalog-page-text text-sm font-bold text-black/85" dangerouslySetInnerHTML={ { __html: title } } /> }
                     </div> }
 
                 {/* Intro text */}
                 { intro &&
-                    <div className="catalog-page-text text-[11px] text-white/40 leading-relaxed px-0.5" dangerouslySetInnerHTML={ { __html: intro } } /> }
+                    <div className="catalog-page-text text-[11px] text-black/40 leading-relaxed px-0.5" dangerouslySetInnerHTML={ { __html: intro } } /> }
 
                 {/* Content blocks (numbered steps or paragraphs) */}
                 { blocks.length > 0
                     ? <div className="flex flex-col gap-2">
                         { blocks.map((block, i) =>
-                            <div key={ i } className={ `flex gap-3 rounded-lg ${ block.number ? 'p-3 bg-white/[0.03] border border-white/[0.06]' : 'px-0.5' }` }>
+                            <div key={ i } className={ `flex gap-3 rounded-lg ${ block.number ? 'p-3 bg-black/[0.02] border border-black/[0.06]' : 'px-0.5' }` }>
                                 { block.number &&
                                     <span className="text-lg font-bold text-sky-400/40 shrink-0 w-5 text-right leading-tight mt-px">
                                         { block.number }
                                     </span> }
-                                <div className="catalog-page-text text-[11px] text-white/60 leading-relaxed flex-1 min-w-0" dangerouslySetInnerHTML={ { __html: block.html } } />
+                                <div className="catalog-page-text text-[11px] text-black/50 leading-relaxed flex-1 min-w-0" dangerouslySetInnerHTML={ { __html: block.html } } />
                             </div>
                         ) }
                     </div>
                     : content
-                        ? <div className="catalog-page-text text-[11px] text-white/60 leading-relaxed" dangerouslySetInnerHTML={ { __html: content } } />
+                        ? <div className="catalog-page-text text-[11px] text-black/50 leading-relaxed" dangerouslySetInnerHTML={ { __html: content } } />
                         : null }
 
                 {/* Footer hint */}
                 { footer &&
-                    <div className="catalog-page-text text-[10px] text-white/25 italic mt-1 px-0.5" dangerouslySetInnerHTML={ { __html: footer } } /> }
+                    <div className="catalog-page-text text-[10px] text-black/20 italic mt-1 px-0.5" dangerouslySetInnerHTML={ { __html: footer } } /> }
 
             </div>
         </div>

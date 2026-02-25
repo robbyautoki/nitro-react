@@ -1,3 +1,90 @@
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
+index 5731eba..5a4ac81 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
+@@ -5,6 +5,7 @@ import { RoomEnterEffect, RoomId, RoomObjectUpdateMessage } from '../../room';
+ import { BotPlaceComposer, FurnitureColorWheelComposer, FurnitureDiceActivateComposer, FurnitureDiceDeactivateComposer, FurnitureFloorUpdateComposer, FurnitureGroupInfoComposer, FurnitureMultiStateComposer, FurnitureOneWayDoorComposer, FurniturePickupComposer, FurniturePlaceComposer, FurniturePostItPlaceComposer, FurnitureRandomStateComposer, FurnitureWallMultiStateComposer, FurnitureWallUpdateComposer, GetItemDataComposer, GetResolutionAchievementsMessageComposer, PetMoveComposer, PetPlaceComposer, RemoveWallItemComposer, RoomUnitLookComposer, RoomUnitWalkComposer, SetItemDataMessageComposer, SetObjectDataMessageComposer } from '../communication';
+ import { Nitro } from '../Nitro';
+ import { ObjectAvatarSelectedMessage, ObjectDataUpdateMessage, ObjectSelectedMessage, ObjectTileCursorUpdateMessage, ObjectVisibilityUpdateMessage } from './messages';
++import { MovingObjectLogic } from './object/logic/MovingObjectLogic';
+ import { SelectedRoomObjectData } from './utils';
+ 
+ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMouseListener, IRoomObjectEventManager
+@@ -1057,6 +1058,15 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
+ 
+         if(!session || session.isSpectator) return;
+ 
++        if((globalThis as any).__wiredTileSelectionActive)
++        {
++            if(typeof (globalThis as any).__wiredTileDispatch === 'function')
++            {
++                (globalThis as any).__wiredTileDispatch(event.tileXAsInt, event.tileYAsInt);
++            }
++            return;
++        }
++
+         this.sendWalkUpdate(event.tileXAsInt, event.tileYAsInt);
+     }
+ 
+@@ -1487,6 +1497,58 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
+         if(!this._roomEngine || !this._roomEngine.connection) return;
+ 
+         this._roomEngine.connection.send(new RoomUnitWalkComposer(x, y));
++
++        // CSP: Predict first step immediately for own avatar
++        this.predictOwnAvatarFirstStep(x, y);
++    }
++
++    private predictOwnAvatarFirstStep(targetX: number, targetY: number): void
++    {
++        const roomId = this._roomEngine.activeRoomId;
++        if(roomId < 0) return;
++
++        const session = this._roomEngine.roomSessionManager && this._roomEngine.roomSessionManager.getSession(roomId);
++        if(!session) return;
++
++        const ownObjectId = session.ownRoomIndex;
++        if(ownObjectId < 0) return;
++
++        const ownObject = this._roomEngine.getRoomObject(roomId, ownObjectId, RoomObjectCategory.UNIT);
++        if(!ownObject || !ownObject.logic) return;
++
++        const logic = ownObject.logic as unknown as MovingObjectLogic;
++        if(!logic.startPredictedMove) return;
++
++        // CSP v8: Use current tile position (prediction only from standstill)
++        const currentLoc = ownObject.getLocation();
++        const currentTileX = Math.round(currentLoc.x);
++        const currentTileY = Math.round(currentLoc.y);
++
++        const dx = targetX - currentTileX;
++        const dy = targetY - currentTileY;
++
++        if(dx === 0 && dy === 0) return;
++
++        let stepX: number;
++        let stepY: number;
++
++        if(Math.abs(dx) <= 1 && Math.abs(dy) <= 1)
++        {
++            stepX = targetX;
++            stepY = targetY;
++        }
++        else
++        {
++            stepX = currentTileX + Math.sign(dx);
++            stepY = currentTileY + Math.sign(dy);
++        }
++
++        const heightMap = this._roomEngine.getFurnitureStackingHeightMap(roomId);
++        const stepZ = heightMap ? heightMap.getTileHeight(stepX, stepY) : currentLoc.z;
++
++        if(stepZ < 0) return;
++
++        logic.startPredictedMove(stepX, stepY, stepZ);
+     }
+ 
+     private handleMouseOverObject(category: number, roomId: number, event: RoomObjectMouseEvent): ObjectTileCursorUpdateMessage
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts
 index 671cf7f..a14673f 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts

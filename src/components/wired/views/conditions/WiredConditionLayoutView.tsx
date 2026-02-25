@@ -15,6 +15,18 @@ import { WiredConditionFurniMatchesSnapshotView } from './WiredConditionFurniMat
 import { WiredConditionTimeElapsedLessView } from './WiredConditionTimeElapsedLessView';
 import { WiredConditionTimeElapsedMoreView } from './WiredConditionTimeElapsedMoreView';
 import { WiredConditionUserCountInRoomView } from './WiredConditionUserCountInRoomView';
+import { WiredSelectorAreaView } from './WiredSelectorAreaView';
+import { WiredSelectorFurniPickerView } from './WiredSelectorFurniPickerView';
+import { WiredSelectorNoConfigView } from './WiredSelectorNoConfigView';
+import { WiredSelectorTeamView } from './WiredSelectorTeamView';
+import { WiredSelectorByActionView } from './WiredSelectorByActionView';
+import { WiredSelectorByNameView } from './WiredSelectorByNameView';
+import { WiredSelectorHanditemView } from './WiredSelectorHanditemView';
+import { WiredSelectorGroupView } from './WiredSelectorGroupView';
+import { WiredSelectorAltitudeView } from './WiredSelectorAltitudeView';
+import { WiredSelectorWithVarView } from './WiredSelectorWithVarView';
+import { WiredFilterAmountView } from './WiredFilterAmountView';
+import { WiredFilterByVarView } from './WiredFilterByVarView';
 
 export const WiredConditionLayoutView = (code: number) =>
 {
@@ -61,6 +73,54 @@ export const WiredConditionLayoutView = (code: number) =>
             return <WiredConditionUserCountInRoomView />;
         case WiredConditionlayout.RANDOM_CHANCE:
             return <WiredConditionRandomChanceView />;
+        case WiredConditionlayout.SELECTOR_FURNI_AREA:
+            return <WiredSelectorAreaView title="Furni Area" />;
+        case WiredConditionlayout.SELECTOR_FURNI_NEIGHBORHOOD:
+            return <WiredSelectorAreaView title="Furni Neighborhood" />;
+        case WiredConditionlayout.SELECTOR_FURNI_BY_TYPE:
+            return <WiredSelectorFurniPickerView title="Furni By Type" />;
+        case WiredConditionlayout.SELECTOR_FURNI_ON_FURNI:
+            return <WiredSelectorFurniPickerView title="Furni On Furni" />;
+        case WiredConditionlayout.SELECTOR_FURNI_PICKS:
+            return <WiredSelectorFurniPickerView title="Furni Picks" />;
+        case WiredConditionlayout.SELECTOR_FURNI_SIGNAL:
+            return <WiredSelectorNoConfigView />;
+        case WiredConditionlayout.SELECTOR_FURNI_ALTITUDE:
+            return <WiredSelectorAltitudeView />;
+        case WiredConditionlayout.SELECTOR_FURNI_WITH_VAR:
+            return <WiredSelectorWithVarView />;
+        case WiredConditionlayout.SELECTOR_USERS_AREA:
+            return <WiredSelectorAreaView title="Users Area" />;
+        case WiredConditionlayout.SELECTOR_USERS_NEIGHBORHOOD:
+            return <WiredSelectorAreaView title="Users Neighborhood" />;
+        case WiredConditionlayout.SELECTOR_USERS_SIGNAL:
+            return <WiredSelectorNoConfigView />;
+        case WiredConditionlayout.SELECTOR_USERS_BY_TYPE:
+            return <WiredSelectorNoConfigView />;
+        case WiredConditionlayout.SELECTOR_USERS_IN_TEAM:
+            return <WiredSelectorTeamView />;
+        case WiredConditionlayout.SELECTOR_USERS_BY_ACTION:
+            return <WiredSelectorByActionView />;
+        case WiredConditionlayout.SELECTOR_USERS_BY_NAME:
+            return <WiredSelectorByNameView />;
+        case WiredConditionlayout.SELECTOR_USERS_ON_FURNI:
+            return <WiredSelectorFurniPickerView title="Users On Furni" />;
+        case WiredConditionlayout.SELECTOR_USERS_HANDITEM:
+            return <WiredSelectorHanditemView />;
+        case WiredConditionlayout.SELECTOR_USERS_IN_GROUP:
+            return <WiredSelectorGroupView />;
+        case WiredConditionlayout.SELECTOR_USERS_WITH_VAR:
+            return <WiredSelectorWithVarView />;
+        case WiredConditionlayout.SELECTOR_REMOTE:
+            return <WiredSelectorNoConfigView />;
+        case WiredConditionlayout.FILTER_USERS:
+            return <WiredFilterAmountView title="Filter Users" />;
+        case WiredConditionlayout.FILTER_FURNI:
+            return <WiredFilterAmountView title="Filter Furni" />;
+        case WiredConditionlayout.FILTER_USERS_VAR:
+            return <WiredFilterByVarView title="Filter Users by Variable" />;
+        case WiredConditionlayout.FILTER_FURNI_VAR:
+            return <WiredFilterByVarView title="Filter Furni by Variable" />;
     }
 
     return null;

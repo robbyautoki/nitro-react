@@ -58,7 +58,7 @@ export const GroupTabCreatorConfirmationView: FC<GroupTabCreatorConfirmationView
                     </Column>
                     <Text overflow="auto">{ LocalizeText('group.create.confirm.info') }</Text>
                 </Column>
-                <Text center variant="white" className="bg-primary rounded p-1">
+                <Text center variant="white" className="bg-sky-500/20 rounded p-1">
                     { LocalizeText('group.create.confirm.buyinfo', [ 'amount' ], [ purchaseCost.toString() ]) }
                 </Text>
             </Column>

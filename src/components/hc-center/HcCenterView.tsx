@@ -152,7 +152,7 @@ export const HcCenterView: FC<{}> = props =>
                 { GetConfiguration('hc.center')['payday.info'] &&
                     <Flex alignItems="center">
 
-                        <Column className="rounded-start bg-primary p-2 payday-special mb-1">
+                        <Column className="rounded-start bg-sky-500/20 p-2 payday-special mb-1">
                             <h4 className="mb-1">{ LocalizeText('hccenter.special.title') }</h4>
                             <div>{ LocalizeText('hccenter.special.info') }</div>
                             <div className="btn btn-link text-white p-0 mt-auto self-baseline" onClick={ () => CreateLinkEvent('habbopages/' + GetConfiguration('hc.center')['payday.habbopage']) }>{ LocalizeText('hccenter.special.infolink') }</div>

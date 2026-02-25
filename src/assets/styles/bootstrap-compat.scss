@@ -214,17 +214,9 @@
 }
 
 // ─── Utility classes still referenced ─────────────────────────────────────────
-.text-primary {
-    color: rgba(56, 189, 248, 0.80);
-}
-
-.bg-primary {
-    background-color: rgba(56, 189, 248, 0.20);
-}
-
-.bg-muted {
-    background-color: rgba(255, 255, 255, 0.06);
-}
+// NOTE: .text-primary, .bg-primary, .bg-muted REMOVED — they conflict with
+// Tailwind v4 utilities (unlayered CSS > @layer utilities specificity).
+// Use Tailwind classes directly instead.
 
 .small {
     font-size: 0.875em;

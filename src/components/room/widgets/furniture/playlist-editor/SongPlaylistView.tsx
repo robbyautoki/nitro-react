@@ -28,7 +28,7 @@ export const SongPlaylistView: FC<SongPlaylistViewProps> = props =>
     }
 
     return (<>
-        <div className="bg-primary py-3 container-fluid justify-center flex rounded">
+        <div className="bg-sky-500/20 py-3 container-fluid justify-center flex rounded">
             <img src={ GetConfiguration('image.library.url') + 'playlist/title_playlist.gif' } className="playlist-img" />
             <h2 className="ml-6">{ LocalizeText('playlist.editor.playlist') }</h2>
         </div>

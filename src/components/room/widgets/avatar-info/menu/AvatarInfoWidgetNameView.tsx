@@ -2,6 +2,7 @@ import { RoomObjectType } from '@nitrots/nitro-renderer';
 import { FC, useMemo } from 'react';
 import { AvatarInfoName, GetSessionDataManager } from '../../../../../api';
 import { getPrestigeFromBadges } from '../../../../../api/utils/PrestigeUtils';
+import { LayoutAvatarImageView } from '../../../../../common';
 import { useRoom } from '../../../../../hooks';
 import { ContextMenuView } from '../../context-menu/ContextMenuView';
 
@@ -38,15 +39,6 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
         return newClassNames;
     }, [ nameInfo ]);
 
-    const avatarHeadUrl = useMemo(() =>
-    {
-        if(!nameInfo.figure || nameInfo.userType !== RoomObjectType.USER) return '';
-
-        const fig = nameInfo.figure.replace(/ /g, '.');
-
-        return `https://www.habbo.com/habbo-imaging/avatarimage?figure=${ encodeURIComponent(fig) }&headonly=1&direction=3&head_direction=3&size=l&gesture=sml`;
-    }, [ nameInfo ]);
-
     const isUser = nameInfo.userType === RoomObjectType.USER;
 
     if(isUser && nameInfo.figure)
@@ -55,7 +47,7 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
             <ContextMenuView objectId={ nameInfo.roomIndex } category={ nameInfo.category } userType={ nameInfo.userType } fades={ (nameInfo.id !== GetSessionDataManager().userId) } classNames={ getClassNames } onClose={ onClose }>
                 <div className="nameplate-banner" style={{ backgroundImage: `url(${ DEFAULT_NAMEPLATE_URL })` }}>
                     <div className="nameplate-avatar">
-                        <img src={ avatarHeadUrl } alt="" className="nameplate-head" draggable={ false } />
+                        <LayoutAvatarImageView figure={ nameInfo.figure } headOnly={ true } direction={ 3 } className="nameplate-head" />
                         <img src={ DEFAULT_DECO_URL } alt="" className="nameplate-deco" draggable={ false } />
                     </div>
                     <div className="nameplate-info">

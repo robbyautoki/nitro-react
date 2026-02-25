@@ -1,5 +1,6 @@
 import { Dispose, DropBounce, EaseOut, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait } from '@nitrots/nitro-renderer';
-import { FC, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, MessengerIconState, OpenMessengerChat, VisitDesktop } from '../../api';
 import { LayoutAvatarImageView } from '../../common';
 import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useRoomEngineEvent, useSessionInfo } from '../../hooks';
@@ -84,6 +85,14 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   const { requests = [] } = useFriends();
   const { iconState = MessengerIconState.HIDDEN } = useMessenger();
   const isMod = GetSessionDataManager().isModerator;
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
+
+  const toggleTheme = useCallback(() => {
+    const next = !isDark;
+    document.documentElement.classList.toggle('dark', next);
+    localStorage.setItem('nitro.theme', next ? 'dark' : 'light');
+    setIsDark(next);
+  }, [isDark]);
 
   useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event => {
     const parser = event.getParser();
@@ -159,6 +168,12 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
           <div className="w-8 h-px bg-accent/50 my-1" />
 
           <OnlineFriendsPopover />
+
+          <div className="mt-auto" />
+          <div className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={toggleTheme}>
+            {isDark ? <Sun className="w-5 h-5 text-muted-foreground/60" /> : <Moon className="w-5 h-5 text-muted-foreground/60" />}
+            <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">{isDark ? 'Light' : 'Dark'}</span>
+          </div>
         </div>
 
       </div>

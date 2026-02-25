@@ -289,7 +289,7 @@ export const CatalogView: FC<{}> = props =>
         <>
             <DraggableWindow uniqueKey="catalog" windowPosition={ DraggableWindowPosition.CENTER }>
                 <div
-                    className="nitro-catalog relative flex flex-col rounded-2xl border border-black/[0.08] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] overflow-hidden"
+                    className="nitro-catalog relative flex flex-col rounded-2xl border border-border bg-card text-card-foreground shadow-[0_8px_40px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] overflow-hidden"
                     style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `${ catalogSize.height }px` } }
                 >
                     {/* Header */}

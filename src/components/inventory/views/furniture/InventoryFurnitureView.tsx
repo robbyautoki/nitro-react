@@ -387,7 +387,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                                 </div>
                                 { durabilityInfo &&
                                     <div className="inv-durability">
-                                        <FaWrench className="inv-durability-icon" style={{ color: durabilityInfo.remaining < 30 ? '#ef4444' : 'rgba(0,0,0,0.25)' }} />
+                                        <FaWrench className="inv-durability-icon" style={{ color: durabilityInfo.remaining < 30 ? '#ef4444' : 'rgba(var(--inv-fg-rgb, 0,0,0),0.25)' }} />
                                         <div className="inv-durability-bar">
                                             <div className="inv-durability-fill" style={{
                                                 width: `${ durabilityInfo.remaining }%`,

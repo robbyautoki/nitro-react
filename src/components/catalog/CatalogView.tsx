@@ -14,6 +14,7 @@ import { CatalogNavigationView } from './views/navigation/CatalogNavigationView'
 import { CatalogSubcategoryChipsView } from './views/navigation/CatalogSubcategoryChipsView';
 import { CatalogSearchView } from './views/page/common/CatalogSearchView';
 import { GetCatalogLayout } from './views/page/layout/GetCatalogLayout';
+import { CatalogLayoutFrontpage4View } from './views/page/layout/frontpage4/CatalogLayoutFrontpage4View';
 import { CatalogVirtualGridView } from './views/page/layout/CatalogVirtualGridView';
 import { MarketplacePostOfferView } from './views/page/layout/marketplace/MarketplacePostOfferView';
 
@@ -401,7 +402,9 @@ export const CatalogView: FC<{}> = props =>
                                 <div className="flex-1 min-w-0 min-h-0 overflow-hidden">
                                     { virtualPage
                                         ? <CatalogVirtualGridView type={ virtualPage } />
-                                        : GetCatalogLayout(currentPage, () => setNavigationHidden(true))
+                                        : currentPage
+                                            ? GetCatalogLayout(currentPage, () => setNavigationHidden(true))
+                                            : <CatalogLayoutFrontpage4View page={ null } hideNavigation={ () => {} } />
                                     }
                                 </div>
 

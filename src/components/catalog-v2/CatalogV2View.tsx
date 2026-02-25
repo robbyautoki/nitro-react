@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   ChevronRight,
@@ -64,8 +64,6 @@ import {
   Layers,
   Play,
   Type,
-  Sun,
-  Moon,
   RotateCw,
   ZoomIn,
   Box,
@@ -1880,7 +1878,6 @@ export const CatalogV2View: FC<{}> = () => {
   const [openSections, setOpenSections] = useState<Set<number>>(new Set());
   const [stats, setStats] = useState<CatalogStats | null>(null);
   const [interactionFilter, setInteractionFilter] = useState<string | null>(null);
-  const [darkMode, setDarkMode] = useState(true);
   const [staffMode, setStaffMode] = useState(false);
   const [contentView, setContentView] = useState<"catalog" | "recent" | "popular">("catalog");
   const [recentPurchases, setRecentPurchases] = useState<RecentPurchase[]>([]);
@@ -2058,9 +2055,9 @@ export const CatalogV2View: FC<{}> = () => {
         </div>
 
         {/* Catalog Window */}
-        <div className={`rounded-2xl border shadow-lg overflow-hidden transition-colors duration-300 ${darkMode ? "border-white/[0.09] bg-[#0a0a0e] text-white" : "border-border/60 bg-white text-foreground"}`}>
+        <div className="rounded-2xl border border-border shadow-lg overflow-hidden transition-colors duration-300 bg-card text-card-foreground">
           {/* Header */}
-          <div className={`flex items-center gap-3 px-4 h-12 border-b ${darkMode ? "border-white/[0.06] bg-white/[0.02]" : "border-border/40 bg-muted/30"}`}>
+          <div className="flex items-center gap-3 px-4 h-12 border-b border-border bg-muted/30">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setSidebarOpen((v) => !v)}>
@@ -2138,20 +2135,13 @@ export const CatalogV2View: FC<{}> = () => {
               </Button>
             </TooltipTrigger><TooltipContent side="bottom">{staffMode ? "Normal-Katalog" : "Staff-Katalog"}</TooltipContent></Tooltip>
 
-            <Separator orientation="vertical" className="h-5" />
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              <Sun className={`w-3.5 h-3.5 transition-colors ${!darkMode ? "text-amber-500" : "text-muted-foreground/30"}`} />
-              <Switch checked={darkMode} onCheckedChange={setDarkMode} className="scale-75" />
-              <Moon className={`w-3.5 h-3.5 transition-colors ${darkMode ? "text-blue-400" : "text-muted-foreground/30"}`} />
-            </div>
           </div>
 
           {/* Body */}
           <div className="flex overflow-hidden" style={{ height: "calc(100vh - 260px)", minHeight: "400px" }}>
             {/* Sidebar */}
             {sidebarOpen && (
-              <div className={`w-[260px] min-w-[260px] border-r flex flex-col min-h-0 ${darkMode ? "border-white/[0.06] bg-white/[0.02]" : "border-border/40 bg-muted/5"}`}>
+              <div className="w-[260px] min-w-[260px] border-r border-border bg-muted/5 flex flex-col min-h-0">
                 {/* Staff mode indicator */}
                 {staffMode && (
                   <div className="shrink-0 px-3 py-2 border-b border-amber-400/20 bg-amber-500/5">

@@ -1,11 +1,11 @@
 import { RoomDataParser } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent } from 'react';
-import { FaLock, FaKey, FaEyeSlash, FaThumbtack } from 'react-icons/fa';
+import { Crown, MessageCircle, Star, Users } from 'lucide-react';
 import { CreateRoomSession, DoorStateType, GetSessionDataManager, TryVisitRoom } from '../../../../api';
-import { LayoutRoomThumbnailView } from '../../../../common';
+import { LayoutBadgeImageView, LayoutRoomThumbnailView } from '../../../../common';
 import { useNavigator } from '../../../../hooks';
+import { Badge } from '@/components/ui/reui-badge';
 import { cn } from '@/lib/utils';
-import { NavigatorSearchResultItemInfoView } from './NavigatorSearchResultItemInfoView';
 
 export interface NavigatorSearchResultItemViewProps
 {
@@ -13,38 +13,55 @@ export interface NavigatorSearchResultItemViewProps
     isPinned?: boolean;
 }
 
+function ActivityBar({ roomId, userCount }: { roomId: number; userCount: number })
+{
+    const activity = userCount <= 0 ? 0 : Math.min(100, userCount * 8 + Math.floor(roomId * 7.3) % 30);
+    let barColor = 'bg-emerald-500';
+    if(activity >= 80) barColor = 'bg-red-500';
+    else if(activity >= 45) barColor = 'bg-amber-500';
+    else if(userCount <= 0) barColor = 'bg-muted-foreground/20';
+
+    return (
+        <div className="flex items-center gap-1.5 w-full">
+            <MessageCircle className="w-3 h-3 text-muted-foreground/30 shrink-0" />
+            <div className="flex-1 h-1.5 rounded-full bg-muted/50 overflow-hidden">
+                <div className={ `h-full rounded-full transition-all ${ barColor }` } style={ { width: `${ Math.max(activity, 2) }%` } } />
+            </div>
+        </div>
+    );
+}
+
+function UserCountBadge({ userCount, maxUsers }: { userCount: number; maxUsers: number })
+{
+    const pct = maxUsers > 0 ? (userCount / maxUsers) * 100 : 0;
+    const label = `${ userCount }/${ maxUsers }`;
+
+    if(userCount <= 0)
+        return <Badge variant="outline" size="xs" className="gap-1 tabular-nums"><Users className="w-3 h-3" />{ label }</Badge>;
+    if(pct >= 90)
+        return <Badge variant="destructive-light" size="xs" className="gap-1 tabular-nums"><span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /><Users className="w-3 h-3" />{ label }</Badge>;
+    if(pct >= 50)
+        return <Badge variant="warning-light" size="xs" className="gap-1 tabular-nums"><Users className="w-3 h-3" />{ label }</Badge>;
+
+    return <Badge variant="success-light" size="xs" className="gap-1 tabular-nums"><Users className="w-3 h-3" />{ label }</Badge>;
+}
+
+function getDoorIconSrc(doorMode: number): string | null
+{
+    if(doorMode === RoomDataParser.DOORBELL_STATE) return '/navigator/icons/room_locked.png';
+    if(doorMode === RoomDataParser.PASSWORD_STATE) return '/navigator/icons/room_password.png';
+    if(doorMode === RoomDataParser.INVISIBLE_STATE) return '/navigator/icons/room_invisible.png';
+    return null;
+}
+
 export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProps> = props =>
 {
     const { roomData = null, isPinned = false } = props;
     const { setDoorData = null } = useNavigator();
 
-    const getUserCountBadge = () =>
-    {
-        const pct = 100 * (roomData.userCount / roomData.maxUserCount);
-        const count = `${ roomData.userCount }/${ roomData.maxUserCount }`;
-
-        if(roomData.userCount <= 0)
-            return <span className="text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-white/5 text-zinc-500">{ count }</span>;
-        if(pct >= 92)
-            return <span className="inline-flex items-center text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-400 font-medium shadow-[0_0_8px_rgba(239,68,68,0.2)]"><span className="inline-block w-1.5 h-1.5 rounded-full bg-red-400 mr-1 animate-pulse" />{ count }</span>;
-        if(pct >= 50)
-            return <span className="inline-flex items-center text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-medium shadow-[0_0_8px_rgba(245,158,11,0.2)]"><span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 mr-1" />{ count }</span>;
-
-        return <span className="inline-flex items-center text-[10px] tabular-nums px-1.5 py-0.5 rounded-full bg-green-500/10 text-green-400 font-medium shadow-[0_0_8px_rgba(34,197,94,0.2)]"><span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 mr-1" />{ count }</span>;
-    }
-
     const isEmpty = roomData.userCount <= 0;
-
-    const getHashIcon = (): React.ReactNode =>
-    {
-        if(isPinned) return <FaThumbtack className="size-2 text-white drop-shadow-sm" />;
-
-        if(roomData.doorMode === RoomDataParser.DOORBELL_STATE) return <FaLock className="size-2 text-white drop-shadow-sm" />;
-        if(roomData.doorMode === RoomDataParser.PASSWORD_STATE) return <FaKey className="size-2 text-white drop-shadow-sm" />;
-        if(roomData.doorMode === RoomDataParser.INVISIBLE_STATE) return <FaEyeSlash className="size-2 text-white drop-shadow-sm" />;
-
-        return null;
-    }
+    const isMine = roomData.ownerId === GetSessionDataManager().userId;
+    const doorIconSrc = getDoorIconSrc(roomData.doorMode);
 
     const visitRoom = (event: MouseEvent) =>
     {
@@ -53,7 +70,6 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
             if(roomData.habboGroupId !== 0)
             {
                 TryVisitRoom(roomData.roomId);
-
                 return;
             }
 
@@ -63,10 +79,8 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
                     setDoorData(prevValue =>
                     {
                         const newValue = { ...prevValue };
-
                         newValue.roomInfo = roomData;
                         newValue.state = DoorStateType.START_DOORBELL;
-
                         return newValue;
                     });
                     return;
@@ -74,10 +88,8 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
                     setDoorData(prevValue =>
                     {
                         const newValue = { ...prevValue };
-
                         newValue.roomInfo = roomData;
                         newValue.state = DoorStateType.START_PASSWORD;
-
                         return newValue;
                     });
                     return;
@@ -87,46 +99,66 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
         CreateRoomSession(roomData.roomId);
     }
 
-    const hashIcon = getHashIcon();
-
     return (
         <div
             className={ cn(
-                'group/room flex items-center gap-3 px-3 py-1.5 cursor-pointer transition-colors duration-150',
-                'hover:bg-white/[0.04]',
+                'flex gap-3 p-2.5 rounded-lg cursor-pointer transition-all hover:bg-accent/50',
                 isEmpty && 'opacity-40 hover:opacity-60'
             ) }
             onClick={ visitRoom }
         >
-            { /* Thumbnail — compact left */ }
+            {/* Thumbnail — 80x80 like v2 prototype */}
             <LayoutRoomThumbnailView
                 roomId={ roomData.roomId }
                 customUrl={ roomData.officialRoomPicRef }
-                className="shrink-0 !w-[48px] !h-[36px] !rounded-[4px] overflow-hidden"
+                className="shrink-0 !w-[80px] !h-[80px] !rounded-lg overflow-hidden relative"
             >
-                { hashIcon && (
-                    <div className="absolute bottom-0 right-0 p-px bg-black/50 backdrop-blur-sm rounded-tl-sm">
-                        { hashIcon }
+                { roomData.habboGroupId > 0 && (
+                    <div className="absolute top-0 left-0 p-0.5">
+                        <LayoutBadgeImageView badgeCode={ roomData.groupBadgeCode } isGroup={ true } className="!w-[13px] !h-[11px]" />
+                    </div>
+                ) }
+                { doorIconSrc && (
+                    <div className="absolute bottom-0 right-0 p-0.5 bg-black/50 backdrop-blur-sm rounded-tl-sm">
+                        <img src={ doorIconSrc } alt="" className="w-[13px] h-[16px]" style={ { imageRendering: 'pixelated' } } />
                     </div>
                 ) }
             </LayoutRoomThumbnailView>
 
-            { /* Info — center */ }
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <p className="text-[12px] font-medium text-white/85 truncate leading-tight">
-                    { roomData.roomName }
-                </p>
-                <span className="text-[10px] text-white/30 truncate">{ roomData.ownerName }</span>
-            </div>
+            {/* Info — v2 prototype RoomCard layout */}
+            <div className="flex-1 min-w-0 flex flex-col gap-1 py-0.5">
+                {/* Name + Count */}
+                <div className="flex items-start justify-between gap-2">
+                    <span className="text-[13px] font-semibold truncate leading-tight">{ roomData.roomName }</span>
+                    <UserCountBadge userCount={ roomData.userCount } maxUsers={ roomData.maxUserCount } />
+                </div>
 
-            { /* User count — right */ }
-            <div className="shrink-0 ml-auto pl-2">
-                { getUserCountBadge() }
-            </div>
+                {/* Activity bar */}
+                <ActivityBar roomId={ roomData.roomId } userCount={ roomData.userCount } />
 
-            { /* Info popover — on hover */ }
-            <div className="opacity-0 group-hover/room:opacity-100 transition-opacity">
-                <NavigatorSearchResultItemInfoView roomData={ roomData } />
+                {/* Owner row */}
+                <div className="flex items-center gap-1.5">
+                    <img
+                        src={ `https://www.habbo.de/habbo-imaging/avatarimage?figure=${ roomData.ownerName ? encodeURIComponent(roomData.ownerName) : '' }&headonly=1&size=s&direction=2&user=${ roomData.ownerName }` }
+                        alt=""
+                        className="w-6 h-6 shrink-0"
+                        style={ { imageRendering: 'pixelated' } }
+                        onError={ (e) => { (e.target as HTMLImageElement).style.display = 'none'; } }
+                    />
+                    <span className="text-[11px] text-muted-foreground/60 truncate">{ roomData.ownerName }</span>
+                    { isMine && <Crown className="w-3 h-3 text-amber-500 shrink-0" /> }
+                </div>
+
+                {/* Tags */}
+                { roomData.tags && roomData.tags.length > 0 && (
+                    <div className="flex items-center gap-1 flex-wrap">
+                        { roomData.tags.map((tag: string) => (
+                            <span key={ tag } className="text-[9px] px-1.5 py-px rounded-full bg-muted/50 text-muted-foreground/50 font-medium">
+                                { tag }
+                            </span>
+                        )) }
+                    </div>
+                ) }
             </div>
         </div>
     );

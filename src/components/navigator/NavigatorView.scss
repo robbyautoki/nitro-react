@@ -1,69 +1,12 @@
 // ── Navigator Drawer Inner Styles ─────────────────────────────────────────────
 .navigator-drawer {
-
-    .nav-stats {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 6px 14px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        flex-shrink: 0;
-    }
-
-    .nav-stats-dot {
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: #22c55e;
-        flex-shrink: 0;
-        animation: nav-pulse 2s ease-in-out infinite;
-    }
-
-    .nav-stats-num {
-        font-size: 11px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.65);
-        font-variant-numeric: tabular-nums;
-    }
-
-    .nav-stats-label {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.25);
-    }
-
-    .nav-stats-sep {
-        width: 1px;
-        height: 9px;
-        background: rgba(255, 255, 255, 0.08);
-        margin: 0 2px;
-    }
-
-    .nav-loading {
-        opacity: 0.4;
-        pointer-events: none;
-    }
-
-    .nav-group-items {
-        animation: nav-group-expand 0.15s ease-out;
-    }
-
     [data-radix-scroll-area-thumb] {
         background-color: rgba(255, 255, 255, 0.10);
         border-radius: 9999px;
     }
 }
 
-@keyframes nav-group-expand {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes nav-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
-// ── Navigator Sub-dialog Sizes ───────────────────────────
+// ── Navigator Sub-dialog Sizes ───────────────────────
 .nitro-navigator-doorbell,
 .nitro-navigator-password {
     width: 250px;

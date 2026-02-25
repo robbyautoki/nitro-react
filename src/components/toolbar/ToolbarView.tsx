@@ -10,12 +10,11 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// 1:1 from prototype SidebarItem — using CSS sprite icons instead of ToolbarIcon PNGs (same images)
 function SidebarItem({ iconClass, label, badge, onClick }: { iconClass: string; label: string; badge?: number; onClick?: () => void }) {
   return (
-    <div className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={onClick}>
+    <div className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors" onClick={onClick}>
       <div className={`icon ${iconClass} shrink-0`} style={{ maxWidth: 28, maxHeight: 28 }} />
-      <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">{label}</span>
+      <span className="text-[8px] font-medium text-white/30 leading-none">{label}</span>
       {badge != null && badge > 0 && (
         <span className="absolute top-0.5 right-0 h-[14px] min-w-[14px] flex items-center justify-center text-[8px] px-0.5 rounded-full bg-red-500 text-white font-bold shadow-sm">{badge}</span>
       )}
@@ -23,13 +22,11 @@ function SidebarItem({ iconClass, label, badge, onClick }: { iconClass: string; 
   );
 }
 
-// 1:1 from prototype OnlineFriendsPopover — real data from useFriends()
 function OnlineFriendsPopover() {
   const { onlineFriends = [], followFriend } = useFriends();
-
-  const displayFriends = onlineFriends.slice(0, 5);
   const miniAvatars = onlineFriends.slice(0, 3);
   const extraCount = Math.max(0, onlineFriends.length - 3);
+  const displayFriends = onlineFriends.slice(0, 5);
 
   if (onlineFriends.length === 0) return null;
 
@@ -38,46 +35,45 @@ function OnlineFriendsPopover() {
       <PopoverTrigger asChild>
         <div className="flex flex-col items-center gap-1 cursor-pointer">
           {miniAvatars.map((f) => (
-            <div key={f.id} className="relative w-7 h-7 rounded-full overflow-hidden bg-muted/30 hover:ring-2 hover:ring-primary/20 transition-all">
+            <div key={f.id} className="relative w-7 h-7 rounded-full overflow-hidden bg-white/[0.06] hover:ring-2 hover:ring-white/10 transition-all">
               <LayoutAvatarImageView figure={f.figure} headOnly={true} direction={2} className="!absolute -top-1" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-white" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-[#1a1a1f]" />
             </div>
           ))}
           {extraCount > 0 && (
-            <span className="text-[9px] font-bold text-muted-foreground/60 bg-muted/40 rounded-full px-1.5 py-0.5">+{extraCount}</span>
+            <span className="text-[9px] font-bold text-white/30 bg-white/[0.06] rounded-full px-1.5 py-0.5">+{extraCount}</span>
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" sideOffset={8} className="w-[280px] p-0">
-        <div className="px-4 pt-3 pb-2 border-b border-border/50">
+      <PopoverContent side="right" align="start" sideOffset={8} className="w-[280px] p-0 bg-[#1e1e24] border-white/[0.08] text-white">
+        <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold">Online-Freunde</span>
-            <Badge variant="outline" className="text-[10px] px-1 py-0">{onlineFriends.length}</Badge>
+            <span className="text-sm font-semibold text-white">Online-Freunde</span>
+            <Badge variant="outline" className="text-[10px] px-1 py-0 border-white/10 text-white/60">{onlineFriends.length}</Badge>
           </div>
         </div>
         <div className="p-2 space-y-0.5 max-h-[260px] overflow-y-auto">
           {displayFriends.map((f) => (
-            <div key={f.id} className="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-accent/40 transition-colors">
-              <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-muted/30">
+            <div key={f.id} className="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white/[0.04] transition-colors">
+              <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/[0.06]">
                 <LayoutAvatarImageView figure={f.figure} headOnly={true} direction={2} className="!absolute -top-1" />
-                <div className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-white" />
+                <div className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-[#1a1a1f]" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium truncate">{f.name}</p>
+                <p className="text-xs font-medium text-white truncate">{f.name}</p>
               </div>
-              <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 shrink-0" onClick={() => followFriend(f)}>Besuchen</Button>
+              <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 shrink-0 border-white/10 text-white/70 hover:bg-white/[0.06] hover:text-white" onClick={() => followFriend(f)}>Besuchen</Button>
             </div>
           ))}
         </div>
-        <div className="px-4 py-2 border-t border-border/50">
-          <button className="text-[11px] text-primary hover:underline" onClick={() => CreateLinkEvent('friends/toggle')}>Alle Freunde anzeigen</button>
+        <div className="px-4 py-2 border-t border-white/[0.06]">
+          <button className="text-[11px] text-white/50 hover:text-white hover:underline" onClick={() => CreateLinkEvent('friends/toggle')}>Alle Freunde anzeigen</button>
         </div>
       </PopoverContent>
     </Popover>
   );
 }
 
-// 1:1 from prototype LeftSidebar
 export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   const { isInRoom } = props;
   const [useGuideTool, setUseGuideTool] = useState(false);
@@ -122,20 +118,17 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
 
   return (
     <TooltipProvider delayDuration={200}>
-      {/* 1:1 prototype LeftSidebar wrapper */}
       <div className="nitro-toolbar fixed left-0 top-0 h-full z-[70] pointer-events-auto relative shrink-0">
-        <div className={`border-r border-border/40 bg-card/50 flex flex-col items-center py-3 gap-0.5 overflow-hidden transition-all duration-200 h-full ${sidebarOpen ? "w-16" : "w-0 border-r-0"}`}>
+        <div className={`border-r border-white/[0.06] bg-[#16161b]/80 backdrop-blur-xl flex flex-col items-center py-3 gap-0.5 overflow-hidden transition-all duration-200 h-full ${sidebarOpen ? "w-16" : "w-0 border-r-0"}`}>
 
-          {/* Avatar → Me-Menü Popover */}
           <ToolbarMeView
             useGuideTool={useGuideTool}
             unseenAchievementCount={getTotalUnseen}
             userFigure={userFigure}
           />
 
-          <div className="w-8 h-px bg-border/30 my-1" />
+          <div className="w-8 h-px bg-white/[0.06] my-1" />
 
-          {/* Nav Icons — 1:1 prototype NAV_ICONS */}
           {isInRoom
             ? <SidebarItem iconClass="icon-habbo" label="Hotel View" onClick={() => VisitDesktop()} />
             : <SidebarItem iconClass="icon-house" label="Home" onClick={() => CreateLinkEvent('navigator/goto/home')} />
@@ -150,26 +143,22 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
           {isMod &&
             <SidebarItem iconClass="icon-modtools" label="Mod Tools" onClick={() => CreateLinkEvent('mod-tools/toggle')} />}
 
-          <div className="w-8 h-px bg-border/30 my-1" />
+          <div className="w-8 h-px bg-white/[0.06] my-1" />
 
-          {/* Social Icons — 1:1 prototype SOCIAL_ICONS */}
           <SidebarItem iconClass="icon-friendall" label="Freunde" badge={requests.length} onClick={() => CreateLinkEvent('friends/toggle')} />
           {((iconState === MessengerIconState.SHOW) || (iconState === MessengerIconState.UNREAD)) &&
             <SidebarItem iconClass={`icon-message${iconState === MessengerIconState.UNREAD ? ' is-unseen' : ''}`} label="Messenger" onClick={() => OpenMessengerChat()} />}
 
-          <div className="w-8 h-px bg-border/30 my-1" />
+          <div className="w-8 h-px bg-white/[0.06] my-1" />
 
-          {/* Online Friends — 1:1 prototype */}
           <OnlineFriendsPopover />
         </div>
 
-        {/* Collapse toggle — 1:1 prototype */}
-        <button onClick={() => setSidebarOpen(v => !v)} className="absolute top-3 -right-3 z-20 size-6 rounded-full bg-card border border-border/50 shadow-sm flex items-center justify-center hover:bg-accent/50 transition-colors">
-          {sidebarOpen ? <ChevronLeft className="size-3 text-muted-foreground" /> : <ChevronRight className="size-3 text-muted-foreground" />}
+        <button onClick={() => setSidebarOpen(v => !v)} className="absolute top-3 -right-3 z-20 size-6 rounded-full bg-[#1e1e24] border border-white/[0.08] shadow-sm flex items-center justify-center hover:bg-white/[0.06] transition-colors">
+          {sidebarOpen ? <ChevronLeft className="size-3 text-white/40" /> : <ChevronRight className="size-3 text-white/40" />}
         </button>
       </div>
 
-      {/* Bottom center - Chat Input + Room Tools */}
       <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto flex items-end gap-2 w-[620px]">
         <div id="toolbar-chat-input-container" className="flex-1 min-w-0" />
         <div id="toolbar-room-tools-container" className="flex items-center shrink-0" />

@@ -3,8 +3,20 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { CreateLinkEvent, GetRoomSession } from '../../api';
 import { useMessageEvent } from '../../hooks';
 import { TextGif } from '../../components/ui/text-gif';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Headphones, Pause, Play, Volume2, VolumeX, Mic, X,
+  SkipForward, Repeat, Power, Music,
+} from 'lucide-react';
+import { LayoutAvatarImageView } from '../../common';
 
-/* YouTube IFrame API global types */
 declare global {
     interface Window {
         YT: any;
@@ -21,23 +33,18 @@ interface RadioTrack {
     duration: number;
 }
 
-const extractYoutubeId = (url: string): string | null =>
-{
-    if(url.includes('youtube.com/watch'))
-    {
+const extractYoutubeId = (url: string): string | null => {
+    if (url.includes('youtube.com/watch')) {
         const parts = url.split('v=');
-        if(parts.length > 1) return parts[1].split('&')[0];
-    }
-    else if(url.includes('youtu.be/'))
-    {
+        if (parts.length > 1) return parts[1].split('&')[0];
+    } else if (url.includes('youtu.be/')) {
         const parts = url.split('youtu.be/');
-        if(parts.length > 1) return parts[1].split('?')[0];
+        if (parts.length > 1) return parts[1].split('?')[0];
     }
     return null;
 };
 
-const parseQueue = (json: string): RadioTrack[] =>
-{
+const parseQueue = (json: string): RadioTrack[] => {
     try { return JSON.parse(json || '[]'); }
     catch { return []; }
 };
@@ -46,24 +53,15 @@ let ytApiLoading = false;
 let ytApiReady = false;
 const ytApiCallbacks: (() => void)[] = [];
 
-const ensureYTApi = (cb: () => void) =>
-{
-    if(ytApiReady && window.YT && window.YT.Player)
-    {
-        cb();
-        return;
-    }
-
+const ensureYTApi = (cb: () => void) => {
+    if (ytApiReady && window.YT && window.YT.Player) { cb(); return; }
     ytApiCallbacks.push(cb);
-
-    if(!ytApiLoading)
-    {
+    if (!ytApiLoading) {
         ytApiLoading = true;
         const prev = window.onYouTubeIframeAPIReady;
-        window.onYouTubeIframeAPIReady = () =>
-        {
+        window.onYouTubeIframeAPIReady = () => {
             ytApiReady = true;
-            if(prev) prev();
+            if (prev) prev();
             ytApiCallbacks.forEach(fn => fn());
             ytApiCallbacks.length = 0;
         };
@@ -73,24 +71,149 @@ const ensureYTApi = (cb: () => void) =>
     }
 };
 
-export const RadioPanelView: FC<{}> = () =>
-{
-    // ── Server State ──
-    const [ currentTrack, setCurrentTrack ] = useState<RadioTrack | null>(null);
-    const [ startedAt, setStartedAt ] = useState(0);
-    const [ paused, setPaused ] = useState(false);
-    const [ isStaff, setIsStaff ] = useState(false);
-    const [ radioEnabled, setRadioEnabled ] = useState(true);
-    const [ looping, setLooping ] = useState(false);
+function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendCommand }: {
+  currentTrack: RadioTrack | null;
+  paused: boolean;
+  looping: boolean;
+  radioEnabled: boolean;
+  sendCommand: (cmd: string) => void;
+}) {
+  const [loopOn, setLoopOn] = useState(looping);
+  const [radioOn, setRadioOn] = useState(radioEnabled);
 
-    // ── Local UI State ──
-    const [ volume, setVolume ] = useState(0.5);
-    const [ muted, setMuted ] = useState(false);
-    const [ isInIframe, setIsInIframe ] = useState(false);
-    const [ needsInteraction, setNeedsInteraction ] = useState(false);
-    const [ announcement, setAnnouncement ] = useState<{ message: string; djName: string } | null>(null);
+  useEffect(() => { setLoopOn(looping); }, [looping]);
+  useEffect(() => { setRadioOn(radioEnabled); }, [radioEnabled]);
 
-    // ── Refs ──
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button className="p-1.5 rounded-xl cursor-pointer hover:bg-white/[0.06] transition-colors">
+          <Headphones className="size-3.5 text-white/30" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="end" sideOffset={8} className="w-[380px] p-0 bg-[#1e1e24] border-white/[0.08] text-white">
+        <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Headphones className="size-4 text-white/40" />
+              <span className="text-sm font-semibold text-white">DJ Panel</span>
+            </div>
+            <Badge variant="outline" className="text-[10px] border-white/10 text-white/40">Staff</Badge>
+          </div>
+        </div>
+
+        <Tabs defaultValue="playing" className="w-full">
+          <TabsList className="w-full justify-start rounded-none border-b border-white/[0.06] bg-transparent px-4 h-9">
+            <TabsTrigger value="playing" className="text-xs text-white/40 data-[state=active]:text-white data-[state=active]:bg-white/[0.06]">Now Playing</TabsTrigger>
+            <TabsTrigger value="queue" className="text-xs text-white/40 data-[state=active]:text-white data-[state=active]:bg-white/[0.06]">Queue</TabsTrigger>
+            <TabsTrigger value="controls" className="text-xs text-white/40 data-[state=active]:text-white data-[state=active]:bg-white/[0.06]">DJ Controls</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="playing" className="p-4 mt-0">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center shrink-0">
+                <Music className="size-5 text-purple-400/60" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-white truncate">{currentTrack?.title || 'Kein Track'}</p>
+                <p className="text-xs text-white/40 truncate">{currentTrack?.artist || '—'}</p>
+                <p className="text-[10px] text-white/20 mt-0.5">{currentTrack?.type === 'youtube' ? 'YouTube' : 'Audio'}</p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5 mb-4">
+              <Progress value={45} className="h-1.5 bg-white/10" />
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-white/40">—</span>
+                {loopOn && (
+                  <Badge variant="outline" className="text-white/30 border-white/10">
+                    <Repeat className="size-2.5 mr-1" />Loop
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center gap-2">
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-white/10 text-white hover:bg-white/[0.06]" onClick={() => sendCommand(':radio play')}>
+                <Play className="size-3.5" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-white/10 text-white hover:bg-white/[0.06]" onClick={() => sendCommand(':radio pause')}>
+                <Pause className="size-3.5" />
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-white/10 text-white hover:bg-white/[0.06]" onClick={() => sendCommand(':radio skip')}>
+                <SkipForward className="size-3.5" />
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="queue" className="p-4 mt-0">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Queue</span>
+            </div>
+            <p className="text-xs text-white/30 text-center py-4">Queue wird vom Server verwaltet</p>
+          </TabsContent>
+
+          <TabsContent value="controls" className="p-4 mt-0 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Power className="size-3.5 text-white/40" />
+                <span className="text-xs font-medium text-white">Radio</span>
+              </div>
+              <Switch checked={radioOn} onCheckedChange={v => { setRadioOn(v); sendCommand(v ? ':radio on' : ':radio off'); }} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Repeat className="size-3.5 text-white/40" />
+                <span className="text-xs font-medium text-white">Loop</span>
+              </div>
+              <Switch checked={loopOn} onCheckedChange={v => { setLoopOn(v); sendCommand(v ? ':radio loop on' : ':radio loop off'); }} />
+            </div>
+
+            <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
+              <label className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Durchsage (TTS)</label>
+              <textarea
+                placeholder="Durchsage-Text eingeben..."
+                rows={2}
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-white/[0.08] bg-white/[0.04] text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-white/20 resize-none"
+                id="dj-tts-input"
+              />
+              <Button size="sm" className="w-full h-7 text-xs bg-white/10 hover:bg-white/15 text-white border-0" onClick={() => {
+                const el = document.getElementById('dj-tts-input') as HTMLTextAreaElement;
+                if (el?.value) { sendCommand(':radio tts ' + el.value); el.value = ''; }
+              }}>Generieren</Button>
+            </div>
+
+            <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
+              <label className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Sound Effect</label>
+              <div className="flex gap-1.5">
+                <Input placeholder="SFX URL (MP3)..." className="h-7 text-xs bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20" id="dj-sfx-input" />
+                <Button variant="outline" size="sm" className="h-7 text-xs shrink-0 border-white/10 text-white hover:bg-white/[0.06]" onClick={() => {
+                  const el = document.getElementById('dj-sfx-input') as HTMLInputElement;
+                  if (el?.value) { sendCommand(':radio sfx ' + el.value); el.value = ''; }
+                }}>Play</Button>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export const RadioPanelView: FC<{}> = () => {
+    const [currentTrack, setCurrentTrack] = useState<RadioTrack | null>(null);
+    const [startedAt, setStartedAt] = useState(0);
+    const [paused, setPaused] = useState(false);
+    const [isStaff, setIsStaff] = useState(false);
+    const [radioEnabled, setRadioEnabled] = useState(true);
+    const [looping, setLooping] = useState(false);
+
+    const [volume, setVolume] = useState(0.5);
+    const [muted, setMuted] = useState(false);
+    const [isInIframe, setIsInIframe] = useState(false);
+    const [needsInteraction, setNeedsInteraction] = useState(false);
+    const [announcement, setAnnouncement] = useState<{ message: string; djName: string } | null>(null);
+
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const ytPlayerRef = useRef<any>(null);
     const ytReadyRef = useRef(false);
@@ -100,41 +223,31 @@ export const RadioPanelView: FC<{}> = () =>
     const mutedRef = useRef(false);
     const pausedRef = useRef(false);
 
-    // ── iframe detection ──
-    useEffect(() =>
-    {
+    useEffect(() => {
         try { setIsInIframe(window !== window.parent); }
         catch { setIsInIframe(true); }
     }, []);
 
-    // Keep refs in sync
     volumeRef.current = volume;
     mutedRef.current = muted;
     pausedRef.current = paused;
 
-    // ── Stop all playback ──
-    const stopPlayback = useCallback(() =>
-    {
-        if(audioRef.current)
-        {
+    const stopPlayback = useCallback(() => {
+        if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.src = '';
             audioRef.current = null;
         }
-        if(ytPlayerRef.current && ytReadyRef.current)
-        {
+        if (ytPlayerRef.current && ytReadyRef.current) {
             try { ytPlayerRef.current.destroy(); } catch {}
             ytPlayerRef.current = null;
             ytReadyRef.current = false;
         }
     }, []);
 
-    // ── Prepare YouTube container (safe DOM methods) ──
-    const prepareYTContainer = useCallback(() =>
-    {
-        if(!ytContainerRef.current) return;
-        while(ytContainerRef.current.firstChild)
-        {
+    const prepareYTContainer = useCallback(() => {
+        if (!ytContainerRef.current) return;
+        while (ytContainerRef.current.firstChild) {
             ytContainerRef.current.removeChild(ytContainerRef.current.firstChild);
         }
         const playerDiv = document.createElement('div');
@@ -142,212 +255,109 @@ export const RadioPanelView: FC<{}> = () =>
         ytContainerRef.current.appendChild(playerDiv);
     }, []);
 
-    // ── Play a track ──
-    const playTrack = useCallback((track: RadioTrack, sAt: number, isPaused: boolean) =>
-    {
+    const playTrack = useCallback((track: RadioTrack, sAt: number, isPaused: boolean) => {
         stopPlayback();
-
-        if(!track || !track.url) return;
-
+        if (!track || !track.url) return;
         const elapsed = isPaused ? 0 : Math.max(0, (Date.now() - sAt) / 1000);
         const vol = mutedRef.current ? 0 : volumeRef.current;
 
-        if(track.type === 'youtube')
-        {
+        if (track.type === 'youtube') {
             const videoId = extractYoutubeId(track.url);
-            if(!videoId) return;
-
-            ensureYTApi(() =>
-            {
+            if (!videoId) return;
+            ensureYTApi(() => {
                 prepareYTContainer();
-
                 ytReadyRef.current = false;
-                ytPlayerRef.current = new window.YT.Player('yt-radio-player',
-                {
-                    height: '1',
-                    width: '1',
-                    videoId,
+                ytPlayerRef.current = new window.YT.Player('yt-radio-player', {
+                    height: '1', width: '1', videoId,
                     playerVars: { autoplay: isPaused ? 0 : 1, start: Math.floor(elapsed) },
-                    events:
-                    {
-                        onReady: (ev: any) =>
-                        {
+                    events: {
+                        onReady: (ev: any) => {
                             ytReadyRef.current = true;
                             ev.target.setVolume(vol * 100);
-                            if(!isPaused) ev.target.playVideo();
+                            if (!isPaused) ev.target.playVideo();
                         }
                     }
                 });
             });
-        }
-        else
-        {
+        } else {
             const audio = new Audio(track.url);
             audio.volume = vol;
             audioRef.current = audio;
-
-            audio.addEventListener('loadedmetadata', () =>
-            {
+            audio.addEventListener('loadedmetadata', () => {
                 audio.currentTime = Math.min(elapsed, track.duration);
             });
-
-            if(!isPaused)
-            {
-                audio.play().then(() =>
-                {
-                    setNeedsInteraction(false);
-                }).catch(() =>
-                {
-                    setNeedsInteraction(true);
-                });
+            if (!isPaused) {
+                audio.play().then(() => setNeedsInteraction(false)).catch(() => setNeedsInteraction(true));
             }
         }
-    }, [ stopPlayback, prepareYTContainer ]);
+    }, [stopPlayback, prepareYTContainer]);
 
-    // ── Handle user click to unlock autoplay ──
-    const handleUnlock = useCallback(() =>
-    {
+    const handleUnlock = useCallback(() => {
         setNeedsInteraction(false);
-        if(audioRef.current && !pausedRef.current)
-        {
-            audioRef.current.play().catch(() => {});
-        }
-        if(ytPlayerRef.current && ytReadyRef.current && !pausedRef.current)
-        {
+        if (audioRef.current && !pausedRef.current) audioRef.current.play().catch(() => {});
+        if (ytPlayerRef.current && ytReadyRef.current && !pausedRef.current) {
             try { ytPlayerRef.current.playVideo(); } catch {}
         }
     }, []);
 
-    // ── Send chat command ──
-    const sendCommand = useCallback((cmd: string) =>
-    {
-        try
-        {
+    const sendCommand = useCallback((cmd: string) => {
+        try {
             const session = GetRoomSession();
-            if(session) session.sendChatMessage(cmd, 0);
-        }
-        catch {}
+            if (session) session.sendChatMessage(cmd, 0);
+        } catch {}
     }, []);
 
-    // ── Listen for server events ──
-    useMessageEvent<NotificationDialogMessageEvent>(NotificationDialogMessageEvent, event =>
-    {
+    useMessageEvent<NotificationDialogMessageEvent>(NotificationDialogMessageEvent, event => {
         const parser = event.getParser();
         const params = parser.parameters;
 
-        switch(parser.type)
-        {
-            case 'radio.state':
-            {
+        switch (parser.type) {
+            case 'radio.state': {
                 const title = params?.get('track_title') || '';
                 const staff = params?.get('is_staff') === 'true';
                 setIsStaff(staff);
                 setRadioEnabled(params?.get('enabled') !== 'false');
-
                 const isPaused = params?.get('paused') === 'true';
                 const isEnabled = params?.get('enabled') !== 'false';
                 setPaused(isPaused);
-
-                if(title && isEnabled)
-                {
-                    const track: RadioTrack = {
-                        id: 0,
-                        title,
-                        artist: params?.get('track_artist') || '',
-                        url: params?.get('track_url') || '',
-                        type: params?.get('track_type') || 'audio',
-                        duration: parseInt(params?.get('duration') || '0', 10)
-                    };
+                if (title && isEnabled) {
+                    const track: RadioTrack = { id: 0, title, artist: params?.get('track_artist') || '', url: params?.get('track_url') || '', type: params?.get('track_type') || 'audio', duration: parseInt(params?.get('duration') || '0', 10) };
                     const sAt = parseInt(params?.get('started_at') || '0', 10);
-                    setCurrentTrack(track);
-                    setStartedAt(sAt);
-                    playTrack(track, sAt, isPaused);
-                }
-                else
-                {
-                    setCurrentTrack(null);
-                    setStartedAt(0);
-                    stopPlayback();
-                }
+                    setCurrentTrack(track); setStartedAt(sAt); playTrack(track, sAt, isPaused);
+                } else { setCurrentTrack(null); setStartedAt(0); stopPlayback(); }
                 break;
             }
-            case 'radio.track':
-            {
+            case 'radio.track': {
                 const title = params?.get('track_title') || '';
                 const isLoop = params?.get('looping') === 'true';
                 setLooping(isLoop);
-
-                if(title)
-                {
-                    const track: RadioTrack = {
-                        id: 0,
-                        title,
-                        artist: params?.get('track_artist') || '',
-                        url: params?.get('track_url') || '',
-                        type: params?.get('track_type') || 'audio',
-                        duration: parseInt(params?.get('duration') || '0', 10)
-                    };
+                if (title) {
+                    const track: RadioTrack = { id: 0, title, artist: params?.get('track_artist') || '', url: params?.get('track_url') || '', type: params?.get('track_type') || 'audio', duration: parseInt(params?.get('duration') || '0', 10) };
                     const sAt = parseInt(params?.get('started_at') || '0', 10);
-                    setCurrentTrack(track);
-                    setStartedAt(sAt);
-                    setPaused(false);
-                    playTrack(track, sAt, false);
-                }
-                else
-                {
-                    setCurrentTrack(null);
-                    setStartedAt(0);
-                    setPaused(false);
-                    setLooping(false);
-                    stopPlayback();
-                }
+                    setCurrentTrack(track); setStartedAt(sAt); setPaused(false); playTrack(track, sAt, false);
+                } else { setCurrentTrack(null); setStartedAt(0); setPaused(false); setLooping(false); stopPlayback(); }
                 break;
             }
-            case 'radio.pause':
-            {
+            case 'radio.pause': {
                 const isPaused = params?.get('paused') === 'true';
                 setPaused(isPaused);
-
-                if(isPaused)
-                {
-                    if(audioRef.current) audioRef.current.pause();
-                    if(ytPlayerRef.current && ytReadyRef.current)
-                    {
-                        try { ytPlayerRef.current.pauseVideo(); } catch {}
-                    }
-                }
-                else
-                {
+                if (isPaused) {
+                    if (audioRef.current) audioRef.current.pause();
+                    if (ytPlayerRef.current && ytReadyRef.current) try { ytPlayerRef.current.pauseVideo(); } catch {}
+                } else {
                     const sAt = parseInt(params?.get('started_at') || '0', 10);
-                    if(sAt > 0) setStartedAt(sAt);
-
-                    if(audioRef.current)
-                    {
-                        const elapsed = (Date.now() - sAt) / 1000;
-                        audioRef.current.currentTime = elapsed;
-                        audioRef.current.play().catch(() => {});
-                    }
-                    if(ytPlayerRef.current && ytReadyRef.current)
-                    {
-                        const elapsed = (Date.now() - sAt) / 1000;
-                        try { ytPlayerRef.current.seekTo(elapsed); ytPlayerRef.current.playVideo(); } catch {}
-                    }
+                    if (sAt > 0) setStartedAt(sAt);
+                    if (audioRef.current) { const elapsed = (Date.now() - sAt) / 1000; audioRef.current.currentTime = elapsed; audioRef.current.play().catch(() => {}); }
+                    if (ytPlayerRef.current && ytReadyRef.current) { const elapsed = (Date.now() - sAt) / 1000; try { ytPlayerRef.current.seekTo(elapsed); ytPlayerRef.current.playVideo(); } catch {} }
                 }
                 break;
             }
-            case 'radio.sfx':
-            {
+            case 'radio.sfx': {
                 const sfxUrl = params?.get('sfx_url') || '';
-                if(sfxUrl)
-                {
-                    const sfxAudio = new Audio(sfxUrl);
-                    sfxAudio.volume = mutedRef.current ? 0 : volumeRef.current;
-                    sfxAudio.play().catch(() => {});
-                }
+                if (sfxUrl) { const sfxAudio = new Audio(sfxUrl); sfxAudio.volume = mutedRef.current ? 0 : volumeRef.current; sfxAudio.play().catch(() => {}); }
                 break;
             }
-            case 'radio.announce':
-            {
+            case 'radio.announce': {
                 const message = params?.get('message') || '';
                 const djName = params?.get('dj_name') || 'DJ';
                 const duckMs = parseInt(params?.get('duck_ms') || '5000', 10);
@@ -356,116 +366,62 @@ export const RadioPanelView: FC<{}> = () =>
                     ? 'data:audio/mpeg;base64,' + Array.from({ length: audioChunks }, (_, i) => params?.get('audio_chunk_' + i) || '').join('')
                     : (params?.get('audio_url') || '');
 
-                if(message)
-                {
+                if (message) {
                     const originalVolume = volumeRef.current;
                     const originalMuted = mutedRef.current;
                     const duckTarget = 0.15;
                     const fadeSteps = 30;
-                    const fadeDownStepMs = 50;   // 30 x 50 = 1500ms (1.5s) fade down
-                    const fadeUpStepMs = 65;     // 30 x 65 = ~2s fade up
+                    const fadeDownStepMs = 50;
+                    const fadeUpStepMs = 65;
 
-                    // Smooth fade down (1.5s)
                     let step = 0;
-                    const fadeDown = setInterval(() =>
-                    {
+                    const fadeDown = setInterval(() => {
                         step++;
                         const newVol = originalMuted ? 0 : originalVolume - (originalVolume - duckTarget) * (step / fadeSteps);
-                        if(audioRef.current) audioRef.current.volume = Math.max(0, newVol);
-                        if(ytPlayerRef.current && ytReadyRef.current)
-                        {
-                            try { ytPlayerRef.current.setVolume(Math.max(0, newVol * 100)); } catch {}
-                        }
-                        if(step >= fadeSteps) clearInterval(fadeDown);
+                        if (audioRef.current) audioRef.current.volume = Math.max(0, newVol);
+                        if (ytPlayerRef.current && ytReadyRef.current) try { ytPlayerRef.current.setVolume(Math.max(0, newVol * 100)); } catch {}
+                        if (step >= fadeSteps) clearInterval(fadeDown);
                     }, fadeDownStepMs);
 
-                    // Play TTS audio if provided (after fade starts, with fade-in/out)
-                    if(audioUrl)
-                    {
-                        setTimeout(() =>
-                        {
+                    if (audioUrl) {
+                        setTimeout(() => {
                             const ttsAudio = new Audio(audioUrl);
                             const ttsMaxVol = mutedRef.current ? 0 : 1.0;
                             ttsAudio.volume = 0;
                             ttsAudio.play().catch(() => {});
-
-                            // Fade in (400ms)
                             let ttsStep = 0;
-                            const ttsFadeIn = setInterval(() =>
-                            {
-                                ttsStep++;
-                                ttsAudio.volume = Math.min(ttsMaxVol, ttsMaxVol * (ttsStep / 20));
-                                if(ttsStep >= 20) clearInterval(ttsFadeIn);
-                            }, 20);
-
-                            // Fade out before end (2s)
-                            setTimeout(() =>
-                            {
-                                let outStep = 0;
-                                const ttsFadeOut = setInterval(() =>
-                                {
-                                    outStep++;
-                                    ttsAudio.volume = Math.max(0, ttsMaxVol * (1 - outStep / 50));
-                                    if(outStep >= 50) clearInterval(ttsFadeOut);
-                                }, 40);
-                            }, Math.max(0, duckMs - 800 - 2000));
+                            const ttsFadeIn = setInterval(() => { ttsStep++; ttsAudio.volume = Math.min(ttsMaxVol, ttsMaxVol * (ttsStep / 20)); if (ttsStep >= 20) clearInterval(ttsFadeIn); }, 20);
+                            setTimeout(() => { let outStep = 0; const ttsFadeOut = setInterval(() => { outStep++; ttsAudio.volume = Math.max(0, ttsMaxVol * (1 - outStep / 50)); if (outStep >= 50) clearInterval(ttsFadeOut); }, 40); }, Math.max(0, duckMs - 800 - 2000));
                         }, 800);
                     }
 
-                    // Show announcement
                     setAnnouncement({ message, djName });
+                    if (announcementTimerRef.current) clearTimeout(announcementTimerRef.current);
 
-                    // Clear any existing timer
-                    if(announcementTimerRef.current) clearTimeout(announcementTimerRef.current);
-
-                    // After duckMs, fade back up (~2s) and hide announcement
-                    announcementTimerRef.current = setTimeout(() =>
-                    {
+                    announcementTimerRef.current = setTimeout(() => {
                         setAnnouncement(null);
                         let upStep = 0;
                         const restoreVol = originalMuted ? 0 : originalVolume;
-                        const fadeUp = setInterval(() =>
-                        {
+                        const fadeUp = setInterval(() => {
                             upStep++;
                             const newVol = duckTarget + (restoreVol - duckTarget) * (upStep / fadeSteps);
-                            if(audioRef.current) audioRef.current.volume = Math.min(1, newVol);
-                            if(ytPlayerRef.current && ytReadyRef.current)
-                            {
-                                try { ytPlayerRef.current.setVolume(Math.min(100, newVol * 100)); } catch {}
-                            }
-                            if(upStep >= fadeSteps) clearInterval(fadeUp);
+                            if (audioRef.current) audioRef.current.volume = Math.min(1, newVol);
+                            if (ytPlayerRef.current && ytReadyRef.current) try { ytPlayerRef.current.setVolume(Math.min(100, newVol * 100)); } catch {}
+                            if (upStep >= fadeSteps) clearInterval(fadeUp);
                         }, fadeUpStepMs);
                     }, duckMs);
                 }
                 break;
             }
-            case 'radio.toggle':
-            {
+            case 'radio.toggle': {
                 const isEnabled = params?.get('enabled') === 'true';
                 setRadioEnabled(isEnabled);
-
-                if(!isEnabled)
-                {
-                    stopPlayback();
-                }
-                else
-                {
+                if (!isEnabled) { stopPlayback(); } else {
                     const title = params?.get('track_title') || '';
-                    if(title)
-                    {
-                        const track: RadioTrack = {
-                            id: 0,
-                            title,
-                            artist: params?.get('track_artist') || '',
-                            url: params?.get('track_url') || '',
-                            type: params?.get('track_type') || 'audio',
-                            duration: parseInt(params?.get('duration') || '0', 10)
-                        };
+                    if (title) {
+                        const track: RadioTrack = { id: 0, title, artist: params?.get('track_artist') || '', url: params?.get('track_url') || '', type: params?.get('track_type') || 'audio', duration: parseInt(params?.get('duration') || '0', 10) };
                         const sAt = parseInt(params?.get('started_at') || '0', 10);
-                        setCurrentTrack(track);
-                        setStartedAt(sAt);
-                        setPaused(false);
-                        playTrack(track, sAt, false);
+                        setCurrentTrack(track); setStartedAt(sAt); setPaused(false); playTrack(track, sAt, false);
                     }
                 }
                 break;
@@ -473,133 +429,118 @@ export const RadioPanelView: FC<{}> = () =>
         }
     });
 
-    // ── Volume sync ──
-    useEffect(() =>
-    {
+    useEffect(() => {
         const vol = muted ? 0 : volume;
-        if(audioRef.current) audioRef.current.volume = vol;
-        if(ytPlayerRef.current && ytReadyRef.current)
-        {
-            try { ytPlayerRef.current.setVolume(vol * 100); } catch {}
-        }
-    }, [ volume, muted ]);
+        if (audioRef.current) audioRef.current.volume = vol;
+        if (ytPlayerRef.current && ytReadyRef.current) try { ytPlayerRef.current.setVolume(vol * 100); } catch {}
+    }, [volume, muted]);
 
-    // ── Cleanup on unmount ──
-    useEffect(() =>
-    {
-        return () => { stopPlayback(); };
-    }, [ stopPlayback ]);
+    useEffect(() => { return () => { stopPlayback(); }; }, [stopPlayback]);
 
-    // ── Don't render if nothing to show ──
-    if(!radioEnabled && !isStaff) return null;
+    if (!radioEnabled && !isStaff) return null;
 
     return (
         <>
-            {/* Hidden YouTube container */}
-            <div
-                ref={ ytContainerRef }
-                style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}
-            />
+            <div ref={ytContainerRef} style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }} />
 
-            {/* ── Compact Float Bar ── */}
-            <div className="fixed top-3 left-4 z-[65] pointer-events-auto flex items-center gap-1 py-1.5 px-3 min-h-[48px] texture-panel backdrop-blur-2xl rounded-2xl select-none">
-                {/* CMS Switcher — nur wenn im iframe */}
-                { isInIframe && (
-                    <>
-                        <button
-                            className="flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => window.parent.postMessage({ type: 'show-cms' }, '*') }
-                            title="Zurück zum CMS"
-                        >
-                            <svg className="size-4 text-white/90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="3" width="7" height="7" rx="1" />
-                                <rect x="14" y="3" width="7" height="7" rx="1" />
-                                <rect x="3" y="14" width="7" height="7" rx="1" />
-                                <rect x="14" y="14" width="7" height="7" rx="1" />
-                            </svg>
+            <div className="fixed top-3 left-20 z-[65] pointer-events-auto flex flex-col gap-3">
+                <div className="inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-[#1a1a1f]/80 border border-white/[0.06] shadow-lg backdrop-blur-xl">
+                    {isInIframe && (
+                        <>
+                            <button
+                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors"
+                                onClick={() => window.parent.postMessage({ type: 'show-cms' }, '*')}
+                                title="Zurück zum CMS"
+                            >
+                                <svg className="size-4 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                                </svg>
+                            </button>
+                            <div className="w-px h-5 bg-white/[0.06]" />
+                        </>
+                    )}
+
+                    <TextGif
+                        gifUrl="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmx6a3BzZ3pwajN0bnphZGlpcHI2ajA1cWpzaHBkbHJ0anVjeGcyeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wQHDnQmXZlpVuuPqey/giphy.gif"
+                        text="bahhos"
+                        size="sm"
+                        weight="bold"
+                    />
+                    <div className="w-px h-5 bg-white/[0.06]" />
+
+                    {!radioEnabled ? (
+                        <span className="text-xs text-red-400/60 italic px-1">Aus</span>
+                    ) : currentTrack ? (
+                        <span className="text-xs text-white/60 truncate max-w-[180px] px-1.5">
+                            {currentTrack.title} – {currentTrack.artist}
+                        </span>
+                    ) : (
+                        <span className="text-xs text-white/20 italic px-1">Radio</span>
+                    )}
+
+                    {needsInteraction && (
+                        <button className="p-1.5 rounded-xl cursor-pointer hover:bg-white/[0.06] transition-colors" onClick={handleUnlock}>
+                            <Play className="size-3.5 text-amber-400" />
                         </button>
-                        <div className="w-px h-6 bg-white/[0.06]" />
-                    </>
-                ) }
-                {/* Logo */}
-                <TextGif
-                    gifUrl="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbmx6a3BzZ3pwajN0bnphZGlpcHI2ajA1cWpzaHBkbHJ0anVjeGcyeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wQHDnQmXZlpVuuPqey/giphy.gif"
-                    text="bahhos"
-                    size="sm"
-                    weight="bold"
-                />
-                <div className="w-px h-6 bg-white/[0.06]" />
+                    )}
 
-                {/* Track Info */}
-                { !radioEnabled ? (
-                    <span className="text-sm text-red-400/60 italic">Aus</span>
-                ) : currentTrack ? (
-                    <span className="text-sm text-white/80 truncate max-w-[160px]">
-                        { currentTrack.title } – { currentTrack.artist }
-                    </span>
-                ) : (
-                    <span className="text-sm text-white/40 italic">Radio</span>
-                ) }
+                    {radioEnabled && currentTrack && (
+                        <button
+                            className="p-1.5 rounded-xl cursor-pointer hover:bg-white/[0.06] transition-colors"
+                            onClick={() => sendCommand(paused ? ':radio play' : ':radio pause')}
+                        >
+                            {paused
+                                ? <Play className="size-3.5 text-white/40" strokeWidth={2.5} />
+                                : <Pause className="size-3.5 text-white/40" strokeWidth={2.5} />
+                            }
+                        </button>
+                    )}
 
-                { needsInteraction && (
                     <button
-                        className="text-xs text-amber-300 hover:text-amber-200 font-bold"
-                        onClick={ handleUnlock }
+                        className="p-1 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors"
+                        onClick={() => setMuted(v => !v)}
                     >
-                        ▶
-                    </button>
-                ) }
-
-                {/* Play/Pause */}
-                { radioEnabled && currentTrack && (
-                    <button
-                        className="text-sm text-white/60 hover:text-white/90 transition-colors"
-                        onClick={ () => sendCommand(paused ? ':radio play' : ':radio pause') }
-                    >
-                        { paused ? '▶' : '⏸' }
-                    </button>
-                ) }
-
-                {/* Volume */}
-                <div className="flex items-center gap-1">
-                    <button
-                        className="text-xs text-white/40 hover:text-white/70 transition-colors"
-                        onClick={ () => setMuted(!muted) }
-                    >
-                        { muted || volume === 0 ? '🔇' : volume < 0.4 ? '🔈' : '🔊' }
+                        {muted || volume === 0
+                            ? <VolumeX className="size-3.5 text-white/20" />
+                            : <Volume2 className="size-3.5 text-white/40" />
+                        }
                     </button>
                     <input
                         type="range"
-                        min="0"
-                        max="100"
-                        value={ muted ? 0 : Math.round(volume * 100) }
-                        onChange={ (e) => { setVolume(parseInt(e.target.value) / 100); setMuted(false); } }
+                        min={0}
+                        max={100}
+                        value={muted ? 0 : Math.round(volume * 100)}
+                        onChange={e => { setVolume(parseInt(e.target.value) / 100); setMuted(false); }}
                         className="w-14 h-1 accent-white/60 cursor-pointer"
                     />
+
+                    {isStaff && (
+                        <DjPanelPopover
+                            currentTrack={currentTrack}
+                            paused={paused}
+                            looping={looping}
+                            radioEnabled={radioEnabled}
+                            sendCommand={sendCommand}
+                        />
+                    )}
                 </div>
 
-                {/* Open DJ Panel */}
-                { isStaff && (
-                    <button
-                        onClick={ () => CreateLinkEvent('radio/toggle') }
-                        className="text-xs text-white/40 hover:text-white/80 transition-colors"
-                        title="DJ Panel"
-                    >
-                        🎧
-                    </button>
-                ) }
-            </div>
-
-            {/* ── DJ Announcement Overlay ── */}
-            { announcement && (
-                <div className="fixed top-14 left-4 z-[65] w-[320px] rounded-xl backdrop-blur-xl bg-gradient-to-r from-purple-900/70 to-indigo-900/70 border border-purple-400/20 shadow-xl p-3 animate-in fade-in slide-in-from-top-1 duration-300 pointer-events-auto">
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm">🎙</span>
-                        <span className="text-xs font-bold text-purple-200 uppercase tracking-wider">{ announcement.djName }</span>
+                {announcement && (
+                    <div className="min-w-[340px] max-w-[400px] flex items-start gap-3 p-3 rounded-xl bg-[#1a1a1f]/80 border border-white/[0.06] shadow-lg backdrop-blur-xl animate-in slide-in-from-top-2 fade-in duration-300">
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                                <Mic className="size-3 text-white/40 shrink-0" />
+                                <span className="text-xs font-semibold text-white">{announcement.djName}</span>
+                                <Badge variant="outline" className="text-[10px] border-white/10 text-white/40">Durchsage</Badge>
+                            </div>
+                            <p className="text-xs text-white/60 mt-1 leading-relaxed">{announcement.message}</p>
+                        </div>
                     </div>
-                    <div className="text-sm text-white/90 font-medium leading-relaxed">{ announcement.message }</div>
-                </div>
-            ) }
+                )}
+            </div>
         </>
     );
 };

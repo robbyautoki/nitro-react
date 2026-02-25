@@ -1,19 +1,36 @@
 import { ExtendedProfileChangedMessageEvent, FriendlyTime, RelationshipStatusInfoEvent, RelationshipStatusInfoMessageParser, RoomEngineObjectEvent, RoomObjectCategory, RoomObjectType, UserCurrentBadgesComposer, UserCurrentBadgesEvent, UserProfileEvent, UserProfileParser, UserRelationshipsComposer, RequestFriendComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { X, Pen, Users, Trophy, Star, Calendar, MessageSquare, Home, UserPlus } from 'lucide-react';
+import { X, Pen, Calendar, Coins, Diamond, Trophy, Gem, Home, Share2, UserPlus, MessageSquare } from 'lucide-react';
 import { CreateLinkEvent, GetLocalStorage, GetRoomSession, GetSessionDataManager, GetUserProfile, LocalizeText, SendMessageComposer, SetLocalStorage } from '../../api';
 import { getPrestigeFromBadges, getPrestigeInfo } from '../../api/utils/PrestigeUtils';
 import { LayoutAvatarImageView, LayoutBadgeImageView } from '../../common';
 import { useMessageEvent, useRoomEngineEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/reui-badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import { BANNER_PRESETS, BannerPreset, DEFAULT_BANNER_ID } from './BannerPresets';
 import { BannerPickerView } from './views/BannerPickerView';
 import { RelationshipsContainerView } from './views/RelationshipsContainerView';
 import { GroupsContainerView } from './views/GroupsContainerView';
 
 const getBannerStorageKey = (userId: number) => `nitro.profile.banner.${ userId }`;
+
+const statIcons = {
+    coins: Coins,
+    diamond: Diamond,
+    gem: Gem,
+    trophy: Trophy,
+};
+
+const statColors = {
+    coins: 'text-yellow-500',
+    diamond: 'text-sky-500',
+    gem: 'text-emerald-500',
+    trophy: 'text-amber-500',
+};
 
 export const UserProfileView: FC<{}> = () =>
 {
@@ -126,6 +143,9 @@ export const UserProfileView: FC<{}> = () =>
 
     if(!userProfile) return null;
 
+    const prestige = getPrestigeFromBadges(userBadges);
+    const levelInfo = getPrestigeInfo(userProfile.achievementPoints, prestige);
+
     const friendStatusText = (() =>
     {
         if(isOwnProfile) return 'Das bist du';
@@ -134,159 +154,172 @@ export const UserProfileView: FC<{}> = () =>
         return null;
     })();
 
+    const stats: { label: string; value: string; icon: keyof typeof statIcons }[] = [
+        { label: 'Freunde', value: userProfile.friendsCount.toLocaleString('de-DE'), icon: 'coins' },
+        { label: 'Erfolge', value: userProfile.achievementPoints.toLocaleString('de-DE'), icon: 'trophy' },
+        { label: 'Diamanten', value: (prestige > 0 ? `P${ prestige } ` : '') + `Lv.${ levelInfo.displayLevel }`, icon: 'diamond' },
+        { label: 'Zuletzt', value: userProfile.isOnline ? 'Jetzt online' : FriendlyTime.format(userProfile.secondsSinceLastVisit, '.ago', 2), icon: 'gem' },
+    ];
+
     return (
         <DraggableWindow uniqueKey="nitro-user-profile" windowPosition={ DraggableWindowPosition.CENTER }>
-            <div className="w-[540px] bg-white rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.18),0_0_0_1px_rgba(0,0,0,0.05)] overflow-hidden">
-                {/* Banner */}
-                <div
-                    className="drag-handler relative h-32 cursor-move select-none overflow-hidden"
-                    style={ currentBanner.gifUrl
-                        ? { backgroundImage: `url(${ currentBanner.gifUrl })`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                        : { background: currentBanner.gradient }
-                    }
-                >
-                    { isOwnProfile && (
-                        <button
-                            className="absolute top-2.5 left-2.5 w-7 h-7 flex items-center justify-center rounded-lg bg-black/30 backdrop-blur-sm text-white/70 hover:bg-black/50 hover:text-white transition-all"
-                            onClick={ () => setShowBannerPicker(!showBannerPicker) }
-                            onMouseDown={ e => e.stopPropagation() }
-                            title="Banner ändern"
-                        >
-                            <Pen className="w-3 h-3" />
-                        </button>
-                    ) }
-                    <button
-                        className="absolute top-2.5 right-2.5 w-7 h-7 flex items-center justify-center rounded-lg bg-black/30 backdrop-blur-sm text-white/70 hover:bg-black/50 hover:text-white transition-all"
-                        onClick={ onClose }
-                        onMouseDown={ e => e.stopPropagation() }
+            <div className={ cn('w-[540px] space-y-4') }>
+                {/* ── Main Profile Card (1:1 v2 structure) ── */}
+                <Card className="overflow-hidden pt-0">
+                    {/* Banner — v2: h-32 bg-gradient, here: animated GIF support */}
+                    <div
+                        className="drag-handler relative h-32 cursor-move select-none sm:h-40"
+                        style={ currentBanner.gifUrl
+                            ? { backgroundImage: `url(${ currentBanner.gifUrl })`, backgroundSize: 'cover', backgroundPosition: 'center' }
+                            : { background: currentBanner.gradient }
+                        }
                     >
-                        <X className="w-3.5 h-3.5" />
-                    </button>
-                </div>
-
-                {/* Banner Picker */}
-                { showBannerPicker && (
-                    <BannerPickerView
-                        activeBannerId={ bannerId }
-                        onSelect={ onBannerSelect }
-                        onClose={ () => setShowBannerPicker(false) }
-                    />
-                ) }
-
-                {/* Profile Header */}
-                <div className="relative px-5 pb-4">
-                    <div className="flex gap-4">
-                        {/* Avatar */}
-                        <div className="-mt-10 relative shrink-0 w-[90px] h-[110px] rounded-xl border-4 border-white shadow-lg bg-zinc-100 overflow-hidden cursor-pointer" onClick={ () => GetUserProfile(userProfile.id) }>
-                            <LayoutAvatarImageView figure={ userProfile.figure } direction={ 2 } />
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0 pt-3">
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <h2 className="text-xl font-bold text-zinc-900 truncate">{ userProfile.username }</h2>
-                                { userProfile.isOnline && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                        Online
-                                    </span>
-                                ) }
-                                { !userProfile.isOnline && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-100 text-zinc-500">
-                                        { FriendlyTime.format(userProfile.secondsSinceLastVisit, '.ago', 2) }
-                                    </span>
-                                ) }
-                                { friendStatusText && (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-zinc-100 text-zinc-500">
-                                        { friendStatusText }
-                                    </span>
-                                ) }
-                            </div>
-                            { userProfile.motto && (
-                                <p className="text-sm text-zinc-400 italic mt-0.5 truncate">&quot;{ userProfile.motto }&quot;</p>
-                            ) }
-                            <div className="flex items-center gap-3 mt-1.5 text-xs text-zinc-400">
-                                <span className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
-                                    Dabei seit { userProfile.registration }
-                                </span>
-                            </div>
-                        </div>
+                        { isOwnProfile && (
+                            <button
+                                className="absolute top-2.5 left-2.5 w-7 h-7 flex items-center justify-center rounded-lg bg-black/30 backdrop-blur-sm text-white/70 hover:bg-black/50 hover:text-white transition-all"
+                                onClick={ () => setShowBannerPicker(!showBannerPicker) }
+                                onMouseDown={ e => e.stopPropagation() }
+                                title="Banner ändern"
+                            >
+                                <Pen className="w-3 h-3" />
+                            </button>
+                        ) }
+                        <button
+                            className="absolute top-2.5 right-2.5 w-7 h-7 flex items-center justify-center rounded-lg bg-black/30 backdrop-blur-sm text-white/70 hover:bg-black/50 hover:text-white transition-all"
+                            onClick={ onClose }
+                            onMouseDown={ e => e.stopPropagation() }
+                        >
+                            <X className="w-3.5 h-3.5" />
+                        </button>
                     </div>
-                </div>
 
-                {/* Stats Row */}
-                <div className="grid grid-cols-4 gap-2 px-5 pb-4">
-                    <StatCard icon={ <Users className="w-4 h-4 text-blue-500" /> } label="Freunde" value={ userProfile.friendsCount } />
-                    <StatCard icon={ <Trophy className="w-4 h-4 text-amber-500" /> } label="Erfolge" value={ userProfile.achievementPoints } />
-                    <ProfileLevelStat badges={ userBadges } score={ userProfile.achievementPoints } />
-                    <StatCard
-                        icon={ <Calendar className="w-4 h-4 text-zinc-400" /> }
-                        label="Zuletzt"
-                        valueStr={ userProfile.isOnline ? 'Jetzt' : FriendlyTime.format(userProfile.secondsSinceLastVisit, '.ago', 2) }
-                        small
-                    />
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2 px-5 pb-4">
-                    { canSendFriendRequest && (
-                        <Button size="sm" onClick={ addFriend } className="gap-1.5">
-                            <UserPlus className="w-3.5 h-3.5" />
-                            Freund hinzufügen
-                        </Button>
+                    {/* Banner Picker */}
+                    { showBannerPicker && (
+                        <BannerPickerView
+                            activeBannerId={ bannerId }
+                            onSelect={ onBannerSelect }
+                            onClose={ () => setShowBannerPicker(false) }
+                        />
                     ) }
-                    <Button variant="outline" size="sm" className="gap-1.5" onClick={ () => CreateLinkEvent(`navigator/search/hotel_view/owner:${ userProfile.username }`) }>
-                        <Home className="w-3.5 h-3.5" />
-                        Räume
-                    </Button>
-                    { !isOwnProfile && userProfile.isMyFriend && (
-                        <Button variant="outline" size="sm" className="gap-1.5" onClick={ () => CreateLinkEvent(`friends/messenger/${ userProfile.username }`) }>
-                            <MessageSquare className="w-3.5 h-3.5" />
-                            Nachricht
-                        </Button>
-                    ) }
+
+                    {/* v2: CardContent className="relative pb-6" */}
+                    <CardContent className="relative pb-6">
+                        {/* v2: flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6 */}
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
+                            {/* v2: Avatar className="-mt-12 size-32 border-4 border-card shadow-lg sm:-mt-16 sm:size-40" */}
+                            <div
+                                className="-mt-12 size-32 shrink-0 rounded-full border-4 border-card shadow-lg overflow-hidden bg-muted cursor-pointer sm:-mt-16 sm:size-40"
+                                onClick={ () => GetUserProfile(userProfile.id) }
+                            >
+                                <LayoutAvatarImageView figure={ userProfile.figure } direction={ 2 } />
+                            </div>
+
+                            {/* v2: flex-1 space-y-1 */}
+                            <div className="flex-1 space-y-1">
+                                {/* v2: flex items-center gap-2 */}
+                                <div className="flex items-center gap-2">
+                                    <h1 className="text-2xl font-bold">{ userProfile.username }</h1>
+                                    <Badge variant="secondary" size="sm">Spieler</Badge>
+                                    { userProfile.isOnline && (
+                                        <Badge variant="success" size="sm">Online</Badge>
+                                    ) }
+                                    { friendStatusText && friendStatusText !== 'Das bist du' && (
+                                        <Badge variant="info-light" size="sm">{ friendStatusText }</Badge>
+                                    ) }
+                                </div>
+                                {/* v2: text-muted-foreground italic */}
+                                { userProfile.motto && (
+                                    <p className="text-muted-foreground italic">
+                                        &quot;{ userProfile.motto }&quot;
+                                    </p>
+                                ) }
+                                {/* v2: flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground */}
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                    <span className="flex items-center gap-1">
+                                        <Calendar className="size-3.5" />
+                                        Mitglied seit { userProfile.registration }
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* v2: flex gap-2 (buttons right-aligned) */}
+                            <div className="flex gap-2 shrink-0">
+                                { canSendFriendRequest && (
+                                    <Button size="sm" onClick={ addFriend }>
+                                        <UserPlus className="mr-2 size-4" />
+                                        Freund
+                                    </Button>
+                                ) }
+                                <Button variant="outline" size="sm" onClick={ () => CreateLinkEvent(`navigator/search/hotel_view/owner:${ userProfile.username }`) }>
+                                    <Home className="mr-2 size-4" />
+                                    Räume
+                                </Button>
+                                { !isOwnProfile && userProfile.isMyFriend && (
+                                    <Button variant="outline" size="sm" onClick={ () => CreateLinkEvent(`friends/messenger/${ userProfile.username }`) }>
+                                        <MessageSquare className="mr-2 size-4" />
+                                        Nachricht
+                                    </Button>
+                                ) }
+                            </div>
+                        </div>
+
+                        {/* v2: Badges inline — mt-4 flex items-center gap-3 border-t pt-4 */}
+                        { userBadges && userBadges.length > 0 && (
+                            <div className="mt-4 flex items-center gap-3 border-t pt-4">
+                                <span className="text-xs font-medium text-muted-foreground">Badges</span>
+                                <div className="flex gap-2">
+                                    { userBadges.map((badge) => (
+                                        <LayoutBadgeImageView key={ badge } badgeCode={ badge } />
+                                    )) }
+                                </div>
+                            </div>
+                        ) }
+                    </CardContent>
+                </Card>
+
+                {/* ── Stats Cards Grid (1:1 v2 structure) ── */}
+                <div className="grid gap-3 grid-cols-4">
+                    { stats.map((stat) =>
+                    {
+                        const Icon = statIcons[stat.icon];
+                        const color = statColors[stat.icon];
+
+                        return (
+                            <Card key={ stat.label }>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                                        { stat.label }
+                                    </CardTitle>
+                                    <Icon className={ cn('size-4', color) } />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{ stat.value }</div>
+                                </CardContent>
+                            </Card>
+                        );
+                    }) }
                 </div>
 
-                {/* Tabs */}
-                <div className="border-t border-zinc-100">
-                    <Tabs defaultValue="badges">
-                        <TabsList variant="line" className="bg-transparent! border-b border-zinc-100 px-5 h-auto!">
-                            <TabsTrigger value="badges" className="text-zinc-500! data-[state=active]:text-zinc-900! data-[state=active]:border-zinc-900! text-xs py-2.5">
-                                Badges
-                            </TabsTrigger>
-                            <TabsTrigger value="relationships" className="text-zinc-500! data-[state=active]:text-zinc-900! data-[state=active]:border-zinc-900! text-xs py-2.5">
+                {/* ── Tabs (In-Game addition: Beziehungen + Gruppen) ── */}
+                <Card>
+                    <Tabs defaultValue="relationships">
+                        <TabsList variant="line" className="bg-transparent! border-b px-6 h-auto!">
+                            <TabsTrigger value="relationships" className="text-xs py-2.5">
                                 Beziehungen
                             </TabsTrigger>
-                            <TabsTrigger value="groups" className="text-zinc-500! data-[state=active]:text-zinc-900! data-[state=active]:border-zinc-900! text-xs py-2.5">
+                            <TabsTrigger value="groups" className="text-xs py-2.5">
                                 Gruppen
                             </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="badges" className="px-5 py-3 min-h-[120px] max-h-[200px] overflow-y-auto">
-                            { userBadges && userBadges.length > 0 ? (
-                                <div className="grid grid-cols-8 gap-1.5">
-                                    { userBadges.map((badge) => (
-                                        <div key={ badge } className="flex items-center justify-center h-10 rounded-lg bg-zinc-50 border border-zinc-100">
-                                            <LayoutBadgeImageView badgeCode={ badge } />
-                                        </div>
-                                    )) }
-                                </div>
-                            ) : (
-                                <div className="flex items-center justify-center h-20 text-sm text-zinc-300">
-                                    Keine Badges
-                                </div>
-                            ) }
-                        </TabsContent>
-
-                        <TabsContent value="relationships" className="px-5 py-3 min-h-[120px] max-h-[200px] overflow-y-auto">
+                        <TabsContent value="relationships" className="px-6 py-4 min-h-[100px] max-h-[200px] overflow-y-auto">
                             { userRelationships
                                 ? <RelationshipsContainerView relationships={ userRelationships } />
-                                : <div className="flex items-center justify-center h-20 text-sm text-zinc-300">Wird geladen...</div>
+                                : <div className="flex items-center justify-center h-20 text-sm text-muted-foreground">Wird geladen...</div>
                             }
                         </TabsContent>
 
-                        <TabsContent value="groups" className="px-5 py-3 min-h-[120px] max-h-[200px] overflow-y-auto">
+                        <TabsContent value="groups" className="px-6 py-4 min-h-[100px] max-h-[200px] overflow-y-auto">
                             <GroupsContainerView
                                 fullWidth
                                 itsMe={ isOwnProfile }
@@ -295,35 +328,8 @@ export const UserProfileView: FC<{}> = () =>
                             />
                         </TabsContent>
                     </Tabs>
-                </div>
+                </Card>
             </div>
         </DraggableWindow>
-    );
-};
-
-const StatCard: FC<{ icon: React.ReactNode; label: string; value?: number; valueStr?: string; small?: boolean }> = ({ icon, label, value, valueStr, small }) => (
-    <div className="flex flex-col items-center gap-1 p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
-        { icon }
-        <span className={ `font-bold text-zinc-900 ${ small ? 'text-xs' : 'text-lg' }` }>
-            { valueStr ?? value?.toLocaleString('de-DE') }
-        </span>
-        <span className="text-[10px] text-zinc-400 uppercase tracking-wider">{ label }</span>
-    </div>
-);
-
-const ProfileLevelStat: FC<{ badges: string[]; score: number }> = ({ badges, score }) =>
-{
-    const prestige = useMemo(() => getPrestigeFromBadges(badges), [ badges ]);
-    const info = useMemo(() => getPrestigeInfo(score, prestige), [ score, prestige ]);
-
-    return (
-        <div className="flex flex-col items-center gap-1 p-2.5 rounded-xl bg-zinc-50 border border-zinc-100">
-            <Star className="w-4 h-4 text-purple-500" />
-            <span className="text-lg font-bold text-zinc-900">
-                { prestige > 0 && <span className="text-purple-500">P{ prestige } </span> }
-                Lv.{ info.displayLevel }
-            </span>
-            <span className="text-[10px] text-zinc-400 uppercase tracking-wider">Level</span>
-        </div>
     );
 };

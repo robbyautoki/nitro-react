@@ -13,11 +13,11 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 
 function SidebarItem({ iconClass, label, badge, onClick }: { iconClass: string; label: string; badge?: number; onClick?: () => void }) {
   return (
-    <div className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={onClick}>
-      <div className={`icon ${iconClass} shrink-0`} style={{ maxWidth: 28, maxHeight: 28 }} />
-      <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">{label}</span>
+    <div className="relative flex flex-col items-center gap-1 py-1.5 px-1 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors" onClick={onClick}>
+      <div className={`icon ${iconClass} shrink-0`} style={{ width: 40, height: 40, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center' }} />
+      <span className="text-[9px] font-medium text-muted-foreground/60 leading-none">{label}</span>
       {badge != null && badge > 0 && (
-        <span className="absolute top-0.5 right-0 h-[14px] min-w-[14px] flex items-center justify-center text-[8px] px-0.5 rounded-full bg-red-500 text-white font-bold shadow-sm">{badge}</span>
+        <span className="absolute top-0.5 right-0.5 h-[16px] min-w-[16px] flex items-center justify-center text-[9px] px-1 rounded-full bg-red-500 text-white font-bold shadow-sm">{badge}</span>
       )}
     </div>
   );
@@ -128,7 +128,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="nitro-toolbar fixed left-0 top-0 h-screen z-[70] pointer-events-auto shrink-0">
-        <div className="border-r border-border/40 bg-card w-16 flex flex-col items-center py-3 gap-0.5 overflow-hidden h-screen">
+        <div className="border-r border-border/40 bg-card w-[72px] flex flex-col items-center py-3 gap-1 overflow-hidden h-screen">
 
           <ToolbarMeView
             useGuideTool={useGuideTool}
@@ -163,9 +163,9 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
           <OnlineFriendsPopover />
 
           <div className="mt-auto" />
-          <div className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={toggleTheme}>
+          <div className="relative flex flex-col items-center gap-1 py-1.5 px-1 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors" onClick={toggleTheme}>
             {isDark ? <Sun className="w-5 h-5 text-muted-foreground/60" /> : <Moon className="w-5 h-5 text-muted-foreground/60" />}
-            <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">{isDark ? 'Light' : 'Dark'}</span>
+            <span className="text-[9px] font-medium text-muted-foreground/60 leading-none">{isDark ? 'Light' : 'Dark'}</span>
           </div>
         </div>
 

@@ -1,7 +1,9 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { Store, Package, BarChart3, History, MessageCircle, ShoppingBag, X } from 'lucide-react';
+import { Store, Package, BarChart3, History, MessageCircle, ShoppingBag, X, GripVertical } from 'lucide-react';
 import { DraggableWindow, DraggableWindowPosition } from '../../common';
+import { GetConfiguration } from '../../api';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
 import { MarketplacePriceChartView } from './MarketplacePriceChartView';
 import { CustomMarketplaceBrowseView } from './CustomMarketplaceBrowseView';
@@ -67,12 +69,24 @@ export const MarketplaceView: FC<{}> = () =>
                     {/* Title Bar */}
                     <div className="drag-handler shrink-0 flex items-center justify-between px-3 py-2 border-b border-border/40 bg-muted/20 cursor-grab active:cursor-grabbing select-none">
                         <div className="flex items-center gap-2">
+                            <GripVertical className="w-3.5 h-3.5 text-muted-foreground/30" />
                             <Store className="w-3.5 h-3.5 text-muted-foreground/50" />
                             <span className="text-[13px] font-semibold">Marktplatz</span>
                         </div>
                         <button className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/50 transition-colors" onClick={ onClose }>
                             <X className="w-3 h-3" />
                         </button>
+                    </div>
+
+                    {/* Marketplace Banner */}
+                    <div className="shrink-0 border-b border-border/30 overflow-hidden">
+                        <img
+                            src={ `${ GetConfiguration<string>('assets.url', 'http://localhost:8080') }/c_images/catalogue/bonush.gif` }
+                            alt="Marktplatz"
+                            className="w-full h-[64px] object-cover"
+                            style={ { imageRendering: 'pixelated' } }
+                            draggable={ false }
+                        />
                     </div>
 
                     {/* Tab Bar */}

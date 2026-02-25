@@ -156,7 +156,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
 
       </div>
 
-      <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto flex items-end gap-2 w-[620px]">
+      <div className="fixed bottom-1 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto flex items-end gap-2 w-[620px]">
         <div id="toolbar-chat-input-container" className="flex-1 min-w-0" />
         <div id="toolbar-room-tools-container" className="flex items-center shrink-0" />
       </div>

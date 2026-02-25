@@ -307,6 +307,9 @@ export const ChatInputView: FC<{}> = props =>
     const { selectedUsername = '', floodBlocked = false, floodBlockedSeconds = 0, setIsTyping = null, setIsIdle = null, sendChat = null } = useChatInputWidget();
     const { roomSession = null } = useRoom();
     const inputRef = useRef<HTMLInputElement>();
+    const selectedCmdRef = useRef<HTMLButtonElement>(null);
+    const selectedUserRef = useRef<HTMLButtonElement>(null);
+    const autocompleteRef = useRef<HTMLDivElement>(null);
 
     const chatModeIdWhisper = useMemo(() => LocalizeText('widgets.chatinput.mode.whisper'), []);
     const chatModeIdShout = useMemo(() => LocalizeText('widgets.chatinput.mode.shout'), []);
@@ -541,6 +544,22 @@ export const ChatInputView: FC<{}> = props =>
         inputRef.current.parentElement.dataset.value = chatValue;
     }, [ chatValue ]);
 
+    useEffect(() => { selectedCmdRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, [ selectedCmdIndex ]);
+    useEffect(() => { selectedUserRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, [ selectedUserIndex ]);
+
+    useEffect(() =>
+    {
+        const onMouseDown = (e: MouseEvent) =>
+        {
+            if(!showCommands && !showUserAuto) return;
+            if(autocompleteRef.current?.contains(e.target as Node)) return;
+            if(inputRef.current?.contains(e.target as Node)) return;
+            setShowCommands(false);
+        };
+        document.addEventListener('mousedown', onMouseDown);
+        return () => document.removeEventListener('mousedown', onMouseDown);
+    }, [ showCommands, showUserAuto ]);
+
     if(!roomSession || roomSession.isSpectator) return null;
 
     const portalTarget = document.getElementById('toolbar-chat-input-container');
@@ -554,7 +573,7 @@ export const ChatInputView: FC<{}> = props =>
             <div className="relative w-full max-w-2xl mx-auto px-4 pb-3 pt-1">
                 {/* Command Autocomplete */}
                 { showCommands && filteredCommands.length > 0 && (
-                    <div className="absolute bottom-full left-4 right-4 mb-2 rounded-xl border border-border/50 bg-card/98 backdrop-blur-xl shadow-2xl overflow-hidden z-10">
+                    <div ref={ autocompleteRef } className="absolute bottom-full left-4 right-4 mb-2 rounded-xl border border-border/50 bg-card/98 backdrop-blur-xl shadow-2xl overflow-hidden z-10">
                         <ScrollArea className="max-h-[280px]">
                             { filteredCommands.map((cmd, flatIndex) => {
                                 const showHeader = cmd.category !== lastCategory;
@@ -569,6 +588,7 @@ export const ChatInputView: FC<{}> = props =>
                                             </div>
                                         ) }
                                         <button
+                                            ref={ isSelected ? selectedCmdRef : undefined }
                                             className={ `w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${ isSelected ? 'bg-primary/10 text-foreground' : 'hover:bg-accent/40 text-foreground/80' }` }
                                             onMouseDown={ e => { e.preventDefault(); handleCommandSelect(cmd.command + ' '); } }
                                         >
@@ -598,6 +618,7 @@ export const ChatInputView: FC<{}> = props =>
                                 const isSelected = i === selectedUserIndex;
                                 return (
                                     <button key={ user.name }
+                                        ref={ isSelected ? selectedUserRef : undefined }
                                         className={ `w-full flex items-center gap-2.5 px-3 py-1.5 text-left transition-colors ${ isSelected ? 'bg-primary/10 text-foreground' : 'hover:bg-accent/40 text-foreground/80' }` }
                                         onMouseDown={ e => { e.preventDefault(); handleUserSelect(user.name); } }
                                     >
@@ -651,12 +672,12 @@ export const ChatInputView: FC<{}> = props =>
 
                 {/* Hints */}
                 <div className="flex items-center justify-between mt-1.5 px-1">
-                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground/25">
+                    <div className="flex items-center gap-3 text-[10px] text-white/25">
                         <span className="flex items-center gap-1"><Smile className="w-3 h-3" /> Emoji</span>
                         <span className="flex items-center gap-1"><Palette className="w-3 h-3" /> #{chatStyleId}</span>
                         <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Hotbar</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground/25">
+                    <div className="flex items-center gap-2 text-[10px] text-white/25">
                         <span>Shift+↵ Rufen</span><span>·</span><span>: Befehle</span><span>·</span><span>↑↓ Navigation</span>
                     </div>
                 </div>

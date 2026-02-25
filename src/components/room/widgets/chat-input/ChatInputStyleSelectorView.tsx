@@ -52,8 +52,8 @@ export const ChatInputStyleSelectorView: FC<ChatInputStyleSelectorViewProps> = p
                                                     ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
                                                     : 'border-border/20 hover:border-border/50 bg-muted/5 hover:bg-accent/20' }` }
                                         >
-                                            <div className="bubble-container">
-                                                <div className={ `chat-bubble bubble-${ styleId }` }>&nbsp;</div>
+                                            <div className="bubble-container" style={ { width: 40, height: 22, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' } }>
+                                                <div className={ `chat-bubble bubble-${ styleId }` } style={ { minHeight: 0, maxWidth: 'none', fontSize: 0, padding: '2px 8px', lineHeight: 0 } }>&nbsp;</div>
                                             </div>
                                             { chatStyleId === styleId && (
                                                 <div className="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-tl-md flex items-center justify-center">

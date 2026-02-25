@@ -4,13 +4,14 @@ const getCmsUrl = () => GetConfiguration<string>('url.prefix', '');
 const headers = () => getAuthHeaders();
 
 export const CustomMarketplaceApi = {
-    browse: (params?: { q?: string; minPrice?: number; maxPrice?: number; currency?: string; page?: number }) =>
+    browse: (params?: { q?: string; minPrice?: number; maxPrice?: number; currency?: string; sort?: string; page?: number }) =>
     {
         const sp = new URLSearchParams({ action: 'browse' });
         if(params?.q) sp.set('q', params.q);
         if(params?.minPrice && params.minPrice > 0) sp.set('minPrice', String(params.minPrice));
         if(params?.maxPrice && params.maxPrice > 0) sp.set('maxPrice', String(params.maxPrice));
         if(params?.currency) sp.set('currency', params.currency);
+        if(params?.sort) sp.set('sort', params.sort);
         if(params?.page) sp.set('page', String(params.page));
         return fetch(`${ getCmsUrl() }/api/marketplace?${ sp }`, { headers: headers() }).then(r => r.json());
     },

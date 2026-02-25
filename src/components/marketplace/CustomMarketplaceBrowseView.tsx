@@ -60,8 +60,9 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
     const [ buyTarget, setBuyTarget ] = useState<CustomListing | null>(null);
     const [ buySubmitting, setBuySubmitting ] = useState(false);
 
-    const doSearch = useCallback((p: number = 0) =>
+    const doSearch = useCallback((p: number = 0, sort?: string) =>
     {
+        const s = sort ?? sortBy;
         setLoading(true);
         setPage(p);
         CustomMarketplaceApi.browse({
@@ -69,6 +70,7 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
             minPrice: parseInt(minPrice) || undefined,
             maxPrice: parseInt(maxPrice) || undefined,
             currency: currency || undefined,
+            sort: s || undefined,
             page: p,
         })
             .then(data =>
@@ -77,7 +79,7 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
                 setTotal(data.total ?? 0);
             })
             .finally(() => setLoading(false));
-    }, [ searchQuery, minPrice, maxPrice, currency ]);
+    }, [ searchQuery, minPrice, maxPrice, currency, sortBy ]);
 
     useEffect(() => { doSearch(0); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -168,7 +170,7 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
                 { [ { id: 'price_asc', label: 'Günstig' }, { id: 'price_desc', label: 'Teuer' }, { id: 'newest', label: 'Neu' } ].map(opt => (
                     <button
                         key={ opt.id }
-                        onClick={ () => setSortBy(opt.id) }
+                        onClick={ () => { setSortBy(opt.id); doSearch(0, opt.id); } }
                         className={ `px-1.5 py-0.5 rounded text-[9px] font-medium ${ sortBy === opt.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent/50' }` }
                     >
                         { opt.label }

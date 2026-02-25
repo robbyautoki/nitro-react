@@ -1,6 +1,7 @@
 import { FC, useMemo, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Smile } from 'lucide-react';
 import { LocalStorageKeys } from '../../../../api';
 import { CATEGORIES, EMOJIS, getEmojisByCategory } from '../../../../api/utils/EmojiRegistry';
 import { useLocalStorage } from '../../../../hooks';
@@ -88,14 +89,9 @@ export const ChatInputEmojiPickerView: FC<ChatInputEmojiPickerViewProps> = props
     return (
         <Popover open={ pickerVisible } onOpenChange={ handleOpenChange }>
             <PopoverTrigger asChild>
-                <div className="emoji-picker-trigger shrink-0 cursor-pointer transition-opacity hover:opacity-70 flex items-center justify-center" title="Emojis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={ { color: 'rgba(255, 255, 255, 0.45)' } }>
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                        <line x1="9" y1="9" x2="9.01" y2="9" />
-                        <line x1="15" y1="9" x2="15.01" y2="9" />
-                    </svg>
-                </div>
+                <button className="shrink-0 text-muted-foreground/40 hover:text-foreground transition-colors cursor-pointer flex items-center justify-center" title="Emojis">
+                    <Smile className="w-5 h-5" />
+                </button>
             </PopoverTrigger>
             <PopoverContent
                 side="top"

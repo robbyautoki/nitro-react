@@ -8,7 +8,7 @@ import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
 import { HotbarView } from '../../../hotbar/HotbarView';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Zap } from 'lucide-react';
+import { Smile, Zap, Palette } from 'lucide-react';
 
 interface CommandParam { name: string; type: 'user' | 'number' | 'text' | 'id'; }
 
@@ -647,6 +647,18 @@ export const ChatInputView: FC<{}> = props =>
 
                     <Separator orientation="vertical" className="h-4" />
                     <span className="text-[11px] text-muted-foreground/25 select-none shrink-0 font-medium">↵ Senden</span>
+                </div>
+
+                {/* Hints */}
+                <div className="flex items-center justify-between mt-1.5 px-1">
+                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground/25">
+                        <span className="flex items-center gap-1"><Smile className="w-3 h-3" /> Emoji</span>
+                        <span className="flex items-center gap-1"><Palette className="w-3 h-3" /> #{chatStyleId}</span>
+                        <span className="flex items-center gap-1"><Zap className="w-3 h-3" /> Hotbar</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground/25">
+                        <span>Shift+↵ Rufen</span><span>·</span><span>: Befehle</span><span>·</span><span>↑↓ Navigation</span>
+                    </div>
                 </div>
             </div>
         </>,

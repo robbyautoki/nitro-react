@@ -1,12 +1,13 @@
 import { RelationshipStatusEnum, RelationshipStatusInfoEvent, RelationshipStatusInfoMessageParser, RoomSessionFavoriteGroupUpdateEvent, RoomSessionUserBadgesEvent, RoomSessionUserFigureUpdateEvent, UserRelationshipsComposer } from '@nitrots/nitro-renderer';
 import { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useEffect, useMemo, useState } from 'react';
-import { Heart, Smile, Shield, X, Pen } from 'lucide-react';
-import { AvatarInfoUser, CloneObject, GetConfiguration, GetGroupInformation, GetLocalStorage, GetSessionDataManager, GetUserProfile, LocalizeText, SendMessageComposer, SetLocalStorage } from '../../../../../api';
+import { Heart, Smile, Shield, X, Pen, Star, Users, Calendar, Hand } from 'lucide-react';
+import { AvatarInfoUser, CloneObject, GetConfiguration, GetGroupInformation, GetLocalStorage, GetSessionDataManager, GetUserProfile, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { getPrestigeFromBadges, getPrestigeInfo } from '../../../../../api/utils/PrestigeUtils';
 import { LayoutAvatarImageView, LayoutBadgeImageView } from '../../../../../common';
 import { useMessageEvent, useRoom, useRoomSessionManagerEvent } from '../../../../../hooks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/reui-badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { PROFILE_EFFECTS, ProfileEffectData, ROLE_PRESETS } from '../../../../user-profile/ProfileEffects';
 
 const DEFAULT_EFFECT_ID = 'sakura-dreams';
@@ -37,7 +38,7 @@ function ProfileEffectRenderer({ effect }: { effect: ProfileEffectData })
     const sorted = useMemo(() => [ ...effect.effects ].sort((a, b) => a.zIndex - b.zIndex), [ effect ]);
 
     return (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1] opacity-60" style={ { willChange: 'transform, opacity', transform: 'translateZ(0)' } }>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1] opacity-100 group-hover:opacity-20 transition-opacity duration-500" style={ { willChange: 'transform, opacity', transform: 'translateZ(0)' } }>
             { sorted.map((layer, i) => (
                 <div key={ `${ effect.id }-${ i }` } className="absolute inset-0" style={ { zIndex: layer.zIndex } }>
                     <SpriteLayer src={ layer.src } startDelay={ layer.start } />
@@ -45,6 +46,11 @@ function ProfileEffectRenderer({ effect }: { effect: ProfileEffectData })
             )) }
         </div>
     );
+}
+
+function SectionHeader({ children }: { children: React.ReactNode })
+{
+    return <div className="text-[10px] uppercase tracking-wider font-semibold text-white/25 mb-1.5">{ children }</div>;
 }
 
 function getRolesFromBadges(badges: string[]): string[]
@@ -56,10 +62,10 @@ function getRolesFromBadges(badges: string[]): string[]
     return roles;
 }
 
-const REL_CONFIG: Record<number, { icon: typeof Heart; color: string; label: string }> = {
-    [RelationshipStatusEnum.HEART]: { icon: Heart, color: 'text-red-400', label: 'Herz' },
-    [RelationshipStatusEnum.SMILE]: { icon: Smile, color: 'text-yellow-400', label: 'Smiley' },
-    [RelationshipStatusEnum.BOBBA]: { icon: Shield, color: 'text-blue-400', label: 'Bobba' },
+const REL_CONFIG: Record<number, { icon: typeof Heart; color: string; bg: string; label: string }> = {
+    [RelationshipStatusEnum.HEART]: { icon: Heart, color: 'text-red-400', bg: 'bg-red-500/10', label: 'Herz' },
+    [RelationshipStatusEnum.SMILE]: { icon: Smile, color: 'text-yellow-400', bg: 'bg-yellow-500/10', label: 'Smiley' },
+    [RelationshipStatusEnum.BOBBA]: { icon: Shield, color: 'text-blue-400', bg: 'bg-blue-500/10', label: 'Bobba' },
 };
 
 interface InfoStandWidgetUserViewProps
@@ -87,6 +93,7 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
     const roles = useMemo(() => getRolesFromBadges(avatarInfo?.badges || []), [ avatarInfo?.badges ]);
     const prestige = useMemo(() => getPrestigeFromBadges(avatarInfo?.badges || []), [ avatarInfo?.badges ]);
     const levelInfo = avatarInfo ? getPrestigeInfo(avatarInfo.achievementScore, prestige) : null;
+    const isOwnUser = avatarInfo?.type === AvatarInfoUser.OWN_USER;
 
     const saveMotto = (motto: string) =>
     {
@@ -167,154 +174,188 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
 
     return (
         <TooltipProvider delayDuration={ 200 }>
-            <div className="nitro-infostand relative rounded-xl overflow-hidden">
+            <div className="group nitro-infostand relative rounded-xl overflow-hidden flex flex-col">
 
-                {/* Header */}
-                <div className="relative z-10 flex items-center justify-between px-3 pt-2.5 pb-1.5">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                        <button className="shrink-0 opacity-60 hover:opacity-100 transition-opacity" onClick={ () => GetUserProfile(avatarInfo.webID) }>
-                            <div className="w-5 h-5 rounded-full overflow-hidden">
+                {/* ── Header ── */}
+                <div className="relative z-10 flex items-center justify-between px-3 pt-2.5 pb-1.5 shrink-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <button className="shrink-0 hover:opacity-80 transition-opacity" onClick={ () => GetUserProfile(avatarInfo.webID) }>
+                            <div className="w-6 h-6 rounded-full overflow-hidden ring-1 ring-white/10">
                                 <LayoutAvatarImageView figure={ avatarInfo.figure } headOnly direction={ 2 } />
                             </div>
                         </button>
-                        <span className="text-[13px] font-semibold truncate text-white">{ avatarInfo.name }</span>
+                        <div className="min-w-0">
+                            <span className="text-[13px] font-bold truncate text-white block leading-tight">{ avatarInfo.name }</span>
+                            <span className="text-[9px] text-white/25 font-mono">#{ avatarInfo.webID }</span>
+                        </div>
+                        { roles.length > 0 && (
+                            <div className="flex gap-1 shrink-0">
+                                { roles.map(r =>
+                                {
+                                    const cfg = ROLE_PRESETS[r];
+                                    if(!cfg) return null;
+                                    return (
+                                        <span key={ r } className={ `inline-flex items-center text-[8px] font-bold px-1.5 py-0.5 rounded-full border ${ cfg.bg } ${ cfg.border } ${ cfg.color }` }>
+                                            { cfg.label }
+                                        </span>
+                                    );
+                                }) }
+                            </div>
+                        ) }
                     </div>
                     <button className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors" onClick={ onClose }>
-                        <X className="w-3 h-3 text-white/50" />
+                        <X className="w-3 h-3 text-white/40" />
                     </button>
                 </div>
 
-                <div className="relative z-10 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+                <div className="relative z-10 h-px shrink-0" style={ { background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)' } } />
 
-                {/* Body: Avatar + Badges */}
-                <div className="relative z-10 flex gap-2 px-3 py-2">
-                    <div className="shrink-0 w-[68px] rounded-md overflow-hidden flex items-center justify-center cursor-pointer" style={ { background: 'linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0.03))' } } onClick={ () => GetUserProfile(avatarInfo.webID) }>
-                        <LayoutAvatarImageView figure={ avatarInfo.figure } direction={ 4 } style={ { minHeight: 90 } } />
-                    </div>
+                {/* ── Scrollable Content ── */}
+                <ScrollArea className="flex-1 min-h-0 relative z-10">
+                    <div className="px-3 py-2 space-y-2.5">
 
-                    <div className="flex-1 grid grid-cols-2 gap-1 content-start">
-                        { avatarInfo.badges.slice(0, 5).map((badge, i) => (
-                            <Tooltip key={ badge + i }><TooltipTrigger asChild>
-                                <div className="w-full aspect-square rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-default" style={ { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' } }>
-                                    <LayoutBadgeImageView badgeCode={ badge } showInfo={ true } />
-                                </div>
-                            </TooltipTrigger><TooltipContent className="text-[10px]">{ badge }</TooltipContent></Tooltip>
-                        )) }
-                        { avatarInfo.groupId > 0 && (
-                            <Tooltip><TooltipTrigger asChild>
-                                <div className="w-full aspect-square rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer" style={ { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)' } } onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
-                                    <LayoutBadgeImageView badgeCode={ avatarInfo.groupBadgeId } isGroup showInfo={ true } customTitle={ avatarInfo.groupName } />
-                                </div>
-                            </TooltipTrigger><TooltipContent className="text-[10px]">{ avatarInfo.groupName }</TooltipContent></Tooltip>
-                        ) }
-                        { avatarInfo.groupId <= 0 && avatarInfo.badges.length <= 5 && (
-                            <div className="w-full aspect-square rounded-md" style={ { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.04)' } } />
-                        ) }
-                    </div>
-                </div>
+                        {/* ── Avatar + Badge Grid ── */}
+                        <div className="flex gap-2.5">
+                            <div className="shrink-0 w-[80px] rounded-lg overflow-hidden flex items-center justify-center cursor-pointer hover:ring-1 hover:ring-white/10 transition-all" style={ { background: 'linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0.02))' } } onClick={ () => GetUserProfile(avatarInfo.webID) }>
+                                <LayoutAvatarImageView figure={ avatarInfo.figure } direction={ 4 } style={ { minHeight: 100 } } />
+                            </div>
 
-                <div className="relative z-10 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-
-                {/* Motto */}
-                <div className="relative z-10 px-3 py-1.5">
-                    <div className="rounded-md px-2 py-1.5" style={ { background: 'rgba(255,255,255,0.05)' } }>
-                        { avatarInfo.type === AvatarInfoUser.OWN_USER ? (
-                            <div className="flex items-center gap-1.5">
-                                <Pen className="w-2.5 h-2.5 text-white/30 shrink-0" />
-                                { !isEditingMotto ? (
-                                    <p className="text-[11px] text-white/60 leading-relaxed truncate cursor-pointer flex-1" onClick={ () => setIsEditingMotto(true) }>{ motto || '...' }</p>
-                                ) : (
-                                    <input
-                                        type="text"
-                                        className="flex-1 bg-transparent text-[11px] text-white/80 outline-none border-none p-0"
-                                        maxLength={ GetConfiguration<number>('motto.max.length', 38) }
-                                        value={ motto }
-                                        onChange={ e => setMotto(e.target.value) }
-                                        onBlur={ onMottoBlur }
-                                        onKeyDown={ onMottoKeyDown }
-                                        autoFocus
-                                    />
+                            <div className="flex-1 grid grid-cols-2 gap-1 content-start">
+                                { avatarInfo.badges.slice(0, 5).map((badge, i) => (
+                                    <Tooltip key={ badge + i }><TooltipTrigger asChild>
+                                        <div className="w-full aspect-square rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-default" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } }>
+                                            <LayoutBadgeImageView badgeCode={ badge } showInfo={ true } />
+                                        </div>
+                                    </TooltipTrigger><TooltipContent className="text-[10px]">{ badge }</TooltipContent></Tooltip>
+                                )) }
+                                { avatarInfo.groupId > 0 && (
+                                    <Tooltip><TooltipTrigger asChild>
+                                        <div className="w-full aspect-square rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } } onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
+                                            <LayoutBadgeImageView badgeCode={ avatarInfo.groupBadgeId } isGroup showInfo={ true } customTitle={ avatarInfo.groupName } />
+                                        </div>
+                                    </TooltipTrigger><TooltipContent className="text-[10px]">{ avatarInfo.groupName }</TooltipContent></Tooltip>
+                                ) }
+                                { avatarInfo.groupId <= 0 && avatarInfo.badges.length <= 5 && (
+                                    <div className="w-full aspect-square rounded-md" style={ { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' } } />
                                 ) }
                             </div>
-                        ) : (
-                            <p className="text-[11px] text-white/60 leading-relaxed truncate">{ motto || '...' }</p>
-                        ) }
-                    </div>
-                </div>
+                        </div>
 
-                <div className="relative z-10 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+                        {/* ── Motto ── */}
+                        <div className="rounded-lg p-2.5" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } }>
+                            { isOwnUser ? (
+                                <div className="flex items-center gap-1.5">
+                                    <Pen className="w-2.5 h-2.5 text-white/20 shrink-0" />
+                                    { !isEditingMotto ? (
+                                        <p className="text-[11px] text-white/50 leading-relaxed truncate cursor-pointer flex-1 italic" onClick={ () => setIsEditingMotto(true) }>{ motto || 'Motto setzen...' }</p>
+                                    ) : (
+                                        <input
+                                            type="text"
+                                            className="flex-1 bg-transparent text-[11px] text-white/80 outline-none border-none p-0"
+                                            maxLength={ GetConfiguration<number>('motto.max.length', 38) }
+                                            value={ motto }
+                                            onChange={ e => setMotto(e.target.value) }
+                                            onBlur={ onMottoBlur }
+                                            onKeyDown={ onMottoKeyDown }
+                                            autoFocus
+                                        />
+                                    ) }
+                                </div>
+                            ) : (
+                                <p className="text-[11px] text-white/50 leading-relaxed italic">{ motto || '...' }</p>
+                            ) }
+                        </div>
 
-                {/* Achievement Score + Level */}
-                <div className="relative z-10 px-3 py-2 space-y-1">
-                    <div className="flex items-center justify-between">
-                        <span className="text-[10px] text-white/40">Erfolgspunkte</span>
-                        <span className="text-[11px] font-semibold text-white/80">{ avatarInfo.achievementScore }</span>
-                    </div>
-                    { levelInfo && (
-                        <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-white/40">
-                                { prestige > 0 && `P${ prestige } ` }Lv.{ levelInfo.displayLevel }
-                            </span>
-                            <div className="flex-1 h-1 rounded-full bg-white/10 overflow-hidden">
-                                <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all" style={ { width: `${ levelInfo.progress * 100 }%` } } />
+                        {/* ── Stats ── */}
+                        <div className="rounded-lg p-2.5 space-y-2" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } }>
+                            <SectionHeader>Stats</SectionHeader>
+
+                            <div className="flex flex-wrap gap-1">
+                                <Badge variant="secondary" className="text-[9px] h-[18px] px-1.5 gap-1 font-semibold bg-white/5 border-white/8 text-white/60 hover:bg-white/10">
+                                    <Star className="w-2.5 h-2.5" />{ avatarInfo.achievementScore }
+                                </Badge>
+                                { levelInfo && (
+                                    <Tooltip><TooltipTrigger asChild>
+                                        <div className="inline-flex items-center gap-1">
+                                            <Badge variant="secondary" className="text-[9px] h-[18px] px-1.5 gap-1 font-semibold bg-white/5 border-white/8 text-white/60">
+                                                { prestige > 0 && `P${ prestige } ` }Lv.{ levelInfo.displayLevel }
+                                            </Badge>
+                                            <div className="w-10 h-1 rounded-full bg-white/10 overflow-hidden">
+                                                <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all" style={ { width: `${ levelInfo.progress * 100 }%` } } />
+                                            </div>
+                                        </div>
+                                    </TooltipTrigger><TooltipContent className="text-[10px]">{ Math.round(levelInfo.progress * 100) }% zum naechsten Level</TooltipContent></Tooltip>
+                                ) }
+                                { isOwnUser && (
+                                    <Badge variant="outline" className="text-[9px] h-[18px] px-1.5 font-medium text-white/30 border-white/10">Du</Badge>
+                                ) }
+                            </div>
+
+                            <div className="space-y-1.5 pt-0.5">
+                                <div className="flex items-center gap-2 text-[10px]">
+                                    <Calendar className="w-3 h-3 text-white/20 shrink-0" />
+                                    <span className="text-white/35">Erfolgspunkte</span>
+                                    <span className="text-white/70 font-semibold ml-auto tabular-nums">{ avatarInfo.achievementScore }</span>
+                                </div>
+                                { avatarInfo.groupId > 0 && (
+                                    <div className="flex items-center gap-2 text-[10px]">
+                                        <Users className="w-3 h-3 text-white/20 shrink-0" />
+                                        <span className="text-white/35">Gruppe</span>
+                                        <span className="text-white/60 font-medium ml-auto truncate max-w-[120px] cursor-pointer hover:text-white/80" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>{ avatarInfo.groupName }</span>
+                                    </div>
+                                ) }
+                                { (avatarInfo.carryItem > 0) && (
+                                    <div className="flex items-center gap-2 text-[10px]">
+                                        <Hand className="w-3 h-3 text-white/20 shrink-0" />
+                                        <span className="text-white/35">Hält</span>
+                                        <span className="text-white/60 font-medium ml-auto">{ LocalizeText('handitem' + avatarInfo.carryItem) }</span>
+                                    </div>
+                                ) }
                             </div>
                         </div>
-                    ) }
-                    { roles.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-0.5">
-                            { roles.map(r =>
+
+                        {/* ── Beziehungen ── */}
+                        <div className="rounded-lg p-2.5 space-y-1.5" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } }>
+                            <SectionHeader>Beziehungen</SectionHeader>
+                            { [ RelationshipStatusEnum.HEART, RelationshipStatusEnum.SMILE, RelationshipStatusEnum.BOBBA ].map(type =>
                             {
-                                const cfg = ROLE_PRESETS[r];
-                                if(!cfg) return null;
+                                const c = REL_CONFIG[type];
+                                if(!c) return null;
+                                const Icon = c.icon;
+                                const info = relationships?.relationshipStatusMap?.hasKey(type)
+                                    ? relationships.relationshipStatusMap.getValue(type)
+                                    : null;
+                                const hasData = info && info.friendCount > 0;
+
                                 return (
-                                    <span key={ r } className={ `inline-flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${ cfg.bg } ${ cfg.border } ${ cfg.color }` }>
-                                        { cfg.label }
-                                    </span>
+                                    <div key={ type } className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/5 transition-colors" style={ { border: '1px solid rgba(255,255,255,0.04)' } }>
+                                        <div className={ `w-6 h-6 rounded-full ${ c.bg } flex items-center justify-center shrink-0` }>
+                                            <Icon className={ `w-3 h-3 ${ c.color }` } />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            { hasData ? (
+                                                <span className="text-[11px] font-medium text-white/70 cursor-pointer hover:underline truncate block" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
+                                                    { info.randomFriendName }
+                                                </span>
+                                            ) : (
+                                                <span className="text-[11px] text-white/15">—</span>
+                                            ) }
+                                        </div>
+                                        { hasData && info.friendCount > 1 && <span className="text-[9px] text-white/25">+{ info.friendCount - 1 }</span> }
+                                        { hasData && info.randomFriendFigure && (
+                                            <div className="w-5 h-5 rounded-full shrink-0 overflow-hidden ring-1 ring-white/10 cursor-pointer" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
+                                                <LayoutAvatarImageView figure={ info.randomFriendFigure } headOnly direction={ 2 } />
+                                            </div>
+                                        ) }
+                                    </div>
                                 );
                             }) }
                         </div>
-                    ) }
-                    { (avatarInfo.carryItem > 0) && (
-                        <div className="text-[10px] text-white/40 pt-0.5">
-                            { LocalizeText('infostand.text.handitem', [ 'item' ], [ LocalizeText('handitem' + avatarInfo.carryItem) ]) }
-                        </div>
-                    ) }
-                </div>
 
-                <div className="relative z-10 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-
-                {/* Relationships */}
-                { relationships && relationships.relationshipStatusMap.length > 0 && (
-                    <div className="relative z-10 px-3 py-2 space-y-1">
-                        { [ RelationshipStatusEnum.HEART, RelationshipStatusEnum.SMILE, RelationshipStatusEnum.BOBBA ].map(type =>
-                        {
-                            const c = REL_CONFIG[type];
-                            if(!c) return null;
-                            const Icon = c.icon;
-                            const info = relationships.relationshipStatusMap.hasKey(type)
-                                ? relationships.relationshipStatusMap.getValue(type)
-                                : null;
-                            const hasData = info && info.friendCount > 0;
-
-                            return (
-                                <div key={ type } className="flex items-center gap-2">
-                                    <Icon className={ `w-3 h-3 shrink-0 ${ c.color }` } />
-                                    <span className={ `text-[11px] flex-1 truncate ${ hasData ? 'text-white/70 cursor-pointer hover:underline' : 'text-white/20' }` } onClick={ () => hasData && info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
-                                        { hasData ? info.randomFriendName : '—' }
-                                    </span>
-                                    { hasData && info.friendCount > 1 && <span className="text-[9px] text-white/30">+{ info.friendCount - 1 }</span> }
-                                    { hasData && info.randomFriendFigure && (
-                                        <div className="w-4 h-4 rounded-full shrink-0 overflow-hidden cursor-pointer" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
-                                            <LayoutAvatarImageView figure={ info.randomFriendFigure } headOnly direction={ 2 } />
-                                        </div>
-                                    ) }
-                                </div>
-                            );
-                        }) }
                     </div>
-                ) }
+                </ScrollArea>
 
-                {/* Discord Effect Overlay */}
+                {/* ── Discord Effect Overlay ── */}
                 { activeEffect && <ProfileEffectRenderer key={ activeEffect.id } effect={ activeEffect } /> }
             </div>
         </TooltipProvider>

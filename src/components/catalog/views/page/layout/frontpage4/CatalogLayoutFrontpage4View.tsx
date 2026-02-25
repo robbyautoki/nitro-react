@@ -10,7 +10,7 @@ import { CatalogCurrencyIcon } from '../../../shared/CatalogCurrencyIcon';
 
 export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
 {
-    const { page = null, hideNavigation = null } = props;
+    const { page = null } = props;
     const { frontPageItems = [], openPageByOfferId = null } = useCatalog();
 
     const [ recentPurchases, setRecentPurchases ] = useState<TrackedPurchase[]>(() => loadTracked('catalog_recent_purchases'));
@@ -21,8 +21,6 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
 
     const slides = frontPageItems.filter(Boolean);
     const imageBase = GetConfiguration<string>('image.library.url');
-
-    useEffect(() => { hideNavigation(); }, [ page, hideNavigation ]);
 
     useEffect(() =>
     {

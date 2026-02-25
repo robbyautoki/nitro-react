@@ -6,6 +6,7 @@ import { CatalogPurchasedEvent } from '../../events';
 import { useCatalog, useUiEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
 import { Button } from '../ui/button';
+import { Separator } from '../ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { CatalogInspectorView } from './views/CatalogInspectorView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
@@ -54,7 +55,7 @@ export const CatalogView: FC<{}> = props =>
 {
     const { isVisible = false, setIsVisible = null, rootNode = null, setRootNode = null, currentType, setCurrentType = null, currentPage = null, currentOffer = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, getNodeById, catalogSize, setCatalogSize } = useCatalog();
 
-    const [ navOverlay, setNavOverlay ] = useState(false);
+    const [ sidebarCollapsed, setSidebarCollapsed ] = useState(false);
     const [ inspectorOverlay, setInspectorOverlay ] = useState(false);
     const [ virtualPage, setVirtualPage ] = useState<string | null>(null);
     const [ staffView, setStaffView ] = useState(false);
@@ -292,45 +293,50 @@ export const CatalogView: FC<{}> = props =>
                     style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `${ catalogSize.height }px` } }
                 >
                     {/* Header */}
-                    <div
-                        className="drag-handler relative flex items-center gap-3 px-4 shrink-0 border-b border-black/[0.06] h-14 cursor-move select-none overflow-hidden"
-                        style={ { backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(0,0,0,0.02) 1px, transparent 0)', backgroundSize: '16px 16px' } }
-                    >
+                    <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-border/40 bg-muted/30 h-12 cursor-move select-none overflow-hidden">
                         <TooltipProvider delayDuration={ 300 }>
-                        { !navigationHidden && (
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon-xs" className="shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setNavOverlay(v => !v) }>
-                                        { navOverlay ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" /> }
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom">{ navOverlay ? 'Sidebar ausblenden' : 'Sidebar einblenden' }</TooltipContent>
-                            </Tooltip>
-                        ) }
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setSidebarCollapsed(v => !v) }>
+                                    { sidebarCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" /> }
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">{ sidebarCollapsed ? 'Sidebar einblenden' : 'Sidebar ausblenden' }</TooltipContent>
+                        </Tooltip>
 
-                        <div className="flex items-center gap-1.5 shrink-0 min-w-0 overflow-hidden flex-1">
-                            <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-black/30 shrink-0">
-                                { staffView ? 'Staff Katalog' : LocalizeText('catalog.title') }
-                            </span>
-                            { breadcrumb.map((label, i) => (
-                                <Fragment key={ i }>
-                                    <span className="text-[11px] text-black/15 shrink-0">›</span>
-                                    <span className="text-[12px] text-black/50 truncate">{ label }</span>
-                                </Fragment>
-                            )) }
+                        <div className="flex-1 min-w-0">
+                            { searchResult ? (
+                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                    <span>Suche: &ldquo;<span className="text-foreground font-medium">{ searchResult.searchValue }</span>&rdquo;</span>
+                                </div>
+                            ) : breadcrumb.length > 0 ? (
+                                <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                                    <span className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors shrink-0">Katalog</span>
+                                    { breadcrumb.map((label, i) => (
+                                        <Fragment key={ i }>
+                                            <span className="text-[11px] text-muted-foreground/30 shrink-0">›</span>
+                                            <span className={ `text-xs truncate ${ i === breadcrumb.length - 1 ? 'text-foreground font-medium' : 'text-muted-foreground' }` }>{ label }</span>
+                                        </Fragment>
+                                    )) }
+                                </div>
+                            ) : (
+                                <span className="text-sm text-muted-foreground">Wähle eine Kategorie</span>
+                            ) }
                         </div>
 
-                        <div className="w-[220px] shrink-0" onMouseDown={ e => e.stopPropagation() }>
+                        <div className="w-[240px] shrink-0" onMouseDown={ e => e.stopPropagation() }>
                             <CatalogSearchView />
                         </div>
+
+                        <Separator orientation="vertical" className="h-5" />
 
                         <div className="flex items-center gap-1 shrink-0" onMouseDown={ e => e.stopPropagation() }>
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button
                                         variant="ghost"
-                                        size="icon-xs"
-                                        className={ virtualPage === 'recent' ? 'bg-primary/10 text-primary' : '' }
+                                        size="icon"
+                                        className={ `h-7 w-7 ${ virtualPage === 'recent' ? 'bg-primary/10 text-primary' : '' }` }
                                         onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'recent' })) }
                                     >
                                         <Clock className="w-3.5 h-3.5" />
@@ -343,8 +349,8 @@ export const CatalogView: FC<{}> = props =>
                                 <TooltipTrigger asChild>
                                     <Button
                                         variant="ghost"
-                                        size="icon-xs"
-                                        className={ virtualPage === 'frequent' ? 'bg-primary/10 text-primary' : '' }
+                                        size="icon"
+                                        className={ `h-7 w-7 ${ virtualPage === 'frequent' ? 'bg-primary/10 text-primary' : '' }` }
                                         onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'frequent' })) }
                                     >
                                         <Flame className={ `w-3.5 h-3.5 ${ virtualPage !== 'frequent' ? 'text-orange-400' : '' }` } />
@@ -358,8 +364,8 @@ export const CatalogView: FC<{}> = props =>
                                     <TooltipTrigger asChild>
                                         <Button
                                             variant="ghost"
-                                            size="icon-xs"
-                                            className={ staffView ? 'bg-primary/10 text-primary' : '' }
+                                            size="icon"
+                                            className={ `h-7 w-7 ${ staffView ? 'bg-primary/10 text-primary' : '' }` }
                                             onClick={ () => setStaffView(v => !v) }
                                         >
                                             <ShieldCheck className="w-3.5 h-3.5" />
@@ -371,7 +377,7 @@ export const CatalogView: FC<{}> = props =>
                         </div>
 
                         <button
-                            className="appearance-none border-0 bg-transparent rounded-md p-1 text-black/20 hover:bg-black/[0.04] hover:text-black/60 transition-colors shrink-0"
+                            className="appearance-none border-0 bg-transparent rounded-md p-1 text-muted-foreground/40 hover:bg-accent hover:text-foreground transition-colors shrink-0"
                             onMouseDown={ e => e.stopPropagation() }
                             onClick={ () => setIsVisible(false) }
                         >
@@ -381,10 +387,10 @@ export const CatalogView: FC<{}> = props =>
                     </div>
 
                     {/* Content: Sidebar | Grid | Inspector */}
-                    <div className="flex-1 min-h-0 overflow-hidden flex relative">
+                    <div className="flex-1 min-h-0 overflow-hidden flex">
 
-                        { !navigationHidden && (
-                            <div className={ `w-[210px] min-w-[210px] flex-col min-h-0 border-r border-black/[0.06] hidden xl:flex ${ navOverlay ? '!flex absolute inset-y-0 left-0 z-20 bg-white border-r border-black/[0.06]' : '' }` }>
+                        { !sidebarCollapsed && (
+                            <div className="w-[260px] min-w-[260px] flex-col min-h-0 border-r border-border/40 bg-muted/5 flex">
                                 <CatalogNavigationView staffView={ staffView } />
                             </div>
                         ) }

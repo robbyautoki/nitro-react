@@ -32,7 +32,6 @@ import { UserSettingsView } from '../user-settings/UserSettingsView';
 import { LotteryView } from '../lottery/LotteryView';
 import { WelcomeToastView } from '../welcome/WelcomeToastView';
 import { ArrestToastView } from '../welcome/ArrestToastView';
-import { RadioPanelView } from '../radio/RadioPanelView';
 import { RadioView } from '../radio/RadioView';
 import { PriceListView } from '../pricelist/PriceListView';
 import { WiredView } from '../wired/WiredView';
@@ -105,7 +104,6 @@ export const MainView: FC<{}> = props =>
             <PurseView />
             <WelcomeToastView />
             <ArrestToastView />
-            <RadioPanelView />
             <RadioView />
             <LotteryView />
             <WinRewardView />

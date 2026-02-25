@@ -199,7 +199,7 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
   );
 }
 
-export const RadioPanelView: FC<{}> = () => {
+export const RadioPanelView: FC<{ embedded?: boolean }> = ({ embedded = false }) => {
     const [currentTrack, setCurrentTrack] = useState<RadioTrack | null>(null);
     const [startedAt, setStartedAt] = useState(0);
     const [paused, setPaused] = useState(false);
@@ -442,20 +442,24 @@ export const RadioPanelView: FC<{}> = () => {
         <TooltipProvider delayDuration={200}>
             <div ref={ytContainerRef} style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }} />
 
-            <div className="fixed top-3 left-20 z-[65] pointer-events-auto flex flex-col gap-3">
-                <div className="inline-flex items-center gap-1 py-2 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl">
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <div className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/60 transition-colors" onClick={() => isInIframe ? window.parent.postMessage({ type: 'show-cms' }, '*') : null}>
-                                <Home className="size-4 text-muted-foreground/70" />
-                            </div>
-                        </TooltipTrigger>
-                        <TooltipContent className="text-xs">Startseite</TooltipContent>
-                    </Tooltip>
-                    <div className="w-px h-5 bg-border/30" />
+            <div className={embedded ? "flex flex-col gap-3" : "fixed top-3 left-20 z-[65] pointer-events-auto flex flex-col gap-3"}>
+                <div className={`inline-flex items-center gap-1 py-2 px-3 ${embedded ? 'bg-transparent' : 'rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl'}`}>
+                    {!embedded && (
+                        <>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/60 transition-colors" onClick={() => isInIframe ? window.parent.postMessage({ type: 'show-cms' }, '*') : null}>
+                                        <Home className="size-4 text-muted-foreground/70" />
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent className="text-xs">Startseite</TooltipContent>
+                            </Tooltip>
+                            <div className="w-px h-5 bg-border/30" />
 
-                    <span className="text-sm font-bold px-2 tracking-tight">bahhos</span>
-                    <div className="w-px h-5 bg-border/30" />
+                            <span className="text-sm font-bold px-2 tracking-tight">bahhos</span>
+                            <div className="w-px h-5 bg-border/30" />
+                        </>
+                    )}
 
                     {!radioEnabled ? (
                         <span className="text-xs text-red-400/60 italic px-1.5">Aus</span>

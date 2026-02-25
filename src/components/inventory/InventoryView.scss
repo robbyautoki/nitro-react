@@ -387,14 +387,15 @@
 
 .inv-tile-ltd {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 3px;
+    right: 2px;
     font-size: 7px;
     font-weight: 800;
     color: #fcd34d;
     background: rgba(120, 53, 15, 0.6);
     padding: 0 3px;
     line-height: 1.5;
+    border-radius: 2px;
 }
 
 .inv-tile-rarity {
@@ -1240,12 +1241,13 @@
     bottom: calc(100% + 6px);
     left: 50%;
     transform: translateX(-50%);
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.10);
+    background: rgba(15, 15, 20, 0.92);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
     padding: 6px 10px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
-    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.30);
+    z-index: 9999;
     pointer-events: none;
     white-space: nowrap;
     min-width: 100px;
@@ -1258,14 +1260,14 @@
         left: 50%;
         transform: translateX(-50%);
         border: 5px solid transparent;
-        border-top-color: white;
+        border-top-color: rgba(15, 15, 20, 0.92);
     }
 }
 
 .inv-tooltip-name {
     font-size: 11px;
     font-weight: 600;
-    color: rgba(0, 0, 0, 0.85);
+    color: rgba(255, 255, 255, 0.90);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1274,7 +1276,7 @@
 .inv-tooltip-classname {
     font-family: monospace;
     font-size: 9px;
-    color: rgba(0, 0, 0, 0.30);
+    color: rgba(255, 255, 255, 0.30);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1285,13 +1287,13 @@
     align-items: center;
     gap: 4px;
     font-size: 10px;
-    color: rgba(0, 0, 0, 0.50);
+    color: rgba(255, 255, 255, 0.50);
     margin-top: 2px;
 }
 
 .inv-tooltip-ltd {
     font-size: 10px;
-    color: #d97706;
+    color: #fbbf24;
     font-weight: 600;
     margin-top: 1px;
 }

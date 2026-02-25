@@ -74,6 +74,22 @@ Diese Dateien liegen in `client/custom/` (nicht hier) und werden beim Docker-Bui
 `dist/` wird via `client/Dockerfile` in nginx-Image kopiert und auf Port 3080 served.
 `client/config/*.json` werden zur Laufzeit gemountet (kein rebuild nötig für Config).
 
+## Theming / Dark Mode (KRITISCH)
+
+Der Client nutzt **shadcn/ui + Tailwind** mit Dark-Mode via `.dark` Klasse auf `<html>`.
+Toggle: `ToolbarView.tsx` → `document.documentElement.classList.toggle('dark')`.
+
+**Regeln:**
+1. NIEMALS hardcoded Farben (`#fff`, `#000`, `rgba(...)`) für Hintergrund oder Text verwenden
+2. IMMER shadcn CSS-Variablen nutzen die automatisch Light/Dark switchen:
+   - Hintergrund: `oklch(var(--card))`, `oklch(var(--background))`, `oklch(var(--popover))`
+   - Text: `oklch(var(--card-foreground))`, `oklch(var(--foreground))`
+   - Muted: `oklch(var(--muted))`, `oklch(var(--muted-foreground))`
+   - Accent: `oklch(var(--accent))`, `oklch(var(--accent-foreground))`
+3. In Tailwind-Klassen: `bg-card`, `text-card-foreground`, `bg-background`, `text-foreground`
+4. In SCSS: `background-color: oklch(var(--card));` / `color: oklch(var(--card-foreground));`
+5. Variablen definiert in `src/tailwind.css` (`:root` = light, `.dark` = dark)
+
 ## Production Deployment (Vercel)
 
 Production URL: `play.bahhos.de`

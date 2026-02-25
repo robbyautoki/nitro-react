@@ -229,27 +229,7 @@
     flex-shrink: 0;
 }
 
-.inv-toolbar-row input {
-    flex: 1;
-    min-width: 0;
-    background: rgba(0, 0, 0, 0.03) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    border-radius: 6px !important;
-    font-size: 11px !important;
-    height: 24px !important;
-    color: rgba(0, 0, 0, 0.7) !important;
-    padding: 0 8px !important;
-
-    &::placeholder {
-        color: rgba(0, 0, 0, 0.3) !important;
-    }
-
-    &:focus {
-        border-color: rgba(59, 130, 246, 0.3) !important;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
-        outline: none !important;
-    }
-}
+// input styles are on .inv-search-input now
 
 .inv-sort-btn {
     display: flex;
@@ -377,11 +357,12 @@
         content: '';
         position: absolute;
         top: 2px;
-        right: 2px;
+        left: 2px;
         width: 5px;
         height: 5px;
         border-radius: 50%;
         background: #3b82f6;
+        z-index: 4;
     }
 }
 
@@ -410,9 +391,9 @@
     right: 0;
     font-size: 7px;
     font-weight: 800;
-    color: #d97706;
-    background: rgba(245, 158, 11, 0.12);
-    padding: 0 2px;
+    color: #fcd34d;
+    background: rgba(120, 53, 15, 0.6);
+    padding: 0 3px;
     line-height: 1.5;
 }
 
@@ -1176,7 +1157,8 @@
 // ─── Empty state ────────────────────────────────
 
 .inv-empty {
-    flex: 1;
+    width: 100%;
+    min-height: 200px;
     display: flex;
     flex-direction: column;
     align-items: center;

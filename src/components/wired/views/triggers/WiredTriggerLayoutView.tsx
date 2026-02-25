@@ -11,6 +11,7 @@ import { WiredTriggeExecutePeriodicallyLongView } from './WiredTriggerExecutePer
 import { WiredTriggeExecutePeriodicallyView } from './WiredTriggerExecutePeriodicallyView';
 import { WiredTriggerGameEndsView } from './WiredTriggerGameEndsView';
 import { WiredTriggerGameStartsView } from './WiredTriggerGameStartsView';
+import { WiredTriggerRecvSignalView } from './WiredTriggerRecvSignalView';
 import { WiredTriggeScoreAchievedView } from './WiredTriggerScoreAchievedView';
 import { WiredTriggerToggleFurniView } from './WiredTriggerToggleFurniView';
 
@@ -46,6 +47,8 @@ export const WiredTriggerLayoutView = (code: number) =>
             return <WiredTriggeScoreAchievedView />;
         case WiredTriggerLayout.TOGGLE_FURNI:
             return <WiredTriggerToggleFurniView />;
+        case WiredTriggerLayout.RECV_SIGNAL:
+            return <WiredTriggerRecvSignalView />;
     }
 
     return null;

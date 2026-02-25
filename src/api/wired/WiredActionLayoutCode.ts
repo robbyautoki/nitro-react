@@ -27,4 +27,5 @@ export class WiredActionLayoutCode
     public static BOT_CHANGE_FIGURE: number = 26;
     public static BOT_TALK_DIRECT_TO_AVTR: number = 27;
     public static AI_MESSAGE: number = 28;
+    public static SEND_SIGNAL: number = 29;
 }

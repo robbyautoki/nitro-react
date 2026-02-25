@@ -1,5 +1,6 @@
 import { WiredActionLayoutCode } from '../../../../api';
 import { WiredActionAiMessageView } from './WiredActionAiMessageView';
+import { WiredActionSendSignalView } from './WiredActionSendSignalView';
 import { WiredActionBotChangeFigureView } from './WiredActionBotChangeFigureView';
 import { WiredActionBotFollowAvatarView } from './WiredActionBotFollowAvatarView';
 import { WiredActionBotGiveHandItemView } from './WiredActionBotGiveHandItemView';
@@ -82,6 +83,8 @@ export const WiredActionLayoutView = (code: number) =>
             return <WiredActionToggleFurniStateView />;
         case WiredActionLayoutCode.AI_MESSAGE:
             return <WiredActionAiMessageView />;
+        case WiredActionLayoutCode.SEND_SIGNAL:
+            return <WiredActionSendSignalView />;
     }
 
     return null;

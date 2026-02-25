@@ -1,6 +1,6 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaTimes, FaList, FaInfoCircle, FaClock, FaFire } from 'react-icons/fa';
+import { FaTimes, FaList, FaClock, FaFire } from 'react-icons/fa';
 import { AddEventLinkTracker, CatalogType, GetSessionDataManager, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
 import { CatalogPurchasedEvent } from '../../events';
 import { useCatalog, useUiEvent } from '../../hooks';
@@ -125,6 +125,25 @@ export const CatalogView: FC<{}> = props =>
         el.addEventListener('click', handleLinkClick);
         return () => el.removeEventListener('click', handleLinkClick);
     }, []);
+
+    // Cmd+K / Ctrl+K keyboard shortcut to focus search
+    useEffect(() =>
+    {
+        if(!isVisible) return;
+
+        const handleKeyDown = (e: KeyboardEvent) =>
+        {
+            if((e.metaKey || e.ctrlKey) && e.key === 'k')
+            {
+                e.preventDefault();
+                const searchInput = document.querySelector('.nitro-catalog input[type="text"]') as HTMLInputElement;
+                if(searchInput) searchInput.focus();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [ isVisible ]);
 
     // Virtual page from navigation (Zuletzt gekauft / Am meisten gekauft)
     useEffect(() =>
@@ -344,19 +363,19 @@ export const CatalogView: FC<{}> = props =>
 
                         <div ref={ catalogContentRef } className="flex-1 min-w-0 overflow-hidden flex flex-col relative">
                             { !virtualPage && <CatalogSubcategoryChipsView /> }
-                            <div className="flex-1 min-h-0 overflow-hidden">
-                                { virtualPage
-                                    ? <CatalogVirtualGridView type={ virtualPage } />
-                                    : GetCatalogLayout(currentPage, () => setNavigationHidden(true))
-                                }
-                            </div>
-
-                            {/* Bottom Inspector Panel */}
-                            { showInspector && currentOffer && (
-                                <div className="shrink-0 border-t border-white/[0.08] bg-[rgba(10,10,14,0.98)] catalog-inspector-enter">
-                                    <CatalogInspectorView />
+                            <div className="flex-1 min-h-0 overflow-hidden flex">
+                                <div className="flex-1 min-w-0 min-h-0 overflow-hidden">
+                                    { virtualPage
+                                        ? <CatalogVirtualGridView type={ virtualPage } />
+                                        : GetCatalogLayout(currentPage, () => setNavigationHidden(true))
+                                    }
                                 </div>
-                            ) }
+
+                                {/* Right-side Inspector Panel */}
+                                { showInspector && currentOffer && (
+                                    <CatalogInspectorView />
+                                ) }
+                            </div>
                         </div>
                     </div>
 

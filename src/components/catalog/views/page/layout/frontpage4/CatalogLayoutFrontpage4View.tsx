@@ -1,6 +1,6 @@
 import { FrontPageItem } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaShoppingBag } from 'react-icons/fa';
+import { FaShoppingBag, FaFire } from 'react-icons/fa';
 import { CreateLinkEvent, GetConfiguration, LocalizeText } from '../../../../../../api';
 import { useCatalog } from '../../../../../../hooks';
 import { CatalogRedeemVoucherView } from '../../common/CatalogRedeemVoucherView';
@@ -14,6 +14,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
     const { frontPageItems = [], openPageByOfferId = null } = useCatalog();
 
     const [ recentPurchases, setRecentPurchases ] = useState<TrackedPurchase[]>(() => loadTracked('catalog_recent_purchases'));
+    const [ frequentPurchases, setFrequentPurchases ] = useState<TrackedPurchase[]>(() => loadTracked('catalog_most_purchased'));
 
     const slides = frontPageItems.filter(Boolean);
 
@@ -22,10 +23,14 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
         hideNavigation();
     }, [ page, hideNavigation ]);
 
-    // Refresh recent purchases when tracking event fires
+    // Refresh purchases when tracking event fires
     useEffect(() =>
     {
-        const refresh = () => setRecentPurchases(loadTracked('catalog_recent_purchases'));
+        const refresh = () =>
+        {
+            setRecentPurchases(loadTracked('catalog_recent_purchases'));
+            setFrequentPurchases(loadTracked('catalog_most_purchased'));
+        };
 
         window.addEventListener('catalog_purchase_tracked', refresh);
         return () => window.removeEventListener('catalog_purchase_tracked', refresh);
@@ -104,6 +109,37 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                                     <span className="text-[10px] text-white/70 truncate max-w-[90px]">{ item.name }</span>
                                     { item.priceCredits > 0 &&
                                         <span className="text-[9px] text-amber-400/70">{ item.priceCredits } Credits</span> }
+                                </div>
+                            </button>
+                        )) }
+                    </div>
+                </div>
+            ) }
+
+            {/* ── Most Purchased ───────────────────────────── */}
+            { frequentPurchases.length > 0 && (
+                <div className="shrink-0 border-t border-white/[0.06] px-4 py-2.5">
+                    <div className="flex items-center gap-2 mb-2">
+                        <FaFire className="text-[9px] text-orange-400/60" />
+                        <span className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/25">
+                            Meist gekauft
+                        </span>
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto catalog-chip-scroll pb-0.5">
+                        { frequentPurchases.map((item, i) => (
+                            <button
+                                key={ i }
+                                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.07] hover:bg-white/[0.09] hover:border-white/[0.12] transition-colors shrink-0"
+                                onClick={ () => item.offerId > 0 && openPageByOfferId(item.offerId) }
+                            >
+                                { item.iconUrl &&
+                                    <div
+                                        className="w-7 h-7 bg-center bg-no-repeat shrink-0"
+                                        style={ { backgroundImage: `url(${ item.iconUrl })`, imageRendering: 'pixelated' } }
+                                    /> }
+                                <div className="flex flex-col items-start min-w-0">
+                                    <span className="text-[10px] text-white/70 truncate max-w-[90px]">{ item.name }</span>
+                                    <span className="text-[9px] text-orange-400/70">×{ item.count || 1 }</span>
                                 </div>
                             </button>
                         )) }

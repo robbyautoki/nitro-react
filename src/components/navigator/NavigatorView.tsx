@@ -199,6 +199,18 @@ export const NavigatorView: FC<{}> = props =>
 
     useEffect(() => { applyGermanNavigatorLocale(); }, []);
 
+    useEffect(() =>
+    {
+        if(!isVisible) return;
+        const handler = (e: MouseEvent) =>
+        {
+            const drawer = document.querySelector('.navigator-drawer');
+            if(drawer && !drawer.contains(e.target as Node)) setIsVisible(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [ isVisible ]);
+
     const dedupedRooms = useMemo(() =>
     {
         if(!searchResult || !searchResult.results) return [];
@@ -273,7 +285,6 @@ export const NavigatorView: FC<{}> = props =>
                 modal={ false }
             >
                 <DrawerPrimitive.Portal>
-                    { isVisible && <div className="fixed inset-0 z-[78]" onClick={ () => setIsVisible(false) } /> }
                     <DrawerPrimitive.Content
                         className="navigator-drawer fixed right-0 top-0 bottom-0 w-[440px] z-[79] flex flex-col overflow-hidden bg-background border-l border-border/40 shadow-xl"
                         style={ { '--initial-transform': 'calc(100%)' } as React.CSSProperties }

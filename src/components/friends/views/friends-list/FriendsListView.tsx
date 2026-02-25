@@ -117,6 +117,18 @@ export const FriendsListView: FC<{}> = props =>
         return () => RemoveLinkEventTracker(linkTracker);
     }, [ requestFriend ]);
 
+    useEffect(() =>
+    {
+        if(!isVisible) return;
+        const handler = (e: MouseEvent) =>
+        {
+            const el = document.querySelector('.nitro-friends');
+            if(el && !el.contains(e.target as Node)) setIsVisible(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [ isVisible ]);
+
     if(!isVisible) return null;
 
     return (

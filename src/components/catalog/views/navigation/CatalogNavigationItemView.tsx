@@ -27,14 +27,14 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                 onMouseLeave={ () => setHovered(false) }
             >
                 <button
-                    className={ `w-full flex items-center gap-2.5 py-[6px] px-2.5 text-sm rounded-lg transition-all duration-150 ${
+                    className={ `w-full flex items-center gap-2 py-1 px-2 text-xs rounded-lg transition-all duration-150 ${
                         node.isActive
                             ? 'bg-accent text-foreground font-medium'
                             : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                     }` }
                     onClick={ () => activateNode(node) }
                 >
-                    <div className="w-5 h-5 rounded flex items-center justify-center shrink-0">
+                    <div className="w-4 h-4 rounded flex items-center justify-center shrink-0">
                         <CatalogIconView icon={ node.iconId } />
                     </div>
                     <span className="truncate flex-1 text-left">{ node.localization?.replace(/\s*\(\d+\)$/, '') }</span>
@@ -50,7 +50,7 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                 </button>
             </div>
             { node.isOpen && node.isBranch &&
-                <div className="ml-3 border-l border-border/30 pl-0.5 mt-0.5">
+                <div className="ml-4 border-l border-border/40 pl-0.5 mt-0.5">
                     <CatalogNavigationSetView node={ node } child={ true } />
                 </div> }
         </div>

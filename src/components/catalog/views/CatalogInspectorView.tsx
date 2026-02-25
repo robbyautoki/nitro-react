@@ -157,7 +157,7 @@ export const CatalogInspectorView: FC<{}> = () =>
             <div
                 ref={ previewRef }
                 className="relative h-[220px] shrink-0 overflow-hidden rounded-b-xl border-b border-border/30 cursor-zoom-in"
-                style={ { backgroundColor: '#f0f1f3' } }
+                style={ { backgroundColor: 'var(--muted)' } }
                 onMouseEnter={ () =>
                 {
                     if(hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
@@ -230,7 +230,7 @@ export const CatalogInspectorView: FC<{}> = () =>
                         border: '1px solid rgba(0,0,0,0.08)',
                         boxShadow: '0 16px 48px rgba(0,0,0,0.12)',
                         backdropFilter: 'blur(16px)',
-                        backgroundColor: 'rgba(255,255,255,0.95)',
+                        backgroundColor: 'color-mix(in oklch, var(--card) 95%, transparent)',
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'center',
                         backgroundSize: 'contain',

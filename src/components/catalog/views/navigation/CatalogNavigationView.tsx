@@ -117,7 +117,7 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
             return (
                 <div key={ index } className={ index > 0 ? 'mt-0.5' : '' }>
                     <button
-                        className="w-full flex items-center gap-2.5 px-3 py-2.5 transition-colors hover:bg-accent/30"
+                        className="w-full flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/30"
                         onClick={ () => { setOpenSection(isOpen && !hasActiveChild ? null : topNode.pageId); onSectionClick(topNode); } }
                     >
                         <CatalogIconView icon={ topNode.iconId } />

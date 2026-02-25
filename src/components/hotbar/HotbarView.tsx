@@ -1,6 +1,7 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, attemptItemPlacement } from '../../api';
 import { useInventoryFurni } from '../../hooks';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface HotbarSlot {
     item_base_id: number | null;
@@ -12,9 +13,6 @@ interface HotbarSlot {
 const STORAGE_KEY = 'habbo_hotbar';
 const VISIBILITY_KEY = 'habbo_hotbar_visible';
 const SLOT_COUNT = 9;
-const BAR_WIDTH = 520;
-const GAP = 3;
-const SLOT_SIZE = Math.floor((BAR_WIDTH - (SLOT_COUNT - 1) * GAP) / SLOT_COUNT);
 
 function emptySlots(): HotbarSlot[] {
     return Array.from({ length: SLOT_COUNT }, () => ({ item_base_id: null, public_name: null, item_name: null, sprite_id: null }));
@@ -26,7 +24,6 @@ function loadSlots(): HotbarSlot[] {
         if (!raw) return emptySlots();
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed)) return emptySlots();
-        // Migrate from old 8-slot to 9-slot
         while (parsed.length < SLOT_COUNT) parsed.push({ item_base_id: null, public_name: null, item_name: null, sprite_id: null });
         return parsed.slice(0, SLOT_COUNT);
     } catch { return emptySlots(); }
@@ -48,7 +45,6 @@ export const HotbarView: FC = () =>
 
     const imageUrl = GetConfiguration<string>('image.library.url', 'http://localhost:8080/c_images/');
 
-    // Map sprite_id → inventory count
     const inventoryCounts = useMemo(() => {
         const map = new Map<number, number>();
         for (const group of groupItems) {
@@ -70,12 +66,10 @@ export const HotbarView: FC = () =>
 
     const handleSlotClick = useCallback((slot: HotbarSlot, count: number) => {
         if (!slot.sprite_id) return;
-
         if (count > 0) {
             const group = groupItems.find(g => g.type === slot.sprite_id);
             if (group) attemptItemPlacement(group);
         } else {
-            // 0 items → open catalog for this item
             const sessionData = GetSessionDataManager();
             const furniData = sessionData.getFloorItemData(slot.sprite_id) || sessionData.getWallItemData(slot.sprite_id);
             if (furniData && furniData.purchaseOfferId > 0) {
@@ -118,77 +112,54 @@ export const HotbarView: FC = () =>
     if (!hasAnyItem) return null;
 
     return (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: GAP, width: BAR_WIDTH, margin: '0 auto 4px auto' }}>
-            {slots.map((slot, i) => {
-                const hovered = hoveredSlot === i;
+        <div className="flex items-center justify-center gap-1.5 py-2">
+            { slots.map((slot, i) => {
                 const filled = slot.item_base_id !== null;
                 const count = filled && slot.sprite_id ? (inventoryCounts.get(slot.sprite_id) ?? 0) : 0;
+                const hovered = hoveredSlot === i;
 
                 return (
-                    <div
-                        key={i}
-                        style={{
-                            width: SLOT_SIZE, height: SLOT_SIZE, borderRadius: 6,
-                            background: hovered ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)',
-                            border: hovered ? '1px solid rgba(255,255,255,0.25)' : '1px solid rgba(255,255,255,0.1)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            cursor: 'pointer', position: 'relative', transition: 'background 0.15s, border-color 0.15s',
-                            flexShrink: 0,
-                        }}
-                        onMouseEnter={() => setHoveredSlot(i)}
-                        onMouseLeave={() => setHoveredSlot(null)}
-                        onClick={() => filled && handleSlotClick(slot, count)}
-                        title={filled ? (count > 0 ? `${slot.public_name} (${count}x)` : `${slot.public_name} – Im Shop kaufen`) : `Slot ${i + 1} (leer)`}
-                    >
-                        <span style={{ position: 'absolute', top: 1, left: 3, fontSize: 9, color: 'rgba(255,255,255,0.3)', fontWeight: 600, pointerEvents: 'none' }}>
-                            {i + 1}
-                        </span>
-                        {filled && slot.item_name && (
-                            <img
-                                src={getFurniIcon(slot.item_name)}
-                                alt={slot.public_name || ''}
-                                style={{
-                                    width: 34, height: 34, objectFit: 'contain', imageRendering: 'pixelated',
-                                    ...(count === 0 ? { opacity: 0.3, filter: 'grayscale(100%)' } : {}),
-                                }}
-                                onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.3'; }}
-                            />
-                        )}
-                        {filled && count === 0 && (
-                            <span style={{
-                                position: 'absolute', fontSize: 18, pointerEvents: 'none',
-                                textShadow: '0 1px 3px rgba(0,0,0,0.9)',
-                            }}>
-                                🛒
-                            </span>
-                        )}
-                        {filled && count > 0 && (
-                            <span style={{
-                                position: 'absolute', bottom: 1, right: 3,
-                                fontSize: 10, fontWeight: 700,
-                                color: 'rgba(255,255,255,0.8)',
-                                pointerEvents: 'none',
-                                textShadow: '0 1px 2px rgba(0,0,0,0.8)',
-                            }}>
-                                {count}
-                            </span>
-                        )}
-                        {filled && hovered && (
-                            <button
-                                style={{
-                                    position: 'absolute', top: -4, right: -4,
-                                    width: 14, height: 14, borderRadius: 9999,
-                                    background: 'rgba(220,38,38,0.8)', color: '#fff',
-                                    fontSize: 9, fontWeight: 'bold',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    cursor: 'pointer', border: 'none', lineHeight: 1, padding: 0,
-                                }}
-                                onClick={(e) => { e.stopPropagation(); clearSlot(i); }}
-                            >×</button>
-                        )}
-                    </div>
+                    <TooltipProvider key={ i }>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div
+                                    className={ `relative w-11 h-11 rounded-lg border flex items-center justify-center cursor-pointer transition-all duration-150
+                                        ${ filled
+                                            ? hovered ? 'border-primary/40 bg-primary/5 shadow-sm' : 'border-border/50 bg-card/80'
+                                            : 'border-dashed border-border/30 bg-muted/10' }` }
+                                    onMouseEnter={ () => setHoveredSlot(i) }
+                                    onMouseLeave={ () => setHoveredSlot(null) }
+                                    onClick={ () => filled && handleSlotClick(slot, count) }
+                                >
+                                    <span className="absolute top-0.5 left-1 text-[8px] font-semibold text-muted-foreground/30 pointer-events-none">{ i + 1 }</span>
+                                    { filled && slot.item_name && (
+                                        <img
+                                            src={ getFurniIcon(slot.item_name) }
+                                            alt={ slot.public_name || '' }
+                                            className="w-7 h-7 object-contain"
+                                            style={{ imageRendering: 'pixelated', ...(count === 0 ? { opacity: 0.3, filter: 'grayscale(100%)' } : {}) }}
+                                            onError={ e => { (e.target as HTMLImageElement).style.opacity = '0.3'; } }
+                                        />
+                                    ) }
+                                    { filled && count === 0 && <span className="absolute text-lg pointer-events-none" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>🛒</span> }
+                                    { filled && count > 0 && <span className="absolute bottom-0 right-1 text-[8px] font-bold text-foreground/50 tabular-nums pointer-events-none">{ count }</span> }
+                                    { filled && hovered && (
+                                        <button
+                                            className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center cursor-pointer"
+                                            onClick={ e => { e.stopPropagation(); clearSlot(i); } }
+                                        >×</button>
+                                    ) }
+                                </div>
+                            </TooltipTrigger>
+                            { filled && (
+                                <TooltipContent side="top" sideOffset={ 4 }>
+                                    <span className="text-xs">{ slot.public_name } ({ count > 0 ? `${count}×` : 'Im Shop kaufen' })</span>
+                                </TooltipContent>
+                            ) }
+                        </Tooltip>
+                    </TooltipProvider>
                 );
-            })}
+            }) }
         </div>
     );
 }

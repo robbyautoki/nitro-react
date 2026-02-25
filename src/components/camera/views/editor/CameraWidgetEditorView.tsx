@@ -230,7 +230,7 @@ export const CameraWidgetEditorView: FC<CameraWidgetEditorViewProps> = props =>
                 }) }
             </NitroCardTabsView>
             <NitroCardContentView>
-                <Grid className="h-100">
+                <Grid className="h-full">
                     <Column size={ 5 } overflow="hidden">
                         <CameraWidgetEffectListView myLevel={ myLevel } selectedEffects={ selectedEffects } effects={ getEffectList() } thumbnails={ effectsThumbnails } processAction={ processAction } />
                     </Column>

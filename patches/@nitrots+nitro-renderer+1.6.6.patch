@@ -1,3 +1,16 @@
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomEngine.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomEngine.ts
+index d912d44..704a37d 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomEngine.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomEngine.ts
+@@ -2427,7 +2427,7 @@ export class RoomEngine extends NitroManager implements IRoomEngine, IRoomCreato
+ 
+         if(type === MouseEventType.MOUSE_DOWN)
+         {
+-            if(!altKey && !ctrlKey && !shiftKey && !this.isDecorating)
++            if(!altKey && !ctrlKey && !shiftKey && !this.isDecorating && !(globalThis as any).__wiredTileSelectionActive)
+             {
+                 if(this._roomAllowsDragging)
+                 {
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
 index 5731eba..e4bd4db 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts

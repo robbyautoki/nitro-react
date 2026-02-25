@@ -34,7 +34,7 @@ export const ToolbarMeView: FC<ToolbarMeViewProps> = props => {
     <Popover>
       <PopoverTrigger asChild>
         <div className="relative w-12 h-12 overflow-hidden cursor-pointer rounded-xl hover:ring-2 hover:ring-primary/20 transition-all mb-1 bg-accent/30">
-          <LayoutAvatarImageView figure={userFigure} direction={2} className="!absolute -bottom-[18px] left-1/2 -translate-x-1/2" />
+          <LayoutAvatarImageView figure={userFigure} direction={2} className="!absolute top-0 left-1/2" style={{ transform: 'translateX(-50%) scale(0.55)', transformOrigin: 'top center' }} />
         </div>
       </PopoverTrigger>
       <PopoverContent side="right" align="start" sideOffset={8} className="w-[180px] p-1.5">

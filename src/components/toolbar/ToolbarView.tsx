@@ -12,9 +12,9 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 function SidebarItem({ iconClass, label, badge, onClick }: { iconClass: string; label: string; badge?: number; onClick?: () => void }) {
   return (
-    <div className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors" onClick={onClick}>
+    <div className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={onClick}>
       <div className={`icon ${iconClass} shrink-0`} style={{ maxWidth: 28, maxHeight: 28 }} />
-      <span className="text-[8px] font-medium text-white/30 leading-none">{label}</span>
+      <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">{label}</span>
       {badge != null && badge > 0 && (
         <span className="absolute top-0.5 right-0 h-[14px] min-w-[14px] flex items-center justify-center text-[8px] px-0.5 rounded-full bg-red-500 text-white font-bold shadow-sm">{badge}</span>
       )}
@@ -35,39 +35,39 @@ function OnlineFriendsPopover() {
       <PopoverTrigger asChild>
         <div className="flex flex-col items-center gap-1 cursor-pointer">
           {miniAvatars.map((f) => (
-            <div key={f.id} className="relative w-7 h-7 rounded-full overflow-hidden bg-white/[0.06] hover:ring-2 hover:ring-white/10 transition-all">
+            <div key={f.id} className="relative w-7 h-7 rounded-full overflow-hidden bg-accent/50 hover:ring-2 hover:ring-white/10 transition-all">
               <LayoutAvatarImageView figure={f.figure} headOnly={true} direction={2} className="!absolute -top-1" />
-              <div className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-[#1a1a1f]" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-card" />
             </div>
           ))}
           {extraCount > 0 && (
-            <span className="text-[9px] font-bold text-white/30 bg-white/[0.06] rounded-full px-1.5 py-0.5">+{extraCount}</span>
+            <span className="text-[9px] font-bold text-muted-foreground/60 bg-accent/50 rounded-full px-1.5 py-0.5">+{extraCount}</span>
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" sideOffset={8} className="w-[280px] p-0 bg-[#1e1e24] border-white/[0.08] text-white">
-        <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">
+      <PopoverContent side="right" align="start" sideOffset={8} className="w-[280px] p-0 bg-popover border-border/50 text-foreground">
+        <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-white">Online-Freunde</span>
-            <Badge variant="outline" className="text-[10px] px-1 py-0 border-white/10 text-white/60">{onlineFriends.length}</Badge>
+            <span className="text-sm font-semibold text-foreground">Online-Freunde</span>
+            <Badge variant="outline" className="text-[10px] px-1 py-0 border-border/50 text-muted-foreground">{onlineFriends.length}</Badge>
           </div>
         </div>
         <div className="p-2 space-y-0.5 max-h-[260px] overflow-y-auto">
           {displayFriends.map((f) => (
-            <div key={f.id} className="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white/[0.04] transition-colors">
-              <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-white/[0.06]">
+            <div key={f.id} className="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-accent/30 transition-colors">
+              <div className="relative w-7 h-7 rounded-full overflow-hidden shrink-0 bg-accent/50">
                 <LayoutAvatarImageView figure={f.figure} headOnly={true} direction={2} className="!absolute -top-1" />
-                <div className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-[#1a1a1f]" />
+                <div className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border border-card" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-white truncate">{f.name}</p>
+                <p className="text-xs font-medium text-foreground truncate">{f.name}</p>
               </div>
-              <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 shrink-0 border-white/10 text-white/70 hover:bg-white/[0.06] hover:text-white" onClick={() => followFriend(f)}>Besuchen</Button>
+              <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 shrink-0 border-border/50 text-foreground/80 hover:bg-accent/50 hover:text-foreground" onClick={() => followFriend(f)}>Besuchen</Button>
             </div>
           ))}
         </div>
-        <div className="px-4 py-2 border-t border-white/[0.06]">
-          <button className="text-[11px] text-white/50 hover:text-white hover:underline" onClick={() => CreateLinkEvent('friends/toggle')}>Alle Freunde anzeigen</button>
+        <div className="px-4 py-2 border-t border-border/40">
+          <button className="text-[11px] text-white/50 hover:text-foreground hover:underline" onClick={() => CreateLinkEvent('friends/toggle')}>Alle Freunde anzeigen</button>
         </div>
       </PopoverContent>
     </Popover>
@@ -119,7 +119,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   return (
     <TooltipProvider delayDuration={200}>
       <div className="nitro-toolbar fixed left-0 top-0 h-full z-[70] pointer-events-auto relative shrink-0">
-        <div className={`border-r border-white/[0.06] bg-[#16161b]/80 backdrop-blur-xl flex flex-col items-center py-3 gap-0.5 overflow-hidden transition-all duration-200 h-full ${sidebarOpen ? "w-16" : "w-0 border-r-0"}`}>
+        <div className={`border-r border-border/40 bg-card/50 backdrop-blur-xl flex flex-col items-center py-3 gap-0.5 overflow-hidden transition-all duration-200 h-full ${sidebarOpen ? "w-16" : "w-0 border-r-0"}`}>
 
           <ToolbarMeView
             useGuideTool={useGuideTool}
@@ -127,7 +127,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
             userFigure={userFigure}
           />
 
-          <div className="w-8 h-px bg-white/[0.06] my-1" />
+          <div className="w-8 h-px bg-accent/50 my-1" />
 
           {isInRoom
             ? <SidebarItem iconClass="icon-habbo" label="Hotel View" onClick={() => VisitDesktop()} />
@@ -143,19 +143,19 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
           {isMod &&
             <SidebarItem iconClass="icon-modtools" label="Mod Tools" onClick={() => CreateLinkEvent('mod-tools/toggle')} />}
 
-          <div className="w-8 h-px bg-white/[0.06] my-1" />
+          <div className="w-8 h-px bg-accent/50 my-1" />
 
           <SidebarItem iconClass="icon-friendall" label="Freunde" badge={requests.length} onClick={() => CreateLinkEvent('friends/toggle')} />
           {((iconState === MessengerIconState.SHOW) || (iconState === MessengerIconState.UNREAD)) &&
             <SidebarItem iconClass={`icon-message${iconState === MessengerIconState.UNREAD ? ' is-unseen' : ''}`} label="Messenger" onClick={() => OpenMessengerChat()} />}
 
-          <div className="w-8 h-px bg-white/[0.06] my-1" />
+          <div className="w-8 h-px bg-accent/50 my-1" />
 
           <OnlineFriendsPopover />
         </div>
 
-        <button onClick={() => setSidebarOpen(v => !v)} className="absolute top-3 -right-3 z-20 size-6 rounded-full bg-[#1e1e24] border border-white/[0.08] shadow-sm flex items-center justify-center hover:bg-white/[0.06] transition-colors">
-          {sidebarOpen ? <ChevronLeft className="size-3 text-white/40" /> : <ChevronRight className="size-3 text-white/40" />}
+        <button onClick={() => setSidebarOpen(v => !v)} className="absolute top-3 -right-3 z-20 size-6 rounded-full bg-popover border border-border/50 shadow-sm flex items-center justify-center hover:bg-accent/50 transition-colors">
+          {sidebarOpen ? <ChevronLeft className="size-3 text-muted-foreground" /> : <ChevronRight className="size-3 text-muted-foreground" />}
         </button>
       </div>
 

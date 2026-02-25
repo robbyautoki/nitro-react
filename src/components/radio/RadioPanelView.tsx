@@ -87,26 +87,26 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="p-1.5 rounded-xl cursor-pointer hover:bg-white/[0.06] transition-colors">
-          <Headphones className="size-3.5 text-white/30" />
+        <button className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors">
+          <Headphones className="size-3.5 text-muted-foreground/60" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[380px] p-0 bg-[#1e1e24] border-white/[0.08] text-white">
-        <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">
+      <PopoverContent align="end" sideOffset={8} className="w-[380px] p-0 bg-popover border-border/50 text-foreground">
+        <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Headphones className="size-4 text-white/40" />
-              <span className="text-sm font-semibold text-white">DJ Panel</span>
+              <Headphones className="size-4 text-muted-foreground" />
+              <span className="text-sm font-semibold text-foreground">DJ Panel</span>
             </div>
-            <Badge variant="outline" className="text-[10px] border-white/10 text-white/40">Staff</Badge>
+            <Badge variant="outline" className="text-[10px] border-border/50 text-muted-foreground">Staff</Badge>
           </div>
         </div>
 
         <Tabs defaultValue="playing" className="w-full">
-          <TabsList className="w-full justify-start rounded-none border-b border-white/[0.06] bg-transparent px-4 h-9">
-            <TabsTrigger value="playing" className="text-xs text-white/40 data-[state=active]:text-white data-[state=active]:bg-white/[0.06]">Now Playing</TabsTrigger>
-            <TabsTrigger value="queue" className="text-xs text-white/40 data-[state=active]:text-white data-[state=active]:bg-white/[0.06]">Queue</TabsTrigger>
-            <TabsTrigger value="controls" className="text-xs text-white/40 data-[state=active]:text-white data-[state=active]:bg-white/[0.06]">DJ Controls</TabsTrigger>
+          <TabsList className="w-full justify-start rounded-none border-b border-border/40 bg-transparent px-4 h-9">
+            <TabsTrigger value="playing" className="text-xs text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-accent/50">Now Playing</TabsTrigger>
+            <TabsTrigger value="queue" className="text-xs text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-accent/50">Queue</TabsTrigger>
+            <TabsTrigger value="controls" className="text-xs text-muted-foreground data-[state=active]:text-foreground data-[state=active]:bg-accent/50">DJ Controls</TabsTrigger>
           </TabsList>
 
           <TabsContent value="playing" className="p-4 mt-0">
@@ -115,18 +115,18 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
                 <Music className="size-5 text-purple-400/60" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-white truncate">{currentTrack?.title || 'Kein Track'}</p>
-                <p className="text-xs text-white/40 truncate">{currentTrack?.artist || '—'}</p>
-                <p className="text-[10px] text-white/20 mt-0.5">{currentTrack?.type === 'youtube' ? 'YouTube' : 'Audio'}</p>
+                <p className="text-sm font-semibold text-foreground truncate">{currentTrack?.title || 'Kein Track'}</p>
+                <p className="text-xs text-muted-foreground truncate">{currentTrack?.artist || '—'}</p>
+                <p className="text-[10px] text-muted-foreground/40 mt-0.5">{currentTrack?.type === 'youtube' ? 'YouTube' : 'Audio'}</p>
               </div>
             </div>
 
             <div className="space-y-1.5 mb-4">
-              <Progress value={45} className="h-1.5 bg-white/10" />
+              <Progress value={45} className="h-1.5 bg-muted/50" />
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-white/40">—</span>
+                <span className="text-[10px] text-muted-foreground">—</span>
                 {loopOn && (
-                  <Badge variant="outline" className="text-white/30 border-white/10">
+                  <Badge variant="outline" className="text-muted-foreground/60 border-border/50">
                     <Repeat className="size-2.5 mr-1" />Loop
                   </Badge>
                 )}
@@ -134,13 +134,13 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
             </div>
 
             <div className="flex items-center justify-center gap-2">
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-white/10 text-white hover:bg-white/[0.06]" onClick={() => sendCommand(':radio play')}>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50 text-white hover:bg-accent/50" onClick={() => sendCommand(':radio play')}>
                 <Play className="size-3.5" />
               </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-white/10 text-white hover:bg-white/[0.06]" onClick={() => sendCommand(':radio pause')}>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50 text-white hover:bg-accent/50" onClick={() => sendCommand(':radio pause')}>
                 <Pause className="size-3.5" />
               </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-white/10 text-white hover:bg-white/[0.06]" onClick={() => sendCommand(':radio skip')}>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50 text-white hover:bg-accent/50" onClick={() => sendCommand(':radio skip')}>
                 <SkipForward className="size-3.5" />
               </Button>
             </div>
@@ -148,46 +148,46 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
 
           <TabsContent value="queue" className="p-4 mt-0">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Queue</span>
+              <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Queue</span>
             </div>
-            <p className="text-xs text-white/30 text-center py-4">Queue wird vom Server verwaltet</p>
+            <p className="text-xs text-muted-foreground/60 text-center py-4">Queue wird vom Server verwaltet</p>
           </TabsContent>
 
           <TabsContent value="controls" className="p-4 mt-0 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Power className="size-3.5 text-white/40" />
-                <span className="text-xs font-medium text-white">Radio</span>
+                <Power className="size-3.5 text-muted-foreground" />
+                <span className="text-xs font-medium text-foreground">Radio</span>
               </div>
               <Switch checked={radioOn} onCheckedChange={v => { setRadioOn(v); sendCommand(v ? ':radio on' : ':radio off'); }} />
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Repeat className="size-3.5 text-white/40" />
-                <span className="text-xs font-medium text-white">Loop</span>
+                <Repeat className="size-3.5 text-muted-foreground" />
+                <span className="text-xs font-medium text-foreground">Loop</span>
               </div>
               <Switch checked={loopOn} onCheckedChange={v => { setLoopOn(v); sendCommand(v ? ':radio loop on' : ':radio loop off'); }} />
             </div>
 
-            <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
-              <label className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Durchsage (TTS)</label>
+            <div className="space-y-1.5 pt-1 border-t border-border/40">
+              <label className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Durchsage (TTS)</label>
               <textarea
                 placeholder="Durchsage-Text eingeben..."
                 rows={2}
-                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-white/[0.08] bg-white/[0.04] text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-white/20 resize-none"
+                className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border/50 bg-accent/30 text-foreground placeholder:text-muted-foreground/40 outline-none focus:ring-1 focus:ring-ring resize-none"
                 id="dj-tts-input"
               />
-              <Button size="sm" className="w-full h-7 text-xs bg-white/10 hover:bg-white/15 text-white border-0" onClick={() => {
+              <Button size="sm" className="w-full h-7 text-xs bg-muted/50 hover:bg-accent/60 text-white border-0" onClick={() => {
                 const el = document.getElementById('dj-tts-input') as HTMLTextAreaElement;
                 if (el?.value) { sendCommand(':radio tts ' + el.value); el.value = ''; }
               }}>Generieren</Button>
             </div>
 
-            <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
-              <label className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Sound Effect</label>
+            <div className="space-y-1.5 pt-1 border-t border-border/40">
+              <label className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Sound Effect</label>
               <div className="flex gap-1.5">
-                <Input placeholder="SFX URL (MP3)..." className="h-7 text-xs bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20" id="dj-sfx-input" />
-                <Button variant="outline" size="sm" className="h-7 text-xs shrink-0 border-white/10 text-white hover:bg-white/[0.06]" onClick={() => {
+                <Input placeholder="SFX URL (MP3)..." className="h-7 text-xs bg-accent/30 border-border/50 text-foreground placeholder:text-muted-foreground/40" id="dj-sfx-input" />
+                <Button variant="outline" size="sm" className="h-7 text-xs shrink-0 border-border/50 text-white hover:bg-accent/50" onClick={() => {
                   const el = document.getElementById('dj-sfx-input') as HTMLInputElement;
                   if (el?.value) { sendCommand(':radio sfx ' + el.value); el.value = ''; }
                 }}>Play</Button>
@@ -444,22 +444,22 @@ export const RadioPanelView: FC<{}> = () => {
             <div ref={ytContainerRef} style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }} />
 
             <div className="fixed top-3 left-20 z-[65] pointer-events-auto flex flex-col gap-3">
-                <div className="inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-[#1a1a1f]/80 border border-white/[0.06] shadow-lg backdrop-blur-xl">
+                <div className="inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl">
                     {isInIframe && (
                         <>
                             <button
-                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors"
+                                className="flex items-center gap-1.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
                                 onClick={() => window.parent.postMessage({ type: 'show-cms' }, '*')}
                                 title="Zurück zum CMS"
                             >
-                                <svg className="size-4 text-white/60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg className="size-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <rect x="3" y="3" width="7" height="7" rx="1" />
                                     <rect x="14" y="3" width="7" height="7" rx="1" />
                                     <rect x="3" y="14" width="7" height="7" rx="1" />
                                     <rect x="14" y="14" width="7" height="7" rx="1" />
                                 </svg>
                             </button>
-                            <div className="w-px h-5 bg-white/[0.06]" />
+                            <div className="w-px h-5 bg-accent/50" />
                         </>
                     )}
 
@@ -469,43 +469,43 @@ export const RadioPanelView: FC<{}> = () => {
                         size="sm"
                         weight="bold"
                     />
-                    <div className="w-px h-5 bg-white/[0.06]" />
+                    <div className="w-px h-5 bg-accent/50" />
 
                     {!radioEnabled ? (
                         <span className="text-xs text-red-400/60 italic px-1">Aus</span>
                     ) : currentTrack ? (
-                        <span className="text-xs text-white/60 truncate max-w-[180px] px-1.5">
+                        <span className="text-xs text-muted-foreground truncate max-w-[180px] px-1.5">
                             {currentTrack.title} – {currentTrack.artist}
                         </span>
                     ) : (
-                        <span className="text-xs text-white/20 italic px-1">Radio</span>
+                        <span className="text-xs text-muted-foreground/40 italic px-1">Radio</span>
                     )}
 
                     {needsInteraction && (
-                        <button className="p-1.5 rounded-xl cursor-pointer hover:bg-white/[0.06] transition-colors" onClick={handleUnlock}>
+                        <button className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors" onClick={handleUnlock}>
                             <Play className="size-3.5 text-amber-400" />
                         </button>
                     )}
 
                     {radioEnabled && currentTrack && (
                         <button
-                            className="p-1.5 rounded-xl cursor-pointer hover:bg-white/[0.06] transition-colors"
+                            className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors"
                             onClick={() => sendCommand(paused ? ':radio play' : ':radio pause')}
                         >
                             {paused
-                                ? <Play className="size-3.5 text-white/40" strokeWidth={2.5} />
-                                : <Pause className="size-3.5 text-white/40" strokeWidth={2.5} />
+                                ? <Play className="size-3.5 text-muted-foreground" strokeWidth={2.5} />
+                                : <Pause className="size-3.5 text-muted-foreground" strokeWidth={2.5} />
                             }
                         </button>
                     )}
 
                     <button
-                        className="p-1 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors"
+                        className="p-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
                         onClick={() => setMuted(v => !v)}
                     >
                         {muted || volume === 0
-                            ? <VolumeX className="size-3.5 text-white/20" />
-                            : <Volume2 className="size-3.5 text-white/40" />
+                            ? <VolumeX className="size-3.5 text-muted-foreground/40" />
+                            : <Volume2 className="size-3.5 text-muted-foreground" />
                         }
                     </button>
                     <input
@@ -514,7 +514,7 @@ export const RadioPanelView: FC<{}> = () => {
                         max={100}
                         value={muted ? 0 : Math.round(volume * 100)}
                         onChange={e => { setVolume(parseInt(e.target.value) / 100); setMuted(false); }}
-                        className="w-14 h-1 accent-white/60 cursor-pointer"
+                        className="w-14 h-1 accent-primary cursor-pointer"
                     />
 
                     {isStaff && (
@@ -529,14 +529,14 @@ export const RadioPanelView: FC<{}> = () => {
                 </div>
 
                 {announcement && (
-                    <div className="min-w-[340px] max-w-[400px] flex items-start gap-3 p-3 rounded-xl bg-[#1a1a1f]/80 border border-white/[0.06] shadow-lg backdrop-blur-xl animate-in slide-in-from-top-2 fade-in duration-300">
+                    <div className="min-w-[340px] max-w-[400px] flex items-start gap-3 p-3 rounded-xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl animate-in slide-in-from-top-2 fade-in duration-300">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
-                                <Mic className="size-3 text-white/40 shrink-0" />
-                                <span className="text-xs font-semibold text-white">{announcement.djName}</span>
-                                <Badge variant="outline" className="text-[10px] border-white/10 text-white/40">Durchsage</Badge>
+                                <Mic className="size-3 text-muted-foreground shrink-0" />
+                                <span className="text-xs font-semibold text-foreground">{announcement.djName}</span>
+                                <Badge variant="outline" className="text-[10px] border-border/50 text-muted-foreground">Durchsage</Badge>
                             </div>
-                            <p className="text-xs text-white/60 mt-1 leading-relaxed">{announcement.message}</p>
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{announcement.message}</p>
                         </div>
                     </div>
                 )}

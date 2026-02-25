@@ -88,44 +88,44 @@ function HelpPopover() {
   return (
     <Popover onOpenChange={open => { if (!open) reset(); }}>
       <PopoverTrigger asChild>
-        <div className="p-2 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors">
+        <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
           <i className="icon icon-help" />
         </div>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0 bg-[#1e1e24] border-white/[0.08] text-white">
-        <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">
+      <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0 bg-popover border-border/50 text-foreground">
+        <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
             {step > 0 && (
-              <button onClick={goBack} className="p-0.5 rounded-md hover:bg-white/[0.06] transition-colors">
-                <ChevronLeft className="size-4 text-white/40" />
+              <button onClick={goBack} className="p-0.5 rounded-md hover:bg-accent/50 transition-colors">
+                <ChevronLeft className="size-4 text-muted-foreground" />
               </button>
             )}
             {step === 12 ? (
               <div className="flex items-center gap-2 flex-1">
-                <span className="text-sm font-semibold text-white">Mod_Sarah</span>
+                <span className="text-sm font-semibold text-foreground">Mod_Sarah</span>
                 <div className="w-2 h-2 rounded-full bg-green-500" />
               </div>
             ) : (
               <>
-                <HelpCircle className="size-4 text-white/40" />
-                <span className="text-sm font-semibold text-white">{STEP_TITLES[step] ?? "Hilfe"}</span>
+                <HelpCircle className="size-4 text-muted-foreground" />
+                <span className="text-sm font-semibold text-foreground">{STEP_TITLES[step] ?? "Hilfe"}</span>
               </>
             )}
           </div>
-          {step === 0 && <p className="text-[11px] text-white/40 mt-0.5">Wie können wir helfen?</p>}
+          {step === 0 && <p className="text-[11px] text-muted-foreground mt-0.5">Wie können wir helfen?</p>}
         </div>
 
         <div className="p-3">
           {step === 0 && (
             <div className="space-y-1.5">
               {HELP_INDEX.map((item, i) => (
-                <button key={item.title} onClick={() => { if (i === 0) setStep(1); if (i === 1) setStep(10); if (i === 2) setStep(20); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-white/[0.06] ${item.hover} hover:bg-white/[0.03] transition-all text-left`}>
+                <button key={item.title} onClick={() => { if (i === 0) setStep(1); if (i === 1) setStep(10); if (i === 2) setStep(20); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border/40 ${item.hover} hover:bg-muted/20 transition-all text-left`}>
                   <div className={`shrink-0 p-2 rounded-lg ${item.bg}`}>
                     <item.icon className={`size-4 ${item.color}`} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-white">{item.title}</p>
-                    <p className="text-[10px] text-white/40 mt-0.5 leading-snug">{item.desc}</p>
+                    <p className="text-xs font-medium text-foreground">{item.title}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-snug">{item.desc}</p>
                   </div>
                 </button>
               ))}
@@ -134,38 +134,38 @@ function HelpPopover() {
 
           {step === 1 && (
             <div className="space-y-1.5">
-              <p className="text-[11px] text-white/40 mb-2">Wähle den Spieler, den du melden möchtest</p>
+              <p className="text-[11px] text-muted-foreground mb-2">Wähle den Spieler, den du melden möchtest</p>
               {DEMO_USERS.map((name, i) => (
-                <button key={name} onClick={() => setSelectedUser(i)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${selectedUser === i ? "border-white/20 bg-white/[0.06]" : "border-white/[0.06] hover:bg-white/[0.03]"}`}>
-                  <div className={`shrink-0 p-1.5 rounded-lg ${selectedUser === i ? "bg-white/10 text-white" : "bg-white/[0.04] text-white/40"}`}>
+                <button key={name} onClick={() => setSelectedUser(i)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${selectedUser === i ? "border-border/60 bg-accent/50" : "border-border/40 hover:bg-muted/20"}`}>
+                  <div className={`shrink-0 p-1.5 rounded-lg ${selectedUser === i ? "bg-muted/50 text-foreground" : "bg-accent/30 text-muted-foreground"}`}>
                     <User className="size-4" />
                   </div>
-                  <span className="text-xs font-medium text-white">{name}</span>
+                  <span className="text-xs font-medium text-foreground">{name}</span>
                 </button>
               ))}
               <div className="flex justify-end pt-2">
-                <Button size="sm" className="h-7 text-xs bg-white/10 hover:bg-white/15 text-white border-0" disabled={selectedUser < 0} onClick={() => setStep(2)}>Weiter</Button>
+                <Button size="sm" className="h-7 text-xs bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={selectedUser < 0} onClick={() => setStep(2)}>Weiter</Button>
               </div>
             </div>
           )}
 
           {step === 2 && (
             <div className="space-y-1.5">
-              <p className="text-[11px] text-white/40 mb-2">Wähle die Nachrichten, die du melden möchtest</p>
+              <p className="text-[11px] text-muted-foreground mb-2">Wähle die Nachrichten, die du melden möchtest</p>
               {DEMO_CHATS.map((msg, i) => {
                 const sel = selectedChats.includes(i);
                 return (
-                  <button key={i} onClick={() => toggleChat(i)} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition-all text-left ${sel ? "border-white/20 bg-white/[0.06]" : "border-white/[0.06] hover:bg-white/[0.03]"}`}>
-                    <div className={`shrink-0 size-5 rounded-md border flex items-center justify-center transition-all ${sel ? "border-white/30 bg-white/10 text-white" : "border-white/10 bg-transparent"}`}>
+                  <button key={i} onClick={() => toggleChat(i)} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border transition-all text-left ${sel ? "border-border/60 bg-accent/50" : "border-border/40 hover:bg-muted/20"}`}>
+                    <div className={`shrink-0 size-5 rounded-md border flex items-center justify-center transition-all ${sel ? "border-border/80 bg-muted/50 text-foreground" : "border-border/50 bg-transparent"}`}>
                       {sel && <Check className="size-3" />}
                     </div>
-                    <MessageSquare className="size-3.5 text-white/20 shrink-0" />
-                    <span className="text-xs text-white/70 truncate">{msg}</span>
+                    <MessageSquare className="size-3.5 text-muted-foreground/40 shrink-0" />
+                    <span className="text-xs text-foreground/80 truncate">{msg}</span>
                   </button>
                 );
               })}
               <div className="flex justify-end pt-2">
-                <Button size="sm" className="h-7 text-xs bg-white/10 hover:bg-white/15 text-white border-0" disabled={selectedChats.length === 0} onClick={() => setStep(3)}>Weiter</Button>
+                <Button size="sm" className="h-7 text-xs bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={selectedChats.length === 0} onClick={() => setStep(3)}>Weiter</Button>
               </div>
             </div>
           )}
@@ -174,26 +174,26 @@ function HelpPopover() {
             <div className="space-y-1.5">
               {selectedCat < 0 ? (
                 <>
-                  <p className="text-[11px] text-white/40 mb-2">Wähle eine Kategorie</p>
+                  <p className="text-[11px] text-muted-foreground mb-2">Wähle eine Kategorie</p>
                   {DEMO_CATEGORIES.map((cat, i) => (
-                    <button key={cat.name} onClick={() => { setSelectedCat(i); setSelectedTopic(-1); }} className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-white/[0.06] hover:bg-white/[0.03] transition-all text-left">
-                      <span className="text-xs font-medium text-white">{cat.name}</span>
-                      <ChevronRight className="size-4 text-white/20" />
+                    <button key={cat.name} onClick={() => { setSelectedCat(i); setSelectedTopic(-1); }} className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-border/40 hover:bg-muted/20 transition-all text-left">
+                      <span className="text-xs font-medium text-foreground">{cat.name}</span>
+                      <ChevronRight className="size-4 text-muted-foreground/40" />
                     </button>
                   ))}
                 </>
               ) : (
                 <>
-                  <button onClick={() => { setSelectedCat(-1); setSelectedTopic(-1); }} className="flex items-center gap-1 text-[11px] text-white/40 hover:text-white transition-colors mb-2">
+                  <button onClick={() => { setSelectedCat(-1); setSelectedTopic(-1); }} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors mb-2">
                     <ChevronLeft className="size-3.5" />Zurück zu Kategorien
                   </button>
                   {DEMO_CATEGORIES[selectedCat].topics.map((topic, i) => (
-                    <button key={topic} onClick={() => setSelectedTopic(i)} className={`w-full px-3 py-2.5 rounded-xl border transition-all text-left text-xs font-medium ${selectedTopic === i ? "border-white/20 bg-white/[0.06] text-white" : "border-white/[0.06] hover:bg-white/[0.03] text-white"}`}>
+                    <button key={topic} onClick={() => setSelectedTopic(i)} className={`w-full px-3 py-2.5 rounded-xl border transition-all text-left text-xs font-medium ${selectedTopic === i ? "border-border/60 bg-accent/50 text-foreground" : "border-border/40 hover:bg-muted/20 text-foreground"}`}>
                       {topic}
                     </button>
                   ))}
                   <div className="flex justify-end pt-2">
-                    <Button size="sm" className="h-7 text-xs bg-white/10 hover:bg-white/15 text-white border-0" disabled={selectedTopic < 0} onClick={() => setStep(4)}>Weiter</Button>
+                    <Button size="sm" className="h-7 text-xs bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={selectedTopic < 0} onClick={() => setStep(4)}>Weiter</Button>
                   </div>
                 </>
               )}
@@ -202,27 +202,27 @@ function HelpPopover() {
 
           {step === 4 && (
             <div className="space-y-3">
-              <p className="text-[11px] text-white/40">Beschreibe das Problem möglichst genau (min. 15 Zeichen)</p>
+              <p className="text-[11px] text-muted-foreground">Beschreibe das Problem möglichst genau (min. 15 Zeichen)</p>
               <div className="relative">
-                <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Was ist passiert?" rows={4} className="w-full px-3 py-2 text-xs rounded-lg border border-white/[0.08] bg-white/[0.04] text-white placeholder:text-white/20 outline-none focus:ring-1 focus:ring-white/20 resize-none" />
-                <span className={`absolute bottom-2 right-2.5 text-[10px] ${message.length >= 15 ? "text-green-400" : "text-white/20"}`}>{message.length}/15</span>
+                <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Was ist passiert?" rows={4} className="w-full px-3 py-2 text-xs rounded-lg border border-border/50 bg-accent/30 text-foreground placeholder:text-muted-foreground/40 outline-none focus:ring-1 focus:ring-ring resize-none" />
+                <span className={`absolute bottom-2 right-2.5 text-[10px] ${message.length >= 15 ? "text-green-400" : "text-muted-foreground/40"}`}>{message.length}/15</span>
               </div>
               <div className="flex justify-end">
-                <Button size="sm" className="h-7 text-xs bg-white/10 hover:bg-white/15 text-white border-0" disabled={message.length < 15} onClick={() => setStep(5)}>Weiter</Button>
+                <Button size="sm" className="h-7 text-xs bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={message.length < 15} onClick={() => setStep(5)}>Weiter</Button>
               </div>
             </div>
           )}
 
           {step === 5 && (
             <div className="space-y-2.5">
-              <p className="text-[11px] text-white/40">Prüfe deine Meldung und sende sie ab</p>
-              <div className="px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03]">
-                <p className="text-[10px] text-white/40 mb-0.5">Deine Beschreibung</p>
-                <p className="text-xs text-white">{message}</p>
+              <p className="text-[11px] text-muted-foreground">Prüfe deine Meldung und sende sie ab</p>
+              <div className="px-3 py-2.5 rounded-xl border border-border/40 bg-muted/20">
+                <p className="text-[10px] text-muted-foreground mb-0.5">Deine Beschreibung</p>
+                <p className="text-xs text-foreground">{message}</p>
               </div>
-              <div className="px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03]">
-                <p className="text-[10px] text-white/40 mb-0.5">Gemeldete Nachrichten</p>
-                <p className="text-xs text-white">{selectedChats.length} Nachricht(en) ausgewählt</p>
+              <div className="px-3 py-2.5 rounded-xl border border-border/40 bg-muted/20">
+                <p className="text-[10px] text-muted-foreground mb-0.5">Gemeldete Nachrichten</p>
+                <p className="text-xs text-foreground">{selectedChats.length} Nachricht(en) ausgewählt</p>
               </div>
               <div className="flex justify-end pt-1">
                 <Button size="sm" className="h-7 text-xs gap-1.5 bg-green-600 hover:bg-green-700 text-white border-0" onClick={reset}>
@@ -236,8 +236,8 @@ function HelpPopover() {
             <div className="flex flex-col items-center text-center py-4 space-y-3">
               <Loader2 className="size-8 text-blue-400 animate-spin" />
               <div>
-                <p className="text-xs font-semibold text-white">Deine Anfrage wird bearbeitet...</p>
-                <p className="text-[11px] text-white/40 mt-1">Geschätzte Wartezeit: ~2 Minuten</p>
+                <p className="text-xs font-semibold text-foreground">Deine Anfrage wird bearbeitet...</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Geschätzte Wartezeit: ~2 Minuten</p>
               </div>
               <Button variant="outline" size="sm" className="h-7 text-xs text-red-400 border-red-500/20 hover:bg-red-500/10" onClick={reset}>Abbrechen</Button>
             </div>
@@ -247,8 +247,8 @@ function HelpPopover() {
             <div className="flex flex-col items-center text-center py-4 space-y-3">
               <CheckCircle2 className="size-8 text-green-400" />
               <div>
-                <p className="text-xs font-semibold text-white">Ein Teammitglied wurde gefunden!</p>
-                <p className="text-[11px] text-white/40 mt-1">Du wirst gleich verbunden...</p>
+                <p className="text-xs font-semibold text-foreground">Ein Teammitglied wurde gefunden!</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Du wirst gleich verbunden...</p>
               </div>
             </div>
           )}
@@ -258,16 +258,16 @@ function HelpPopover() {
               <div className="h-[200px] overflow-y-auto space-y-2 pr-1">
                 {DEMO_CHAT_MESSAGES.map((msg, i) => (
                   <div key={i} className={`flex gap-2 ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[75%] px-2.5 py-1.5 rounded-xl text-xs leading-relaxed ${msg.from === "user" ? "bg-white/10 text-white" : "bg-white/[0.04] text-white"}`}>
-                      {msg.from === "staff" && <p className="text-[10px] font-semibold text-white/40 mb-0.5">Mod_Sarah</p>}
+                    <div className={`max-w-[75%] px-2.5 py-1.5 rounded-xl text-xs leading-relaxed ${msg.from === "user" ? "bg-muted/50 text-foreground" : "bg-accent/30 text-foreground"}`}>
+                      {msg.from === "staff" && <p className="text-[10px] font-semibold text-muted-foreground mb-0.5">Mod_Sarah</p>}
                       {msg.text}
                     </div>
                   </div>
                 ))}
               </div>
               <div className="flex gap-1.5">
-                <Input placeholder="Nachricht schreiben..." className="h-7 text-xs flex-1 bg-white/[0.04] border-white/[0.08] text-white placeholder:text-white/20" />
-                <Button size="sm" className="h-7 text-xs shrink-0 bg-white/10 hover:bg-white/15 text-white border-0">Senden</Button>
+                <Input placeholder="Nachricht schreiben..." className="h-7 text-xs flex-1 bg-accent/30 border-border/50 text-foreground placeholder:text-muted-foreground/40" />
+                <Button size="sm" className="h-7 text-xs shrink-0 bg-muted/50 hover:bg-accent/60 text-white border-0">Senden</Button>
               </div>
               <Button variant="outline" size="sm" className="h-7 text-xs w-full text-green-400 border-green-500/20 hover:bg-green-500/10" onClick={reset}>Gespräch beenden</Button>
             </div>
@@ -279,26 +279,26 @@ function HelpPopover() {
                 <CheckCircle2 className="size-4 text-green-400 shrink-0" />
                 <p className="text-xs font-medium text-green-300">Keine aktiven Sanktionen</p>
               </div>
-              <div className="px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.03]">
-                <p className="text-[10px] font-semibold text-white/30 uppercase tracking-wider mb-1.5">Letzte Sanktion</p>
+              <div className="px-3 py-2.5 rounded-xl border border-border/40 bg-muted/20">
+                <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider mb-1.5">Letzte Sanktion</p>
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between"><span className="text-[11px] text-white/40">Typ</span><span className="text-[11px] font-medium text-white">Mute (2 Stunden)</span></div>
-                  <div className="flex items-center justify-between"><span className="text-[11px] text-white/40">Datum</span><span className="text-[11px] font-medium text-white">15.02.2026, 14:32</span></div>
-                  <div className="flex items-center justify-between"><span className="text-[11px] text-white/40">Grund</span><span className="text-[11px] font-medium text-white">Beleidigung</span></div>
+                  <div className="flex items-center justify-between"><span className="text-[11px] text-muted-foreground">Typ</span><span className="text-[11px] font-medium text-foreground">Mute (2 Stunden)</span></div>
+                  <div className="flex items-center justify-between"><span className="text-[11px] text-muted-foreground">Datum</span><span className="text-[11px] font-medium text-foreground">15.02.2026, 14:32</span></div>
+                  <div className="flex items-center justify-between"><span className="text-[11px] text-muted-foreground">Grund</span><span className="text-[11px] font-medium text-foreground">Beleidigung</span></div>
                 </div>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/[0.06] bg-white/[0.03]">
-                <Clock className="size-3.5 text-white/40 shrink-0" />
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border/40 bg-muted/20">
+                <Clock className="size-3.5 text-muted-foreground shrink-0" />
                 <div>
-                  <p className="text-[10px] text-white/40">Bewährung verbleibend</p>
-                  <p className="text-xs font-medium text-white">3 Tage</p>
+                  <p className="text-[10px] text-muted-foreground">Bewährung verbleibend</p>
+                  <p className="text-xs font-medium text-foreground">3 Tage</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-amber-500/20 bg-amber-500/10">
                 <AlertTriangle className="size-3.5 text-amber-400 shrink-0" />
                 <p className="text-[11px] text-amber-300">Bei erneutem Verstoß: Ban (24 Stunden)</p>
               </div>
-              <Button variant="outline" size="sm" className="h-7 text-xs w-full border-white/10 text-white/60 hover:bg-white/[0.06]" onClick={reset}>Verstanden</Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs w-full border-border/50 text-muted-foreground hover:bg-accent/50" onClick={reset}>Verstanden</Button>
             </div>
           )}
         </div>
@@ -320,39 +320,39 @@ function LevelPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors">
-          <span className="text-xs font-semibold text-white">Lvl {Math.floor(achievementScore / 100) || 1}</span>
-          <div className="w-[60px] h-[3px] bg-white/10 rounded-full overflow-hidden">
+        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
+          <span className="text-xs font-semibold text-foreground">Lvl {Math.floor(achievementScore / 100) || 1}</span>
+          <div className="w-[60px] h-[3px] bg-muted/50 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full" style={{ width: `${(achievementScore % 100) || 67}%` }} />
           </div>
         </div>
       </PopoverTrigger>
-      <PopoverContent align="center" sideOffset={8} className="w-[260px] p-0 bg-[#1e1e24] border-white/[0.08] text-white">
-        <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">
+      <PopoverContent align="center" sideOffset={8} className="w-[260px] p-0 bg-popover border-border/50 text-foreground">
+        <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-amber-400" />
-            <span className="text-sm font-bold text-white">Level {Math.floor(achievementScore / 100) || 1}</span>
+            <span className="text-sm font-bold text-foreground">Level {Math.floor(achievementScore / 100) || 1}</span>
           </div>
-          <p className="text-[11px] text-white/40 mt-0.5">Erfahrener Spieler</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Erfahrener Spieler</p>
         </div>
 
         <div className="p-4 space-y-4">
           <div className="space-y-1.5">
-            <Progress value={achievementScore % 100 || 67} className="h-2 bg-white/10 [&>div]:bg-gradient-to-r [&>div]:from-amber-400 [&>div]:to-yellow-500" />
+            <Progress value={achievementScore % 100 || 67} className="h-2 bg-muted/50 [&>div]:bg-gradient-to-r [&>div]:from-amber-400 [&>div]:to-yellow-500" />
             <div className="flex items-center justify-between">
-              <span className="text-[11px] text-white/40 tabular-nums">{achievementScore} XP</span>
-              <span className="text-[11px] font-semibold text-white tabular-nums">{achievementScore % 100 || 67}%</span>
+              <span className="text-[11px] text-muted-foreground tabular-nums">{achievementScore} XP</span>
+              <span className="text-[11px] font-semibold text-foreground tabular-nums">{achievementScore % 100 || 67}%</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             {LEVEL_STATS.map(s => (
-              <div key={s.label} className="px-2.5 py-2 rounded-lg border border-white/[0.06] bg-white/[0.03]">
+              <div key={s.label} className="px-2.5 py-2 rounded-lg border border-border/40 bg-muted/20">
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <span className="text-xs leading-none">{s.emoji}</span>
-                  <span className="text-[10px] text-white/40">{s.label}</span>
+                  <span className="text-[10px] text-muted-foreground">{s.label}</span>
                 </div>
-                <p className="text-xs font-semibold text-white tabular-nums">{s.value}</p>
+                <p className="text-xs font-semibold text-foreground tabular-nums">{s.value}</p>
               </div>
             ))}
           </div>
@@ -391,41 +391,41 @@ function SettingsPopover() {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="p-2 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors">
+        <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
           <i className="icon icon-cog" />
         </div>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[340px] p-0 bg-[#1e1e24] border-white/[0.08] text-white">
-        <div className="px-4 pt-3 pb-2 border-b border-white/[0.06]">
+      <PopoverContent align="end" sideOffset={8} className="w-[340px] p-0 bg-popover border-border/50 text-foreground">
+        <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
-            <Settings className="size-4 text-white/40" />
-            <span className="text-sm font-semibold text-white">Einstellungen</span>
+            <Settings className="size-4 text-muted-foreground" />
+            <span className="text-sm font-semibold text-foreground">Einstellungen</span>
           </div>
         </div>
 
         <div className="p-4 space-y-3">
           <div>
-            <span className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Allgemein</span>
+            <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Allgemein</span>
             <div className="mt-2 space-y-2.5">
               {SETTINGS_TOGGLES.map((t, i) => (
                 <div key={t.label} className="flex items-center justify-between">
-                  <span className="text-xs text-white">{t.label}</span>
+                  <span className="text-xs text-foreground">{t.label}</span>
                   <Switch checked={toggles[i]} onCheckedChange={v => setToggles(prev => { const n = [...prev]; n[i] = v; return n; })} />
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="h-px bg-white/[0.06]" />
+          <div className="h-px bg-accent/50" />
 
           <div>
-            <span className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Lautstärke</span>
+            <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Lautstärke</span>
             <div className="mt-3 space-y-4">
               {VOLUME_SLIDERS.map((v, i) => (
                 <div key={v.label} className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-white">{v.label}</span>
-                    <span className="text-[10px] text-white/40 tabular-nums">{volumes[i]}%</span>
+                    <span className="text-xs text-foreground">{v.label}</span>
+                    <span className="text-[10px] text-muted-foreground tabular-nums">{volumes[i]}%</span>
                   </div>
                   <Slider value={[volumes[i]]} max={100} step={1} onValueChange={(val: number[]) => setVolumes(prev => { const n = [...prev]; n[i] = val[0]; return n; })} />
                 </div>
@@ -481,12 +481,12 @@ export const PurseView: FC<{}> = props => {
       return (
         <Tooltip key={type}>
           <TooltipTrigger asChild>
-            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors">
+            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
               <CurrencyIcon type={String(type)} />
-              <span className="text-xs font-semibold text-white tabular-nums">{display}</span>
+              <span className="text-xs font-semibold text-foreground tabular-nums">{display}</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs bg-[#1e1e24] border-white/[0.08] text-white">Währung {type}</TooltipContent>
+          <TooltipContent side="bottom" className="text-xs bg-popover border-border/50 text-foreground">Währung {type}</TooltipContent>
         </Tooltip>
       );
     });
@@ -498,54 +498,54 @@ export const PurseView: FC<{}> = props => {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[69] pointer-events-auto inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-[#1a1a1f]/80 border border-white/[0.06] shadow-lg backdrop-blur-xl">
+      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[69] pointer-events-auto inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl">
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors">
+            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
               <CurrencyIcon type="-1" />
-              <span className="text-xs font-semibold text-white tabular-nums">{creditsDisplay}</span>
+              <span className="text-xs font-semibold text-foreground tabular-nums">{creditsDisplay}</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs bg-[#1e1e24] border-white/[0.08] text-white">Credits</TooltipContent>
+          <TooltipContent side="bottom" className="text-xs bg-popover border-border/50 text-foreground">Credits</TooltipContent>
         </Tooltip>
 
         {getCurrencyElements()}
 
-        <div className="w-px h-6 bg-white/[0.06] mx-1.5" />
+        <div className="w-px h-6 bg-accent/50 mx-1.5" />
 
         <LevelPopover />
 
-        <div className="w-px h-6 bg-white/[0.06] mx-1.5" />
+        <div className="w-px h-6 bg-accent/50 mx-1.5" />
 
         {!hcDisabled && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors" onClick={() => CreateLinkEvent('habboUI/open/hccenter')}>
+              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent('habboUI/open/hccenter')}>
                 <CurrencyIcon type="hc" />
-                <span className="text-xs font-medium text-white">{getClubText}</span>
+                <span className="text-xs font-medium text-foreground">{getClubText}</span>
               </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs bg-[#1e1e24] border-white/[0.08] text-white">Habbo Club</TooltipContent>
+            <TooltipContent side="bottom" className="text-xs bg-popover border-border/50 text-foreground">Habbo Club</TooltipContent>
           </Tooltip>
         )}
 
-        {!hcDisabled && <div className="w-px h-6 bg-white/[0.06] mx-1.5" />}
+        {!hcDisabled && <div className="w-px h-6 bg-accent/50 mx-1.5" />}
 
         {TOOL_ICONS.map(({ iconId, label, link }) => (
           <Tooltip key={label}>
             <TooltipTrigger asChild>
-              <div className="relative p-2 rounded-lg cursor-pointer hover:bg-white/[0.06] transition-colors" onClick={() => CreateLinkEvent(link)}>
+              <div className="relative p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent(link)}>
                 <CatalogIcon iconId={iconId} />
                 {label === "Marktplatz" && offerCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold leading-none shadow-sm">{offerCount}</span>
                 )}
               </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs bg-[#1e1e24] border-white/[0.08] text-white">{label}</TooltipContent>
+            <TooltipContent side="bottom" className="text-xs bg-popover border-border/50 text-foreground">{label}</TooltipContent>
           </Tooltip>
         ))}
 
-        <div className="w-px h-6 bg-white/[0.06] mx-1.5" />
+        <div className="w-px h-6 bg-accent/50 mx-1.5" />
 
         <HelpPopover />
         <SettingsPopover />

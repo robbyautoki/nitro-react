@@ -498,7 +498,7 @@ export const PurseView: FC<{}> = props => {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[69] pointer-events-auto inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl">
+      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[69] pointer-events-auto inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-card border border-border/40 shadow-md">
         <Tooltip>
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">

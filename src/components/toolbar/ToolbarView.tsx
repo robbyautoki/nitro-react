@@ -1,11 +1,12 @@
 import { Dispose, DropBounce, EaseOut, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useState } from 'react';
-import { Sun, Moon, ChevronUp, ChevronDown, Radio } from 'lucide-react';
+import { Sun, Moon, ChevronUp, ChevronDown, Radio, Mic } from 'lucide-react';
 import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, MessengerIconState, OpenMessengerChat, VisitDesktop } from '../../api';
 import { LayoutAvatarImageView } from '../../common';
 import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useRoomEngineEvent, useSessionInfo } from '../../hooks';
 import { ToolbarMeView } from './ToolbarMeView';
 import { RadioPanelView } from '../radio/RadioPanelView';
+import { VoiceChannelView } from '../room/VoiceChannelView';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -183,6 +184,21 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
           <OnlineFriendsPopover />
 
           <div className="mt-auto" />
+
+          {isInRoom && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="relative flex flex-col items-center gap-1 py-1.5 px-1 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors">
+                  <Mic className="w-5 h-5 text-muted-foreground/60" />
+                  <span className="text-[9px] font-medium text-muted-foreground/60 leading-none">Voice</span>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent side="right" align="end" sideOffset={8} className="w-[260px] p-0 border-none bg-transparent shadow-none">
+                <VoiceChannelView />
+              </PopoverContent>
+            </Popover>
+          )}
+
           <div className="relative flex flex-col items-center gap-1 py-1.5 px-1 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors" onClick={toggleTheme}>
             {isDark ? <Sun className="w-5 h-5 text-muted-foreground/60" /> : <Moon className="w-5 h-5 text-muted-foreground/60" />}
             <span className="text-[9px] font-medium text-muted-foreground/60 leading-none">{isDark ? 'Light' : 'Dark'}</span>

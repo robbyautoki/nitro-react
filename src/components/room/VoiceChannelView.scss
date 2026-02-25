@@ -1,36 +1,16 @@
-$dc-bg-primary: #313338;
-$dc-bg-secondary: #2b2d31;
-$dc-bg-tertiary: #1e1f22;
-$dc-bg-hover: #35373c;
-$dc-bg-active: #404249;
-$dc-text-primary: #f2f3f5;
-$dc-text-secondary: #949ba4;
-$dc-text-muted: #6d6f78;
 $dc-green: #23a559;
 $dc-red: #ed4245;
-$dc-brand: #5865f2;
 
-.dc-voice {
-    position: fixed;
-    left: 10px;
-    bottom: 75px;
-    z-index: 200;
-    width: 240px;
-    font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-
-    @media (max-width: 575.98px) {
-        left: 6px;
-        bottom: 70px;
-        width: 220px;
-    }
+.dc-voice-embedded {
+    width: 100%;
 }
 
 .dc-voice-panel {
-    background: $dc-bg-secondary;
+    background: var(--card);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.24);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    border: 1px solid var(--border);
 }
 
 .dc-voice-header {
@@ -45,14 +25,14 @@ $dc-brand: #5865f2;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     cursor: default;
 }
 
 .dc-voice-header-add {
     background: none;
     border: none;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     cursor: pointer;
     padding: 2px;
     border-radius: 4px;
@@ -62,7 +42,7 @@ $dc-brand: #5865f2;
     transition: color 0.15s;
 
     &:hover {
-        color: $dc-text-primary;
+        color: var(--foreground);
     }
 }
 
@@ -72,20 +52,20 @@ $dc-brand: #5865f2;
 
 .dc-voice-create-input {
     width: 100%;
-    background: $dc-bg-tertiary;
+    background: var(--muted);
     border: none;
     border-radius: 4px;
     padding: 6px 8px;
     font-size: 13px;
-    color: $dc-text-primary;
+    color: var(--foreground);
     outline: none;
 
     &::placeholder {
-        color: $dc-text-muted;
+        color: var(--muted-foreground);
     }
 
     &:focus {
-        box-shadow: 0 0 0 1px $dc-brand;
+        box-shadow: 0 0 0 1px var(--primary);
     }
 }
 
@@ -97,18 +77,18 @@ $dc-brand: #5865f2;
 
 .dc-voice-create-btn {
     flex: 1;
-    background: $dc-brand;
+    background: var(--primary);
     border: none;
     border-radius: 3px;
     padding: 4px 8px;
     font-size: 12px;
     font-weight: 600;
-    color: white;
+    color: var(--primary-foreground);
     cursor: pointer;
-    transition: background 0.15s;
+    transition: opacity 0.15s;
 
     &:hover {
-        background: darken($dc-brand, 8%);
+        opacity: 0.9;
     }
 }
 
@@ -119,12 +99,12 @@ $dc-brand: #5865f2;
     border-radius: 3px;
     padding: 4px 8px;
     font-size: 12px;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     cursor: pointer;
     transition: color 0.15s;
 
     &:hover {
-        color: $dc-text-primary;
+        color: var(--foreground);
     }
 }
 
@@ -140,17 +120,17 @@ $dc-brand: #5865f2;
     margin: 1px 8px;
     border-radius: 4px;
     font-size: 14px;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     cursor: pointer;
     transition: all 0.1s;
 
     &:hover {
-        background: $dc-bg-hover;
-        color: $dc-text-primary;
+        background: var(--accent);
+        color: var(--foreground);
     }
 
     &--active {
-        color: $dc-text-primary;
+        color: var(--foreground);
     }
 }
 
@@ -164,7 +144,7 @@ $dc-brand: #5865f2;
 
 .dc-voice-channel-limit {
     font-size: 11px;
-    color: $dc-text-muted;
+    color: var(--muted-foreground);
     margin-left: auto;
 }
 
@@ -172,10 +152,9 @@ $dc-brand: #5865f2;
     text-align: center;
     padding: 6px;
     font-size: 11px;
-    color: $dc-text-muted;
+    color: var(--muted-foreground);
 }
 
-// Connected participants
 .dc-voice-participants {
     padding: 2px 8px 4px 28px;
 }
@@ -190,7 +169,7 @@ $dc-brand: #5865f2;
     transition: background 0.1s;
 
     &:hover {
-        background: $dc-bg-hover;
+        background: var(--accent);
     }
 
     &--speaking .dc-voice-participant-name {
@@ -203,7 +182,7 @@ $dc-brand: #5865f2;
     height: 32px;
     border-radius: 50%;
     flex-shrink: 0;
-    background: $dc-bg-active;
+    background: var(--muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -218,7 +197,7 @@ $dc-brand: #5865f2;
 .dc-voice-participant-avatar-inner {
     font-size: 11px;
     font-weight: 700;
-    color: $dc-text-primary;
+    color: var(--foreground);
     line-height: 1;
     width: 100%;
     height: 100%;
@@ -239,14 +218,14 @@ $dc-brand: #5865f2;
 .dc-voice-participant-name {
     font-size: 13px;
     font-weight: 500;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     transition: color 0.15s;
 
     &--muted {
-        color: $dc-text-muted;
+        opacity: 0.5;
     }
 }
 
@@ -258,10 +237,9 @@ $dc-brand: #5865f2;
     flex-shrink: 0;
 }
 
-// Voice connected footer
 .dc-voice-footer {
-    border-top: 1px solid $dc-bg-tertiary;
-    background: $dc-bg-tertiary;
+    border-top: 1px solid var(--border);
+    background: var(--muted);
 }
 
 .dc-voice-connected-info {
@@ -294,7 +272,7 @@ $dc-brand: #5865f2;
 
 .dc-voice-connected-channel {
     font-size: 11px;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     line-height: 1.2;
 }
 
@@ -319,7 +297,7 @@ $dc-brand: #5865f2;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
-    background: $dc-bg-active;
+    background: var(--muted);
 
     img {
         width: 100%;
@@ -331,7 +309,7 @@ $dc-brand: #5865f2;
 .dc-voice-user-name {
     font-size: 12px;
     font-weight: 600;
-    color: $dc-text-primary;
+    color: var(--foreground);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -349,7 +327,7 @@ $dc-brand: #5865f2;
     border-radius: 4px;
     border: none;
     background: transparent;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -357,8 +335,8 @@ $dc-brand: #5865f2;
     transition: all 0.15s;
 
     &:hover {
-        background: $dc-bg-hover;
-        color: $dc-text-primary;
+        background: var(--accent);
+        color: var(--foreground);
     }
 
     &--danger {
@@ -371,7 +349,7 @@ $dc-brand: #5865f2;
     }
 
     &--disconnect {
-        color: $dc-text-secondary;
+        color: var(--muted-foreground);
         background: transparent;
 
         &:hover {
@@ -379,44 +357,22 @@ $dc-brand: #5865f2;
             color: $dc-red;
         }
     }
-}
 
-// Toggle button (always visible)
-.dc-voice-toggle {
-    position: fixed;
-    left: 10px;
-    bottom: 38px;
-    z-index: 201;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: $dc-bg-secondary;
-    color: $dc-text-muted;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-
-    &:hover {
-        background: $dc-bg-hover;
-        color: $dc-text-primary;
+    &--active {
+        background: var(--accent);
+        color: var(--foreground);
     }
 
-    &--connected {
-        color: $dc-green;
-        border-color: rgba($dc-green, 0.3);
+    &--disabled {
+        opacity: 0.4;
+        cursor: default;
 
         &:hover {
-            color: $dc-green;
-            border-color: rgba($dc-green, 0.5);
+            background: transparent;
         }
     }
 }
 
-// Error message
 .dc-voice-error {
     padding: 6px 12px;
     margin: 4px 8px;
@@ -428,7 +384,6 @@ $dc-brand: #5865f2;
     text-align: center;
 }
 
-// PTT badge
 .dc-voice-ptt-badge {
     display: inline-block;
     margin-left: 6px;
@@ -437,21 +392,20 @@ $dc-brand: #5865f2;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: 0.04em;
-    color: $dc-brand;
-    background: rgba($dc-brand, 0.15);
+    color: var(--primary);
+    background: color-mix(in oklch, var(--primary) 15%, transparent);
     vertical-align: middle;
 }
 
-// Settings popover (fixed to viewport, not clipped by panel overflow)
 .dc-voice-settings {
     position: fixed;
     width: 220px;
-    background: $dc-bg-primary;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    z-index: 250;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
 }
 
 .dc-voice-settings-title {
@@ -459,7 +413,7 @@ $dc-brand: #5865f2;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     margin-bottom: 8px;
 }
 
@@ -476,7 +430,7 @@ $dc-brand: #5865f2;
 
 .dc-voice-settings-label {
     font-size: 12px;
-    color: $dc-text-secondary;
+    color: var(--muted-foreground);
     font-weight: 500;
 }
 
@@ -484,73 +438,58 @@ $dc-brand: #5865f2;
     display: flex;
     border-radius: 4px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
 }
 
 .dc-voice-settings-opt {
-    background: $dc-bg-tertiary;
+    background: var(--muted);
     border: none;
     padding: 4px 8px;
     font-size: 11px;
-    color: $dc-text-muted;
+    color: var(--muted-foreground);
     cursor: pointer;
     transition: all 0.1s;
     white-space: nowrap;
 
     &:hover {
-        color: $dc-text-secondary;
+        color: var(--foreground);
     }
 
     &--active {
-        background: $dc-brand;
-        color: white;
+        background: var(--primary);
+        color: var(--primary-foreground);
 
         &:hover {
-            color: white;
+            color: var(--primary-foreground);
         }
     }
 }
 
 .dc-voice-settings-keybind {
-    background: $dc-bg-tertiary;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--muted);
+    border: 1px solid var(--border);
     border-radius: 4px;
     padding: 4px 10px;
     font-size: 12px;
     font-weight: 600;
-    color: $dc-text-primary;
+    color: var(--foreground);
     cursor: pointer;
     transition: all 0.15s;
     min-width: 60px;
     text-align: center;
 
     &:hover {
-        border-color: $dc-brand;
+        border-color: var(--primary);
     }
 
     &--listening {
-        border-color: $dc-brand;
-        color: $dc-brand;
+        border-color: var(--primary);
+        color: var(--primary);
         animation: dcKeybindPulse 1s ease-in-out infinite;
     }
 }
 
-// Disabled button style (for mic in PTT mode)
-.dc-voice-btn--active {
-    background: $dc-bg-active;
-    color: $dc-text-primary;
-}
-
-.dc-voice-btn--disabled {
-    opacity: 0.4;
-    cursor: default;
-
-    &:hover {
-        background: transparent;
-    }
-}
-
-// Hide LiveKit default UI (we use custom)
+// Hide LiveKit default UI
 .lk-audio-conference,
 .lk-control-bar {
     display: none !important;

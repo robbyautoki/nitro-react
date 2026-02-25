@@ -516,7 +516,6 @@ export const VoiceChannelView: FC<{}> = () =>
     const [ isConnecting, setIsConnecting ] = useState(false);
     const [ showCreateForm, setShowCreateForm ] = useState(false);
     const [ newChannelName, setNewChannelName ] = useState('');
-    const [ uiVisible, setUiVisible ] = useState(true);
     const [ joinError, setJoinError ] = useState<string | null>(null);
     const [ voiceMode, setVoiceModeState ] = useState<VoiceMode>(getVoiceMode());
     const [ pttKey, setPttKeyState ] = useState<string>(getPttKey());
@@ -618,7 +617,6 @@ export const VoiceChannelView: FC<{}> = () =>
             setToken(data.token);
             setActiveChannelId(channel.id);
             setActiveChannelName(channel.name);
-            setUiVisible(true);
         }
         catch(e)
         {
@@ -675,102 +673,84 @@ export const VoiceChannelView: FC<{}> = () =>
 
     if(!roomId || channels.length === 0)
     {
-        // No channels but still show toggle button if connected (edge case)
         if(!isConnected) return null;
     }
 
     return (
-        <>
-            {/* Toggle Button - always visible when channels exist */}
-            <button
-                className={ `dc-voice-toggle ${ isConnected ? 'dc-voice-toggle--connected' : '' }` }
-                onClick={ () => setUiVisible(!uiVisible) }
-                title={ uiVisible ? 'Sprachchat ausblenden' : 'Sprachchat einblenden' }
-            >
-                { isConnected
-                    ? <MicIcon size={ 20 } />
-                    : <MicMuteIcon size={ 20 } />
-                }
-            </button>
-
-            {/* Voice Panel - hideable */}
-            { uiVisible && (
-                <div className="dc-voice">
-                    <div className="dc-voice-panel">
-                        <div className="dc-voice-header">
-                            <span className="dc-voice-header-label">SPRACHCHANNEL</span>
-                            { isMod && (
-                                <button
-                                    className="dc-voice-header-add"
-                                    onClick={ () => setShowCreateForm(!showCreateForm) }
-                                    title="Channel erstellen"
-                                >
-                                    <PlusIcon />
-                                </button>
-                            ) }
-                        </div>
-
-                        { showCreateForm && (
-                            <div className="dc-voice-create">
-                                <input
-                                    className="dc-voice-create-input"
-                                    type="text"
-                                    placeholder="Channel-Name..."
-                                    value={ newChannelName }
-                                    onChange={ e => setNewChannelName(e.target.value) }
-                                    onKeyDown={ e => e.key === 'Enter' && createChannel() }
-                                    autoFocus
-                                />
-                                <div className="dc-voice-create-actions">
-                                    <button className="dc-voice-create-btn" onClick={ createChannel }>Erstellen</button>
-                                    <button className="dc-voice-create-cancel" onClick={ () => { setShowCreateForm(false); setNewChannelName(''); } }>Abbrechen</button>
-                                </div>
-                            </div>
-                        ) }
-
-                        { joinError && (
-                            <div className="dc-voice-error">{ joinError }</div>
-                        ) }
-
-                        <div className="dc-voice-channels">
-                            { channels.map(ch => (
-                                <div key={ ch.id } className="dc-voice-channel">
-                                    <div
-                                        className={ `dc-voice-channel-row ${ activeChannelId === ch.id ? 'dc-voice-channel-row--active' : '' }` }
-                                        onClick={ () => activeChannelId === ch.id ? disconnect() : joinChannel(ch) }
-                                    >
-                                        <SpeakerIcon />
-                                        <span className="dc-voice-channel-name">{ ch.name }</span>
-                                        { (ch.max || ch.maxParticipants) ? (
-                                            <span className="dc-voice-channel-limit">{ ch.max || ch.maxParticipants }</span>
-                                        ) : null }
-                                    </div>
-                                </div>
-                            )) }
-                        </div>
-
-                        { isConnecting && (
-                            <div className="dc-voice-status">Verbinde...</div>
-                        ) }
-
-                        { activeChannelId && token && (
-                            <VoiceConnectedContent
-                                channelId={ activeChannelId }
-                                channelName={ activeChannelName }
-                                livekitUrl={ livekitUrl }
-                                token={ token }
-                                cmsUrl={ cmsUrl }
-                                roomId={ roomId }
-                                voiceMode={ voiceMode }
-                                pttKey={ pttKey }
-                                onChangeMode={ handleChangeMode }
-                                onChangePttKey={ handleChangePttKey }
-                                onDisconnect={ disconnect }
-                            />
-                        ) }
-                    </div>
+        <div className="dc-voice-embedded">
+            <div className="dc-voice-panel">
+                <div className="dc-voice-header">
+                    <span className="dc-voice-header-label">SPRACHCHANNEL</span>
+                    { isMod && (
+                        <button
+                            className="dc-voice-header-add"
+                            onClick={ () => setShowCreateForm(!showCreateForm) }
+                            title="Channel erstellen"
+                        >
+                            <PlusIcon />
+                        </button>
+                    ) }
                 </div>
-            ) }
-        </>
+
+                { showCreateForm && (
+                    <div className="dc-voice-create">
+                        <input
+                            className="dc-voice-create-input"
+                            type="text"
+                            placeholder="Channel-Name..."
+                            value={ newChannelName }
+                            onChange={ e => setNewChannelName(e.target.value) }
+                            onKeyDown={ e => e.key === 'Enter' && createChannel() }
+                            autoFocus
+                        />
+                        <div className="dc-voice-create-actions">
+                            <button className="dc-voice-create-btn" onClick={ createChannel }>Erstellen</button>
+                            <button className="dc-voice-create-cancel" onClick={ () => { setShowCreateForm(false); setNewChannelName(''); } }>Abbrechen</button>
+                        </div>
+                    </div>
+                ) }
+
+                { joinError && (
+                    <div className="dc-voice-error">{ joinError }</div>
+                ) }
+
+                <div className="dc-voice-channels">
+                    { channels.map(ch => (
+                        <div key={ ch.id } className="dc-voice-channel">
+                            <div
+                                className={ `dc-voice-channel-row ${ activeChannelId === ch.id ? 'dc-voice-channel-row--active' : '' }` }
+                                onClick={ () => activeChannelId === ch.id ? disconnect() : joinChannel(ch) }
+                            >
+                                <SpeakerIcon />
+                                <span className="dc-voice-channel-name">{ ch.name }</span>
+                                { (ch.max || ch.maxParticipants) ? (
+                                    <span className="dc-voice-channel-limit">{ ch.max || ch.maxParticipants }</span>
+                                ) : null }
+                            </div>
+                        </div>
+                    )) }
+                </div>
+
+                { isConnecting && (
+                    <div className="dc-voice-status">Verbinde...</div>
+                ) }
+
+                { activeChannelId && token && (
+                    <VoiceConnectedContent
+                        channelId={ activeChannelId }
+                        channelName={ activeChannelName }
+                        livekitUrl={ livekitUrl }
+                        token={ token }
+                        cmsUrl={ cmsUrl }
+                        roomId={ roomId }
+                        voiceMode={ voiceMode }
+                        pttKey={ pttKey }
+                        onChangeMode={ handleChangeMode }
+                        onChangePttKey={ handleChangePttKey }
+                        onDisconnect={ disconnect }
+                    />
+                ) }
+            </div>
+        </div>
     );
 };

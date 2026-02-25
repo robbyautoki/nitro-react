@@ -1,93 +1,86 @@
-import * as React from 'react';
-import * as TabsPrimitive from '@radix-ui/react-tabs';
-import { cn } from '@/lib/utils';
 
-const Tabs = TabsPrimitive.Root;
+import * as React from "react"
+import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { cva, type VariantProps } from "class-variance-authority"
 
-// ─── Default (Pill) Style ────────────────────────────────────────────────────
+import { cn } from "@/lib/utils"
 
-const TabsList = React.forwardRef<
-    React.ElementRef<typeof TabsPrimitive.List>,
-    React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
+function Tabs({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+  return (
+    <TabsPrimitive.Root
+      data-slot="tabs"
+      className={cn("flex flex-col gap-2", className)}
+      {...props}
+    />
+  )
+}
+
+const tabsListVariants = cva(
+  "group/tabs-list text-muted-foreground inline-flex w-fit items-center justify-center",
+  {
+    variants: {
+      variant: {
+        default: "bg-muted h-9 rounded-lg p-[3px]",
+        line: "gap-1 border-b bg-transparent h-10 rounded-none p-0",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+)
+
+function TabsList({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.List> &
+  VariantProps<typeof tabsListVariants>) {
+  return (
     <TabsPrimitive.List
-        ref={ ref }
-        className={ cn(
-            'inline-flex h-9 items-center justify-center rounded-lg bg-white/[0.06] p-1 text-white/50',
-            className
-        ) }
-        { ...props }
+      data-slot="tabs-list"
+      data-variant={variant}
+      className={cn(tabsListVariants({ variant }), className)}
+      {...props}
     />
-));
-TabsList.displayName = TabsPrimitive.List.displayName;
+  )
+}
 
-const TabsTrigger = React.forwardRef<
-    React.ElementRef<typeof TabsPrimitive.Trigger>,
-    React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
+function TabsTrigger({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+  return (
     <TabsPrimitive.Trigger
-        ref={ ref }
-        className={ cn(
-            'appearance-none border-0 bg-transparent inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-transparent transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=active]:shadow',
-            className
-        ) }
-        { ...props }
+      data-slot="tabs-trigger"
+      className={cn(
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring text-foreground/60 hover:text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 whitespace-nowrap px-2 py-1 text-sm font-medium transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "data-[state=active]:text-foreground",
+        // Default variant styles
+        "group-data-[variant=default]/tabs-list:rounded-md group-data-[variant=default]/tabs-list:border group-data-[variant=default]/tabs-list:border-transparent group-data-[variant=default]/tabs-list:data-[state=active]:bg-background group-data-[variant=default]/tabs-list:data-[state=active]:shadow-sm dark:group-data-[variant=default]/tabs-list:data-[state=active]:border-input dark:group-data-[variant=default]/tabs-list:data-[state=active]:bg-input/30",
+        // Line variant styles — underline indicator
+        "group-data-[variant=line]/tabs-list:relative group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:rounded-none group-data-[variant=line]/tabs-list:after:absolute group-data-[variant=line]/tabs-list:after:inset-x-0 group-data-[variant=line]/tabs-list:after:bottom-[-1px] group-data-[variant=line]/tabs-list:after:h-0.5 group-data-[variant=line]/tabs-list:after:bg-foreground group-data-[variant=line]/tabs-list:after:opacity-0 group-data-[variant=line]/tabs-list:after:transition-opacity group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
+        className
+      )}
+      {...props}
     />
-));
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
+  )
+}
 
-const TabsContent = React.forwardRef<
-    React.ElementRef<typeof TabsPrimitive.Content>,
-    React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>
->(({ className, ...props }, ref) => (
+function TabsContent({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+  return (
     <TabsPrimitive.Content
-        ref={ ref }
-        className={ cn(
-            'mt-2 ring-offset-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20 focus-visible:ring-offset-2',
-            className
-        ) }
-        { ...props }
+      data-slot="tabs-content"
+      className={cn("flex-1 outline-none", className)}
+      {...props}
     />
-));
-TabsContent.displayName = TabsPrimitive.Content.displayName;
+  )
+}
 
-// ─── Underline Style ─────────────────────────────────────────────────────────
-
-const TabsListUnderline = React.forwardRef<
-    React.ElementRef<typeof TabsPrimitive.List>,
-    React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-    <TabsPrimitive.List
-        ref={ ref }
-        className={ cn(
-            'w-full inline-flex items-center justify-start gap-0 roundehidden border-b border-white/10 bg-transparent px-10 h-auto py-0',
-            className
-        ) }
-        { ...props }
-    />
-));
-TabsListUnderline.displayName = 'TabsListUnderline';
-
-const TabsTriggerUnderline = React.forwardRef<
-    React.ElementRef<typeof TabsPrimitive.Trigger>,
-    React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>
->(({ className, ...props }, ref) => (
-    <TabsPrimitive.Trigger
-        ref={ ref }
-        className={ cn(
-            'appearance-none border-0 border-b-2 border-transparent bg-transparent inline-flex items-center justify-center gap-1.5 whitespace-nowrap roundehidden px-4 py-2.5 text-xs font-medium text-white/50 transition-colors hover:text-white focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-[state=active]:border-white data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:font-semibold',
-            className
-        ) }
-        { ...props }
-    />
-));
-TabsTriggerUnderline.displayName = 'TabsTriggerUnderline';
-
-export {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent,
-    TabsListUnderline,
-    TabsTriggerUnderline,
-};
+export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants }

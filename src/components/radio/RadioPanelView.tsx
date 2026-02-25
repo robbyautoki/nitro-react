@@ -442,7 +442,7 @@ export const RadioPanelView: FC<{}> = () => {
             <div ref={ytContainerRef} style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }} />
 
             <div className="fixed top-3 left-20 z-[65] pointer-events-auto flex flex-col gap-3">
-                <div className="inline-flex items-center gap-1 py-2 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-md">
+                <div className="inline-flex items-center gap-1 py-2 px-3 rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl">
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div className="p-1.5 rounded-xl cursor-pointer hover:bg-accent/60 transition-colors" onClick={() => isInIframe ? window.parent.postMessage({ type: 'show-cms' }, '*') : null}>
@@ -512,7 +512,7 @@ export const RadioPanelView: FC<{}> = () => {
                 </div>
 
                 {announcement && (
-                    <div className="min-w-[340px] max-w-[400px] flex items-start gap-3 p-3 rounded-xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-md animate-in slide-in-from-top-2 fade-in duration-300">
+                    <div className="min-w-[340px] max-w-[400px] flex items-start gap-3 p-3 rounded-xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl animate-in slide-in-from-top-2 fade-in duration-300">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-1.5">
                                 <Mic className="size-3 text-muted-foreground shrink-0" />

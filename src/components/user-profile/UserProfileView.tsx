@@ -6,7 +6,7 @@ import { getPrestigeFromBadges, getPrestigeInfo } from '../../api/utils/Prestige
 import { Column, Flex, Grid, LayoutAvatarImageView, LayoutBadgeImageView, NitroCardContentView, NitroCardView } from '../../common';
 import { useMessageEvent, useRoomEngineEvent } from '../../hooks';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsListUnderline, TabsTriggerUnderline, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { BANNER_PRESETS, BannerPreset, DEFAULT_BANNER_ID } from './BannerPresets';
 import { BannerPickerView } from './views/BannerPickerView';
 import { BadgesContainerView } from './views/BadgesContainerView';
@@ -237,11 +237,11 @@ export const UserProfileView: FC<{}> = props =>
 
             <div className="profile-tabs">
                 <Tabs defaultValue="badges">
-                    <TabsListUnderline className="tabs-list">
-                        <TabsTriggerUnderline value="badges">Badges</TabsTriggerUnderline>
-                        <TabsTriggerUnderline value="relationships">Beziehungen</TabsTriggerUnderline>
-                        <TabsTriggerUnderline value="groups">Gruppen</TabsTriggerUnderline>
-                    </TabsListUnderline>
+                    <TabsList variant="line" className="tabs-list">
+                        <TabsTrigger value="badges">Badges</TabsTrigger>
+                        <TabsTrigger value="relationships">Beziehungen</TabsTrigger>
+                        <TabsTrigger value="groups">Gruppen</TabsTrigger>
+                    </TabsList>
 
                     <TabsContent value="badges" className="tab-content">
                         <div className="badges-grid">

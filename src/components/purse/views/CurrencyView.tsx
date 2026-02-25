@@ -33,7 +33,7 @@ export const CurrencyView: FC<CurrencyViewProps> = props =>
             <TooltipTrigger asChild>
                 { element }
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+            <TooltipContent side="bottom" className="text-xs">
                 { LocalizeFormattedNumber(amount) }
             </TooltipContent>
         </Tooltip>

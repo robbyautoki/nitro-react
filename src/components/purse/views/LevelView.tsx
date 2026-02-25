@@ -80,13 +80,13 @@ export const LevelView: FC<{}> = props =>
                     />
                 </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+            <TooltipContent side="bottom" className="text-xs">
                 <div className="flex flex-col gap-1">
                     { prestige > 0 && (
                         <span className="font-medium text-purple-400">Prestige { prestige }</span>
                     ) }
                     <span className="font-medium text-amber-300">Level { prestigeInfo.displayLevel }</span>
-                    <span className="text-gray-400">
+                    <span className="text-muted-foreground">
                         { prestigeInfo.isMaxLevel ? 'Max Level!' : `${ prestigeInfo.currentXP } / ${ prestigeInfo.nextLevelXP } XP` }
                     </span>
                     { prestigeInfo.isMaxLevel && (

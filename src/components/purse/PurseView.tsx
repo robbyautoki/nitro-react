@@ -92,7 +92,7 @@ function HelpPopover() {
           <i className="icon icon-help" />
         </div>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0 bg-popover border-border/50 text-foreground">
+      <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
             {step > 0 && (
@@ -327,7 +327,7 @@ function LevelPopover() {
           </div>
         </div>
       </PopoverTrigger>
-      <PopoverContent align="center" sideOffset={8} className="w-[260px] p-0 bg-popover border-border/50 text-foreground">
+      <PopoverContent align="center" sideOffset={8} className="w-[260px] p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-amber-400" />
@@ -395,7 +395,7 @@ function SettingsPopover() {
           <i className="icon icon-cog" />
         </div>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[340px] p-0 bg-popover border-border/50 text-foreground">
+      <PopoverContent align="end" sideOffset={8} className="w-[340px] p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
             <Settings className="size-4 text-muted-foreground" />
@@ -486,7 +486,7 @@ export const PurseView: FC<{}> = props => {
               <span className="text-xs font-semibold text-foreground tabular-nums">{display}</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs bg-popover border-border/50 text-foreground">Währung {type}</TooltipContent>
+          <TooltipContent side="bottom" className="text-xs">Währung {type}</TooltipContent>
         </Tooltip>
       );
     });
@@ -506,7 +506,7 @@ export const PurseView: FC<{}> = props => {
               <span className="text-xs font-semibold text-foreground tabular-nums">{creditsDisplay}</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs bg-popover border-border/50 text-foreground">Credits</TooltipContent>
+          <TooltipContent side="bottom" className="text-xs">Credits</TooltipContent>
         </Tooltip>
 
         {getCurrencyElements()}
@@ -525,7 +525,7 @@ export const PurseView: FC<{}> = props => {
                 <span className="text-xs font-medium text-foreground">{getClubText}</span>
               </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs bg-popover border-border/50 text-foreground">Habbo Club</TooltipContent>
+            <TooltipContent side="bottom" className="text-xs">Habbo Club</TooltipContent>
           </Tooltip>
         )}
 
@@ -541,7 +541,7 @@ export const PurseView: FC<{}> = props => {
                 )}
               </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs bg-popover border-border/50 text-foreground">{label}</TooltipContent>
+            <TooltipContent side="bottom" className="text-xs">{label}</TooltipContent>
           </Tooltip>
         ))}
 

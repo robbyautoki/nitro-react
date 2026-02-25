@@ -80,7 +80,7 @@ export const RoomToolsWidgetView: FC<{}> = props =>
                             <i className="icon icon-cog" />
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm max-w-[200px]">
+                    <TooltipContent side="top" className="text-xs max-w-[200px]">
                         { settingsTooltip || LocalizeText('room.settings.button.text') }
                     </TooltipContent>
                 </Tooltip>
@@ -93,7 +93,7 @@ export const RoomToolsWidgetView: FC<{}> = props =>
                             <i className={ classNames('icon', (!isZoomedIn && 'icon-zoom-less'), (isZoomedIn && 'icon-zoom-more')) } />
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                    <TooltipContent side="top" className="text-xs">
                         { LocalizeText('room.zoom.button.text') }
                     </TooltipContent>
                 </Tooltip>
@@ -106,7 +106,7 @@ export const RoomToolsWidgetView: FC<{}> = props =>
                             <i className="icon icon-chat-history" />
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                    <TooltipContent side="top" className="text-xs">
                         { LocalizeText('room.chathistory.button.text') }
                     </TooltipContent>
                 </Tooltip>
@@ -120,7 +120,7 @@ export const RoomToolsWidgetView: FC<{}> = props =>
                                 <i className="icon icon-like-room" />
                             </div>
                         </TooltipTrigger>
-                        <TooltipContent side="top" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+                        <TooltipContent side="top" className="text-xs">
                             { LocalizeText('room.like.button.text') }
                         </TooltipContent>
                     </Tooltip> }

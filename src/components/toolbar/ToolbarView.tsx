@@ -45,7 +45,7 @@ function OnlineFriendsPopover() {
           )}
         </div>
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" sideOffset={8} className="w-[280px] p-0 bg-popover border-border/50 text-foreground">
+      <PopoverContent side="right" align="start" sideOffset={8} className="w-[280px] p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">Online-Freunde</span>

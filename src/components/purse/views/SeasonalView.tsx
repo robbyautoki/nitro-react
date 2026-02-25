@@ -23,7 +23,7 @@ export const SeasonalView: FC<SeasonalViewProps> = props =>
                     <LayoutCurrencyIcon type={ type } />
                 </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-gray-900 text-gray-200 text-xs border-0 shadow-sm">
+            <TooltipContent side="bottom" className="text-xs">
                 { LocalizeText(`purse.seasonal.currency.${ type }`) }
             </TooltipContent>
         </Tooltip>

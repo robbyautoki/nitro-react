@@ -89,7 +89,7 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
           <Headphones className="size-3.5 text-muted-foreground/60" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[380px] p-0 bg-popover border-border/50 text-foreground">
+      <PopoverContent align="end" sideOffset={8} className="w-[380px] p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -132,13 +132,13 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
             </div>
 
             <div className="flex items-center justify-center gap-2">
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50 text-white hover:bg-accent/50" onClick={() => sendCommand(':radio play')}>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => sendCommand(':radio play')}>
                 <Play className="size-3.5" />
               </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50 text-white hover:bg-accent/50" onClick={() => sendCommand(':radio pause')}>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => sendCommand(':radio pause')}>
                 <Pause className="size-3.5" />
               </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-border/50 text-white hover:bg-accent/50" onClick={() => sendCommand(':radio skip')}>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => sendCommand(':radio skip')}>
                 <SkipForward className="size-3.5" />
               </Button>
             </div>
@@ -175,7 +175,7 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
                 className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-border/50 bg-accent/30 text-foreground placeholder:text-muted-foreground/40 outline-none focus:ring-1 focus:ring-ring resize-none"
                 id="dj-tts-input"
               />
-              <Button size="sm" className="w-full h-7 text-xs bg-muted/50 hover:bg-accent/60 text-white border-0" onClick={() => {
+              <Button size="sm" className="w-full h-7 text-xs" onClick={() => {
                 const el = document.getElementById('dj-tts-input') as HTMLTextAreaElement;
                 if (el?.value) { sendCommand(':radio tts ' + el.value); el.value = ''; }
               }}>Generieren</Button>
@@ -185,7 +185,7 @@ function DjPanelPopover({ currentTrack, paused, looping, radioEnabled, sendComma
               <label className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">Sound Effect</label>
               <div className="flex gap-1.5">
                 <Input placeholder="SFX URL (MP3)..." className="h-7 text-xs bg-accent/30 border-border/50 text-foreground placeholder:text-muted-foreground/40" id="dj-sfx-input" />
-                <Button variant="outline" size="sm" className="h-7 text-xs shrink-0 border-border/50 text-white hover:bg-accent/50" onClick={() => {
+                <Button variant="outline" size="sm" className="h-7 text-xs shrink-0" onClick={() => {
                   const el = document.getElementById('dj-sfx-input') as HTMLInputElement;
                   if (el?.value) { sendCommand(':radio sfx ' + el.value); el.value = ''; }
                 }}>Play</Button>

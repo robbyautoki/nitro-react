@@ -1,34 +1,27 @@
-import { FC, useMemo } from 'react';
-import { GetConfiguration } from '../../../../../api';
+import { FC, useMemo, useState } from 'react';
 import { useCatalog } from '../../../../../hooks';
-import { CatalogHeaderView } from '../../catalog-header/CatalogHeaderView';
+import { CatalogPageHeaderBanner } from '../../shared/CatalogPageHeaderBanner';
+import { CatalogInteractionFilter } from '../../shared/CatalogInteractionFilter';
 import { CatalogFirstProductSelectorWidgetView } from '../widgets/CatalogFirstProductSelectorWidgetView';
 import { CatalogItemGridWidgetView } from '../widgets/CatalogItemGridWidgetView';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayoutDefaultView: FC<CatalogLayoutProps> = props =>
 {
-    const { page = null } = props;
     const { currentPage = null } = useCatalog();
+    const [ interactionFilter, setInteractionFilter ] = useState<string | null>(null);
 
-    const pageText = useMemo(() =>
-    {
-        if(!currentPage?.localization) return null;
-        const text = currentPage.localization.getText(0);
-        if(!text || text.length < 3) return null;
-        return text;
-    }, [ currentPage ]);
+    if(!currentPage) return null;
 
     return (
         <div className="flex flex-col h-full gap-0">
             <CatalogFirstProductSelectorWidgetView />
-            { GetConfiguration('catalog.headers') &&
-                <CatalogHeaderView imageUrl={ currentPage.localization.getImage(0) } /> }
-            { pageText && (
-                <div className="shrink-0 px-3 py-2 border-b border-black/[0.04]">
-                    <div className="catalog-page-text text-[11px] leading-relaxed" dangerouslySetInnerHTML={ { __html: pageText } } />
-                </div>
-            ) }
+            <CatalogPageHeaderBanner />
+            <CatalogInteractionFilter
+                offers={ currentPage.offers || [] }
+                activeFilter={ interactionFilter }
+                onFilter={ setInteractionFilter }
+            />
             <div className="flex-1 min-h-0 overflow-auto">
                 <CatalogItemGridWidgetView />
             </div>

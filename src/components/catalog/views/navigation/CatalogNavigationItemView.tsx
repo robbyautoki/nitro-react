@@ -1,7 +1,6 @@
-import { FC } from 'react';
-import { FaStar, FaRegStar } from 'react-icons/fa';
+import { FC, useState } from 'react';
+import { Star } from 'lucide-react';
 import { ICatalogNode } from '../../../../api';
-import { cn } from '../../../../lib/utils';
 import { useCatalog } from '../../../../hooks';
 import { CatalogIconView } from '../catalog-icon/CatalogIconView';
 import { CatalogNavigationSetView } from './CatalogNavigationSetView';
@@ -18,34 +17,40 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
 {
     const { node = null, child = false, onToggleFavorite, isFavorite = false } = props;
     const { activateNode = null } = useCatalog();
+    const [ hovered, setHovered ] = useState(false);
 
     return (
         <div>
             <div
-                className={ cn(
-                    'group/item px-3 py-[3px] text-[11px] cursor-pointer select-none transition-colors rounded-sm flex items-center gap-2 border-l-2',
-                    node.isActive
-                        ? 'text-black/85 bg-black/[0.04] font-medium border-sky-400/60'
-                        : 'text-black/40 hover:text-black/60 hover:bg-black/[0.03] border-transparent'
-                ) }
-                onClick={ () => activateNode(node) }
+                className="group/item"
+                onMouseEnter={ () => setHovered(true) }
+                onMouseLeave={ () => setHovered(false) }
             >
-                <div className="w-5 h-5 rounded bg-black/[0.03] flex items-center justify-center shrink-0">
-                    <CatalogIconView icon={ node.iconId } />
-                </div>
-                <span className="truncate flex-1">{ node.localization?.replace(/\s*\(\d+\)$/, '') }</span>
-                { onToggleFavorite &&
-                    <button
-                        className={ `shrink-0 transition-opacity ${ isFavorite ? 'opacity-100' : 'opacity-0 group-hover/item:opacity-100' }` }
-                        onClick={ (e) => { e.stopPropagation(); onToggleFavorite(node.pageId); } }
-                    >
-                        { isFavorite
-                            ? <FaStar className="text-[8px] text-amber-400/70" />
-                            : <FaRegStar className="text-[8px] text-black/20 hover:text-amber-400/50" /> }
-                    </button> }
+                <button
+                    className={ `w-full flex items-center gap-2.5 py-[6px] px-2.5 text-sm rounded-lg transition-all duration-150 ${
+                        node.isActive
+                            ? 'bg-accent text-foreground font-medium'
+                            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                    }` }
+                    onClick={ () => activateNode(node) }
+                >
+                    <div className="w-5 h-5 rounded flex items-center justify-center shrink-0">
+                        <CatalogIconView icon={ node.iconId } />
+                    </div>
+                    <span className="truncate flex-1 text-left">{ node.localization?.replace(/\s*\(\d+\)$/, '') }</span>
+
+                    { hovered && onToggleFavorite ? (
+                        <button
+                            className="shrink-0 p-0.5 rounded hover:bg-accent transition-colors"
+                            onClick={ (e) => { e.stopPropagation(); onToggleFavorite(node.pageId); } }
+                        >
+                            <Star className={ `w-3 h-3 ${ isFavorite ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30' }` } />
+                        </button>
+                    ) : null }
+                </button>
             </div>
             { node.isOpen && node.isBranch &&
-                <div className="ml-3 border-l border-black/[0.05] pl-0.5 mt-0.5">
+                <div className="ml-3 border-l border-border/30 pl-0.5 mt-0.5">
                     <CatalogNavigationSetView node={ node } child={ true } />
                 </div> }
         </div>

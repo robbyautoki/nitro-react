@@ -1,38 +1,40 @@
-import { FC } from 'react';
-import { CreateLinkEvent, LocalizeText } from '../../../../../api';
+import { FC, useMemo } from 'react';
+import { Users } from 'lucide-react';
+import { GetConfiguration } from '../../../../../api';
 import { Button } from '../../../../ui/button';
+import { useCatalog } from '../../../../../hooks';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayoutGuildFrontpageView: FC<CatalogLayoutProps> = props =>
 {
-    const { page = null } = props;
+    const { currentPage = null } = useCatalog();
+    const imageLibUrl = useMemo(() => GetConfiguration<string>('image.library.url', ''), []);
 
-    const teaserImage = page.localization.getImage(1);
+    const pageText = useMemo(() => currentPage?.localization?.getText(0) || '', [ currentPage ]);
+    const teaser = useMemo(() =>
+    {
+        const img = currentPage?.localization?.getImage(1);
+        return img ? `${ imageLibUrl }${ img }` : '';
+    }, [ currentPage, imageLibUrl ]);
 
     return (
-        <div className="flex flex-col h-full overflow-y-auto" style={ { scrollbarWidth: 'none' } }>
-            <div className="flex flex-col gap-3 p-3">
-
-                {/* Hero with teaser image */}
-                { teaserImage &&
-                    <div className="flex justify-center p-3 rounded-xl bg-black/[0.03] border border-black/[0.06]">
-                        <img src={ teaserImage } alt="" className="max-h-20 object-contain rounded-lg" />
-                    </div> }
-
-                {/* Content */}
-                <div className="catalog-page-text flex flex-col gap-2 rounded-lg bg-black/[0.02] border border-black/[0.06] p-3.5 text-[11px] text-black/50 leading-relaxed">
-                    <div dangerouslySetInnerHTML={ { __html: page.localization.getText(2) } } />
-                    <div dangerouslySetInnerHTML={ { __html: page.localization.getText(0) } } />
-                    <div dangerouslySetInnerHTML={ { __html: page.localization.getText(1) } } />
+        <div className="flex flex-col h-full overflow-y-auto p-4 gap-3" style={ { scrollbarWidth: 'thin' } }>
+            { teaser && (
+                <div className="flex justify-center p-4 rounded-xl bg-muted/20 border border-border/40">
+                    <img src={ teaser } alt="" className="max-h-20 object-contain rounded-lg" onError={ e => { (e.target as HTMLImageElement).style.display = 'none'; } } />
                 </div>
-
-                {/* Action button */}
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-black/[0.03] border border-black/[0.06] shrink-0">
-                    <Button onClick={ () => CreateLinkEvent('groups/create') } className="h-8 text-xs px-4 w-full">
-                        { LocalizeText('catalog.start.guild.purchase.button') }
-                    </Button>
-                </div>
+            ) }
+            <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary/60" />
+                <span className="text-sm font-bold">Gruppen</span>
             </div>
+            { pageText && (
+                <div className="rounded-lg bg-muted/10 border border-border/30 p-4 text-xs text-muted-foreground leading-relaxed catalog-page-text" dangerouslySetInnerHTML={ { __html: pageText } } />
+            ) }
+            <Button className="w-full h-10 gap-2 rounded-xl text-sm font-bold" disabled>
+                <Users className="w-4 h-4" /> Gruppe erstellen
+            </Button>
+            <p className="text-[10px] text-muted-foreground/50 text-center">Gruppenerstellung im Spiel verfügbar</p>
         </div>
     );
 }

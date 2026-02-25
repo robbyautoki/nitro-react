@@ -1,45 +1,35 @@
-import { CatalogGroupsComposer } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useState } from 'react';
-import { SendMessageComposer } from '../../../../../api';
+import { FC, useMemo } from 'react';
+import { MessageSquare, Users } from 'lucide-react';
+import { Button } from '../../../../ui/button';
 import { useCatalog } from '../../../../../hooks';
-import { CatalogFirstProductSelectorWidgetView } from '../widgets/CatalogFirstProductSelectorWidgetView';
-import { CatalogGuildSelectorWidgetView } from '../widgets/CatalogGuildSelectorWidgetView';
-import { CatalogPurchaseWidgetView } from '../widgets/CatalogPurchaseWidgetView';
-import { CatalogTotalPriceWidget } from '../widgets/CatalogTotalPriceWidget';
 import { CatalogLayoutProps } from './CatalogLayout.types';
+import { CatalogGuildSelectorWidgetView } from '../widgets/CatalogGuildSelectorWidgetView';
 
 export const CatalogLayoutGuildForumView: FC<CatalogLayoutProps> = props =>
 {
-    const { page = null } = props;
-    const [ selectedGroupIndex, setSelectedGroupIndex ] = useState<number>(0);
-    const { currentOffer = null, setCurrentOffer = null, catalogOptions = null } = useCatalog();
-    const { groups = null } = catalogOptions;
-
-    useEffect(() =>
-    {
-        SendMessageComposer(new CatalogGroupsComposer());
-    }, [ page ]);
+    const { currentPage = null } = useCatalog();
+    const pageText = useMemo(() => currentPage?.localization?.getText(0) || '', [ currentPage ]);
 
     return (
-        <>
-            <CatalogFirstProductSelectorWidgetView />
-            <div className="flex flex-col h-full gap-2">
-                <div className="catalog-page-text flex-1 min-h-0 overflow-y-auto rounded-lg bg-black/[0.02] border border-black/[0.06] p-3.5 text-[11px] text-black/50 leading-relaxed" style={ { scrollbarWidth: 'none' } }>
-                    <div dangerouslySetInnerHTML={ { __html: page.localization.getText(1) } } />
-                </div>
-                { !!currentOffer && (
-                    <div className="flex items-center gap-3 p-2.5 bg-black/[0.03] rounded-lg border border-black/[0.06] shrink-0">
-                        <div className="flex-1 min-w-0 flex flex-col gap-1">
-                            <span className="text-sm font-medium text-black/85 truncate">{ currentOffer.localizationName }</span>
-                            <CatalogGuildSelectorWidgetView />
-                            <div className="flex items-center justify-between gap-2">
-                                <CatalogTotalPriceWidget justifyContent="end" alignItems="end" />
-                                <CatalogPurchaseWidgetView noGiftOption={ true } />
-                            </div>
-                        </div>
-                    </div>
-                ) }
+        <div className="flex flex-col h-full overflow-y-auto p-4 gap-3" style={ { scrollbarWidth: 'thin' } }>
+            <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-primary/60" />
+                <span className="text-sm font-bold">Gruppen-Forum</span>
             </div>
-        </>
+            { pageText && (
+                <div className="rounded-lg bg-muted/10 border border-border/30 p-4 text-xs text-muted-foreground leading-relaxed catalog-page-text" dangerouslySetInnerHTML={ { __html: pageText } } />
+            ) }
+            <div className="rounded-lg border border-border/40 bg-card p-4">
+                <div className="flex items-center gap-2 mb-3">
+                    <Users className="w-4 h-4 text-muted-foreground/50" />
+                    <span className="text-xs font-semibold">Gruppe auswählen</span>
+                </div>
+                <CatalogGuildSelectorWidgetView />
+                <Button className="w-full h-9 mt-3 gap-2 rounded-lg text-xs font-bold" disabled>
+                    <MessageSquare className="w-3.5 h-3.5" /> Forum aktivieren
+                </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground/50 text-center">Forum-Verwaltung im Spiel verfügbar</p>
+        </div>
     );
 }

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 
 function SidebarItem({ iconClass, label, badge, onClick }: { iconClass: string; label: string; badge?: number; onClick?: () => void }) {
   return (
@@ -77,7 +77,6 @@ function OnlineFriendsPopover() {
 export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   const { isInRoom } = props;
   const [useGuideTool, setUseGuideTool] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const { userFigure = null } = useSessionInfo();
   const { getFullCount = 0 } = useInventoryUnseenTracker();
   const { getTotalUnseen = 0 } = useAchievements();
@@ -118,8 +117,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="nitro-toolbar fixed left-0 top-0 h-full z-[70] pointer-events-auto relative shrink-0">
-        <div className={`border-r border-border/40 bg-card/50 backdrop-blur-xl flex flex-col items-center py-3 gap-0.5 overflow-hidden transition-all duration-200 h-full ${sidebarOpen ? "w-16" : "w-0 border-r-0"}`}>
+      <div className="nitro-toolbar fixed left-0 top-0 h-screen z-[70] pointer-events-auto shrink-0">
+        <div className="border-r border-border/40 bg-card w-16 flex flex-col items-center py-3 gap-0.5 overflow-hidden h-screen">
 
           <ToolbarMeView
             useGuideTool={useGuideTool}
@@ -154,9 +153,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
           <OnlineFriendsPopover />
         </div>
 
-        <button onClick={() => setSidebarOpen(v => !v)} className="absolute top-3 -right-3 z-20 size-6 rounded-full bg-popover border border-border/50 shadow-sm flex items-center justify-center hover:bg-accent/50 transition-colors">
-          {sidebarOpen ? <ChevronLeft className="size-3 text-muted-foreground" /> : <ChevronRight className="size-3 text-muted-foreground" />}
-        </button>
       </div>
 
       <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto flex items-end gap-2 w-[620px]">

@@ -43,7 +43,7 @@ const useCatalogState = () =>
     catalogSkipPurchaseConfirmationRef.current = catalogSkipPurchaseConfirmation;
     const purchasableOfferRef = useRef(purchasableOffer);
     purchasableOfferRef.current = purchasableOffer;
-    const [ catalogSize, setCatalogSize ] = useState({ width: 850, height: 480 });
+    const [ catalogSize, setCatalogSize ] = useState({ width: 850, height: 580 });
     const [ furniCount, setFurniCount ] = useState(0);
     const [ furniLimit, setFurniLimit ] = useState(0);
     const [ maxFurniLimit, setMaxFurniLimit ] = useState(0);

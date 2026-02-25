@@ -180,8 +180,8 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
                 <div className="relative z-10 flex items-center justify-between px-3 pt-2.5 pb-1.5 shrink-0">
                     <div className="flex items-center gap-2 min-w-0">
                         <button className="shrink-0 hover:opacity-80 transition-opacity" onClick={ () => GetUserProfile(avatarInfo.webID) }>
-                            <div className="w-6 h-6 rounded-full overflow-hidden ring-1 ring-white/10">
-                                <LayoutAvatarImageView figure={ avatarInfo.figure } headOnly direction={ 2 } />
+                            <div className="relative w-7 h-7 rounded-full overflow-hidden ring-1 ring-white/10">
+                                <LayoutAvatarImageView figure={ avatarInfo.figure } headOnly direction={ 2 } className="!absolute -top-1" />
                             </div>
                         </button>
                         <div className="min-w-0">
@@ -343,8 +343,8 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
                                         </div>
                                         { hasData && info.friendCount > 1 && <span className="text-[9px] text-white/25">+{ info.friendCount - 1 }</span> }
                                         { hasData && info.randomFriendFigure && (
-                                            <div className="w-5 h-5 rounded-full shrink-0 overflow-hidden ring-1 ring-white/10 cursor-pointer" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
-                                                <LayoutAvatarImageView figure={ info.randomFriendFigure } headOnly direction={ 2 } />
+                                            <div className="relative w-7 h-7 rounded-full shrink-0 overflow-hidden ring-1 ring-white/10 cursor-pointer" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
+                                                <LayoutAvatarImageView figure={ info.randomFriendFigure } headOnly direction={ 2 } className="!absolute -top-1" />
                                             </div>
                                         ) }
                                     </div>

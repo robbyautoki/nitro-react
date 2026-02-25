@@ -309,33 +309,29 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     }
 
     return (
-        <div className="flex flex-col gap-1.5 w-full">
+        <div className="flex flex-col gap-1.5 w-full items-center">
             <PurchaseButton />
-            <div className="flex gap-1 w-full">
-                { (!noGiftOption && !currentOffer.isRentOffer) &&
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="shrink-0 text-[10px] text-muted-foreground hover:text-foreground px-2"
-                        disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
-                        onClick={ () => purchase(true) }
-                    >
-                        🎁
-                    </Button> }
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className={ 'flex-1 text-[10px] px-1 ' + (catalogPlaceMultipleObjects ? 'text-blue-600 bg-blue-500/10' : 'text-muted-foreground hover:text-foreground') }
-                    onClick={ () => {
-                        const newVal = !catalogPlaceMultipleObjects;
-                        setCatalogPlaceMultipleObjects(newVal);
-                        if(newVal && currentOffer) requestOfferToMover(currentOffer);
-                    } }
+            <Button
+                variant="outline"
+                size="sm"
+                className={ 'w-full text-xs ' + (catalogPlaceMultipleObjects ? 'text-blue-600 border-blue-500/40 bg-blue-500/10' : '') }
+                onClick={ () => {
+                    const newVal = !catalogPlaceMultipleObjects;
+                    setCatalogPlaceMultipleObjects(newVal);
+                    if(newVal && currentOffer) requestOfferToMover(currentOffer);
+                } }
+            >
+                Platzieren
+            </Button>
+            { (!noGiftOption && !currentOffer.isRentOffer) &&
+                <button
+                    className="text-[10px] text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed"
+                    disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
+                    onClick={ () => purchase(true) }
                 >
-                    Platzieren
-                </Button>
-            </div>
-            <p className="text-[10px] text-muted-foreground/50 text-center mt-1">⌘/Strg + Klick = Mehrfachauswahl</p>
+                    Verschenken
+                </button> }
+            <p className="text-[10px] text-muted-foreground/50 text-center">⌘/Strg + Klick = Mehrfachauswahl</p>
         </div>
     );
 }

@@ -62,6 +62,7 @@ function OnlineFriendsPopover() {
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-medium text-foreground truncate">{f.name}</p>
               </div>
+              <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 shrink-0 border-border/50 text-foreground/80 hover:bg-accent/50 hover:text-foreground" onClick={() => OpenMessengerChat(f.id)}>Chat</Button>
               <Button variant="outline" size="sm" className="h-6 text-[10px] px-2 shrink-0 border-border/50 text-foreground/80 hover:bg-accent/50 hover:text-foreground" onClick={() => followFriend(f)}>Besuchen</Button>
             </div>
           ))}

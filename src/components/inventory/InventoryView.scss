@@ -22,59 +22,64 @@
         overflow: hidden;
     }
 
+    // ─── Sidebar ────────────────────────────────
     .inv-sidebar {
-        width: 120px;
-        min-width: 120px;
+        width: 140px;
+        min-width: 140px;
         display: flex;
         flex-direction: column;
-        padding: 14px 0;
-        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 10px 0;
+        border-right: 1px solid rgba(0, 0, 0, 0.06);
+        background: rgba(0, 0, 0, 0.01);
     }
 
     .inv-sidebar-title {
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        color: rgba(255, 255, 255, 0.30);
-        padding: 0 16px 12px;
+        letter-spacing: 0.5px;
+        color: rgba(0, 0, 0, 0.30);
+        padding: 0 12px 8px;
     }
 
     .inv-sidebar-item {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 8px 16px;
-        font-size: 13px;
+        padding: 6px 12px;
+        font-size: 12px;
         font-weight: 500;
-        color: rgba(255, 255, 255, 0.55);
+        color: rgba(0, 0, 0, 0.50);
         cursor: pointer;
         transition: all 0.12s ease;
+        border-left: 2px solid transparent;
 
         &:hover {
-            color: rgba(255, 255, 255, 0.80);
-            background: rgba(255, 255, 255, 0.04);
+            color: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.03);
         }
 
         &.active {
-            color: rgba(255, 255, 255, 0.95);
-            background: rgba(255, 255, 255, 0.06);
-            border-right: 2px solid rgba(255, 255, 255, 0.40);
+            color: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.04);
+            border-left-color: #3b82f6;
+            font-weight: 600;
         }
     }
 
     .inv-sidebar-badge {
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 700;
         background: #ef4444;
         color: white;
         border-radius: 10px;
-        padding: 1px 6px;
-        min-width: 18px;
+        padding: 1px 5px;
+        min-width: 16px;
         text-align: center;
         line-height: 1.4;
     }
 
+    // ─── Content ────────────────────────────────
     .inv-content {
         flex: 1;
         display: flex;
@@ -86,17 +91,17 @@
     .inv-content-header {
         display: flex;
         justify-content: flex-end;
-        padding: 8px 12px 4px;
+        padding: 6px 10px 2px;
     }
 
     .inv-close {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.30);
+        font-size: 10px;
+        color: rgba(0, 0, 0, 0.25);
         cursor: pointer;
         transition: color 0.12s ease;
 
         &:hover {
-            color: rgba(255, 255, 255, 0.80);
+            color: rgba(0, 0, 0, 0.70);
         }
     }
 
@@ -106,7 +111,7 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        padding: 0 12px 12px;
+        padding: 0 10px 10px;
 
         > * {
             min-height: 0;
@@ -114,67 +119,98 @@
         }
     }
 
-    .inv-items-grid {
-        flex: 1;
-        min-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    .inv-footer {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 10px 0 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
-        margin-top: 8px;
-        flex-shrink: 0;
-    }
-
-    .inv-footer-preview {
-        width: 48px;
-        height: 48px;
-        min-width: 48px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.04);
+    // ─── Toolbar ────────────────────────────────
+    .inv-toolbar-row {
         display: flex;
         align-items: center;
-        justify-content: center;
-        overflow: hidden;
+        gap: 5px;
+    }
 
-        img {
-            image-rendering: pixelated;
-            max-width: 100%;
-            max-height: 100%;
+    .inv-toolbar-row input {
+        background: rgba(0, 0, 0, 0.03) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        border-radius: 6px !important;
+        font-size: 11px !important;
+        height: 28px !important;
+        color: rgba(0, 0, 0, 0.7) !important;
+
+        &::placeholder {
+            color: rgba(0, 0, 0, 0.3) !important;
+        }
+
+        &:focus {
+            border-color: rgba(59, 130, 246, 0.3) !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1) !important;
         }
     }
 
-    .inv-footer-info {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .inv-footer-name {
-        font-size: 13px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.90);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .inv-footer-actions {
+    .inv-sort-btn {
         display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 4px;
+        align-items: center;
+        justify-content: center;
+        padding: 3px 8px;
+        border-radius: 5px;
+        font-size: 9px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.40);
+        background: transparent;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.12s ease;
+
+        &:hover {
+            color: rgba(0, 0, 0, 0.65);
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        &.active {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.15);
+        }
     }
 
+    .inv-multiselect-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: rgba(0, 0, 0, 0.30);
+        background: transparent;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+
+        &:hover {
+            color: rgba(0, 0, 0, 0.60);
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        &.active {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.08);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+    }
+
+    .inv-count {
+        font-size: 9px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.30);
+        white-space: nowrap;
+        margin-left: auto;
+    }
+
+    // ─── Category Bar ───────────────────────────
     .inv-category-bar {
         display: flex;
         align-items: center;
-        gap: 4px;
-        padding: 6px 0;
+        gap: 3px;
+        padding: 5px 0;
         overflow-x: auto;
         overflow-y: hidden;
         flex-shrink: 0;
@@ -188,64 +224,67 @@
     .inv-category-chip {
         display: flex;
         align-items: center;
-        gap: 4px;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 11px;
+        gap: 3px;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
         font-weight: 500;
-        color: rgba(255, 255, 255, 0.55);
-        background: rgba(255, 255, 255, 0.04);
+        color: rgba(0, 0, 0, 0.45);
+        background: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.04);
         cursor: pointer;
         white-space: nowrap;
         transition: all 0.12s ease;
         flex-shrink: 0;
 
         &:hover {
-            color: rgba(255, 255, 255, 0.80);
-            background: rgba(255, 255, 255, 0.08);
+            color: rgba(0, 0, 0, 0.70);
+            background: rgba(0, 0, 0, 0.05);
         }
 
         &.active {
-            color: rgba(255, 255, 255, 0.95);
-            background: rgba(255, 255, 255, 0.12);
+            color: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.06);
+            border-color: rgba(0, 0, 0, 0.08);
+            font-weight: 600;
         }
 
         .color-dot {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             flex-shrink: 0;
         }
 
         .chip-label {
-            max-width: 80px;
+            max-width: 70px;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .chip-count {
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 700;
-            background: rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.70);
+            background: rgba(0, 0, 0, 0.06);
+            color: rgba(0, 0, 0, 0.40);
             border-radius: 8px;
-            padding: 0 5px;
-            min-width: 16px;
+            padding: 0 4px;
+            min-width: 14px;
             text-align: center;
             line-height: 1.5;
         }
 
         &.active .chip-count {
-            background: rgba(255, 255, 255, 0.25);
-            color: rgba(255, 255, 255, 0.90);
+            background: rgba(0, 0, 0, 0.10);
+            color: rgba(0, 0, 0, 0.60);
         }
 
         .chip-delete {
             display: none;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.3);
-            margin-left: 2px;
+            color: rgba(0, 0, 0, 0.2);
+            margin-left: 1px;
             line-height: 1;
             transition: color 0.1s ease;
 
@@ -259,9 +298,9 @@
         }
 
         &.skeleton {
-            width: 60px;
-            height: 22px;
-            background: rgba(255, 255, 255, 0.04);
+            width: 55px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.03);
             animation: inv-shimmer 1.5s infinite;
         }
     }
@@ -273,55 +312,144 @@
     }
 
     .inv-category-add {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 700;
-        color: rgba(255, 255, 255, 0.30);
-        padding: 3px 8px;
+        color: rgba(0, 0, 0, 0.20);
+        padding: 2px 6px;
 
         &:hover {
-            color: rgba(255, 255, 255, 0.70);
+            color: rgba(0, 0, 0, 0.50);
         }
     }
 
-    // ─── Toolbar row ────────────────────────────
-    .inv-toolbar-row {
-        display: flex;
-        align-items: center;
-        gap: 6px;
+    // ─── Items Grid ─────────────────────────────
+    .inv-items-grid {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 
-    .inv-multiselect-toggle {
+    // ─── Footer / Inspector ─────────────────────
+    .inv-footer {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 6px;
-        cursor: pointer;
-        color: rgba(255, 255, 255, 0.4);
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        transition: all 0.15s ease;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        margin-top: 6px;
         flex-shrink: 0;
-
-        &:hover { color: rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.08); }
-        &.active { color: #3b82f6; background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); }
+        background: rgba(0, 0, 0, 0.01);
+        border-radius: 0 0 8px 0;
     }
 
-    // ─── Multi-select checkbox on items ─────────
+    .inv-footer-preview-large {
+        width: 90px;
+        min-width: 90px;
+        flex: 0 0 90px;
+        height: 90px;
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+
+        .room-preview-container {
+            width: 90px !important;
+            min-width: 90px;
+        }
+
+        .room-preview-image {
+            width: 90px !important;
+            min-width: 90px;
+        }
+    }
+
+    .inv-footer-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .inv-footer-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.85);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .inv-footer-count {
+        font-size: 10px;
+        color: rgba(0, 0, 0, 0.35);
+        margin-bottom: 3px;
+    }
+
+    .inv-footer-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 4px;
+
+        .btn {
+            font-size: 10px !important;
+            padding: 2px 8px !important;
+            border-radius: 6px !important;
+            height: 24px !important;
+        }
+    }
+
+    // ─── Rarity badge on items ──────────────────
+    .inv-rarity-badge {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        font-size: 6px;
+        font-weight: 800;
+        text-transform: uppercase;
+        padding: 0 3px;
+        line-height: 1.6;
+        letter-spacing: 0.3px;
+
+        &.rarity-legendary {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+        }
+        &.rarity-epic {
+            background: rgba(168, 85, 247, 0.15);
+            color: #9333ea;
+        }
+        &.rarity-rare {
+            background: rgba(59, 130, 246, 0.15);
+            color: #2563eb;
+        }
+    }
+
+    .inv-ltd-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        font-size: 7px;
+        font-weight: 800;
+        color: #d97706;
+        background: rgba(245, 158, 11, 0.12);
+        padding: 0 2px;
+        line-height: 1.5;
+    }
+
+    // ─── Multi-select ───────────────────────────
     .inv-multi-check {
         position: absolute;
         top: 2px;
         right: 2px;
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         border-radius: 3px;
-        border: 1.5px solid rgba(255, 255, 255, 0.3);
-        background: rgba(0, 0, 0, 0.5);
+        border: 1.5px solid rgba(0, 0, 0, 0.15);
+        background: white;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 10px;
+        font-size: 9px;
         color: white;
         z-index: 5;
         transition: all 0.1s ease;
@@ -333,30 +461,29 @@
     }
 
     .inv-multi-selected {
-        outline: 2px solid rgba(59, 130, 246, 0.6) !important;
+        outline: 2px solid rgba(59, 130, 246, 0.4) !important;
         outline-offset: -2px;
     }
 
-    // ─── Multi-select toolbar ───────────────────
     .inv-multi-toolbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 8px 10px;
-        margin-top: 6px;
-        background: rgba(59, 130, 246, 0.1);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: 8px;
+        padding: 6px 8px;
+        margin-top: 4px;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.12);
+        border-radius: 6px;
 
         .inv-multi-count {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.8);
+            color: #3b82f6;
         }
 
         .inv-multi-actions {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
         }
 
@@ -369,89 +496,91 @@
             bottom: 100%;
             left: 0;
             margin-bottom: 4px;
-            background: rgba(20, 20, 30, 0.98);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.08);
             border-radius: 8px;
             padding: 4px;
-            min-width: 160px;
+            min-width: 150px;
             z-index: 100;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 
             .inv-multi-dropdown-item {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                padding: 6px 10px;
+                gap: 6px;
+                padding: 5px 8px;
                 border-radius: 5px;
-                font-size: 12px;
-                color: rgba(255, 255, 255, 0.8);
+                font-size: 11px;
+                color: rgba(0, 0, 0, 0.70);
                 cursor: pointer;
                 transition: background 0.1s;
 
-                &:hover { background: rgba(255, 255, 255, 0.08); }
+                &:hover { background: rgba(0, 0, 0, 0.04); }
             }
         }
     }
 
-    // ─── Footer preview large ───────────────────
-    .inv-footer-preview-large {
-        width: 110px;
-        min-width: 110px;
-        flex: 0 0 110px;
-        height: 110px;
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: 8px;
-        overflow: hidden;
+    // ─── Durability bar in footer ───────────────
+    .inv-durability {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 3px;
 
-        .room-preview-container {
-            width: 110px !important;
-            min-width: 110px;
+        .inv-durability-bar {
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.06);
+            overflow: hidden;
         }
 
-        .room-preview-image {
-            width: 110px !important;
-            min-width: 110px;
+        .inv-durability-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s ease;
         }
-    }
 
-    .inv-footer-count {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.4);
-        margin-bottom: 4px;
+        .inv-durability-text {
+            font-size: 10px;
+            font-weight: 500;
+        }
     }
 }
+
+// ─── Category context menu (portaled) ───────────
 
 .inv-category-context {
     position: fixed;
     z-index: 9999;
-    background: #1a1a2e;
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 8px;
     padding: 4px 0;
     min-width: 140px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.50);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 
     .context-header {
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        color: rgba(255, 255, 255, 0.30);
-        padding: 4px 12px 6px;
+        color: rgba(0, 0, 0, 0.30);
+        padding: 4px 10px 5px;
     }
 
     .context-item {
         display: flex;
         align-items: center;
         gap: 6px;
-        padding: 6px 12px;
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.80);
+        padding: 5px 10px;
+        font-size: 11px;
+        color: rgba(0, 0, 0, 0.70);
         cursor: pointer;
         transition: background 0.1s ease;
 
         &:hover {
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(0, 0, 0, 0.03);
         }
 
         &.context-danger {
@@ -459,8 +588,8 @@
         }
 
         .color-dot {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             flex-shrink: 0;
         }
@@ -473,88 +602,82 @@
     }
 }
 
+// ─── Category dialog ────────────────────────────
+
 .inv-category-dialog-overlay {
     position: fixed;
     inset: 0;
     z-index: 10000;
-    background: rgba(0, 0, 0, 0.50);
+    background: rgba(0, 0, 0, 0.30);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .inv-category-dialog {
-    background: #1a1a2e;
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
     padding: 16px;
-    width: 260px;
+    width: 240px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.60);
+    gap: 10px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
 
     .dialog-title {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
-        color: rgba(255, 255, 255, 0.90);
+        color: rgba(0, 0, 0, 0.85);
     }
 
     .color-picker {
         display: flex;
-        gap: 8px;
+        gap: 6px;
     }
 
     .color-swatch {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
         cursor: pointer;
         border: 2px solid transparent;
         transition: border-color 0.12s ease;
 
         &:hover {
-            border-color: rgba(255, 255, 255, 0.30);
+            border-color: rgba(0, 0, 0, 0.20);
         }
 
         &.active {
-            border-color: rgba(255, 255, 255, 0.80);
+            border-color: rgba(0, 0, 0, 0.60);
         }
     }
 
     .dialog-filter-select {
         width: 100%;
-        padding: 6px 10px;
+        padding: 5px 8px;
         border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        background: rgba(255, 255, 255, 0.06);
-        color: rgba(255, 255, 255, 0.85);
-        font-size: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background: rgba(0, 0, 0, 0.02);
+        color: rgba(0, 0, 0, 0.70);
+        font-size: 11px;
         cursor: pointer;
         outline: none;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.4)'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
 
         &:focus {
-            border-color: rgba(255, 255, 255, 0.25);
-        }
-
-        option {
-            background: #1a1a2e;
-            color: rgba(255, 255, 255, 0.85);
+            border-color: rgba(59, 130, 246, 0.3);
         }
     }
 
     .dialog-actions {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         justify-content: flex-end;
     }
 }
 
-// ─── Delete dialog (portaled to body) ───────
+// ─── Delete dialog ──────────────────────────────
+
 .inv-delete-overlay {
     position: fixed;
     inset: 0;
@@ -562,82 +685,82 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.30);
+    backdrop-filter: blur(2px);
 }
 
 .inv-delete-dialog {
-    width: 320px;
-    background: rgba(16, 16, 22, 0.98);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 300px;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
 }
 
 .inv-delete-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    font-size: 14px;
+    gap: 6px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: 13px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(0, 0, 0, 0.85);
 }
 
 .inv-delete-body {
-    padding: 16px;
+    padding: 14px;
 
     .inv-delete-item-name {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 500;
-        color: rgba(255, 255, 255, 0.85);
-        margin-bottom: 10px;
+        color: rgba(0, 0, 0, 0.75);
+        margin-bottom: 8px;
     }
 
     .inv-delete-label {
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.5);
-        margin-bottom: 8px;
+        font-size: 11px;
+        color: rgba(0, 0, 0, 0.45);
+        margin-bottom: 6px;
     }
 
     .inv-delete-input-row {
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin-bottom: 8px;
+        gap: 5px;
+        margin-bottom: 6px;
     }
 
     .inv-delete-btn {
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
         border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.06);
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background: rgba(0, 0, 0, 0.02);
+        color: rgba(0, 0, 0, 0.50);
+        font-size: 14px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
 
-        &:hover { background: rgba(255, 255, 255, 0.1); }
+        &:hover { background: rgba(0, 0, 0, 0.05); }
         &:disabled { opacity: 0.3; cursor: default; }
     }
 
     .inv-delete-input {
         flex: 1;
-        height: 32px;
+        height: 28px;
         border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        background: rgba(255, 255, 255, 0.06);
-        color: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        background: rgba(0, 0, 0, 0.02);
+        color: rgba(0, 0, 0, 0.80);
         text-align: center;
-        font-size: 14px;
+        font-size: 13px;
         outline: none;
 
-        &:focus { border-color: rgba(255, 255, 255, 0.2); }
+        &:focus { border-color: rgba(59, 130, 246, 0.3); }
     }
 
     .inv-delete-slider {
@@ -648,30 +771,30 @@
 
 .inv-delete-footer {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     justify-content: flex-end;
-    padding: 12px 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 10px 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 
     .inv-delete-cancel {
-        padding: 6px 14px;
+        padding: 5px 12px;
         border-radius: 6px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.08);
         background: transparent;
-        color: rgba(255, 255, 255, 0.6);
-        font-size: 12px;
+        color: rgba(0, 0, 0, 0.50);
+        font-size: 11px;
         cursor: pointer;
 
-        &:hover { background: rgba(255, 255, 255, 0.06); }
+        &:hover { background: rgba(0, 0, 0, 0.03); }
     }
 
     .inv-delete-confirm {
-        padding: 6px 14px;
+        padding: 5px 12px;
         border-radius: 6px;
         border: none;
         background: #ef4444;
         color: white;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         cursor: pointer;
 

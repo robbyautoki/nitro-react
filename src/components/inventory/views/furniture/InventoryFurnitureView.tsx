@@ -40,6 +40,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
     const [ deleteTarget, setDeleteTarget ] = useState<{ groupItem: GroupItem; maxCount: number } | null>(null);
     const [ showCategoryDropdown, setShowCategoryDropdown ] = useState(false);
     const [ showBatchDeleteDialog, setShowBatchDeleteDialog ] = useState(false);
+    const [ sortMode, setSortMode ] = useState<'name' | 'count' | 'rarity'>('name');
 
     const categoryFilteredItems = filterByCategory(groupItems, activeCategory);
 
@@ -311,13 +312,17 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
         <Column grow gap={ 0 } style={{ minHeight: 0 }}>
             <div className="inv-toolbar-row">
                 <InventoryFurnitureSearchView groupItems={ categoryFilteredItems } setGroupItems={ setFilteredGroupItems } />
+                <div className={ 'inv-sort-btn' + (sortMode === 'name' ? ' active' : '') } onClick={ () => setSortMode('name') }>A-Z</div>
+                <div className={ 'inv-sort-btn' + (sortMode === 'count' ? ' active' : '') } onClick={ () => setSortMode('count') }>Menge</div>
+                <div className={ 'inv-sort-btn' + (sortMode === 'rarity' ? ' active' : '') } onClick={ () => setSortMode('rarity') }>Rarität</div>
                 <div
                     className={ 'inv-multiselect-toggle' + (multiSelectMode ? ' active' : '') }
                     onClick={ () => { if(multiSelectMode) clearMultiSelect(); else setMultiSelectMode(true); } }
                     title="Mehrfachauswahl"
                 >
-                    <FaCheckSquare style={{ fontSize: '14px' }} />
+                    <FaCheckSquare style={{ fontSize: '12px' }} />
                 </div>
+                <span className="inv-count">{ filteredGroupItems.length }/{ groupItems.length }</span>
             </div>
             <InventoryCategoryBar groupItems={ groupItems } />
             <div className="inv-items-grid mt-2">
@@ -362,30 +367,26 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             { !multiSelectMode && selectedItem &&
                 <div className="inv-footer">
                     <div className="inv-footer-preview-large">
-                        <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 110 } />
+                        <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 90 } />
                     </div>
                     <div className="inv-footer-info">
                         <div className="inv-footer-name">{ selectedItem.name }</div>
                         <div className="inv-footer-count">{ selectedItem.getUnlockedCount() } Stk.</div>
                         { durabilityInfo &&
-                            <div style={ { marginBottom: '4px' } }>
-                                <div style={ { display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '2px' } }>
-                                    <FaWrench style={ { fontSize: '10px', color: durabilityInfo.status === 'broken' ? '#ef4444' : '#9ca3af' } } />
-                                    <span style={ { fontSize: '11px', color: durabilityInfo.status === 'broken' ? '#ef4444' : '#d1d5db' } }>
-                                        { durabilityInfo.status === 'broken' ? 'Zerbrochen!' : `${ durabilityInfo.remaining }%` }
-                                    </span>
-                                </div>
-                                <div style={ { width: '100%', height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.15)' } }>
-                                    <div style={ {
+                            <div className="inv-durability">
+                                <FaWrench style={ { fontSize: '10px', color: durabilityInfo.status === 'broken' ? '#ef4444' : '#9ca3af', flexShrink: 0 } } />
+                                <div className="inv-durability-bar">
+                                    <div className="inv-durability-fill" style={ {
                                         width: `${ durabilityInfo.remaining }%`,
-                                        height: '100%',
-                                        borderRadius: '2px',
                                         background: durabilityInfo.status === 'broken' ? '#6b7280'
                                             : durabilityInfo.remaining > 50 ? '#22c55e'
                                             : durabilityInfo.remaining > 25 ? '#eab308'
                                             : '#ef4444',
                                     } } />
                                 </div>
+                                <span className="inv-durability-text" style={ { color: durabilityInfo.status === 'broken' ? '#ef4444' : '#6b7280' } }>
+                                    { durabilityInfo.status === 'broken' ? 'Zerbrochen!' : `${ durabilityInfo.remaining }%` }
+                                </span>
                             </div> }
                         <div className="inv-footer-actions">
                             { !!roomSession && (!durabilityInfo || durabilityInfo.status !== 'broken') &&

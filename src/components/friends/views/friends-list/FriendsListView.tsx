@@ -121,7 +121,7 @@ export const FriendsListView: FC<{}> = props =>
 
     return (
         <>
-            <div className="fixed inset-0 z-[399]" onClick={ () => setIsVisible(false) } />
+            <div className="fixed inset-0 z-[399] pointer-events-auto" onMouseDown={ () => setIsVisible(false) } />
             <NitroCardView className="nitro-friends" uniqueKey="nitro-friends" theme="primary-slim">
                 <NitroCardHeaderView headerText={ LocalizeText('friendlist.friends') } onCloseClick={ event => setIsVisible(false) } />
                 <NitroCardContentView overflow="hidden" gap={ 1 } className= "text-white/90 p-0">

@@ -77,7 +77,7 @@
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                transform: translate(-50%, -50%);
+                transform: translate(-50%, -42%);
                 width: 150px;
                 height: 150px;
                 image-rendering: pixelated;
@@ -100,7 +100,7 @@
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                min-width: 120px;
+                min-width: 150px;
             }
 
             .nameplate-name {

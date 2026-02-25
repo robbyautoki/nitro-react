@@ -3,7 +3,7 @@ import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from 'react'
 import { attemptItemPlacement, GetSessionDataManager, GroupItem } from '../../../../api';
 import { useInventoryFurni } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
-import { FaWrench } from 'react-icons/fa';
+import { FaWrench, FaBox } from 'react-icons/fa';
 
 interface InventoryFurnitureItemViewProps
 {
@@ -18,6 +18,7 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
     const { groupItem = null, multiSelectMode = false, isMultiSelected = false, onMultiToggle = null } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
     const [ showTooltip, setShowTooltip ] = useState(false);
+    const [ imgError, setImgError ] = useState(false);
     const [ contextMenu, setContextMenu ] = useState<{ x: number; y: number } | null>(null);
     const { selectedItem = null, setSelectedItem = null } = useInventoryFurni();
     const { categories, getItemCategories, toggleAssignment } = useInventoryCategories();
@@ -36,6 +37,20 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
     const furniData = floorData || wallData;
     const className = furniData?.className || '';
     const isWall = groupItem.isWallItem;
+
+    // Rarity detection
+    const getRarity = (): { label: string; cls: string } | null =>
+    {
+        if(isLtd) return { label: 'LGD', cls: 'rarity-legendary' };
+        const cn = className.toLowerCase();
+        const name = groupItem.name.toLowerCase();
+        if(cn.includes('rare_') || name.includes('rare') || name.includes('selten'))
+            return { label: 'RARE', cls: 'rarity-rare' };
+        if(cn.includes('epic_') || name.includes('epic'))
+            return { label: 'EPIC', cls: 'rarity-epic' };
+        return null;
+    };
+    const rarity = getRarity();
 
     const onMouseEvent = (event: MouseEvent) =>
     {
@@ -120,12 +135,16 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
                 onDoubleClick={ onMouseEvent }
                 onContextMenu={ multiSelectMode ? undefined : onContextMenu }
             >
-                <img
-                    className="inv-tile-img"
-                    src={ groupItem.iconUrl }
-                    alt=""
-                    onError={ e => { (e.target as HTMLImageElement).style.opacity = '0.2'; } }
-                />
+                { !imgError ? (
+                    <img
+                        className="inv-tile-img"
+                        src={ groupItem.iconUrl }
+                        alt=""
+                        onError={ () => setImgError(true) }
+                    />
+                ) : (
+                    <FaBox className="inv-tile-fallback" />
+                ) }
 
                 { multiSelectMode &&
                     <div className={ 'inv-tile-check' + (isMultiSelected ? ' checked' : '') }>
@@ -137,6 +156,9 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
 
                 { count > 1 &&
                     <span className="inv-tile-count">{ count }</span> }
+
+                { rarity &&
+                    <span className={ 'inv-tile-rarity ' + rarity.cls }>{ rarity.label }</span> }
 
                 {/* Tooltip */}
                 { showTooltip && !contextMenu &&

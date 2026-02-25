@@ -1,6 +1,6 @@
 import { BadgePointLimitsEvent, ILinkEventTracker, IRoomSession, RoomEngineObjectEvent, RoomEngineObjectPlacedEvent, RoomPreviewer, RoomSessionEvent } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaTimes, FaBox, FaRobot, FaPaw, FaMedal } from 'react-icons/fa';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FaTimes, FaBox, FaRobot, FaPaw, FaMedal, FaPlus, FaCheck } from 'react-icons/fa';
 import { AddEventLinkTracker, GetConfiguration, GetLocalization, GetRoomEngine, isObjectMoverRequested, LocalizeText, RemoveLinkEventTracker, setObjectMoverRequested, UnseenItemCategory } from '../../api';
 import { DraggableWindow, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent } from '../../hooks';
@@ -41,9 +41,54 @@ export const InventoryView: FC<{}> = props =>
     const { isTrading = false, stopTrading = null } = useInventoryTrade();
     const { getCount = null } = useInventoryUnseenTracker();
     const { groupItems = [] } = useInventoryFurni();
-    const { categories, activeCategory, setActiveCategory } = useInventoryCategories();
+    const { categories, activeCategory, setActiveCategory, createCategory } = useInventoryCategories();
 
     const totalItems = useMemo(() => groupItems.reduce((s, g) => s + g.getUnlockedCount(), 0), [ groupItems ]);
+
+    // Resize
+    const MIN_W = 500, MIN_H = 400, MAX_W = 900, MAX_H = 700;
+    const [ size, setSize ] = useState({ w: 620, h: 520 });
+    const resizeRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null);
+
+    useEffect(() =>
+    {
+        const onMove = (e: PointerEvent) =>
+        {
+            if(!resizeRef.current) return;
+            const dw = e.clientX - resizeRef.current.startX;
+            const dh = e.clientY - resizeRef.current.startY;
+            setSize({
+                w: Math.min(MAX_W, Math.max(MIN_W, resizeRef.current.startW + dw)),
+                h: Math.min(MAX_H, Math.max(MIN_H, resizeRef.current.startH + dh)),
+            });
+        };
+        const onUp = () => { resizeRef.current = null; };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        return () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); };
+    }, []);
+
+    const onResizeStart = useCallback((e: React.PointerEvent) =>
+    {
+        e.preventDefault();
+        e.stopPropagation();
+        resizeRef.current = { startX: e.clientX, startY: e.clientY, startW: size.w, startH: size.h };
+    }, [ size ]);
+
+    // Category create inline
+    const [ creatingCategory, setCreatingCategory ] = useState(false);
+    const [ newCatName, setNewCatName ] = useState('');
+    const CAT_COLORS = ['#3b82f6', '#eab308', '#22c55e', '#a855f7', '#ef4444', '#f97316', '#06b6d4', '#ec4899'];
+    const [ newCatColor, setNewCatColor ] = useState(CAT_COLORS[0]);
+
+    const handleCreateCategory = useCallback(() =>
+    {
+        if(!newCatName.trim()) return;
+        createCategory(newCatName.trim(), newCatColor);
+        setNewCatName('');
+        setNewCatColor(CAT_COLORS[0]);
+        setCreatingCategory(false);
+    }, [ newCatName, newCatColor, createCategory ]);
 
     const ASSETS_URL = GetConfiguration<string>('asset.url', 'http://localhost:8080');
 
@@ -183,7 +228,7 @@ export const InventoryView: FC<{}> = props =>
 
     return (
         <DraggableWindow uniqueKey="inventory" handleSelector=".inv-title-bar">
-            <div className="nitro-inventory inv-container">
+            <div className="nitro-inventory inv-container" style={{ width: size.w, height: size.h }}>
                 {/* Title bar */}
                 <div className="inv-title-bar drag-handler">
                     <div className="inv-title-left">
@@ -229,6 +274,42 @@ export const InventoryView: FC<{}> = props =>
                                         <span className="inv-sidebar-label">{ cat.name }</span>
                                     </div>
                                 )) }
+                                <div className="inv-sidebar-divider" />
+                                { creatingCategory ? (
+                                    <div className="inv-create-form">
+                                        <input
+                                            className="inv-create-input"
+                                            placeholder="Name..."
+                                            value={ newCatName }
+                                            onChange={ e => setNewCatName(e.target.value) }
+                                            autoFocus
+                                            onKeyDown={ e => { if(e.key === 'Enter') handleCreateCategory(); if(e.key === 'Escape') setCreatingCategory(false); } }
+                                        />
+                                        <div className="inv-create-colors">
+                                            { CAT_COLORS.map(c => (
+                                                <button
+                                                    key={ c }
+                                                    className={ 'inv-color-swatch' + (newCatColor === c ? ' active' : '') }
+                                                    style={{ backgroundColor: c }}
+                                                    onClick={ () => setNewCatColor(c) }
+                                                />
+                                            )) }
+                                        </div>
+                                        <div className="inv-create-actions">
+                                            <button className="inv-create-ok" onClick={ handleCreateCategory }>
+                                                <FaCheck style={{ fontSize: 8 }} /> OK
+                                            </button>
+                                            <button className="inv-create-cancel" onClick={ () => setCreatingCategory(false) }>
+                                                <FaTimes style={{ fontSize: 8 }} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="inv-sidebar-item inv-sidebar-create" onClick={ () => setCreatingCategory(true) }>
+                                        <FaPlus style={{ fontSize: 10, opacity: 0.4 }} />
+                                        <span className="inv-sidebar-label">Erstellen</span>
+                                    </div>
+                                ) }
                             </div>
                         ) }
                     </div>
@@ -274,6 +355,13 @@ export const InventoryView: FC<{}> = props =>
                             </div>
                         );
                     }) }
+                </div>
+
+                {/* Resize Handle */}
+                <div className="inv-resize-handle" onPointerDown={ onResizeStart }>
+                    <svg width="10" height="10" viewBox="0 0 10 10">
+                        <path d="M9 1L1 9M9 5L5 9M9 8L8 9" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                    </svg>
                 </div>
             </div>
         </DraggableWindow>

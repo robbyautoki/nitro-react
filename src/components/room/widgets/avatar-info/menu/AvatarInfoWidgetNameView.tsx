@@ -42,7 +42,9 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
     {
         if(!nameInfo.figure || nameInfo.userType !== RoomObjectType.USER) return '';
 
-        return `https://www.habbo.com/habbo-imaging/avatarimage?figure=${ encodeURIComponent(nameInfo.figure) }&headonly=1&direction=3&head_direction=3&size=l&gesture=sml`;
+        const fig = nameInfo.figure.replace(/ /g, '.');
+
+        return `https://www.habbo.com/habbo-imaging/avatarimage?figure=${ encodeURIComponent(fig) }&headonly=1&direction=3&head_direction=3&size=l&gesture=sml`;
     }, [ nameInfo ]);
 
     const isUser = nameInfo.userType === RoomObjectType.USER;

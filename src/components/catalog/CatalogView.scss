@@ -164,7 +164,7 @@
 }
 
 .autocomplete-gift-container {
-    background: oklch(var(--card) / 0.98);
+    background: color-mix(in oklch, var(--card) 98%, transparent);
     padding: 8px;
     list-style-type: none;
     min-width: 307px;

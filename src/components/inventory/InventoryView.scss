@@ -36,7 +36,7 @@
     height: 100%;
     border-radius: 12px;
     border: 1px solid rgba(var(--inv-fg-rgb), 0.08);
-    background: oklch(var(--card));
+    background: var(--card);
     color: rgba(var(--inv-fg-rgb), 0.85);
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.06);
     overflow: hidden;
@@ -338,7 +338,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    background: oklch(var(--card));
+    background: var(--card);
     transition: all 0.1s ease;
 
     &:hover {
@@ -439,7 +439,7 @@
     height: 14px;
     border-radius: 3px;
     border: 1.5px solid rgba(var(--inv-fg-rgb), 0.12);
-    background: oklch(var(--card));
+    background: var(--card);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -494,7 +494,7 @@
     font-weight: 600;
     cursor: pointer;
     border: 1px solid rgba(var(--inv-fg-rgb), 0.08);
-    background: oklch(var(--card));
+    background: var(--card);
     color: rgba(var(--inv-fg-rgb), 0.60);
     transition: all 0.12s ease;
 
@@ -523,7 +523,7 @@
     bottom: 100%;
     left: 0;
     margin-bottom: 4px;
-    background: oklch(var(--card));
+    background: var(--card);
     border: 1px solid rgba(var(--inv-fg-rgb), 0.08);
     border-radius: 8px;
     padding: 4px;
@@ -747,7 +747,7 @@
     padding: 4px 10px;
     border-radius: 7px;
     border: 1px solid rgba(var(--inv-fg-rgb), 0.08);
-    background: oklch(var(--card));
+    background: var(--card);
     font-size: 10px;
     font-weight: 600;
     cursor: pointer;
@@ -867,7 +867,7 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.1s ease;
-    background: oklch(var(--card));
+    background: var(--card);
 
     &.filled:hover {
         border-color: rgba(59, 130, 246, 0.3);
@@ -939,7 +939,7 @@
 .inv-category-context {
     position: fixed;
     z-index: 9999;
-    background: oklch(var(--card));
+    background: var(--card);
     border: 1px solid rgba(var(--inv-fg-rgb), 0.08);
     border-radius: 8px;
     padding: 4px 0;
@@ -999,7 +999,7 @@
 
 .inv-delete-dialog {
     width: 300px;
-    background: oklch(var(--card));
+    background: var(--card);
     border: 1px solid rgba(var(--inv-fg-rgb), 0.08);
     border-radius: 12px;
     overflow: hidden;
@@ -1123,7 +1123,7 @@
 }
 
 .inv-category-dialog {
-    background: oklch(var(--card));
+    background: var(--card);
     border: 1px solid rgba(var(--inv-fg-rgb), 0.08);
     border-radius: 12px;
     padding: 16px;
@@ -1330,7 +1330,7 @@
     position: absolute;
     bottom: calc(100% + 4px);
     left: 0;
-    background: oklch(var(--card));
+    background: var(--card);
     border: 1px solid rgba(var(--inv-fg-rgb), 0.08);
     border-radius: 8px;
     padding: 4px;

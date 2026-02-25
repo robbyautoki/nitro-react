@@ -69,10 +69,10 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, active }) 
                 ctx.lineTo(cx - halfTileW, cy);
                 ctx.closePath();
 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
                 ctx.fill();
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                ctx.lineWidth = 2;
                 ctx.stroke();
             });
         };

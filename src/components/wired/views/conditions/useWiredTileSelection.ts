@@ -3,11 +3,11 @@ import { WiredSelectionVisualizer } from '../../../../api';
 
 const tileKey = (x: number, y: number) => `${ x },${ y }`;
 
-const _tileClickHandlers = new Set<(x: number, y: number) => void>();
+const _tileClickHandlers = new Set<(x: number, y: number, isDrag: boolean, shiftKey: boolean) => void>();
 
-(globalThis as any).__wiredTileDispatch = (x: number, y: number) => 
+(globalThis as any).__wiredTileDispatch = (x: number, y: number, isDrag: boolean, shiftKey: boolean) => 
 {
-    _tileClickHandlers.forEach(h => h(x, y));
+    _tileClickHandlers.forEach(h => h(x, y, isDrag, shiftKey));
 };
 
 export const useWiredTileSelection = () =>
@@ -58,14 +58,24 @@ export const useWiredTileSelection = () =>
     {
         if (!isSelecting) return;
 
-        const handler = (x: number, y: number) =>
+        const handler = (x: number, y: number, isDrag: boolean, shiftKey: boolean) =>
         {
             const key = tileKey(x, y);
             setSelectedTiles(prev =>
             {
                 const next = new Set(prev);
-                if (next.has(key)) next.delete(key);
-                else next.add(key);
+
+                if(isDrag)
+                {
+                    if(shiftKey) next.delete(key);
+                    else next.add(key);
+                }
+                else
+                {
+                    if(next.has(key)) next.delete(key);
+                    else next.add(key);
+                }
+
                 return next;
             });
         };

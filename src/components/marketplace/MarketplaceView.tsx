@@ -1,8 +1,8 @@
 import { FC, useCallback } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { Store, Search, Package, BarChart3, History, MessageCircle, ShoppingBag } from 'lucide-react';
+import { Store, Package, BarChart3, History, MessageCircle, ShoppingBag, X } from 'lucide-react';
 import { DraggableWindow, DraggableWindowPosition } from '../../common';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Separator } from '@/components/ui/separator';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
 import { MarketplaceBrowseView } from './MarketplaceBrowseView';
 import { MarketplaceOwnOffersView } from './MarketplaceOwnOffersView';
@@ -25,33 +25,28 @@ const TABS = [
 export const MarketplaceView: FC<{}> = () =>
 {
     const { isVisible, setIsVisible, currentTab, setCurrentTab } = useMarketplace();
-
     const onClose = useCallback(() => setIsVisible(false), [ setIsVisible ]);
 
     if(!isVisible) return null;
 
     return (
         <TooltipProvider delayDuration={ 150 }>
-        <DraggableWindow uniqueKey="marketplace" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-            <div className="w-[820px] max-h-[85vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
-                <div className="flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(85vh-4px)]">
+            <DraggableWindow uniqueKey="marketplace" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
+                <div className="w-[820px] max-h-[85vh] rounded-xl border border-border/60 bg-card shadow-2xl overflow-hidden flex flex-col">
 
-                    {/* Header */}
-                    <div className="drag-handler flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent shrink-0 cursor-move">
-                        <div className="flex items-center gap-2.5">
-                            <Store className="size-4 text-white/70" />
-                            <span className="text-sm font-semibold text-white/90 tracking-tight">Marktplatz</span>
+                    {/* Title Bar */}
+                    <div className="drag-handler shrink-0 flex items-center justify-between px-3 py-2 border-b border-border/40 bg-muted/20 cursor-grab active:cursor-grabbing select-none">
+                        <div className="flex items-center gap-2">
+                            <Store className="w-3.5 h-3.5 text-muted-foreground/50" />
+                            <span className="text-[13px] font-semibold">Marktplatz</span>
                         </div>
-                        <button
-                            className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all cursor-pointer"
-                            onClick={ onClose }
-                        >
-                            <FaTimes className="size-3" />
+                        <button className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/50 transition-colors" onClick={ onClose }>
+                            <X className="w-3 h-3" />
                         </button>
                     </div>
 
                     {/* Tab Bar */}
-                    <div className="flex gap-1 px-4 pt-3 pb-2 shrink-0">
+                    <div className="shrink-0 flex gap-0.5 px-2 pt-1.5 pb-1 border-b border-border/30">
                         { TABS.map(tab =>
                         {
                             const Icon = tab.icon;
@@ -60,13 +55,12 @@ export const MarketplaceView: FC<{}> = () =>
                             return (
                                 <button
                                     key={ tab.id }
-                                    className={ `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${ isActive
-                                        ? 'bg-white/[0.12] text-white shadow-sm'
-                                        : 'text-white/40 hover:text-white/70 hover:bg-white/[0.05]'
-                                    }` }
+                                    className={ `flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all ${ isActive
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground' }` }
                                     onClick={ () => setCurrentTab(tab.id) }
                                 >
-                                    <Icon className="size-3.5" />
+                                    <Icon className="w-3 h-3" />
                                     { tab.label }
                                 </button>
                             );
@@ -74,7 +68,7 @@ export const MarketplaceView: FC<{}> = () =>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-h-0 overflow-auto px-4 pb-4">
+                    <div className="flex-1 min-h-0 overflow-auto px-4 pb-4 pt-2">
                         { currentTab === 'custom-browse' && <CustomMarketplaceBrowseView /> }
                         { currentTab === 'custom-my' && <CustomMarketplaceMyListingsView /> }
                         { currentTab === 'custom-sales' && <CustomMarketplaceSalesView /> }
@@ -83,8 +77,7 @@ export const MarketplaceView: FC<{}> = () =>
                         { currentTab === 'charts' && <MarketplacePriceChartView /> }
                     </div>
                 </div>
-            </div>
-        </DraggableWindow>
+            </DraggableWindow>
         </TooltipProvider>
     );
 };

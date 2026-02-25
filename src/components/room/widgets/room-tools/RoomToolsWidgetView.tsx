@@ -1,10 +1,10 @@
 import { GetGuestRoomResultEvent, NavigatorSearchComposer, RateFlatMessageComposer } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useState } from 'react';
+import { FC, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { CreateLinkEvent, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../../api';
 import { classNames } from '../../../../common';
 import { useMessageEvent, useNavigator, useRoom } from '../../../../hooks';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const RoomToolsWidgetView: FC<{}> = props =>
 {
@@ -69,63 +69,65 @@ export const RoomToolsWidgetView: FC<{}> = props =>
     const settingsTooltip = [ roomName, roomOwner ].filter(Boolean).join(' - ');
 
     return createPortal(
-        <TooltipProvider delayDuration={ 400 }>
-            <div className="flex items-center gap-0.5 py-1.5 px-2 rounded-lg bg-[rgba(12,12,16,0.85)] border border-white/[0.08] backdrop-blur-[20px]">
+        <>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <div
+                        className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                        onClick={ () => handleToolClick('settings') }
+                    >
+                        <i className="icon icon-cog shrink-0" style={ { maxWidth: 28, maxHeight: 28 } } />
+                        <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">Raum Info</span>
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs max-w-[200px]">
+                    { settingsTooltip || LocalizeText('room.settings.button.text') }
+                </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <div
+                        className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                        onClick={ () => handleToolClick('zoom') }
+                    >
+                        <i className={ classNames('icon shrink-0', (!isZoomedIn && 'icon-zoom-less'), (isZoomedIn && 'icon-zoom-more')) } style={ { maxWidth: 28, maxHeight: 28 } } />
+                        <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">Zoom</span>
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                    { LocalizeText('room.zoom.button.text') }
+                </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <div
+                        className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                        onClick={ () => handleToolClick('chat_history') }
+                    >
+                        <i className="icon icon-chat-history shrink-0" style={ { maxWidth: 28, maxHeight: 28 } } />
+                        <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">Verlauf</span>
+                    </div>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="text-xs">
+                    { LocalizeText('room.chathistory.button.text') }
+                </TooltipContent>
+            </Tooltip>
+            { navigatorData.canRate &&
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <div
-                            className="p-1.5 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => handleToolClick('settings') }
+                            className="relative flex flex-col items-center gap-0.5 py-1.5 px-1 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                            onClick={ () => handleToolClick('like_room') }
                         >
-                            <i className="icon icon-cog" />
+                            <i className="icon icon-like-room shrink-0" style={ { maxWidth: 28, maxHeight: 28 } } />
+                            <span className="text-[8px] font-medium text-muted-foreground/60 leading-none">Like</span>
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs max-w-[200px]">
-                        { settingsTooltip || LocalizeText('room.settings.button.text') }
+                    <TooltipContent side="right" className="text-xs">
+                        { LocalizeText('room.like.button.text') }
                     </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <div
-                            className="p-1.5 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => handleToolClick('zoom') }
-                        >
-                            <i className={ classNames('icon', (!isZoomedIn && 'icon-zoom-less'), (isZoomedIn && 'icon-zoom-more')) } />
-                        </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">
-                        { LocalizeText('room.zoom.button.text') }
-                    </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <div
-                            className="p-1.5 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
-                            onClick={ () => handleToolClick('chat_history') }
-                        >
-                            <i className="icon icon-chat-history" />
-                        </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">
-                        { LocalizeText('room.chathistory.button.text') }
-                    </TooltipContent>
-                </Tooltip>
-                { navigatorData.canRate &&
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <div
-                                className="p-1.5 rounded-md cursor-pointer hover:bg-white/10 transition-colors"
-                                onClick={ () => handleToolClick('like_room') }
-                            >
-                                <i className="icon icon-like-room" />
-                            </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="text-xs">
-                            { LocalizeText('room.like.button.text') }
-                        </TooltipContent>
-                    </Tooltip> }
-            </div>
-        </TooltipProvider>,
+                </Tooltip> }
+        </>,
         portalTarget
     );
 }

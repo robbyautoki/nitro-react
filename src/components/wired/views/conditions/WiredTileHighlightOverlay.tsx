@@ -51,7 +51,7 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, active }) 
 
             selectedTiles.forEach(key =>
             {
-                const [xs, ys] = key.split(',');
+                const [ xs, ys ] = key.split(',');
                 const tx = parseInt(xs);
                 const ty = parseInt(ys);
                 if (isNaN(tx) || isNaN(ty)) return;
@@ -87,7 +87,7 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, active }) 
     return (
         <canvas
             ref={ canvasRef }
-            style={{
+            style={ {
                 position: 'fixed',
                 top: 0,
                 left: 0,
@@ -95,7 +95,7 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, active }) 
                 height: '100vh',
                 pointerEvents: 'none',
                 zIndex: 300
-            }}
+            } }
         />
     );
 };

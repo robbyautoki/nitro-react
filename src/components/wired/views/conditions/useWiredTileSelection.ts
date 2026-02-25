@@ -1,13 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { GetRoomEngine } from '../../../../api';
+import { useCallback, useEffect, useState } from 'react';
+import { WiredSelectionVisualizer } from '../../../../api';
 
-export interface TileCoord { x: number; y: number; }
-
-const tileKey = (x: number, y: number) => `${x},${y}`;
+const tileKey = (x: number, y: number) => `${ x },${ y }`;
 
 const _tileClickHandlers = new Set<(x: number, y: number) => void>();
 
-(globalThis as any).__wiredTileDispatch = (x: number, y: number) => {
+(globalThis as any).__wiredTileDispatch = (x: number, y: number) => 
+{
     _tileClickHandlers.forEach(h => h(x, y));
 };
 
@@ -19,12 +18,14 @@ export const useWiredTileSelection = () =>
     const startSelecting = useCallback(() =>
     {
         (globalThis as any).__wiredTileSelectionActive = true;
+        WiredSelectionVisualizer.applyAreaSelectionTransparency();
         setIsSelecting(true);
     }, []);
 
     const stopSelecting = useCallback(() =>
     {
         (globalThis as any).__wiredTileSelectionActive = false;
+        WiredSelectionVisualizer.clearAreaSelectionTransparency();
         setIsSelecting(false);
     }, []);
 
@@ -35,10 +36,14 @@ export const useWiredTileSelection = () =>
 
     const setTilesFromString = useCallback((str: string) =>
     {
-        if (!str || str.length === 0) { setSelectedTiles(new Set()); return; }
+        if (!str || str.length === 0) 
+        {
+            setSelectedTiles(new Set()); return; 
+        }
         const tiles = new Set<string>();
-        str.split(';').forEach(pair => {
-            const [x, y] = pair.split(',').map(Number);
+        str.split(';').forEach(pair => 
+        {
+            const [ x, y ] = pair.split(',').map(Number);
             if (!isNaN(x) && !isNaN(y)) tiles.add(tileKey(x, y));
         });
         setSelectedTiles(tiles);
@@ -66,12 +71,19 @@ export const useWiredTileSelection = () =>
         };
 
         _tileClickHandlers.add(handler);
-        return () => { _tileClickHandlers.delete(handler); };
+        return () => 
+        {
+            _tileClickHandlers.delete(handler); 
+        };
     }, [ isSelecting ]);
 
     useEffect(() =>
     {
-        return () => { (globalThis as any).__wiredTileSelectionActive = false; };
+        return () =>
+        {
+            (globalThis as any).__wiredTileSelectionActive = false;
+            WiredSelectionVisualizer.clearAreaSelectionTransparency();
+        };
     }, []);
 
     return { selectedTiles, isSelecting, startSelecting, stopSelecting, clearTiles, setTilesFromString, tilesToString, tileCount: selectedTiles.size };

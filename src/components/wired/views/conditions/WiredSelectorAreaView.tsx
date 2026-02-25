@@ -26,13 +26,20 @@ export const WiredSelectorAreaView: FC<{ title: string }> = ({ title }) =>
         const str = trigger.stringData || '';
         setTilesFromString(str);
         const p = trigger.intData || [];
-        if (p.length >= 2) { setFilterExisting(p[0] === 1); setInvert(p[1] === 1); }
-    }, [ trigger ]);
+        if (p.length >= 2) 
+        {
+            setFilterExisting(p[0] === 1);
+            setInvert(p[1] === 1);
+        }
+    }, [ trigger, setTilesFromString ]);
 
     useEffect(() =>
     {
-        return () => { stopSelecting(); };
-    }, []);
+        return () => 
+        {
+            stopSelecting(); 
+        };
+    }, [ stopSelecting ]);
 
     const toggleSelecting = () =>
     {
@@ -48,7 +55,7 @@ export const WiredSelectorAreaView: FC<{ title: string }> = ({ title }) =>
                     <Text bold small>Bereichsauswahl</Text>
                     <Text small>
                         Um einen Bereich auszuwählen, klicke einfach auf den
-                        "Bereich wählen" Button und markiere dann mit
+                        „Bereich wählen“ Button und markiere dann mit
                         deinen Cursor den gewünschten Bereich im Raum.
                     </Text>
                     { tileCount > 0 && <Text small className="text-muted">{ tileCount } Felder ausgewählt</Text> }

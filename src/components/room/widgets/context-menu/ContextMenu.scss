@@ -57,8 +57,8 @@
                 display: flex;
                 align-items: center;
                 gap: 6px;
-                padding: 4px 12px 4px 4px;
-                min-height: 48px;
+                padding: 3px 14px 3px 3px;
+                min-height: 38px;
                 background-color: #fff;
                 background-size: cover;
                 background-position: center;
@@ -68,8 +68,8 @@
 
             .nameplate-avatar {
                 position: relative;
-                width: 48px;
-                height: 48px;
+                width: 38px;
+                height: 38px;
                 flex-shrink: 0;
             }
 
@@ -78,8 +78,8 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 50px;
-                height: 54px;
+                width: 42px;
+                height: 46px;
                 object-fit: contain;
                 image-rendering: pixelated;
                 z-index: 1;
@@ -90,8 +90,8 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 46px;
-                height: 46px;
+                width: 38px;
+                height: 38px;
                 object-fit: contain;
                 z-index: 2;
                 pointer-events: none;
@@ -101,6 +101,7 @@
                 display: flex;
                 align-items: center;
                 gap: 6px;
+                min-width: 120px;
             }
 
             .nameplate-name {

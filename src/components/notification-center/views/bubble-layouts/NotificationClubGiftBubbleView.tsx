@@ -1,26 +1,49 @@
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { LocalizeText, NotificationBubbleItem, OpenUrl } from '../../../../api';
-import { LayoutCurrencyIcon, LayoutNotificationBubbleView, LayoutNotificationBubbleViewProps } from '../../../../common';
+import { TransitionAnimation, TransitionAnimationTypes } from '../../../../common/transitions';
+import { Frame, FramePanel } from '../../../ui/frame';
+import { Button } from '../../../ui/button';
+import { Crown } from 'lucide-react';
 
-export interface NotificationClubGiftBubbleViewProps extends LayoutNotificationBubbleViewProps
+export interface NotificationClubGiftBubbleViewProps
 {
     item: NotificationBubbleItem;
+    onClose: () => void;
 }
 
 export const NotificationClubGiftBubbleView: FC<NotificationClubGiftBubbleViewProps> = props =>
 {
-    const { item = null, onClose = null, ...rest } = props;
+    const { item = null, onClose = null } = props;
+    const [ isVisible, setIsVisible ] = useState(false);
+
+    useEffect(() =>
+    {
+        setIsVisible(true);
+        return () => setIsVisible(false);
+    }, []);
 
     return (
-        <LayoutNotificationBubbleView fadesOut={ false } className="flex-col club-gift" onClose={ onClose } { ...rest }>
-            <div className="flex items-center gap-2 mb-2">
-                <LayoutCurrencyIcon type="hc" className="shrink-0" />
-                <span className="ml-1">{ LocalizeText('notifications.text.club_gift') }</span>
+        <TransitionAnimation type={ TransitionAnimationTypes.FADE_IN } inProp={ isVisible } timeout={ 300 }>
+            <div className="pointer-events-auto w-full max-w-xs">
+                <Frame>
+                    <FramePanel className="!p-0">
+                        <div className="px-3.5 py-2.5 space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Crown className="size-4 text-amber-500 shrink-0" />
+                                <span className="text-xs font-semibold text-foreground">{ LocalizeText('notifications.text.club_gift') }</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button size="sm" className="flex-1 h-7 text-xs" onClick={ () => OpenUrl(item.linkUrl) }>
+                                    { LocalizeText('notifications.button.show_gift_list') }
+                                </Button>
+                                <button className="text-xs text-muted-foreground hover:text-foreground underline" onClick={ onClose }>
+                                    { LocalizeText('notifications.button.later') }
+                                </button>
+                            </div>
+                        </div>
+                    </FramePanel>
+                </Frame>
             </div>
-            <div className="flex items-center justify-end gap-2">
-                <button type="button" className="btn btn-success w-full btn-sm" onClick={ () => OpenUrl(item.linkUrl) }>{ LocalizeText('notifications.button.show_gift_list') }</button>
-                <span className="underline cursor-pointer whitespace-nowrap" onClick={ onClose }>{ LocalizeText('notifications.button.later') }</span>
-            </div>
-        </LayoutNotificationBubbleView>
+        </TransitionAnimation>
     );
 }

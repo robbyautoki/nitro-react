@@ -1,7 +1,11 @@
-import { Info } from 'lucide-react';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { NotificationBubbleItem, OpenUrl } from '../../../../api';
+import { NotificationBubbleItem, NotificationBubbleType, OpenUrl } from '../../../../api';
 import { TransitionAnimation, TransitionAnimationTypes } from '../../../../common/transitions';
+import { Frame, FramePanel } from '../../../ui/frame';
+import {
+    Info, Users, UserMinus, Award, BadgeCheck, Heart, PawPrint, ShoppingBag,
+    Crown, Music, Recycle, MessageCircle, X
+} from 'lucide-react';
 
 export interface NotificationDefaultBubbleViewProps
 {
@@ -9,13 +13,52 @@ export interface NotificationDefaultBubbleViewProps
     onClose: () => void;
 }
 
+const BUBBLE_ICON_MAP: Record<string, { icon: FC<any>; color: string }> = {
+    [NotificationBubbleType.FRIENDONLINE]: { icon: Users, color: 'text-emerald-500' },
+    [NotificationBubbleType.THIRDPARTYFRIENDONLINE]: { icon: Users, color: 'text-emerald-500' },
+    [NotificationBubbleType.FRIENDOFFLINE]: { icon: UserMinus, color: 'text-gray-400' },
+    [NotificationBubbleType.THIRDPARTYFRIENDOFFLINE]: { icon: UserMinus, color: 'text-gray-400' },
+    [NotificationBubbleType.ACHIEVEMENT]: { icon: Award, color: 'text-amber-500' },
+    [NotificationBubbleType.BADGE_RECEIVED]: { icon: BadgeCheck, color: 'text-blue-500' },
+    [NotificationBubbleType.RESPECT]: { icon: Heart, color: 'text-pink-500' },
+    [NotificationBubbleType.PETLEVEL]: { icon: PawPrint, color: 'text-emerald-500' },
+    [NotificationBubbleType.BUYFURNI]: { icon: ShoppingBag, color: 'text-emerald-500' },
+    [NotificationBubbleType.INFO]: { icon: Info, color: 'text-blue-500' },
+    [NotificationBubbleType.RECYCLEROK]: { icon: Recycle, color: 'text-emerald-500' },
+    [NotificationBubbleType.SOUNDMACHINE]: { icon: Music, color: 'text-purple-500' },
+    [NotificationBubbleType.VIP]: { icon: Crown, color: 'text-amber-500' },
+    [NotificationBubbleType.CLUB]: { icon: Crown, color: 'text-amber-500' },
+    [NotificationBubbleType.ROOMMESSAGESPOSTED]: { icon: MessageCircle, color: 'text-blue-500' },
+};
+
+const BUBBLE_TITLE_MAP: Record<string, string> = {
+    [NotificationBubbleType.FRIENDONLINE]: 'Freund online',
+    [NotificationBubbleType.THIRDPARTYFRIENDONLINE]: 'Freund online',
+    [NotificationBubbleType.FRIENDOFFLINE]: 'Freund offline',
+    [NotificationBubbleType.THIRDPARTYFRIENDOFFLINE]: 'Freund offline',
+    [NotificationBubbleType.ACHIEVEMENT]: 'Achievement freigeschaltet!',
+    [NotificationBubbleType.BADGE_RECEIVED]: 'Neues Badge!',
+    [NotificationBubbleType.RESPECT]: 'Respekt erhalten',
+    [NotificationBubbleType.PETLEVEL]: 'Pet Level Up!',
+    [NotificationBubbleType.BUYFURNI]: 'Möbel gekauft',
+    [NotificationBubbleType.INFO]: 'Information',
+    [NotificationBubbleType.RECYCLEROK]: 'Recycling abgeschlossen',
+    [NotificationBubbleType.SOUNDMACHINE]: 'Soundmachine',
+    [NotificationBubbleType.VIP]: 'VIP',
+    [NotificationBubbleType.CLUB]: 'Club',
+    [NotificationBubbleType.ROOMMESSAGESPOSTED]: 'Raum-Nachrichten',
+};
+
 export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProps> = props =>
 {
     const { item = null, onClose = null } = props;
     const [ isVisible, setIsVisible ] = useState(false);
 
-    // Content is server-provided and pre-sanitized via cleanText() in useNotification hook.
     const htmlText = item.message.replace(/\r\n|\r|\n/g, '<br />');
+
+    const iconEntry = BUBBLE_ICON_MAP[item.notificationType] || { icon: Info, color: 'text-blue-500' };
+    const IconComponent = iconEntry.icon;
+    const titleText = BUBBLE_TITLE_MAP[item.notificationType] || 'Notification';
 
     const handleClick = useCallback(() =>
     {
@@ -42,36 +85,29 @@ export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProp
 
     return (
         <TransitionAnimation type={ TransitionAnimationTypes.FADE_IN } inProp={ isVisible } timeout={ 300 }>
-            <div
-                className="pointer-events-auto w-full cursor-pointer"
-                onClick={ handleClick }
-            >
-                <div className="relative texture-panel backdrop-blur-xl rounded-2xl overflow-hidden">
-                    <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={ {
-                            backgroundImage: `
-                                linear-gradient(45deg, transparent 49%, rgba(255,255,255,0.045) 49%, rgba(255,255,255,0.045) 51%, transparent 51%),
-                                linear-gradient(-45deg, transparent 49%, rgba(255,255,255,0.045) 49%, rgba(255,255,255,0.045) 51%, transparent 51%)
-                            `,
-                            backgroundSize: '24px 24px',
-                            maskImage: 'radial-gradient(ellipse 90% 90% at 0% 100%, #000 40%, transparent 85%)',
-                            WebkitMaskImage: 'radial-gradient(ellipse 90% 90% at 0% 100%, #000 40%, transparent 85%)',
-                        } }
-                    />
-                    <div className="relative flex items-center gap-3 px-4 py-3.5">
-                        { (item.iconUrl && item.iconUrl.length)
-                            ? <img className="no-select size-5 shrink-0" src={ item.iconUrl } alt="" />
-                            : <Info className="size-5 shrink-0 text-blue-400" />
-                        }
-                        <div className="flex flex-col gap-0.5 min-w-0">
-                            <div className="text-sm font-semibold tracking-wide text-white">Notification</div>
-                            <div className="text-sm text-white/60 leading-relaxed">
-                                <span dangerouslySetInnerHTML={ { __html: htmlText } } />
+            <div className="pointer-events-auto w-full max-w-xs cursor-pointer" onClick={ handleClick }>
+                <Frame>
+                    <FramePanel className="!p-0">
+                        <div className="flex items-center gap-3 px-3.5 py-2.5">
+                            { item.iconUrl && item.iconUrl.length
+                                ? <img className="no-select size-5 shrink-0" src={ item.iconUrl } alt="" />
+                                : <IconComponent className={ `size-4 shrink-0 ${iconEntry.color}` } />
+                            }
+                            <div className="min-w-0 flex-1">
+                                <div className="text-xs font-semibold text-foreground truncate">{ titleText }</div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                    <span dangerouslySetInnerHTML={ { __html: htmlText } } />
+                                </div>
                             </div>
+                            <button
+                                className="p-0.5 rounded text-muted-foreground hover:text-foreground"
+                                onClick={ (e) => { e.stopPropagation(); onClose(); } }
+                            >
+                                <X className="size-3" />
+                            </button>
                         </div>
-                    </div>
-                </div>
+                    </FramePanel>
+                </Frame>
             </div>
         </TransitionAnimation>
     );

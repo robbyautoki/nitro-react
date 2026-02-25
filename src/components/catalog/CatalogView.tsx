@@ -293,7 +293,7 @@ export const CatalogView: FC<{}> = props =>
                     style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `${ catalogSize.height }px` } }
                 >
                     {/* Header */}
-                    <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-border/40 bg-muted/30 h-12 cursor-move select-none overflow-hidden">
+                    <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-border/40 bg-muted/30 h-12 min-h-12 cursor-move select-none">
                         <TooltipProvider delayDuration={ 300 }>
                         <Tooltip>
                             <TooltipTrigger asChild>

@@ -117,22 +117,11 @@ export const FriendsListView: FC<{}> = props =>
         return () => RemoveLinkEventTracker(linkTracker);
     }, [ requestFriend ]);
 
-    useEffect(() =>
-    {
-        if(!isVisible) return;
-        const handler = (e: MouseEvent) =>
-        {
-            const el = document.querySelector('.nitro-friends');
-            if(el && !el.contains(e.target as Node)) setIsVisible(false);
-        };
-        document.addEventListener('mousedown', handler);
-        return () => document.removeEventListener('mousedown', handler);
-    }, [ isVisible ]);
-
     if(!isVisible) return null;
 
     return (
         <>
+            <div className="fixed inset-0 z-[399]" onClick={ () => setIsVisible(false) } />
             <NitroCardView className="nitro-friends" uniqueKey="nitro-friends" theme="primary-slim">
                 <NitroCardHeaderView headerText={ LocalizeText('friendlist.friends') } onCloseClick={ event => setIsVisible(false) } />
                 <NitroCardContentView overflow="hidden" gap={ 1 } className= "text-white/90 p-0">

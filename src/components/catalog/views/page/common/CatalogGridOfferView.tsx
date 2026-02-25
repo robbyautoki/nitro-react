@@ -1,6 +1,6 @@
 import { MouseEventType } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent, useMemo, useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ImageOff } from 'lucide-react';
 import { IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
 import { LayoutAvatarImageView } from '../../../../../common';
 import { LayoutLimitedEditionStyledNumberView } from '../../../../../common/layout/limited-edition';
@@ -22,6 +22,7 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
 {
     const { offer = null, selectOffer = null, itemActive = false, isMultiSelected = false } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
+    const [ iconFailed, setIconFailed ] = useState(false);
     const { requestOfferToMover = null } = useCatalog();
     const { isVisible = false } = useInventoryFurni();
 
@@ -74,11 +75,25 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                                     : 'border-border/50 bg-card',
                             isSoldOut && 'opacity-40 grayscale'
                         ) }
-                        style={ (iconUrl && !isUnique) ? { backgroundImage: `url(${ iconUrl })`, backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundSize: 'contain' } : undefined }
                         onMouseDown={ onMouseEvent }
                         onMouseUp={ onMouseEvent }
                         onMouseOut={ onMouseEvent }
                     >
+                        { (iconUrl && !isUnique && !iconFailed) && (
+                            <img
+                                src={ iconUrl }
+                                alt=""
+                                draggable={ false }
+                                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                                style={ { imageRendering: 'pixelated' } }
+                                onError={ () => setIconFailed(true) }
+                            />
+                        ) }
+                        { (iconUrl && !isUnique && iconFailed) && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                                <ImageOff className="w-5 h-5 text-muted-foreground/25" />
+                            </div>
+                        ) }
                         { isMultiSelected &&
                             <span className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-bold z-20 shadow-sm">✓</span> }
                         { (itemCount > 1) &&
@@ -87,7 +102,11 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                             </span> }
                         { isUnique && (
                             <>
-                                <div className="absolute inset-0 bg-center bg-no-repeat" style={ { backgroundImage: `url(${ iconUrl })` } } />
+                                { (iconUrl && !iconFailed) ? (
+                                    <img src={ iconUrl } alt="" draggable={ false } className="absolute inset-0 w-full h-full object-contain pointer-events-none" style={ { imageRendering: 'pixelated' } } onError={ () => setIconFailed(true) } />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground/25" /></div>
+                                ) }
                                 <div className="absolute top-1 right-1">
                                     <span className="text-[8px] font-bold text-amber-600 bg-amber-500/10 border border-amber-500/20 rounded px-1">LTD</span>
                                 </div>

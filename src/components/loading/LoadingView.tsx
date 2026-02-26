@@ -128,7 +128,7 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                 <motion.img
                     src={ bahhosSvg }
                     alt="Bahhos"
-                    className="max-w-[400px] w-[70vw] object-contain drop-shadow-2xl"
+                    className="max-w-[320px] w-[50vw] object-contain drop-shadow-2xl"
                     initial={ { opacity: 0, scale: 0.8 } }
                     animate={ { opacity: 1, scale: 1 } }
                     transition={ { duration: 0.8, ease: 'easeOut' } }

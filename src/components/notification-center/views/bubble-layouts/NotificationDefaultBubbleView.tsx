@@ -85,17 +85,17 @@ export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProp
 
     return (
         <TransitionAnimation type={ TransitionAnimationTypes.FADE_IN } inProp={ isVisible } timeout={ 300 }>
-            <div className="pointer-events-auto w-full max-w-xs cursor-pointer" onClick={ handleClick }>
+            <div className="pointer-events-auto w-full max-w-sm cursor-pointer" onClick={ handleClick }>
                 <Frame>
                     <FramePanel className="!p-0">
-                        <div className="flex items-center gap-3 px-3.5 py-2.5">
+                        <div className="flex items-start gap-3 px-3.5 py-2.5">
                             { item.iconUrl && item.iconUrl.length
-                                ? <img className="no-select size-5 shrink-0" src={ item.iconUrl } alt="" />
-                                : <IconComponent className={ `size-4 shrink-0 ${iconEntry.color}` } />
+                                ? <img className="no-select size-5 shrink-0 mt-0.5" src={ item.iconUrl } alt="" />
+                                : <IconComponent className={ `size-4 shrink-0 mt-0.5 ${iconEntry.color}` } />
                             }
                             <div className="min-w-0 flex-1">
                                 <div className="text-xs font-semibold text-foreground truncate">{ titleText }</div>
-                                <div className="text-xs text-muted-foreground truncate">
+                                <div className="text-xs text-muted-foreground">
                                     <span dangerouslySetInnerHTML={ { __html: htmlText } } />
                                 </div>
                             </div>

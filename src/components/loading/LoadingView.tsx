@@ -136,11 +136,23 @@ export const LoadingView: FC<LoadingViewProps> = props =>
 
                 { isError ? (
                     <motion.div
-                        className="text-red-400 text-lg font-semibold drop-shadow-lg"
-                        initial={ { opacity: 0 } }
-                        animate={ { opacity: 1 } }
+                        className="flex flex-col items-center gap-4 max-w-[340px] text-center"
+                        initial={ { opacity: 0, y: 10 } }
+                        animate={ { opacity: 1, y: 0 } }
+                        transition={ { duration: 0.5 } }
                     >
-                        { message }
+                        <p className="text-white/90 text-base font-semibold drop-shadow-lg">
+                            { message }
+                        </p>
+                        <button
+                            onClick={ () => window.location.reload() }
+                            className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-medium backdrop-blur-sm transition-all duration-200 cursor-pointer"
+                        >
+                            Erneut versuchen
+                        </button>
+                        <p className="text-white/30 text-xs mt-1">
+                            Falls das Problem bestehen bleibt, schau auf unseren Discord.
+                        </p>
                     </motion.div>
                 ) : (
                     <>

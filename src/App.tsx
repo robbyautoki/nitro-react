@@ -45,11 +45,11 @@ export const App: FC<{}> = props =>
                 return;
             case ConfigurationEvent.FAILED:
                 setIsError(true);
-                setMessage('Configuration Failed');
+                setMessage('Serverwartung — bitte versuche es gleich erneut');
                 return;
             case Nitro.WEBGL_UNAVAILABLE:
                 setIsError(true);
-                setMessage('WebGL Required');
+                setMessage('Dein Browser unterstützt kein WebGL');
                 return;
             case Nitro.WEBGL_CONTEXT_LOST:
                 setIsError(true);
@@ -62,7 +62,7 @@ export const App: FC<{}> = props =>
                 return;
             case NitroCommunicationDemoEvent.CONNECTION_HANDSHAKE_FAILED:
                 setIsError(true);
-                setMessage('Handshake Failed');
+                setMessage('Server nicht erreichbar — bitte versuche es gleich erneut');
                 return;
             case NitroCommunicationDemoEvent.CONNECTION_AUTHENTICATED:
                 setPercent(prevValue => (prevValue + 20));
@@ -106,7 +106,7 @@ export const App: FC<{}> = props =>
                 return;
             case NitroLocalizationEvent.FAILED:
                 setIsError(true);
-                setMessage('Localization Failed');
+                setMessage('Serverwartung — bitte versuche es gleich erneut');
                 return;
             case NitroLocalizationEvent.LOADED: {
                 const assetUrls = GetConfiguration<string[]>('preload.assets.urls');
@@ -125,7 +125,7 @@ export const App: FC<{}> = props =>
                 else
                 {
                     setIsError(true);
-                    setMessage('Assets Failed');
+                    setMessage('Serverwartung — bitte versuche es gleich erneut');
                 }
                 return;
             }

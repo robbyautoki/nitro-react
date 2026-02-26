@@ -24,7 +24,7 @@ const drawTile3D = (
     showRightFace: boolean
 ) =>
 {
-    const topAlpha = isPreview ? 0.15 : 0.25;
+    const topAlpha = isPreview ? 0.30 : 0.50;
 
     // Left side face — only at bottom-left edge of selection
     if(showLeftFace)
@@ -61,7 +61,7 @@ const drawTile3D = (
     ctx.closePath();
     ctx.fillStyle = `rgba(255, 255, 255, ${ topAlpha })`;
     ctx.fill();
-    ctx.strokeStyle = `rgba(255, 255, 255, ${ isPreview ? 0.2 : 0.3 })`;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${ isPreview ? 0.3 : 0.5 })`;
     ctx.lineWidth = 1;
     ctx.stroke();
 };
@@ -132,6 +132,9 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
                     const ty = parseInt(ys);
                     if(isNaN(tx) || isNaN(ty)) return;
 
+                    // Skip tiles that don't exist in the room layout (void/black areas)
+                    if(wallGeo && wallGeo.isRoomTile && !wallGeo.isRoomTile(tx, ty)) return;
+
                     const tileZ = wallGeo && wallGeo.getHeight
                         ? wallGeo.getHeight(tx, ty)
                         : 0;
@@ -172,7 +175,8 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
                 width: '100vw',
                 height: '100vh',
                 pointerEvents: 'none',
-                zIndex: 150
+                zIndex: 150,
+                mixBlendMode: 'soft-light'
             } }
         />,
         document.body

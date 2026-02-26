@@ -1,3 +1,4 @@
+import { NitroPoint } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useRef } from 'react';
 import { DispatchMouseEvent, DispatchTouchEvent, GetNitroInstance, GetRoomEngine } from '../../api';
 import { Base } from '../../common';
@@ -6,15 +7,21 @@ import { RoomSpectatorView } from './spectator/RoomSpectatorView';
 import { RoomWidgetsView } from './widgets/RoomWidgetsView';
 import { FogOverlayView } from './FogOverlayView';
 
-const ZOOM_FACTOR = 1.05;
-const MIN_SCALE = 0.25;
+const ZOOM_FACTOR = 1.08;
+const MIN_SCALE = 0.5;
 const MAX_SCALE = 4;
+const LERP_SPEED = 0.18;
+const LERP_THRESHOLD = 0.003;
 
 export const RoomView: FC<{}> = props =>
 {
     const { roomSession = null } = useRoom();
     const elementRef = useRef<HTMLDivElement>();
     const roomSessionRef = useRef(roomSession);
+    const targetScaleRef = useRef(1);
+    const cursorRef = useRef<NitroPoint>(new NitroPoint());
+    const rafRef = useRef<number>(null);
+    const animatingRef = useRef(false);
 
     useEffect(() => { roomSessionRef.current = roomSession; }, [roomSession]);
 
@@ -34,6 +41,28 @@ export const RoomView: FC<{}> = props =>
         canvas.ontouchend = event => DispatchTouchEvent(event);
         canvas.ontouchcancel = event => DispatchTouchEvent(event);
 
+        const animate = () =>
+        {
+            const session = roomSessionRef.current;
+            if(!session) { animatingRef.current = false; return; }
+
+            const roomId = session.roomId;
+            const current = GetRoomEngine().getRoomInstanceRenderingCanvasScale(roomId, 1);
+            const target = targetScaleRef.current;
+            const diff = target - current;
+
+            if(Math.abs(diff) < LERP_THRESHOLD)
+            {
+                GetRoomEngine().setRoomInstanceRenderingCanvasScale(roomId, 1, target, cursorRef.current);
+                animatingRef.current = false;
+                return;
+            }
+
+            const newScale = current + diff * LERP_SPEED;
+            GetRoomEngine().setRoomInstanceRenderingCanvasScale(roomId, 1, newScale, cursorRef.current);
+            rafRef.current = requestAnimationFrame(animate);
+        };
+
         const handleWheel = (event: WheelEvent) =>
         {
             if(!(event.ctrlKey || event.metaKey)) return;
@@ -44,14 +73,23 @@ export const RoomView: FC<{}> = props =>
             if(!session) return;
 
             const roomId = session.roomId;
-            let scale = GetRoomEngine().getRoomInstanceRenderingCanvasScale(roomId, 1);
 
-            if(event.deltaY < 0) scale *= ZOOM_FACTOR;
-            else scale /= ZOOM_FACTOR;
+            if(!animatingRef.current)
+            {
+                targetScaleRef.current = GetRoomEngine().getRoomInstanceRenderingCanvasScale(roomId, 1);
+            }
 
-            scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
+            if(event.deltaY < 0) targetScaleRef.current *= ZOOM_FACTOR;
+            else targetScaleRef.current /= ZOOM_FACTOR;
 
-            GetRoomEngine().setRoomInstanceRenderingCanvasScale(roomId, 1, scale);
+            targetScaleRef.current = Math.min(MAX_SCALE, Math.max(MIN_SCALE, targetScaleRef.current));
+            cursorRef.current = new NitroPoint(event.clientX, event.clientY);
+
+            if(!animatingRef.current)
+            {
+                animatingRef.current = true;
+                rafRef.current = requestAnimationFrame(animate);
+            }
         };
 
         canvas.addEventListener('wheel', handleWheel, { passive: false });
@@ -62,7 +100,11 @@ export const RoomView: FC<{}> = props =>
 
         element.appendChild(canvas);
 
-        return () => canvas.removeEventListener('wheel', handleWheel);
+        return () =>
+        {
+            canvas.removeEventListener('wheel', handleWheel);
+            if(rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
     }, []);
 
     return (

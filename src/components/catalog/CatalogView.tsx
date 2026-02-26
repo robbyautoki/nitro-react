@@ -49,6 +49,7 @@ const SELF_CONTAINED_LAYOUTS = new Set([
     'marketplace', 'marketplace_own_items',
     'guild_frontpage', 'guild_forum',
     'info_loyalty', 'roomads',
+    'single_bundle', 'room_bundle',
 ]);
 
 export const CatalogView: FC<{}> = props =>

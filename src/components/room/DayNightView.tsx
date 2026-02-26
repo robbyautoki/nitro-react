@@ -27,14 +27,17 @@ const PRESETS: DayNightPreset[] = [
     { hour: 24, brightness: 0.55, saturation: 0.7,  red: 0.7,  green: 0.75, blue: 1.2,  gamma: 0.85 },
 ];
 
-const FILTER_KEYS: (keyof DayNightPreset)[] = ['brightness', 'saturation', 'red', 'green', 'blue', 'gamma'];
+const NEUTRAL = { brightness: 1, saturation: 1, red: 1, green: 1, blue: 1, gamma: 1 };
+const FILTER_KEYS: (keyof typeof NEUTRAL)[] = ['brightness', 'saturation', 'red', 'green', 'blue', 'gamma'];
+
+type DayNightMode = 'auto' | 'off' | 'fixed';
 
 function lerp(a: number, b: number, t: number): number
 {
     return a + (b - a) * t;
 }
 
-function getValuesForTime(hourFraction: number): Omit<DayNightPreset, 'hour'>
+function getValuesForTime(hourFraction: number): typeof NEUTRAL
 {
     const h = ((hourFraction % 24) + 24) % 24;
 
@@ -64,12 +67,21 @@ function getValuesForTime(hourFraction: number): Omit<DayNightPreset, 'hour'>
     };
 }
 
+function applyValues(filter: AdjustmentFilter, values: typeof NEUTRAL)
+{
+    for(const key of FILTER_KEYS)
+    {
+        (filter as any)[key] = values[key];
+    }
+}
+
 export const DayNightView: FC<{}> = () =>
 {
     const { roomSession = null } = useRoom();
     const filterRef = useRef<AdjustmentFilter | null>(null);
     const containerRef = useRef<Container | null>(null);
-    const overrideRef = useRef<Partial<DayNightPreset> | null>(null);
+    const modeRef = useRef<DayNightMode>('auto');
+    const fixedHourRef = useRef<number>(0);
 
     useEffect(() =>
     {
@@ -78,8 +90,8 @@ export const DayNightView: FC<{}> = () =>
         const canvas = GetRoomEngine().getRoomInstanceRenderingCanvas(roomSession.roomId, 1);
         if(!canvas) return;
 
-        // Filter auf _zoomWrapper setzen (= display.parent), NICHT auf display direkt.
-        // display hat cacheAsBitmap — PixiJS deaktiviert cacheAsBitmap wenn filters gesetzt sind.
+        // Filter auf _zoomWrapper (= display.parent), NICHT auf display direkt.
+        // display hat cacheAsBitmap — PixiJS deaktiviert cacheAsBitmap wenn filters gesetzt.
         const display = canvas.display as Container;
         const zoomWrapper = display.parent as Container;
         if(!zoomWrapper) return;
@@ -93,17 +105,22 @@ export const DayNightView: FC<{}> = () =>
         {
             if(!filterRef.current) return;
 
+            if(modeRef.current === 'off')
+            {
+                applyValues(filterRef.current, NEUTRAL);
+                return;
+            }
+
+            if(modeRef.current === 'fixed')
+            {
+                applyValues(filterRef.current, getValuesForTime(fixedHourRef.current));
+                return;
+            }
+
+            // auto: Echtzeit
             const now = new Date();
             const hourFraction = now.getHours() + now.getMinutes() / 60;
-            const values = overrideRef.current || getValuesForTime(hourFraction);
-
-            for(const key of FILTER_KEYS)
-            {
-                if(values[key] !== undefined)
-                {
-                    (filterRef.current as any)[key] = values[key];
-                }
-            }
+            applyValues(filterRef.current, getValuesForTime(hourFraction));
         };
 
         update();
@@ -129,26 +146,33 @@ export const DayNightView: FC<{}> = () =>
 
             if(preset === 'auto')
             {
-                overrideRef.current = null;
+                modeRef.current = 'auto';
             }
-            else
+            else if(preset === 'off')
             {
-                overrideRef.current = preset;
+                modeRef.current = 'off';
+            }
+            else if(typeof preset === 'object' && preset.time !== undefined)
+            {
+                modeRef.current = 'fixed';
+                fixedHourRef.current = preset.time;
             }
 
-            // Sofort Filter updaten
+            // Sofort updaten
             if(filterRef.current)
             {
-                const now = new Date();
-                const hourFraction = now.getHours() + now.getMinutes() / 60;
-                const values = overrideRef.current || getValuesForTime(hourFraction);
-
-                for(const key of FILTER_KEYS)
+                if(modeRef.current === 'off')
                 {
-                    if(values[key] !== undefined)
-                    {
-                        (filterRef.current as any)[key] = values[key];
-                    }
+                    applyValues(filterRef.current, NEUTRAL);
+                }
+                else if(modeRef.current === 'fixed')
+                {
+                    applyValues(filterRef.current, getValuesForTime(fixedHourRef.current));
+                }
+                else
+                {
+                    const now = new Date();
+                    applyValues(filterRef.current, getValuesForTime(now.getHours() + now.getMinutes() / 60));
                 }
             }
         };

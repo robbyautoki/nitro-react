@@ -150,29 +150,38 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
         const allItemIds: number[] = [];
         for(const sel of selected) allItemIds.push(...sel.instance_ids.slice(0, sel.quantity));
 
-        const res = await CustomMarketplaceApi.createListing({
-            item_ids: allItemIds,
-            price: p,
-            currency,
-            duration_days: parseInt(duration),
-            note: note.trim() || undefined,
-        });
-
-        setSubmitting(false);
-
-        if(res.ok)
+        try
         {
-            setSuccess(true);
-            setSelected([]);
-            setPrice('');
-            setNote('');
-            loadInventory();
-            SendMessageComposer(new FurnitureListComposer());
-            setTimeout(() => setSuccess(false), 3000);
+            const res = await CustomMarketplaceApi.createListing({
+                item_ids: allItemIds,
+                price: p,
+                currency,
+                duration_days: parseInt(duration),
+                note: note.trim() || undefined,
+            });
+
+            if(res.ok)
+            {
+                setSuccess(true);
+                setSelected([]);
+                setPrice('');
+                setNote('');
+                loadInventory();
+                SendMessageComposer(new FurnitureListComposer());
+                setTimeout(() => setSuccess(false), 3000);
+            }
+            else
+            {
+                setError(res.error || 'Fehler beim Erstellen');
+            }
         }
-        else
+        catch
         {
-            setError(res.error || 'Fehler beim Erstellen');
+            setError('Netzwerkfehler — bitte erneut versuchen');
+        }
+        finally
+        {
+            setSubmitting(false);
         }
     };
 

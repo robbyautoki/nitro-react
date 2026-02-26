@@ -37,8 +37,10 @@ const getIsRoomTile = (): ((x: number, y: number) => boolean) | null =>
     return (x: number, y: number) =>
     {
         if(!wallGeo.isRoomTile(x, y)) return false;
-        // Also exclude wall/door tiles with negative heights
-        if(wallGeo.getHeight && wallGeo.getHeight(x, y) < 0) return false;
+        if(!wallGeo.getHeight) return true;
+        const h = wallGeo.getHeight(x, y);
+        // Exclude wall tiles (negative) and door tiles (fractional heights like 3.6)
+        if(h < 0 || h % 1 !== 0) return false;
         return true;
     };
 };

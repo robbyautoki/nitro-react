@@ -4,7 +4,7 @@ import { SendMessageComposer } from '../../api';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { InventoryGroup } from './CustomMarketplaceTypes';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
-import { CurrencyIcon, ItemIcon } from './marketplace-components';
+import { ItemIcon } from './marketplace-components';
 import { fmtC } from './marketplace-utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -308,10 +308,7 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
                         <div className="grid grid-cols-3 gap-2">
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] text-muted-foreground">Preis</span>
-                                <div className="relative">
-                                    <CurrencyIcon type={ currency } className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5" />
-                                    <Input type="number" min={ 1 } placeholder="0" value={ price } onChange={ e => setPrice(e.target.value) } className="pl-7 h-7 text-[11px]" />
-                                </div>
+                                <Input type="number" min={ 1 } placeholder="0" value={ price } onChange={ e => setPrice(e.target.value) } className="h-7 text-[11px]" />
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="text-[10px] text-muted-foreground">Währung</span>

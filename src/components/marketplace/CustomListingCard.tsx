@@ -77,15 +77,28 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, isWatched,
                 </button>
             ) }
 
-            {/* Item Icon */}
-            <div className="w-9 h-9 shrink-0 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center relative">
-                <ItemIcon itemName={ mainItem?.item_name ?? '' } className="w-7 h-7" />
-                { ltd && (
-                    <div className="absolute -top-1 -right-1 px-0.5 py-[1px] bg-amber-500/90 text-white text-[7px] font-bold leading-none rounded-sm">
-                        { ltd.num }
-                    </div>
-                ) }
-            </div>
+            {/* Item Icon(s) */}
+            { listing.is_bundle && listing.items.length > 1 ? (
+                <div className="flex items-center gap-0.5 shrink-0">
+                    { listing.items.slice(0, 6).map((item, i) => (
+                        <div key={ i } className="w-7 h-7 rounded border border-border/40 bg-muted/10 flex items-center justify-center">
+                            <ItemIcon itemName={ item.item_name ?? '' } className="w-5 h-5" />
+                        </div>
+                    )) }
+                    { listing.items.length > 6 && (
+                        <span className="text-[9px] font-bold text-muted-foreground/60 ml-0.5">+{ listing.items.length - 6 }</span>
+                    ) }
+                </div>
+            ) : (
+                <div className="w-9 h-9 shrink-0 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center relative">
+                    <ItemIcon itemName={ mainItem?.item_name ?? '' } className="w-7 h-7" />
+                    { ltd && (
+                        <div className="absolute -top-1 -right-1 px-0.5 py-[1px] bg-amber-500/90 text-white text-[7px] font-bold leading-none rounded-sm">
+                            { ltd.num }
+                        </div>
+                    ) }
+                </div>
+            ) }
 
             {/* Info */}
             <div className="flex-1 min-w-0">
@@ -198,9 +211,22 @@ export const OfferRow: FC<OfferRowProps> = ({ offer, onAccept, onReject, isProce
 
     return (
         <div className="flex items-center gap-2 px-2.5 py-2 hover:bg-accent/30 transition-colors">
-            <div className="w-9 h-9 shrink-0 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center">
-                <ItemIcon itemName={ mainItem?.item_name ?? '' } className="w-7 h-7" />
-            </div>
+            { offer.items.length > 1 ? (
+                <div className="flex items-center gap-0.5 shrink-0">
+                    { offer.items.slice(0, 6).map((item, i) => (
+                        <div key={ i } className="w-7 h-7 rounded border border-border/40 bg-muted/10 flex items-center justify-center">
+                            <ItemIcon itemName={ item.item_name ?? '' } className="w-5 h-5" />
+                        </div>
+                    )) }
+                    { offer.items.length > 6 && (
+                        <span className="text-[9px] font-bold text-muted-foreground/60 ml-0.5">+{ offer.items.length - 6 }</span>
+                    ) }
+                </div>
+            ) : (
+                <div className="w-9 h-9 shrink-0 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center">
+                    <ItemIcon itemName={ mainItem?.item_name ?? '' } className="w-7 h-7" />
+                </div>
+            ) }
             <div className="flex-1 min-w-0">
                 <div className="text-[12px] font-medium truncate">
                     { offer.items.length > 1 ? `Bundle (${ offer.items.length } Items)` : mainItem?.public_name ?? 'Unknown' }

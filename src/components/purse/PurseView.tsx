@@ -1,8 +1,8 @@
-import { FriendlyTime, HabboClubLevelEnum, RateFlatMessageComposer } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FriendlyTime, HabboClubLevelEnum, RateFlatMessageComposer, GuideSessionCreateMessageComposer, GuideSessionAttachedMessageEvent, GuideSessionStartedMessageEvent, GuideSessionMessageMessageComposer, GuideSessionMessageMessageEvent, GuideSessionRequesterCancelsMessageComposer, GuideSessionResolvedMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionPartnerIsTypingMessageEvent } from '@nitrots/nitro-renderer';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, LocalizeFormattedNumber, LocalizeShortNumber, LocalizeText, SendMessageComposer, getAuthHeaders } from '../../api';
 import { LayoutCurrencyIcon } from '../../common';
-import { useAchievements, useNavigator, usePurse, useRoom } from '../../hooks';
+import { useAchievements, useMessageEvent, useNavigator, usePurse, useRoom } from '../../hooks';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,17 +50,9 @@ const DEMO_CATEGORIES = [
   { name: "Spam", topics: ["Chat-Spam", "Handels-Spam"] },
 ];
 
-const STAFF_FIGURE = "hr-893-45.hd-600-2.ch-665-73.lg-720-73.sh-725-73.ha-1015-73";
-
-const DEMO_CHAT_MESSAGES = [
-  { from: "staff", text: "Hallo! Wie kann ich dir helfen?" },
-  { from: "user", text: "Jemand hat mich beleidigt im Raum" },
-  { from: "staff", text: "Das tut mir leid. Kannst du mir den Namen des Spielers nennen?" },
-];
-
 const STEP_TITLES: Record<number, string> = {
   0: "Hilfe", 1: "Wen möchtest du melden?", 2: "Nachrichten auswählen", 3: "Kategorie wählen",
-  4: "Beschreibe das Problem", 5: "Meldung absenden", 10: "Live-Support", 11: "Live-Support", 12: "Live-Support", 20: "Sanktionsstatus",
+  4: "Beschreibe das Problem", 5: "Meldung absenden", 9: "Live-Support", 10: "Live-Support", 11: "Live-Support", 12: "Live-Support", 20: "Sanktionsstatus",
 };
 
 function HelpPopover() {
@@ -71,23 +63,102 @@ function HelpPopover() {
   const [selectedTopic, setSelectedTopic] = useState(-1);
   const [message, setMessage] = useState("");
 
-  const reset = () => { setStep(0); setSelectedUser(-1); setSelectedChats([]); setSelectedCat(-1); setSelectedTopic(-1); setMessage(""); };
+  // Live-Support State
+  const [chatMessages, setChatMessages] = useState<{from: string, text: string}[]>([]);
+  const [partnerName, setPartnerName] = useState('');
+  const [chatInput, setChatInput] = useState('');
+  const [userRequest, setUserRequest] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const stepRef = useRef(0);
+  stepRef.current = step;
+
+  const reset = () => {
+    setStep(0); setSelectedUser(-1); setSelectedChats([]); setSelectedCat(-1); setSelectedTopic(-1); setMessage("");
+    setChatMessages([]); setPartnerName(''); setChatInput(''); setUserRequest(''); setIsTyping(false);
+  };
   const toggleChat = (i: number) => setSelectedChats(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
 
   const goBack = () => {
     if (step === 3 && selectedCat >= 0 && selectedTopic < 0) { setSelectedCat(-1); return; }
-    if (step >= 10 && step <= 12) { reset(); return; }
+    if (step === 9) { reset(); return; }
+    if (step >= 10 && step <= 12) { return; } // Kann nicht zurück während aktiver Session
     if (step === 20) { reset(); return; }
     setStep(s => s - 1);
   };
 
+  // Auto-transition: Step 11 → Step 12 nach kurzer Bestätigung
   useEffect(() => {
-    if (step === 10) { const t = setTimeout(() => setStep(11), 3000); return () => clearTimeout(t); }
-    if (step === 11) { const t = setTimeout(() => setStep(12), 2000); return () => clearTimeout(t); }
+    if (step === 11) { const t = setTimeout(() => setStep(12), 1500); return () => clearTimeout(t); }
   }, [step]);
 
+  // Auto-scroll im Chat
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  // Guide Session WebSocket Events
+  useMessageEvent<GuideSessionAttachedMessageEvent>(GuideSessionAttachedMessageEvent, event => {
+    // User ist in Warteschlange — bleibt auf Step 10
+  });
+
+  useMessageEvent<GuideSessionStartedMessageEvent>(GuideSessionStartedMessageEvent, event => {
+    const parser = event.getParser();
+    setPartnerName(parser.guideName);
+    setStep(11);
+    setPopoverOpen(true);
+  });
+
+  useMessageEvent<GuideSessionMessageMessageEvent>(GuideSessionMessageMessageEvent, event => {
+    const parser = event.getParser();
+    const from = parser.senderId === GetSessionDataManager().userId ? 'user' : 'staff';
+    setChatMessages(prev => [...prev, { from, text: parser.chatMessage }]);
+    setPopoverOpen(true);
+  });
+
+  useMessageEvent<GuideSessionPartnerIsTypingMessageEvent>(GuideSessionPartnerIsTypingMessageEvent, event => {
+    setIsTyping(event.getParser().isTyping);
+  });
+
+  useMessageEvent<GuideSessionEndedMessageEvent>(GuideSessionEndedMessageEvent, event => {
+    if (stepRef.current >= 9 && stepRef.current <= 12) {
+      reset();
+    }
+  });
+
+  useMessageEvent<GuideSessionErrorMessageEvent>(GuideSessionErrorMessageEvent, event => {
+    const parser = event.getParser();
+    if (stepRef.current >= 9 && stepRef.current <= 12) {
+      reset();
+    }
+  });
+
+  const sendChatMessage = () => {
+    if (!chatInput.trim()) return;
+    SendMessageComposer(new GuideSessionMessageMessageComposer(chatInput));
+    setChatInput('');
+  };
+
+  const cancelRequest = () => {
+    SendMessageComposer(new GuideSessionRequesterCancelsMessageComposer());
+    reset();
+  };
+
+  const endSession = () => {
+    SendMessageComposer(new GuideSessionResolvedMessageComposer());
+    reset();
+  };
+
+  const handlePopoverChange = (open: boolean) => {
+    // Verhindere Schließen während aktiver Session
+    if (!open && step >= 10 && step <= 12) return;
+    if (!open) reset();
+    setPopoverOpen(open);
+  };
+
   return (
-    <Popover onOpenChange={open => { if (!open) reset(); }}>
+    <Popover open={popoverOpen} onOpenChange={handlePopoverChange}>
       <PopoverTrigger asChild>
         <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
           <i className="icon icon-help" />
@@ -96,14 +167,14 @@ function HelpPopover() {
       <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
-            {step > 0 && (
+            {step > 0 && step !== 10 && step !== 11 && step !== 12 && (
               <button onClick={goBack} className="p-0.5 rounded-md hover:bg-accent/50 transition-colors">
                 <ChevronLeft className="size-4 text-muted-foreground" />
               </button>
             )}
             {step === 12 ? (
               <div className="flex items-center gap-2 flex-1">
-                <span className="text-sm font-semibold text-foreground">Mod_Sarah</span>
+                <span className="text-sm font-semibold text-foreground">{partnerName || 'Support'}</span>
                 <div className="w-2 h-2 rounded-full bg-green-500" />
               </div>
             ) : (
@@ -120,7 +191,7 @@ function HelpPopover() {
           {step === 0 && (
             <div className="space-y-1.5">
               {HELP_INDEX.map((item, i) => (
-                <button key={item.title} onClick={() => { if (i === 0) setStep(1); if (i === 1) setStep(10); if (i === 2) setStep(20); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border/40 ${item.hover} hover:bg-muted/20 transition-all text-left`}>
+                <button key={item.title} onClick={() => { if (i === 0) setStep(1); if (i === 1) setStep(9); if (i === 2) setStep(20); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border/40 ${item.hover} hover:bg-muted/20 transition-all text-left`}>
                   <div className={`shrink-0 p-2 rounded-lg ${item.bg}`}>
                     <item.icon className={`size-4 ${item.color}`} />
                   </div>
@@ -233,6 +304,19 @@ function HelpPopover() {
             </div>
           )}
 
+          {step === 9 && (
+            <div className="space-y-3">
+              <p className="text-[11px] text-muted-foreground">Beschreibe dein Anliegen, damit ein Teammitglied dir helfen kann (min. 15 Zeichen)</p>
+              <div className="relative">
+                <textarea value={userRequest} onChange={e => setUserRequest(e.target.value)} placeholder="Wie können wir dir helfen?" rows={4} maxLength={140} className="w-full px-3 py-2 text-xs rounded-lg border border-border/50 bg-accent/30 text-foreground placeholder:text-muted-foreground/40 outline-none focus:ring-1 focus:ring-ring resize-none" />
+                <span className={`absolute bottom-2 right-2.5 text-[10px] ${userRequest.length >= 15 ? "text-green-400" : "text-muted-foreground/40"}`}>{userRequest.length}/140</span>
+              </div>
+              <Button size="sm" className="h-7 text-xs w-full bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={userRequest.length < 15} onClick={() => { SendMessageComposer(new GuideSessionCreateMessageComposer(1, userRequest)); setStep(10); }}>
+                Anfrage senden
+              </Button>
+            </div>
+          )}
+
           {step === 10 && (
             <div className="flex flex-col items-center text-center py-4 space-y-3">
               <Loader2 className="size-8 text-blue-400 animate-spin" />
@@ -240,7 +324,7 @@ function HelpPopover() {
                 <p className="text-xs font-semibold text-foreground">Deine Anfrage wird bearbeitet...</p>
                 <p className="text-[11px] text-muted-foreground mt-1">Geschätzte Wartezeit: ~2 Minuten</p>
               </div>
-              <Button variant="outline" size="sm" className="h-7 text-xs text-red-400 border-red-500/20 hover:bg-red-500/10" onClick={reset}>Abbrechen</Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs text-red-400 border-red-500/20 hover:bg-red-500/10" onClick={cancelRequest}>Abbrechen</Button>
             </div>
           )}
 
@@ -257,20 +341,28 @@ function HelpPopover() {
           {step === 12 && (
             <div className="flex flex-col gap-2.5">
               <div className="h-[200px] overflow-y-auto space-y-2 pr-1">
-                {DEMO_CHAT_MESSAGES.map((msg, i) => (
+                {chatMessages.map((msg, i) => (
                   <div key={i} className={`flex gap-2 ${msg.from === "user" ? "justify-end" : "justify-start"}`}>
                     <div className={`max-w-[75%] px-2.5 py-1.5 rounded-xl text-xs leading-relaxed ${msg.from === "user" ? "bg-muted/50 text-foreground" : "bg-accent/30 text-foreground"}`}>
-                      {msg.from === "staff" && <p className="text-[10px] font-semibold text-muted-foreground mb-0.5">Mod_Sarah</p>}
+                      {msg.from === "staff" && <p className="text-[10px] font-semibold text-muted-foreground mb-0.5">{partnerName}</p>}
                       {msg.text}
                     </div>
                   </div>
                 ))}
+                {isTyping && (
+                  <div className="flex gap-2 justify-start">
+                    <div className="px-2.5 py-1.5 rounded-xl text-xs text-muted-foreground/60 italic">
+                      {partnerName} tippt...
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
               </div>
               <div className="flex gap-1.5">
-                <Input placeholder="Nachricht schreiben..." className="h-7 text-xs flex-1 bg-accent/30 border-border/50 text-foreground placeholder:text-muted-foreground/40" />
-                <Button size="sm" className="h-7 text-xs shrink-0 bg-muted/50 hover:bg-accent/60 text-white border-0">Senden</Button>
+                <Input placeholder="Nachricht schreiben..." value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') sendChatMessage(); }} className="h-7 text-xs flex-1 bg-accent/30 border-border/50 text-foreground placeholder:text-muted-foreground/40" />
+                <Button size="sm" className="h-7 text-xs shrink-0 bg-muted/50 hover:bg-accent/60 text-white border-0" onClick={sendChatMessage}>Senden</Button>
               </div>
-              <Button variant="outline" size="sm" className="h-7 text-xs w-full text-green-400 border-green-500/20 hover:bg-green-500/10" onClick={reset}>Gespräch beenden</Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs w-full text-green-400 border-green-500/20 hover:bg-green-500/10" onClick={endSession}>Gespräch beenden</Button>
             </div>
           )}
 

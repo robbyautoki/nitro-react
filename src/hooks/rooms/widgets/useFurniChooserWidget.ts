@@ -37,7 +37,7 @@ const useFurniChooserWidgetState = () =>
                 if(furniData && furniData.name.length) name = furniData.name;
             }
 
-            return new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name, typeId, true);
+            return new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name, typeId, true, roomObject.type);
         });
 
         const floorItems = floorObjects.map(roomObject =>
@@ -51,7 +51,7 @@ const useFurniChooserWidgetState = () =>
 
             if(furniData && furniData.name.length) name = furniData.name;
 
-            return new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name, typeId, false);
+            return new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name, typeId, false, roomObject.type);
         });
 
         setItems([ ...wallItems, ...floorItems ].sort((a, b) => ((a.name < b.name) ? -1 : 1)));
@@ -84,7 +84,7 @@ const useFurniChooserWidgetState = () =>
                     if(furniData && furniData.name.length) name = furniData.name;
                 }
 
-                item = new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name, typeId, true);
+                item = new RoomObjectItem(roomObject.id, RoomObjectCategory.WALL, name, typeId, true, roomObject.type);
 
                 break;
             }
@@ -96,7 +96,7 @@ const useFurniChooserWidgetState = () =>
 
                 if(furniData && furniData.name.length) name = furniData.name;
 
-                item = new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name, typeId, false);
+                item = new RoomObjectItem(roomObject.id, RoomObjectCategory.FLOOR, name, typeId, false, roomObject.type);
             }
         }
 

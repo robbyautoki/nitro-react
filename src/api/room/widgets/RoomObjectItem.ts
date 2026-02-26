@@ -5,14 +5,16 @@ export class RoomObjectItem
     private _name: string;
     private _typeId: number;
     private _isWallItem: boolean;
+    private _classname: string;
 
-    constructor(id: number, category: number, name: string, typeId: number = 0, isWallItem: boolean = false)
+    constructor(id: number, category: number, name: string, typeId: number = 0, isWallItem: boolean = false, classname: string = '')
     {
         this._id = id;
         this._category = category;
         this._name = name;
         this._typeId = typeId;
         this._isWallItem = isWallItem;
+        this._classname = classname;
     }
 
     public get id(): number
@@ -38,5 +40,10 @@ export class RoomObjectItem
     public get isWallItem(): boolean
     {
         return this._isWallItem;
+    }
+
+    public get classname(): string
+    {
+        return this._classname;
     }
 }

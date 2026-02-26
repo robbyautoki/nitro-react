@@ -81,8 +81,8 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, isWatched,
             { listing.is_bundle && listing.items.length > 1 ? (
                 <div className="flex items-center gap-0.5 shrink-0">
                     { listing.items.slice(0, 6).map((item, i) => (
-                        <div key={ i } className="w-7 h-7 rounded border border-border/40 bg-muted/10 flex items-center justify-center">
-                            <ItemIcon itemName={ item.item_name ?? '' } className="w-5 h-5" />
+                        <div key={ i } className="w-9 h-9 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center">
+                            <ItemIcon itemName={ item.item_name ?? '' } className="w-7 h-7" />
                         </div>
                     )) }
                     { listing.items.length > 6 && (
@@ -214,8 +214,8 @@ export const OfferRow: FC<OfferRowProps> = ({ offer, onAccept, onReject, isProce
             { offer.items.length > 1 ? (
                 <div className="flex items-center gap-0.5 shrink-0">
                     { offer.items.slice(0, 6).map((item, i) => (
-                        <div key={ i } className="w-7 h-7 rounded border border-border/40 bg-muted/10 flex items-center justify-center">
-                            <ItemIcon itemName={ item.item_name ?? '' } className="w-5 h-5" />
+                        <div key={ i } className="w-9 h-9 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center">
+                            <ItemIcon itemName={ item.item_name ?? '' } className="w-7 h-7" />
                         </div>
                     )) }
                     { offer.items.length > 6 && (

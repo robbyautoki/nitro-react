@@ -109,7 +109,7 @@ function daysLeft(d: string | null): number | null
 
 function CurrencyIcon({ type, className }: { type: 'credits' | 'duckets' | 'diamonds'; className?: string })
 {
-    const url = GetConfiguration<string>('assets.url', 'http://localhost:8080');
+    const url = GetConfiguration<string>('asset.url', 'http://localhost:8080');
     const map = { credits: '/-1.png', duckets: '/0.png', diamonds: '/5.png' };
     return <img src={ `${ url }/wallet${ map[type] }` } alt={ type } className={ className || 'w-4 h-4' } style={{ imageRendering: 'pixelated', objectFit: 'contain' }} draggable={ false } />;
 }

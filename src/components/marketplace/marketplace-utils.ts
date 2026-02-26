@@ -7,7 +7,7 @@ export function getImageUrl()
 
 export function getAssetsUrl()
 {
-    return GetConfiguration<string>('assets.url', 'http://localhost:8080');
+    return GetConfiguration<string>('asset.url', 'http://localhost:8080');
 }
 
 export function getFurniIcon(itemName: string)

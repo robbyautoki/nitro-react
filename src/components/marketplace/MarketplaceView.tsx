@@ -83,7 +83,7 @@ export const MarketplaceView: FC<{}> = () =>
                     {/* Marketplace Banner */}
                     <div className="shrink-0 border-b border-border/30 overflow-hidden">
                         <img
-                            src={ `${ GetConfiguration<string>('assets.url', 'http://localhost:8080') }/c_images/catalogue/bonush.gif` }
+                            src={ `${ GetConfiguration<string>('asset.url', 'http://localhost:8080') }/c_images/catalogue/bonush.gif` }
                             alt="Marktplatz"
                             className="w-full h-[64px] object-cover"
                             style={ { imageRendering: 'pixelated' } }

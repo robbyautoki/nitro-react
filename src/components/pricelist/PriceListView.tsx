@@ -35,7 +35,7 @@ function getImageUrl() { return GetConfiguration<string>('image.library.url', 'h
 
 function CurrencyIcon({ className }: { className?: string })
 {
-    const url = GetConfiguration<string>('assets.url', 'http://localhost:8080');
+    const url = GetConfiguration<string>('asset.url', 'http://localhost:8080');
     return <img src={ `${ url }/wallet/-1.png` } alt="credits" className={ className || 'w-4 h-4' } style={{ imageRendering: 'pixelated', objectFit: 'contain' }} draggable={ false } />;
 }
 

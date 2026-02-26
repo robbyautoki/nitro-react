@@ -6,3 +6,4 @@ export { FireGlowFilter } from './filters/FireGlowFilter';
 export { SparkleFilter } from './filters/SparkleFilter';
 export { HologramFilter } from './filters/HologramFilter';
 export { ShadowGlowFilter } from './filters/ShadowGlowFilter';
+export { PlasmaGlowFilter } from './filters/PlasmaGlowFilter';

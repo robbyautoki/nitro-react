@@ -441,30 +441,74 @@ index 15c6404..b3d3542 100644
              if(Math.abs((_local_5 - width)) <= 1) _local_5 = width;
  
 diff --git a/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts b/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
-index 6a88da8..be0b5af 100644
+index 6a88da8..7f12ee6 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
-@@ -640,8 +640,10 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
-             this.updateEnterRoomEffect(extendedSprite, objectSprite);
+@@ -23,6 +23,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
+     private _lastFrame: number;
+ 
+     private _master: Sprite;
++    private _zoomWrapper: Container;
+     private _display: Container;
+     private _mask: Graphics;
+ 
+@@ -128,11 +129,18 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
+             this._master.interactiveChildren = false;
          }
  
--        if(extendedSprite.x !== sprite.x) extendedSprite.x = sprite.x;
--        if(extendedSprite.y !== sprite.y) extendedSprite.y = sprite.y;
-+        const _sX = (this._scale !== 1) ? (Math.round(sprite.x * this._scale) / this._scale) : sprite.x;
-+        const _sY = (this._scale !== 1) ? (Math.round(sprite.y * this._scale) / this._scale) : sprite.y;
-+        if(extendedSprite.x !== _sX) extendedSprite.x = _sX;
-+        if(extendedSprite.y !== _sY) extendedSprite.y = _sY;
++        if(!this._zoomWrapper)
++        {
++            this._zoomWrapper = new NitroContainer();
++
++            this._master.addChild(this._zoomWrapper);
++        }
++
+         if(!this._display)
+         {
+             const display = new NitroContainer();
  
-         extendedSprite.offsetX = objectSprite.offsetX;
-         extendedSprite.offsetY = objectSprite.offsetY;
-@@ -667,8 +669,8 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
-         extendedSprite.alphaTolerance = sprite.alphaTolerance;
-         extendedSprite.alpha = (sprite.alpha / 255);
-         extendedSprite.tint = sprite.color;
--        extendedSprite.x = sortableSprite.x;
--        extendedSprite.y = sortableSprite.y;
-+        extendedSprite.x = (this._scale !== 1) ? (Math.round(sortableSprite.x * this._scale) / this._scale) : sortableSprite.x;
-+        extendedSprite.y = (this._scale !== 1) ? (Math.round(sortableSprite.y * this._scale) / this._scale) : sortableSprite.y;
-         extendedSprite.offsetX = sprite.offsetX;
-         extendedSprite.offsetY = sprite.offsetY;
-         extendedSprite.name = sprite.name;
+-            this._master.addChild(display);
++            this._zoomWrapper.addChild(display);
+ 
+             this._display = display;
+         }
+@@ -303,7 +311,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
+ 
+         if(!offsetPoint) offsetPoint = point;
+ 
+-        point = this._display.toLocal(point);
++        point = this._zoomWrapper.toLocal(point);
+ 
+         if(asDelta)
+         {
+@@ -332,20 +340,26 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
+ 
+         if((this._width !== this._renderedWidth) || (this._height !== this._renderedHeight)) update = true;
+ 
+-        if((this._display.x !== this._screenOffsetX) || (this._display.y !== this._screenOffsetY))
++        if((this._zoomWrapper.x !== this._screenOffsetX) || (this._zoomWrapper.y !== this._screenOffsetY))
+         {
+-            this._display.position.set(this._screenOffsetX, this._screenOffsetY);
++            this._zoomWrapper.position.set(this._screenOffsetX, this._screenOffsetY);
+ 
+             update = true;
+         }
+ 
+-        if(this._display.scale.x !== this._scale)
++        if(this._zoomWrapper.scale.x !== this._scale)
+         {
+-            this._display.scale.set(this._scale);
++            this._zoomWrapper.scale.set(this._scale);
+ 
+             update = true;
+         }
+ 
++        const shouldCache = (this._scale !== 1);
++        if(this._display.cacheAsBitmap !== shouldCache)
++        {
++            this._display.cacheAsBitmap = shouldCache;
++        }
++
+         this.doMagic();
+ 
+         const frame = Math.round(this._totalTimeRunning / (60 / this._animationFPS));

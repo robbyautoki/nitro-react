@@ -127,6 +127,11 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --animate-line-shadow: line-shadow 15s linear infinite;
   --animate-shine-sweep: shine-sweep 4s ease-in-out infinite;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes marquee-vertical {
+    from { transform: translateY(0); }
+    to { transform: translateY(calc(-100% - var(--gap))); }
+  }
   --color-brand: var(--brand);
   --color-highlight: var(--highlight);
   @keyframes line-shadow {

@@ -11,54 +11,56 @@ export const WiredSelectorAreaView: FC<{ title: string }> = ({ title }) =>
     const [ filterExisting, setFilterExisting ] = useState(false);
     const [ invert, setInvert ] = useState(false);
     const { trigger = null, setIntParams = null, setStringParam = null } = useWired();
-    const { selectedTiles, isSelecting, startSelecting, stopSelecting, clearTiles, setTilesFromString, tilesToString, tileCount } = useWiredTileSelection();
+    const { selectedTiles, previewTiles, isSelecting, isDragging, startSelecting, stopSelecting, clearTiles, setTilesFromString, tilesToString, tileCount } = useWiredTileSelection();
 
     const save = () =>
     {
-        if (isSelecting) stopSelecting();
+        if(isSelecting) stopSelecting();
         setStringParam(tilesToString());
         setIntParams([ filterExisting ? 1 : 0, invert ? 1 : 0 ]);
     };
 
     useEffect(() =>
     {
-        if (!trigger) return;
+        if(!trigger) return;
+
         const str = trigger.stringData || '';
         setTilesFromString(str);
         const p = trigger.intData || [];
-        if (p.length >= 2) 
+
+        if(p.length >= 2)
         {
             setFilterExisting(p[0] === 1);
             setInvert(p[1] === 1);
         }
-    }, [ trigger, setTilesFromString ]);
+    }, [ trigger ]);
 
     useEffect(() =>
     {
-        return () => 
+        return () =>
         {
-            stopSelecting(); 
+            stopSelecting();
         };
-    }, [ stopSelecting ]);
+    }, []);
 
     const toggleSelecting = () =>
     {
-        if (isSelecting) stopSelecting();
+        if(isSelecting) stopSelecting();
         else startSelecting();
     };
 
     return (
         <>
-            <WiredTileHighlightOverlay selectedTiles={ selectedTiles } active={ isSelecting } />
+            <WiredTileHighlightOverlay selectedTiles={ selectedTiles } previewTiles={ previewTiles } active={ isSelecting } />
             <WiredConditionBaseView requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_NONE } hasSpecialInput={ true } save={ save }>
                 <Column gap={ 1 }>
                     <Text bold small>Bereichsauswahl</Text>
                     <Text small>
-                        Um einen Bereich auszuwählen, klicke einfach auf den
-                        „Bereich wählen“ Button und markiere dann mit
-                        deinen Cursor den gewünschten Bereich im Raum.
+                        Halte die Maustaste gedrückt und ziehe einen
+                        rechteckigen Bereich auf dem Boden.
                     </Text>
-                    { tileCount > 0 && <Text small className="text-muted">{ tileCount } Felder ausgewählt</Text> }
+                    { isDragging && <Text small className="text-muted">Ziehe um Bereich auszuwählen...</Text> }
+                    { !isDragging && tileCount > 0 && <Text small className="text-muted">{ tileCount } Felder ausgewählt</Text> }
                     <Flex gap={ 1 }>
                         <Button variant={ isSelecting ? 'danger' : 'success' } onClick={ toggleSelecting }>
                             { isSelecting ? 'Fertig' : 'Bereich wählen' }
@@ -80,4 +82,4 @@ export const WiredSelectorAreaView: FC<{ title: string }> = ({ title }) =>
             </WiredConditionBaseView>
         </>
     );
-}
+};

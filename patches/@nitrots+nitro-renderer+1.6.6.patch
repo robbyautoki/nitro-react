@@ -12,7 +12,7 @@ index d912d44..704a37d 100644
                  if(this._roomAllowsDragging)
                  {
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
-index 5731eba..57e33b6 100644
+index 5731eba..b2d7a51 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
 @@ -1051,12 +1051,16 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
@@ -32,6 +32,33 @@ index 5731eba..57e33b6 100644
 +
          this.sendWalkUpdate(event.tileXAsInt, event.tileYAsInt);
      }
+ 
+@@ -1082,7 +1086,25 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
+         {
+             const stackingHeightMap = this._roomEngine.getFurnitureStackingHeightMap(roomId);
+ 
+-            if(!(((event instanceof RoomObjectTileMouseEvent)) && (this.handleFurnitureMove(roomObject, selectedData, Math.trunc(event.tileX + 0.5), Math.trunc(event.tileY + 0.5), stackingHeightMap))))
++            if(event instanceof RoomObjectTileMouseEvent)
++            {
++                const tX = Math.trunc(event.tileX + 0.5);
++                const tY = Math.trunc(event.tileY + 0.5);
++
++                if(!this.handleFurnitureMove(roomObject, selectedData, tX, tY, stackingHeightMap))
++                {
++                    if(stackingHeightMap)
++                    {
++                        const stackZ = stackingHeightMap.getTileHeight(tX, tY);
++
++                        if(stackZ >= 0)
++                        {
++                            roomObject.setLocation(new Vector3d(tX, tY, stackZ));
++                        }
++                    }
++                }
++            }
++            else
+             {
+                 this.handleFurnitureMove(roomObject, selectedData, selectedData.loc.x, selectedData.loc.y, stackingHeightMap);
  
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/RoomObjectVisualizationFactory.ts
 index 671cf7f..a14673f 100644

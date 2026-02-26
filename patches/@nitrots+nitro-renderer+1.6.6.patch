@@ -12,7 +12,7 @@ index d912d44..704a37d 100644
                  if(this._roomAllowsDragging)
                  {
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
-index 5731eba..b2d7a51 100644
+index 5731eba..60500b6 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
 @@ -1051,12 +1051,16 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
@@ -33,7 +33,7 @@ index 5731eba..b2d7a51 100644
          this.sendWalkUpdate(event.tileXAsInt, event.tileYAsInt);
      }
  
-@@ -1082,7 +1086,25 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
+@@ -1082,7 +1086,35 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
          {
              const stackingHeightMap = this._roomEngine.getFurnitureStackingHeightMap(roomId);
  
@@ -45,15 +45,25 @@ index 5731eba..b2d7a51 100644
 +
 +                if(!this.handleFurnitureMove(roomObject, selectedData, tX, tY, stackingHeightMap))
 +                {
-+                    if(stackingHeightMap)
-+                    {
-+                        const stackZ = stackingHeightMap.getTileHeight(tX, tY);
++                    const floorObjects = this._roomEngine.getRoomObjects(roomId, RoomObjectCategory.FLOOR);
++                    let maxZ = 0;
 +
-+                        if(stackZ >= 0)
++                    for(const obj of floorObjects)
++                    {
++                        if(obj.id === selectedData.id) continue;
++
++                        const loc = obj.getLocation();
++
++                        if(Math.round(loc.x) === tX && Math.round(loc.y) === tY)
 +                        {
-+                            roomObject.setLocation(new Vector3d(tX, tY, stackZ));
++                            const sizeZ = (obj.model && obj.model.getValue<number>(RoomObjectVariable.FURNITURE_SIZE_Z)) || 0;
++                            const topZ = loc.z + sizeZ;
++
++                            if(topZ > maxZ) maxZ = topZ;
 +                        }
 +                    }
++
++                    roomObject.setLocation(new Vector3d(tX, tY, maxZ));
 +                }
 +            }
 +            else

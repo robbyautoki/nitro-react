@@ -1,6 +1,8 @@
-import { FC, useState, useMemo, useCallback } from 'react';
+import { IFurnitureData } from '@nitrots/nitro-renderer';
+import { FC, useState, useMemo, useCallback, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
+import { GetSessionDataManager } from '../../api';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
 import { CurrencyIcon, ItemIcon } from './marketplace-components';
 import { fmtC } from './marketplace-utils';
@@ -19,19 +21,40 @@ export const MarketplacePriceChartView: FC<{}> = () =>
 {
     const { itemStats, requestItemStats } = useMarketplace();
     const [ open, setOpen ] = useState(false);
-    const [ furniType, setFurniType ] = useState(1);
     const [ searchInput, setSearchInput ] = useState('');
     const [ displayName, setDisplayName ] = useState('');
+    const [ selectedClassName, setSelectedClassName ] = useState('');
+    const [ selectedFurniType, setSelectedFurniType ] = useState(1);
+    const [ allFurniture, setAllFurniture ] = useState<IFurnitureData[]>([]);
 
-    const doSearch = useCallback((input: string) =>
+    useEffect(() =>
     {
-        const id = parseInt(input);
-        if(isNaN(id) || id <= 0) return;
-        requestItemStats(furniType, id);
-        setDisplayName(`Möbel #${ id }`);
+        const data = GetSessionDataManager().getAllFurnitureData({ loadFurnitureData: null });
+        if(data) setAllFurniture(data);
+    }, []);
+
+    const suggestions = useMemo(() =>
+    {
+        if(!searchInput || searchInput.length < 2) return [];
+        const q = searchInput.toLowerCase();
+        return allFurniture
+            .filter(f =>
+                (f.name && f.name.toLowerCase().includes(q) && !f.name.endsWith('_name')) ||
+                (f.className && f.className.toLowerCase().includes(q))
+            )
+            .slice(0, 20);
+    }, [ searchInput, allFurniture ]);
+
+    const selectItem = useCallback((item: IFurnitureData) =>
+    {
+        const ft = item.type === 'I' ? 2 : 1;
+        setSelectedFurniType(ft);
+        setSelectedClassName(item.className);
+        setDisplayName(item.name && !item.name.endsWith('_name') ? item.name : item.className);
+        requestItemStats(ft, item.id);
         setOpen(false);
         setSearchInput('');
-    }, [ furniType, requestItemStats ]);
+    }, [ requestItemStats ]);
 
     const chartData = useMemo(() =>
     {
@@ -59,15 +82,15 @@ export const MarketplacePriceChartView: FC<{}> = () =>
                     <Popover open={ open } onOpenChange={ setOpen }>
                         <PopoverTrigger asChild>
                             <button className="flex items-center gap-2 rounded-md border border-border/40 bg-muted/10 hover:bg-accent/30 px-2 py-1 transition-colors">
-                                { itemStats ? (
+                                { displayName ? (
                                     <>
                                         <div className="w-7 h-7 shrink-0 flex items-center justify-center">
-                                            <BarChart3 className="w-4 h-4 text-muted-foreground/50" />
+                                            <ItemIcon itemName={ selectedClassName } className="w-6 h-6" />
                                         </div>
                                         <div className="text-left">
                                             <p className="text-[12px] font-semibold leading-tight">{ displayName }</p>
                                             <p className="text-[9px] text-muted-foreground font-mono leading-tight">
-                                                { furniType === 1 ? 'Bodenmöbel' : 'Wandmöbel' } · ID { itemStats.furniTypeId }
+                                                { selectedFurniType === 1 ? 'Bodenmöbel' : 'Wandmöbel' } · ID { itemStats?.furniTypeId ?? '...' }
                                             </p>
                                         </div>
                                     </>
@@ -79,47 +102,44 @@ export const MarketplacePriceChartView: FC<{}> = () =>
                                 <ChevronsUpDown className="w-3 h-3 text-muted-foreground/50 ml-1 shrink-0" />
                             </button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[240px] p-0" align="start">
+                        <PopoverContent className="w-[280px] p-0" align="start">
                             <Command shouldFilter={ false }>
                                 <CommandInput
-                                    placeholder="Möbel-ID eingeben..."
+                                    placeholder="Möbel suchen..."
                                     className="h-8 text-[12px]"
                                     value={ searchInput }
                                     onValueChange={ setSearchInput }
-                                    onKeyDown={ e =>
-                                    {
-                                        if(e.key === 'Enter')
-                                        {
-                                            e.preventDefault();
-                                            doSearch(searchInput);
-                                        }
-                                    } }
                                 />
                                 <CommandList>
-                                    <CommandEmpty className="py-3 text-center text-[11px] text-muted-foreground">
-                                        Möbel-ID eingeben und Enter drücken.
-                                    </CommandEmpty>
-                                    <CommandGroup>
-                                        <CommandItem
-                                            className="flex items-center gap-2 text-[11px] cursor-pointer"
-                                            onSelect={ () =>
-                                            {
-                                                setFurniType(furniType === 1 ? 2 : 1);
-                                            } }
-                                        >
-                                            <span className="flex-1">Typ: { furniType === 1 ? 'Bodenmöbel' : 'Wandmöbel' }</span>
-                                            <span className="text-[9px] text-muted-foreground">Klicke zum Wechseln</span>
-                                        </CommandItem>
-                                        { searchInput && parseInt(searchInput) > 0 && (
-                                            <CommandItem
-                                                className="flex items-center gap-2 text-[11px] cursor-pointer"
-                                                onSelect={ () => doSearch(searchInput) }
-                                            >
-                                                <BarChart3 className="w-4 h-4 text-muted-foreground/50 shrink-0" />
-                                                <span className="flex-1">Preisverlauf für #{ searchInput } laden</span>
-                                            </CommandItem>
-                                        ) }
-                                    </CommandGroup>
+                                    { searchInput.length < 2 ? (
+                                        <div className="py-4 text-center text-[11px] text-muted-foreground">
+                                            Mindestens 2 Zeichen eingeben...
+                                        </div>
+                                    ) : suggestions.length === 0 ? (
+                                        <CommandEmpty className="py-4 text-center text-[11px] text-muted-foreground">
+                                            Keine Möbel gefunden.
+                                        </CommandEmpty>
+                                    ) : (
+                                        <CommandGroup heading={ `${ suggestions.length } Ergebnis${ suggestions.length !== 1 ? 'se' : '' }` }>
+                                            { suggestions.map(item => (
+                                                <CommandItem
+                                                    key={ `${ item.type }-${ item.id }` }
+                                                    className="flex items-center gap-2 text-[11px] cursor-pointer"
+                                                    onSelect={ () => selectItem(item) }
+                                                >
+                                                    <div className="w-7 h-7 shrink-0 rounded border border-border/30 bg-muted/10 flex items-center justify-center">
+                                                        <ItemIcon itemName={ item.className } className="w-5 h-5" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="truncate font-medium">{ item.name && !item.name.endsWith('_name') ? item.name : item.className }</p>
+                                                        <p className="text-[9px] text-muted-foreground/50 font-mono">
+                                                            { item.type === 'I' ? 'Wand' : 'Boden' } · ID { item.id }
+                                                        </p>
+                                                    </div>
+                                                </CommandItem>
+                                            )) }
+                                        </CommandGroup>
+                                    ) }
                                 </CommandList>
                             </Command>
                         </PopoverContent>
@@ -161,7 +181,7 @@ export const MarketplacePriceChartView: FC<{}> = () =>
             { !itemStats ? (
                 <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground">
                     <BarChart3 className="w-10 h-10 opacity-20 mb-2" />
-                    <span className="text-xs">Gib eine Möbel-ID ein um den Preisverlauf zu sehen</span>
+                    <span className="text-xs">Wähle ein Möbelstück um den Preisverlauf zu sehen</span>
                 </div>
             ) : chartData.length === 0 ? (
                 <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground">

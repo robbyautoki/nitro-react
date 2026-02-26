@@ -133,6 +133,7 @@ const CHAT_COMMANDS: ChatCommand[] = [
     { command: ':radio playlist remove', description: 'Track aus Playlist', minRank: 14, category: 'Moderator', params: [{ name: 'playlist', type: 'text' }, { name: 'nr', type: 'number' }] },
     { command: ':radio playlist load', description: 'Playlist laden', minRank: 14, category: 'Moderator', params: [{ name: 'name', type: 'text' }] },
     { command: ':radio playlist show', description: 'Playlist-Tracks', minRank: 14, category: 'Moderator', params: [{ name: 'name', type: 'text' }] },
+    { command: ':daynight', description: 'Tag/Nacht-Zyklus steuern', minRank: 15, category: 'Admin' },
     { command: ':radio on', description: 'Radio einschalten', minRank: 15, category: 'Admin' },
     { command: ':radio off', description: 'Radio ausschalten', minRank: 15, category: 'Admin' },
     { command: ':lotto draw', description: 'Ziehung starten', minRank: 15, category: 'Admin' },

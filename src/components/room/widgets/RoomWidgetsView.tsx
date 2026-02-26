@@ -19,6 +19,7 @@ import { MultiPlaceCounterView } from './furniture/MultiPlaceCounterView';
 import { GymProgressView } from '../../gym/GymProgressView';
 import { CombatHudView } from '../../combat/CombatHudView';
 import { HighlightEffectView } from '../HighlightEffectView';
+import { DayNightView } from '../DayNightView';
 
 export const RoomWidgetsView: FC<{}> = props =>
 {
@@ -175,6 +176,7 @@ export const RoomWidgetsView: FC<{}> = props =>
             <GymProgressView />
             <CombatHudView />
             <HighlightEffectView />
+            <DayNightView />
         </>
     );
 }

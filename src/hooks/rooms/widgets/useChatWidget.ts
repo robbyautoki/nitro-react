@@ -131,6 +131,20 @@ const useChatWidgetState = () =>
             return;
         }
 
+        // Intercept [DAYNIGHT] whispers — server controls day/night cycle
+        if(text.startsWith('[DAYNIGHT]'))
+        {
+            try
+            {
+                const data = JSON.parse(text.substring('[DAYNIGHT]'.length));
+                window.dispatchEvent(new CustomEvent('daynight_override', {
+                    detail: { preset: data }
+                }));
+            }
+            catch(e) { /* ignore parse errors */ }
+            return;
+        }
+
         if(userData)
         {
             userType = userData.type;

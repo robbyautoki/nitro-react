@@ -34,7 +34,13 @@ const getIsRoomTile = (): ((x: number, y: number) => boolean) | null =>
     const wallGeo = (engine as any).getLegacyWallGeometry?.(roomId);
     if(!wallGeo?.isRoomTile) return null;
 
-    return (x: number, y: number) => wallGeo.isRoomTile(x, y);
+    return (x: number, y: number) =>
+    {
+        if(!wallGeo.isRoomTile(x, y)) return false;
+        // Also exclude wall/door tiles with negative heights
+        if(wallGeo.getHeight && wallGeo.getHeight(x, y) < 0) return false;
+        return true;
+    };
 };
 
 // Build a screen-to-tile converter using the room geometry's inverse isometric projection

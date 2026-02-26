@@ -1,4 +1,4 @@
-import { GetRoomEngine } from '../../../../api';
+import { GetNitroInstance, GetRoomEngine } from '../../../../api';
 import { Vector3d } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -103,6 +103,17 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
 
             if(selectedTiles.size === 0 && previewTiles.size === 0) return;
 
+            // Clip drawing to the game canvas area (don't draw over sidebar/topbar)
+            const gameCanvas = GetNitroInstance()?.application?.renderer?.view as HTMLCanvasElement;
+            if(gameCanvas)
+            {
+                const canvasRect = gameCanvas.getBoundingClientRect();
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(canvasRect.left, canvasRect.top, canvasRect.width, canvasRect.height);
+                ctx.clip();
+            }
+
             const scale = renderingCanvas.scale;
             const offsetX = renderingCanvas.screenOffsetX;
             const offsetY = renderingCanvas.screenOffsetY;
@@ -139,6 +150,9 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
                         ? wallGeo.getHeight(tx, ty)
                         : 0;
 
+                    // Skip wall/door tiles with negative heights
+                    if(tileZ < 0) return;
+
                     const screenPt = geometry.getScreenPoint(new Vector3d(tx, ty, tileZ));
                     if(!screenPt) return;
 
@@ -156,6 +170,9 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
             // Draw confirmed tiles first, then preview on top
             drawTileSet(selectedTiles, false);
             drawTileSet(previewTiles, true);
+
+            // Restore clip state
+            if(gameCanvas) ctx.restore();
         };
 
         draw();

@@ -145,6 +145,18 @@ const useChatWidgetState = () =>
             return;
         }
 
+        // Intercept [GLOW] whispers — furniture glow effects
+        if(text.startsWith('[GLOW]'))
+        {
+            try
+            {
+                const data = JSON.parse(text.substring('[GLOW]'.length));
+                window.dispatchEvent(new CustomEvent('glow_effect', { detail: data }));
+            }
+            catch(e) { /* ignore parse errors */ }
+            return;
+        }
+
         if(userData)
         {
             userType = userData.type;

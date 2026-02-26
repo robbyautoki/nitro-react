@@ -20,6 +20,7 @@ import { GymProgressView } from '../../gym/GymProgressView';
 import { CombatHudView } from '../../combat/CombatHudView';
 import { HighlightEffectView } from '../HighlightEffectView';
 import { DayNightView } from '../DayNightView';
+import { GlowEffectView } from '../GlowEffectView';
 
 export const RoomWidgetsView: FC<{}> = props =>
 {
@@ -177,6 +178,7 @@ export const RoomWidgetsView: FC<{}> = props =>
             <CombatHudView />
             <HighlightEffectView />
             <DayNightView />
+            <GlowEffectView />
         </>
     );
 }

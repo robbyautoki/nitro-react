@@ -1,5 +1,6 @@
+import { Vector3d } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { WiredSelectionVisualizer } from '../../../../api';
+import { GetNitroInstance, GetRoomEngine, WiredSelectionVisualizer } from '../../../../api';
 
 const tileKey = (x: number, y: number) => `${ x },${ y }`;
 
@@ -22,18 +23,56 @@ const rectToTiles = (x1: number, y1: number, x2: number, y2: number): Set<string
     return tiles;
 };
 
-// Only need move + end handlers (tiles don't fire MOUSE_DOWN, only MOUSE_MOVE + CLICK)
-const _dragMoveHandlers = new Set<(x: number, y: number) => void>();
-const _dragEndHandlers = new Set<(x: number, y: number) => void>();
-
-(globalThis as any).__wiredTileDragMove = (x: number, y: number) =>
+// Build a screen-to-tile converter using the room geometry's inverse isometric projection
+const buildScreenToTile = (): ((clientX: number, clientY: number) => { x: number; y: number } | null) | null =>
 {
-    _dragMoveHandlers.forEach(h => h(x, y));
-};
+    const engine = GetRoomEngine();
+    if(!engine) return null;
 
-(globalThis as any).__wiredTileDragEnd = (x: number, y: number) =>
-{
-    _dragEndHandlers.forEach(h => h(x, y));
+    const roomId = engine.activeRoomId;
+    if(roomId < 0) return null;
+
+    const rc = engine.getRoomInstanceRenderingCanvas(roomId, 0);
+    if(!rc) return null;
+
+    const geo = rc.geometry;
+    if(!geo) return null;
+
+    const scale = rc.scale;
+    const offX = rc.screenOffsetX;
+    const offY = rc.screenOffsetY;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+
+    // Compute basis vectors from the geometry
+    const origin = geo.getScreenPoint(new Vector3d(0, 0, 0));
+    const xRef = geo.getScreenPoint(new Vector3d(1, 0, 0));
+    const yRef = geo.getScreenPoint(new Vector3d(0, 1, 0));
+    if(!origin || !xRef || !yRef) return null;
+
+    const xBasisX = xRef.x - origin.x;
+    const xBasisY = xRef.y - origin.y;
+    const yBasisX = yRef.x - origin.x;
+    const yBasisY = yRef.y - origin.y;
+    const det = xBasisX * yBasisY - xBasisY * yBasisX;
+    if(Math.abs(det) < 0.001) return null;
+
+    return (clientX: number, clientY: number) =>
+    {
+        // Browser coords → rendering canvas coords (unscaled)
+        const canvasX = (clientX - w / 2 - offX) / scale;
+        const canvasY = (clientY - h / 2 - offY) / scale;
+
+        // Relative to origin
+        const dx = canvasX - origin.x;
+        const dy = canvasY - origin.y;
+
+        // Inverse isometric projection (2x2 matrix inversion)
+        const tx = (dx * yBasisY - dy * yBasisX) / det;
+        const ty = (dy * xBasisX - dx * xBasisY) / det;
+
+        return { x: Math.floor(tx), y: Math.floor(ty) };
+    };
 };
 
 export const useWiredTileSelection = () =>
@@ -43,8 +82,7 @@ export const useWiredTileSelection = () =>
     const [ isDragging, setIsDragging ] = useState(false);
     const dragAnchorRef = useRef<{ x: number; y: number } | null>(null);
     const dragEndRef = useRef<{ x: number; y: number } | null>(null);
-    const dragFinalizedRef = useRef(false);
-    const mouseIsDownRef = useRef(false);
+    const converterRef = useRef<((clientX: number, clientY: number) => { x: number; y: number } | null) | null>(null);
     const [ previewTiles, setPreviewTiles ] = useState<Set<string>>(new Set());
 
     const selectedTiles = useMemo(() =>
@@ -70,7 +108,7 @@ export const useWiredTileSelection = () =>
         setPreviewTiles(new Set());
         dragAnchorRef.current = null;
         dragEndRef.current = null;
-        mouseIsDownRef.current = false;
+        converterRef.current = null;
     }, []);
 
     const clearTiles = useCallback(() =>
@@ -90,7 +128,6 @@ export const useWiredTileSelection = () =>
             return;
         }
 
-        // Parse tiles and compute bounding rectangle
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         let hasValid = false;
 
@@ -123,94 +160,65 @@ export const useWiredTileSelection = () =>
         return Array.from(selectedTiles).join(';');
     }, [ selectedTiles ]);
 
-    // Register drag handlers when selecting
+    // Document-level drag handlers (bypasses Nitro engine entirely)
     useEffect(() =>
     {
         if(!isSelecting) return;
 
-        // Track mouse button state at browser level
-        // (Floor tiles only fire MOUSE_MOVE + CLICK, not MOUSE_DOWN)
-        const onDocMouseDown = () =>
+        const gameCanvas = GetNitroInstance()?.application?.renderer?.view as HTMLCanvasElement;
+
+        const onMouseDown = (e: MouseEvent) =>
         {
-            mouseIsDownRef.current = true;
+            // Only react to clicks on the game canvas
+            if(e.target !== gameCanvas) return;
+
+            const converter = buildScreenToTile();
+            if(!converter) return;
+
+            const tile = converter(e.clientX, e.clientY);
+            if(!tile) return;
+
+            dragAnchorRef.current = tile;
+            dragEndRef.current = tile;
+            converterRef.current = converter;
+            setIsDragging(true);
+            setPreviewTiles(rectToTiles(tile.x, tile.y, tile.x, tile.y));
         };
 
-        const onDocMouseUp = () =>
+        const onMouseMove = (e: MouseEvent) =>
         {
-            mouseIsDownRef.current = false;
-        };
+            if(!dragAnchorRef.current || !converterRef.current) return;
 
-        const onDragMove = (x: number, y: number) =>
-        {
-            if(dragFinalizedRef.current) return;
+            const tile = converterRef.current(e.clientX, e.clientY);
+            if(!tile) return;
 
-            if(mouseIsDownRef.current && !dragAnchorRef.current)
-            {
-                // First MOUSE_MOVE with button pressed → start drag
-                dragAnchorRef.current = { x, y };
-                dragEndRef.current = { x, y };
-                dragFinalizedRef.current = false;
-                setIsDragging(true);
-                setPreviewTiles(rectToTiles(x, y, x, y));
-            }
-            else if(dragAnchorRef.current)
-            {
-                // Continue drag → update preview
-                dragEndRef.current = { x, y };
-                const anchor = dragAnchorRef.current;
-                setPreviewTiles(rectToTiles(anchor.x, anchor.y, x, y));
-            }
-        };
-
-        const finalizeDrag = (endX: number, endY: number) =>
-        {
-            if(!dragAnchorRef.current || dragFinalizedRef.current) return;
-
-            dragFinalizedRef.current = true;
+            dragEndRef.current = tile;
             const anchor = dragAnchorRef.current;
-            setRect({ x1: anchor.x, y1: anchor.y, x2: endX, y2: endY });
+            setPreviewTiles(rectToTiles(anchor.x, anchor.y, tile.x, tile.y));
+        };
+
+        const onMouseUp = () =>
+        {
+            if(!dragAnchorRef.current) return;
+
+            const end = dragEndRef.current || dragAnchorRef.current;
+            const anchor = dragAnchorRef.current;
+            setRect({ x1: anchor.x, y1: anchor.y, x2: end.x, y2: end.y });
             setPreviewTiles(new Set());
             setIsDragging(false);
             dragAnchorRef.current = null;
             dragEndRef.current = null;
+            converterRef.current = null;
         };
 
-        const onDragEnd = (x: number, y: number) =>
-        {
-            if(dragAnchorRef.current)
-            {
-                // Normal drag end → finalize rectangle
-                finalizeDrag(x, y);
-            }
-            else
-            {
-                // Click without drag → select single tile
-                setRect({ x1: x, y1: y, x2: x, y2: y });
-            }
-        };
-
-        // Safety-net: finalize drag on global mouseup
-        const onMouseUp = () =>
-        {
-            mouseIsDownRef.current = false;
-
-            if(!dragEndRef.current || dragFinalizedRef.current) return;
-
-            finalizeDrag(dragEndRef.current.x, dragEndRef.current.y);
-        };
-
-        document.addEventListener('mousedown', onDocMouseDown, true);
-        document.addEventListener('mouseup', onDocMouseUp, true);
-        _dragMoveHandlers.add(onDragMove);
-        _dragEndHandlers.add(onDragEnd);
+        document.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mousemove', onMouseMove);
         document.addEventListener('mouseup', onMouseUp);
 
         return () =>
         {
-            document.removeEventListener('mousedown', onDocMouseDown, true);
-            document.removeEventListener('mouseup', onDocMouseUp, true);
-            _dragMoveHandlers.delete(onDragMove);
-            _dragEndHandlers.delete(onDragEnd);
+            document.removeEventListener('mousedown', onMouseDown);
+            document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         };
     }, [ isSelecting ]);

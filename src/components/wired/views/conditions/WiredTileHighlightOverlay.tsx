@@ -1,6 +1,7 @@
 import { GetRoomEngine } from '../../../../api';
 import { Vector3d } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 interface Props
 {
@@ -149,7 +150,7 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
 
     if(!active && selectedTiles.size === 0 && previewTiles.size === 0) return null;
 
-    return (
+    return createPortal(
         <canvas
             ref={ canvasRef }
             style={ {
@@ -159,8 +160,9 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
                 width: '100vw',
                 height: '100vh',
                 pointerEvents: 'none',
-                zIndex: 300
+                zIndex: 9999
             } }
-        />
+        />,
+        document.body
     );
 };

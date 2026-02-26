@@ -12,7 +12,7 @@ index d912d44..704a37d 100644
                  if(this._roomAllowsDragging)
                  {
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
-index 5731eba..6192cd5 100644
+index 5731eba..4d43a89 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/RoomObjectEventHandler.ts
 @@ -5,6 +5,7 @@ import { RoomEnterEffect, RoomId, RoomObjectUpdateMessage } from '../../room';
@@ -23,66 +23,7 @@ index 5731eba..6192cd5 100644
  import { SelectedRoomObjectData } from './utils';
  
  export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMouseListener, IRoomObjectEventManager
-@@ -394,6 +395,20 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
-                 }
-                 break;
-             case RoomObjectOperationType.OBJECT_UNDEFINED:
-+                if((globalThis as any).__wiredTileSelectionActive && (category === RoomObjectCategory.FLOOR))
-+                {
-+                    if(typeof (globalThis as any).__wiredTileDragEnd === 'function')
-+                    {
-+                        const _wiredFurni = this._roomEngine.getRoomObject(roomId, event.objectId, RoomObjectCategory.FLOOR);
-+                        if(_wiredFurni)
-+                        {
-+                            const _wiredFurniLoc = _wiredFurni.getLocation();
-+                            (globalThis as any).__wiredTileDragEnd(Math.trunc(_wiredFurniLoc.x), Math.trunc(_wiredFurniLoc.y));
-+                        }
-+                    }
-+                    break;
-+                }
-+
-                 if(category === RoomObjectCategory.ROOM)
-                 {
-                     if(!didWalk && (event instanceof RoomObjectTileMouseEvent)) this.onRoomObjectTileMouseEvent(roomId, event);
-@@ -529,6 +544,15 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
-                 if(event instanceof RoomObjectTileMouseEvent)
-                 {
-                     newEvent = this.handleMouseOverTile(event, roomId);
-+
-+                    // Wired tile drag move (preview)
-+                    if((globalThis as any).__wiredTileSelectionActive)
-+                    {
-+                        if(typeof (globalThis as any).__wiredTileDragMove === 'function')
-+                        {
-+                            (globalThis as any).__wiredTileDragMove(event.tileXAsInt, event.tileYAsInt);
-+                        }
-+                    }
-                 }
- 
-                 else if(event.object && (event.object.id !== -1))
-@@ -537,6 +561,21 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
-                     {
-                         newEvent = this.handleMouseOverObject(category, roomId, event);
-                     }
-+
-+                    // Wired tile drag move: hovering over furniture resolves to its tile position
-+                    if((globalThis as any).__wiredTileSelectionActive && typeof (globalThis as any).__wiredTileDragMove === 'function')
-+                    {
-+                        const _wiredCategory = this._roomEngine.getRoomObjectCategoryForType(event.objectType);
-+                        if(_wiredCategory === RoomObjectCategory.FLOOR)
-+                        {
-+                            const _wiredObj = this._roomEngine.getRoomObject(roomId, event.objectId, RoomObjectCategory.FLOOR);
-+                            if(_wiredObj)
-+                            {
-+                                const _wiredLoc = _wiredObj.getLocation();
-+                                (globalThis as any).__wiredTileDragMove(Math.trunc(_wiredLoc.x), Math.trunc(_wiredLoc.y));
-+                            }
-+                        }
-+                    }
-                 }
- 
-                 else
-@@ -1051,12 +1090,23 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
+@@ -1051,12 +1052,16 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
  
      private onRoomObjectTileMouseEvent(roomId: number, event: RoomObjectTileMouseEvent): void
      {
@@ -93,21 +34,14 @@ index 5731eba..6192cd5 100644
  
          if(!session || session.isSpectator) return;
  
-+        if((globalThis as any).__wiredTileSelectionActive)
-+        {
-+            if(typeof (globalThis as any).__wiredTileDragEnd === 'function')
-+            {
-+                (globalThis as any).__wiredTileDragEnd(event.tileXAsInt, event.tileYAsInt);
-+            }
-+            return;
-+        }
++        if((globalThis as any).__wiredTileSelectionActive) return;
 +
 +        if(this._roomEngine.isDecorating) return;
 +
          this.sendWalkUpdate(event.tileXAsInt, event.tileYAsInt);
      }
  
-@@ -1487,6 +1537,58 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
+@@ -1487,6 +1492,58 @@ export class RoomObjectEventHandler extends Disposable implements IRoomCanvasMou
          if(!this._roomEngine || !this._roomEngine.connection) return;
  
          this._roomEngine.connection.send(new RoomUnitWalkComposer(x, y));

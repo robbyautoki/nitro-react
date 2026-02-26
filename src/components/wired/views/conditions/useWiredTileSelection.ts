@@ -22,15 +22,9 @@ const rectToTiles = (x1: number, y1: number, x2: number, y2: number): Set<string
     return tiles;
 };
 
-// Drag event handler sets
-const _dragStartHandlers = new Set<(x: number, y: number) => void>();
+// Only need move + end handlers (tiles don't fire MOUSE_DOWN, only MOUSE_MOVE + CLICK)
 const _dragMoveHandlers = new Set<(x: number, y: number) => void>();
 const _dragEndHandlers = new Set<(x: number, y: number) => void>();
-
-(globalThis as any).__wiredTileDragStart = (x: number, y: number) =>
-{
-    _dragStartHandlers.forEach(h => h(x, y));
-};
 
 (globalThis as any).__wiredTileDragMove = (x: number, y: number) =>
 {
@@ -50,6 +44,7 @@ export const useWiredTileSelection = () =>
     const dragAnchorRef = useRef<{ x: number; y: number } | null>(null);
     const dragEndRef = useRef<{ x: number; y: number } | null>(null);
     const dragFinalizedRef = useRef(false);
+    const mouseIsDownRef = useRef(false);
     const [ previewTiles, setPreviewTiles ] = useState<Set<string>>(new Set());
 
     const selectedTiles = useMemo(() =>
@@ -75,6 +70,7 @@ export const useWiredTileSelection = () =>
         setPreviewTiles(new Set());
         dragAnchorRef.current = null;
         dragEndRef.current = null;
+        mouseIsDownRef.current = false;
     }, []);
 
     const clearTiles = useCallback(() =>
@@ -132,22 +128,38 @@ export const useWiredTileSelection = () =>
     {
         if(!isSelecting) return;
 
-        const onDragStart = (x: number, y: number) =>
+        // Track mouse button state at browser level
+        // (Floor tiles only fire MOUSE_MOVE + CLICK, not MOUSE_DOWN)
+        const onDocMouseDown = () =>
         {
-            dragAnchorRef.current = { x, y };
-            dragEndRef.current = { x, y };
-            dragFinalizedRef.current = false;
-            setIsDragging(true);
-            setPreviewTiles(rectToTiles(x, y, x, y));
+            mouseIsDownRef.current = true;
+        };
+
+        const onDocMouseUp = () =>
+        {
+            mouseIsDownRef.current = false;
         };
 
         const onDragMove = (x: number, y: number) =>
         {
-            if(!dragAnchorRef.current || dragFinalizedRef.current) return;
+            if(dragFinalizedRef.current) return;
 
-            dragEndRef.current = { x, y };
-            const anchor = dragAnchorRef.current;
-            setPreviewTiles(rectToTiles(anchor.x, anchor.y, x, y));
+            if(mouseIsDownRef.current && !dragAnchorRef.current)
+            {
+                // First MOUSE_MOVE with button pressed → start drag
+                dragAnchorRef.current = { x, y };
+                dragEndRef.current = { x, y };
+                dragFinalizedRef.current = false;
+                setIsDragging(true);
+                setPreviewTiles(rectToTiles(x, y, x, y));
+            }
+            else if(dragAnchorRef.current)
+            {
+                // Continue drag → update preview
+                dragEndRef.current = { x, y };
+                const anchor = dragAnchorRef.current;
+                setPreviewTiles(rectToTiles(anchor.x, anchor.y, x, y));
+            }
         };
 
         const finalizeDrag = (endX: number, endY: number) =>
@@ -165,25 +177,38 @@ export const useWiredTileSelection = () =>
 
         const onDragEnd = (x: number, y: number) =>
         {
-            finalizeDrag(x, y);
+            if(dragAnchorRef.current)
+            {
+                // Normal drag end → finalize rectangle
+                finalizeDrag(x, y);
+            }
+            else
+            {
+                // Click without drag → select single tile
+                setRect({ x1: x, y1: y, x2: x, y2: y });
+            }
         };
 
         // Safety-net: finalize drag on global mouseup
         const onMouseUp = () =>
         {
-            if(!dragEndRef.current) return;
+            mouseIsDownRef.current = false;
+
+            if(!dragEndRef.current || dragFinalizedRef.current) return;
 
             finalizeDrag(dragEndRef.current.x, dragEndRef.current.y);
         };
 
-        _dragStartHandlers.add(onDragStart);
+        document.addEventListener('mousedown', onDocMouseDown, true);
+        document.addEventListener('mouseup', onDocMouseUp, true);
         _dragMoveHandlers.add(onDragMove);
         _dragEndHandlers.add(onDragEnd);
         document.addEventListener('mouseup', onMouseUp);
 
         return () =>
         {
-            _dragStartHandlers.delete(onDragStart);
+            document.removeEventListener('mousedown', onDocMouseDown, true);
+            document.removeEventListener('mouseup', onDocMouseUp, true);
             _dragMoveHandlers.delete(onDragMove);
             _dragEndHandlers.delete(onDragEnd);
             document.removeEventListener('mouseup', onMouseUp);

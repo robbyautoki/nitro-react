@@ -4,7 +4,7 @@ import { GetNitroInstance, GetRoomEngine, WiredSelectionVisualizer } from '../..
 
 const tileKey = (x: number, y: number) => `${ x },${ y }`;
 
-const rectToTiles = (x1: number, y1: number, x2: number, y2: number): Set<string> =>
+const rectToTiles = (x1: number, y1: number, x2: number, y2: number, isValid?: (x: number, y: number) => boolean): Set<string> =>
 {
     const tiles = new Set<string>();
     const minX = Math.min(x1, x2);
@@ -16,11 +16,25 @@ const rectToTiles = (x1: number, y1: number, x2: number, y2: number): Set<string
     {
         for(let y = minY; y <= maxY; y++)
         {
-            tiles.add(tileKey(x, y));
+            if(!isValid || isValid(x, y)) tiles.add(tileKey(x, y));
         }
     }
 
     return tiles;
+};
+
+const getIsRoomTile = (): ((x: number, y: number) => boolean) | null =>
+{
+    const engine = GetRoomEngine();
+    if(!engine) return null;
+
+    const roomId = engine.activeRoomId;
+    if(roomId < 0) return null;
+
+    const wallGeo = (engine as any).getLegacyWallGeometry?.(roomId);
+    if(!wallGeo?.isRoomTile) return null;
+
+    return (x: number, y: number) => wallGeo.isRoomTile(x, y);
 };
 
 // Build a screen-to-tile converter using the room geometry's inverse isometric projection
@@ -89,7 +103,7 @@ export const useWiredTileSelection = () =>
     {
         if(!rect) return new Set<string>();
 
-        return rectToTiles(rect.x1, rect.y1, rect.x2, rect.y2);
+        return rectToTiles(rect.x1, rect.y1, rect.x2, rect.y2, getIsRoomTile() ?? undefined);
     }, [ rect ]);
 
     const startSelecting = useCallback(() =>
@@ -182,7 +196,7 @@ export const useWiredTileSelection = () =>
             dragEndRef.current = tile;
             converterRef.current = converter;
             setIsDragging(true);
-            setPreviewTiles(rectToTiles(tile.x, tile.y, tile.x, tile.y));
+            setPreviewTiles(rectToTiles(tile.x, tile.y, tile.x, tile.y, getIsRoomTile() ?? undefined));
         };
 
         const onMouseMove = (e: MouseEvent) =>
@@ -194,7 +208,7 @@ export const useWiredTileSelection = () =>
 
             dragEndRef.current = tile;
             const anchor = dragAnchorRef.current;
-            setPreviewTiles(rectToTiles(anchor.x, anchor.y, tile.x, tile.y));
+            setPreviewTiles(rectToTiles(anchor.x, anchor.y, tile.x, tile.y, getIsRoomTile() ?? undefined));
         };
 
         const onMouseUp = () =>

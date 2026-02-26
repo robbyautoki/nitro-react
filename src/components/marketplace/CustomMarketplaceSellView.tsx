@@ -209,7 +209,7 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
                                             onClick={ () => { addItem(item); setShowInventory(false); setSearchQuery(''); } }
                                             className="relative w-full aspect-square rounded-md border border-border/40 bg-muted/10 hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center transition-all"
                                         >
-                                            <ItemIcon itemName={ item.item_name } className="w-14 h-14" />
+                                            <ItemIcon itemName={ item.item_name } className="w-20 h-20" />
                                             { item.count > 1 && (
                                                 <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] rounded-full bg-foreground/80 text-background text-[8px] font-bold flex items-center justify-center px-0.5">
                                                     x{ item.count }

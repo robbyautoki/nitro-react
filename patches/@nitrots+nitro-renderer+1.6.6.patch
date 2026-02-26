@@ -113,6 +113,284 @@ index 671cf7f..a14673f 100644
          {
              visualizationData.avatarManager = Nitro.instance.avatar;
          }
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/MovingObjectLogic.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/MovingObjectLogic.ts
+index ac3907b..51f3c39 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/MovingObjectLogic.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/MovingObjectLogic.ts
+@@ -15,6 +15,14 @@ export class MovingObjectLogic extends RoomObjectLogicBase
+     private _changeTime: number;
+     private _updateInterval: number;
+ 
++    // v9: Dynamic interval measurement
++    private _lastMoveTime: number;
++    private _measuredInterval: number;
++
++    // CSP v8: Simple one-step prediction
++    private _isPredicting: boolean;
++    private _predictionTarget: Vector3d;
++
+     constructor()
+     {
+         super();
+@@ -26,11 +34,18 @@ export class MovingObjectLogic extends RoomObjectLogicBase
+         this._lastUpdateTime = 0;
+         this._changeTime = 0;
+         this._updateInterval = MovingObjectLogic.DEFAULT_UPDATE_INTERVAL;
++
++        this._lastMoveTime = 0;
++        this._measuredInterval = MovingObjectLogic.DEFAULT_UPDATE_INTERVAL;
++
++        this._isPredicting = false;
++        this._predictionTarget = new Vector3d();
+     }
+ 
+     protected onDispose(): void
+     {
+         this._liftAmount = 0;
++        this._isPredicting = false;
+ 
+         super.onDispose();
+     }
+@@ -49,7 +64,6 @@ export class MovingObjectLogic extends RoomObjectLogicBase
+                 if(this._liftAmount !== locationOffset.z)
+                 {
+                     this._liftAmount = locationOffset.z;
+-
+                     model.setValue(RoomObjectVariable.FURNITURE_LIFT_AMOUNT, this._liftAmount);
+                 }
+             }
+@@ -58,26 +72,45 @@ export class MovingObjectLogic extends RoomObjectLogicBase
+                 if(this._liftAmount !== 0)
+                 {
+                     this._liftAmount = 0;
+-
+                     model.setValue(RoomObjectVariable.FURNITURE_LIFT_AMOUNT, this._liftAmount);
+                 }
+             }
+         }
+ 
++        // CSP v8: Timeout prediction if server doesn't respond within 2 intervals
++        if(this._isPredicting)
++        {
++            const elapsed = this.time - this._changeTime;
++
++            if(elapsed > this._updateInterval * 2)
++            {
++                this._isPredicting = false;
++                this._locationDelta.x = 0;
++                this._locationDelta.y = 0;
++                this._locationDelta.z = 0;
++                this.object.setLocation(this._location);
++
++                const m = this.object && this.object.model;
++                if(m) m.setValue(RoomObjectVariable.FIGURE_POSTURE, 'std');
++            }
++        }
++
+         if((this._locationDelta.length > 0) || locationOffset)
+         {
+             const vector = MovingObjectLogic.TEMP_VECTOR;
+ 
+-            let difference = (this.time - this._changeTime);
++            // v9: Use measured interval for interpolation speed
++            const interval = this._measuredInterval;
+ 
+-            if(difference === (this._updateInterval >> 1)) difference++;
++            let difference = (this.time - this._changeTime);
+ 
+-            if(difference > this._updateInterval) difference = this._updateInterval;
++            if(difference < 0) difference = 0;
++            if(difference > interval) difference = interval;
+ 
+             if(this._locationDelta.length > 0)
+             {
+                 vector.assign(this._locationDelta);
+-                vector.multiply((difference / this._updateInterval));
++                vector.multiply((difference / interval));
+                 vector.add(this._location);
+             }
+             else
+@@ -89,8 +122,10 @@ export class MovingObjectLogic extends RoomObjectLogicBase
+ 
+             this.object.setLocation(vector);
+ 
+-            if(difference === this._updateInterval)
++            if(difference === interval)
+             {
++                this._location.add(this._locationDelta);
++
+                 this._locationDelta.x = 0;
+                 this._locationDelta.y = 0;
+                 this._locationDelta.z = 0;
+@@ -107,22 +142,164 @@ export class MovingObjectLogic extends RoomObjectLogicBase
+         if(object) this._location.assign(object.getLocation());
+     }
+ 
++    // CSP v8.1: Predict one step — allowed even during movement
++    public startPredictedMove(targetX: number, targetY: number, targetZ: number): void
++    {
++        if(!this.object) return;
++
++        // v8.1: If currently moving, snap _location to nearest tile from visual position
++        if(this._locationDelta.length > 0)
++        {
++            const interval = this._measuredInterval;
++            let progress = (this.time - this._changeTime) / interval;
++            if(progress > 1) progress = 1;
++
++            this._location.x = Math.round(this._location.x + this._locationDelta.x * progress);
++            this._location.y = Math.round(this._location.y + this._locationDelta.y * progress);
++            this._location.z = this._location.z + this._locationDelta.z * progress;
++
++            this._locationDelta.x = 0;
++            this._locationDelta.y = 0;
++            this._locationDelta.z = 0;
++        }
++
++        this._isPredicting = true;
++        this._predictionTarget.x = targetX;
++        this._predictionTarget.y = targetY;
++        this._predictionTarget.z = targetZ;
++
++        this._changeTime = this.time;
++        this._locationDelta.x = targetX - this._location.x;
++        this._locationDelta.y = targetY - this._location.y;
++        this._locationDelta.z = targetZ - this._location.z;
++
++        const dx = Math.sign(this._locationDelta.x);
++        const dy = Math.sign(this._locationDelta.y);
++
++        if(dx === 0 && dy === 0) return;
++
++        const model = this.object && this.object.model;
++        if(model) model.setValue(RoomObjectVariable.FIGURE_POSTURE, 'mv');
++
++        let dir = 0;
++        if(dx === 0 && dy === -1) dir = 0;
++        else if(dx === 1 && dy === -1) dir = 1;
++        else if(dx === 1 && dy === 0) dir = 2;
++        else if(dx === 1 && dy === 1) dir = 3;
++        else if(dx === 0 && dy === 1) dir = 4;
++        else if(dx === -1 && dy === 1) dir = 5;
++        else if(dx === -1 && dy === 0) dir = 6;
++        else if(dx === -1 && dy === -1) dir = 7;
++        this.object.setDirection(new Vector3d(dir * 45));
++    }
++
++    // CSP v8: NO super.processUpdateMessage() — we manage location ourselves to avoid 1-frame teleport
+     public processUpdateMessage(message: IRoomObjectUpdateMessage): void
+     {
+-        if(!message) return;
++        if(!message || !this.object) return;
++
++        if(this._isPredicting && message instanceof ObjectMoveUpdateMessage)
++        {
++            this._isPredicting = false;
++
++            if(message.targetLocation)
++            {
++                const matchX = Math.round(message.targetLocation.x) === Math.round(this._predictionTarget.x);
++                const matchY = Math.round(message.targetLocation.y) === Math.round(this._predictionTarget.y);
+ 
+-        super.processUpdateMessage(message);
++                if(matchX && matchY)
++                {
++                    if(message.direction) this.object.setDirection(message.direction);
++
++                    // v9: Track timing even for confirmed predictions
++                    this._trackMoveInterval();
++
++                    return;
++                }
++            }
+ 
+-        if(message.location) this._location.assign(message.location);
++            // Server disagrees — snap to server position and start new interpolation
++            this._location.assign(message.location);
++
++            this._locationDelta.x = 0;
++            this._locationDelta.y = 0;
++            this._locationDelta.z = 0;
++
++            if(message.direction) this.object.setDirection(message.direction);
++
++            // Fall through to processMoveMessage
++        }
++        else if(this._isPredicting)
++        {
++            if(message.direction) this.object.setDirection(message.direction);
++            return;
++        }
++        else
++        {
++            if(message.direction) this.object.setDirection(message.direction);
++        }
++
++        // Always sync location from server to prevent _location desync
++        // (fixes 2-tile bug after manual furniture move)
++        if(message.location)
++        {
++            this._location.assign(message.location);
++            this._locationDelta.x = 0;
++            this._locationDelta.y = 0;
++            this._locationDelta.z = 0;
++        }
+ 
+         if(message instanceof ObjectMoveUpdateMessage) return this.processMoveMessage(message);
++
++        // Non-move message: snap visual position to server location
++        if(message.location)
++        {
++            this.object.setLocation(this._location);
++        }
++    }
++
++    private _trackMoveInterval(): void
++    {
++        if(this._lastMoveTime > 0)
++        {
++            const elapsed = this.time - this._lastMoveTime;
++
++            if(elapsed > 100 && elapsed < 1000)
++            {
++                this._measuredInterval = this._measuredInterval * 0.7 + elapsed * 0.3;
++            }
++        }
++
++        this._lastMoveTime = this.time;
+     }
+ 
+     private processMoveMessage(message: ObjectMoveUpdateMessage): void
+     {
+         if(!message || !this.object || !message.location) return;
+ 
+-        this._changeTime = this._lastUpdateTime;
++        // v8.3: Skip zero-distance moves (standing still status updates)
++        const tgtLoc = message.targetLocation;
++        if(tgtLoc && message.location)
++        {
++            if(Math.abs(tgtLoc.x - message.location.x) < 0.01 &&
++               Math.abs(tgtLoc.y - message.location.y) < 0.01)
++            {
++                if(this._locationDelta.length === 0)
++                {
++                    this._location.assign(message.location);
++                    this.object.setLocation(this._location);
++                }
++                return;
++            }
++        }
++
++        // v9: Track actual server tick interval
++        this._trackMoveInterval();
++
++        // v9: Always use server position as start — prevents drift accumulation
++        this._location.assign(message.location);
++
++        this._changeTime = this.time;
+ 
+         this._locationDelta.assign(message.targetLocation);
+         this._locationDelta.subtract(this._location);
 diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts
 index 1dc732f..bc703c9 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/logic/pet/PetLogic.ts

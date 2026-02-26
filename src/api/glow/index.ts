@@ -1,2 +1,8 @@
-export { GlowFilter } from './GlowFilter';
 export { GlowEffectManager } from './GlowEffectManager';
+export type { GlowType } from './GlowEffectManager';
+export { NeonGlowFilter } from './filters/NeonGlowFilter';
+export { RainbowGlowFilter } from './filters/RainbowGlowFilter';
+export { FireGlowFilter } from './filters/FireGlowFilter';
+export { SparkleFilter } from './filters/SparkleFilter';
+export { HologramFilter } from './filters/HologramFilter';
+export { ShadowGlowFilter } from './filters/ShadowGlowFilter';

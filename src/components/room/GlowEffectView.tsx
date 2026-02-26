@@ -1,5 +1,6 @@
 import { FC, useEffect } from 'react';
 import { GlowEffectManager } from '../../api/glow';
+import type { GlowType } from '../../api/glow';
 
 export const GlowEffectView: FC<{}> = () =>
 {
@@ -7,12 +8,12 @@ export const GlowEffectView: FC<{}> = () =>
     {
         const handler = (e: Event) =>
         {
-            const { action, furniId, color, pulse } = (e as CustomEvent).detail;
+            const { action, furniId, color, type } = (e as CustomEvent).detail;
 
             switch(action)
             {
                 case 'add':
-                    GlowEffectManager.apply(furniId, color, pulse || false);
+                    GlowEffectManager.apply(furniId, (type || 'neon') as GlowType, color);
                     break;
                 case 'remove':
                     GlowEffectManager.remove(furniId);

@@ -25,7 +25,7 @@ void main(void)
 
     if(color.a > 0.0)
     {
-        vec3 tinted = mix(color.rgb, glowColor * color.a, glowStrength * 0.2);
+        vec3 tinted = mix(color.rgb, glowColor * color.a, glowStrength * 0.4);
         gl_FragColor = vec4(tinted, color.a);
         return;
     }
@@ -34,9 +34,9 @@ void main(void)
     float glow = 0.0;
     float total = 0.0;
 
-    for(float d = 1.0; d <= 8.0; d += 1.0)
+    for(float d = 1.0; d <= 12.0; d += 1.0)
     {
-        float weight = (8.0 - d + 1.0) / 8.0;
+        float weight = (12.0 - d + 1.0) / 12.0;
         for(float angle = 0.0; angle < 6.28318; angle += 0.5236)
         {
             float a = texture2D(uSampler, vTextureCoord + vec2(cos(angle), sin(angle)) * px * d).a;
@@ -46,10 +46,10 @@ void main(void)
     }
     glow /= total;
 
-    float pulse = 0.8 + 0.2 * sin(uTime * 3.0);
+    float pulse = 0.6 + 0.4 * sin(uTime * 3.0);
     float alpha = glow * glowStrength * pulse;
 
-    gl_FragColor = vec4(glowColor * alpha, alpha * 0.9);
+    gl_FragColor = vec4(glowColor * min(alpha * 2.0, 1.0), min(alpha * 2.0, 1.0));
 }`;
 
 export class NeonGlowFilter extends NitroFilter
@@ -61,6 +61,6 @@ export class NeonGlowFilter extends NitroFilter
         this.uniforms.glowColor = new Float32Array(color);
         this.uniforms.glowStrength = strength;
         this.uniforms.uTime = 0.0;
-        this.padding = 15;
+        this.padding = 25;
     }
 }

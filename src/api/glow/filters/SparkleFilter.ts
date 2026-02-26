@@ -29,22 +29,22 @@ void main(void)
     vec4 color = texture2D(uSampler, vTextureCoord);
     vec2 pixelCoord = vTextureCoord * inputSize.xy;
 
-    vec2 cell = floor(pixelCoord / 6.0);
+    vec2 cell = floor(pixelCoord / 10.0);
     float rnd = noise(cell);
 
-    float isSparkle = step(0.82, rnd);
+    float isSparkle = step(0.75, rnd);
 
     float phase = rnd * 6.28318;
-    float twinkle = pow(max(0.0, sin(uTime * 5.0 + phase)), 12.0);
+    float twinkle = pow(max(0.0, sin(uTime * 5.0 + phase)), 6.0);
 
-    vec2 subPos = fract(pixelCoord / 6.0) - 0.5;
-    float point = smoothstep(0.3, 0.0, length(subPos));
+    vec2 subPos = fract(pixelCoord / 10.0) - 0.5;
+    float point = smoothstep(0.45, 0.0, length(subPos));
 
     float sparkleAlpha = isSparkle * twinkle * point * glowStrength;
 
     if(color.a > 0.0)
     {
-        vec3 result = color.rgb + glowColor * sparkleAlpha * 1.5;
+        vec3 result = color.rgb + glowColor * sparkleAlpha * 3.0;
         gl_FragColor = vec4(result, color.a);
     }
     else
@@ -53,7 +53,7 @@ void main(void)
         float nearEdge = 0.0;
         for(float angle = 0.0; angle < 6.28318; angle += 0.7854)
         {
-            nearEdge += texture2D(uSampler, vTextureCoord + vec2(cos(angle), sin(angle)) * px * 3.0).a;
+            nearEdge += texture2D(uSampler, vTextureCoord + vec2(cos(angle), sin(angle)) * px * 6.0).a;
         }
         nearEdge = min(nearEdge, 1.0);
 
@@ -71,6 +71,6 @@ export class SparkleFilter extends NitroFilter
         this.uniforms.glowColor = new Float32Array(color);
         this.uniforms.glowStrength = strength;
         this.uniforms.uTime = 0.0;
-        this.padding = 5;
+        this.padding = 12;
     }
 }

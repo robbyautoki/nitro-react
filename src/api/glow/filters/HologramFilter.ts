@@ -37,7 +37,7 @@ void main(void)
     float hue = fract(wave * 0.5 + 0.5 + uTime * 0.15);
     vec3 shimmer = hsl2rgb(hue);
 
-    vec3 result = mix(color.rgb, shimmer * color.a, glowStrength * 0.4);
+    vec3 result = mix(color.rgb, shimmer * color.a, glowStrength * 0.65);
     gl_FragColor = vec4(result, color.a);
 }`;
 

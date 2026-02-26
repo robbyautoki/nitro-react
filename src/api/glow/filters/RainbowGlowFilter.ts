@@ -31,7 +31,7 @@ void main(void)
 
     if(color.a > 0.0)
     {
-        vec3 tinted = mix(color.rgb, rainbowColor * color.a, glowStrength * 0.25);
+        vec3 tinted = mix(color.rgb, rainbowColor * color.a, glowStrength * 0.5);
         gl_FragColor = vec4(tinted, color.a);
         return;
     }
@@ -40,9 +40,9 @@ void main(void)
     float glow = 0.0;
     float total = 0.0;
 
-    for(float d = 1.0; d <= 8.0; d += 1.0)
+    for(float d = 1.0; d <= 12.0; d += 1.0)
     {
-        float weight = (8.0 - d + 1.0) / 8.0;
+        float weight = (12.0 - d + 1.0) / 12.0;
         for(float angle = 0.0; angle < 6.28318; angle += 0.5236)
         {
             float a = texture2D(uSampler, vTextureCoord + vec2(cos(angle), sin(angle)) * px * d).a;
@@ -54,7 +54,7 @@ void main(void)
 
     float alpha = glow * glowStrength;
 
-    gl_FragColor = vec4(rainbowColor * alpha, alpha * 0.9);
+    gl_FragColor = vec4(rainbowColor * min(alpha * 2.0, 1.0), min(alpha * 2.0, 1.0));
 }`;
 
 export class RainbowGlowFilter extends NitroFilter
@@ -65,6 +65,6 @@ export class RainbowGlowFilter extends NitroFilter
 
         this.uniforms.glowStrength = strength;
         this.uniforms.uTime = 0.0;
-        this.padding = 15;
+        this.padding = 25;
     }
 }

@@ -30,7 +30,7 @@ void main(void)
 
     if(color.a > 0.0)
     {
-        vec3 darkened = mix(color.rgb, glowColor * color.a, glowStrength * 0.15);
+        vec3 darkened = mix(color.rgb, glowColor * color.a, glowStrength * 0.3);
         gl_FragColor = vec4(darkened, color.a);
         return;
     }
@@ -39,9 +39,9 @@ void main(void)
     float glow = 0.0;
     float total = 0.0;
 
-    for(float d = 1.0; d <= 8.0; d += 1.0)
+    for(float d = 1.0; d <= 12.0; d += 1.0)
     {
-        float weight = (8.0 - d + 1.0) / 8.0;
+        float weight = (12.0 - d + 1.0) / 12.0;
         float noiseOffset = noise(vec2(d, uTime * 0.5)) * 0.3;
         for(float angle = 0.0; angle < 6.28318; angle += 0.5236)
         {
@@ -56,7 +56,7 @@ void main(void)
     float undulate = 0.85 + 0.15 * sin(uTime * 1.5 + vTextureCoord.x * 10.0);
     float alpha = glow * glowStrength * undulate;
 
-    gl_FragColor = vec4(glowColor * alpha * 0.6, alpha * 0.95);
+    gl_FragColor = vec4(glowColor * alpha * 1.0, alpha * 0.95);
 }`;
 
 export class ShadowGlowFilter extends NitroFilter
@@ -68,6 +68,6 @@ export class ShadowGlowFilter extends NitroFilter
         this.uniforms.glowColor = new Float32Array(color);
         this.uniforms.glowStrength = strength;
         this.uniforms.uTime = 0.0;
-        this.padding = 15;
+        this.padding = 25;
     }
 }

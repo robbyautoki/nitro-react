@@ -45,7 +45,7 @@ void main(void)
     {
         float heat = fbm(vTextureCoord * inputSize.xy * 0.05 + vec2(0.0, -uTime * 2.0));
         vec3 fireColor = mix(glowColor, vec3(1.0, 0.9, 0.2), heat);
-        vec3 tinted = mix(color.rgb, fireColor * color.a, glowStrength * 0.35);
+        vec3 tinted = mix(color.rgb, fireColor * color.a, glowStrength * 0.5);
         gl_FragColor = vec4(tinted, color.a);
         return;
     }
@@ -54,9 +54,9 @@ void main(void)
     float edgeAlpha = 0.0;
     float total = 0.0;
 
-    for(float d = 1.0; d <= 6.0; d += 1.0)
+    for(float d = 1.0; d <= 10.0; d += 1.0)
     {
-        float weight = (6.0 - d + 1.0) / 6.0;
+        float weight = (10.0 - d + 1.0) / 10.0;
         for(float angle = 0.0; angle < 6.28318; angle += 0.5236)
         {
             float a = texture2D(uSampler, vTextureCoord + vec2(cos(angle), sin(angle)) * px * d).a;
@@ -71,7 +71,7 @@ void main(void)
     float flame = fbm(flameUV);
 
     float flicker = 0.7 + 0.3 * noise(vec2(uTime * 8.0, 0.0));
-    float alpha = edgeAlpha * flame * glowStrength * 1.5 * flicker;
+    float alpha = edgeAlpha * flame * glowStrength * 2.5 * flicker;
     vec3 fireColor = mix(glowColor, vec3(1.0, 0.9, 0.2), flame);
 
     gl_FragColor = vec4(fireColor * alpha, alpha);
@@ -86,6 +86,6 @@ export class FireGlowFilter extends NitroFilter
         this.uniforms.glowColor = new Float32Array(color);
         this.uniforms.glowStrength = strength;
         this.uniforms.uTime = 0.0;
-        this.padding = 20;
+        this.padding = 25;
     }
 }

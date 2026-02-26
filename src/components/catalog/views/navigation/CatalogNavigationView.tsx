@@ -132,7 +132,7 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
                         style={ { gridTemplateRows: isOpen ? '1fr' : '0fr', opacity: isOpen ? 1 : 0 } }
                     >
                         <div className="overflow-hidden min-h-0">
-                            <div className="px-1.5 pb-1">
+                            <div className="pl-5 pr-1.5 pb-1">
                                 { topNode.children.filter((c: any) => c.isVisible).map((child: any, i: number) =>
                                     <CatalogNavigationItemView key={ i } node={ child } onToggleFavorite={ toggleFavorite } isFavorite={ favorites.includes(child.pageId) } />
                                 ) }

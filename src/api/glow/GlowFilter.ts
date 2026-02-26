@@ -23,38 +23,28 @@ void main(void)
 {
     vec4 color = texture2D(uSampler, vTextureCoord);
 
-    if(color.a > 0.0)
+    if(color.a <= 0.0)
     {
-        vec3 tinted = mix(color.rgb, glowColor * color.a, glowStrength * 0.25);
-        gl_FragColor = vec4(tinted, color.a);
+        gl_FragColor = vec4(0.0);
         return;
     }
 
     vec2 px = inputSize.zw * distance;
-    float glow = 0.0;
-    float total = 0.0;
+    float edgeFactor = 0.0;
+    float samples = 0.0;
 
-    for(float angle = 0.0; angle < 6.28318; angle += 0.5236)
+    for(float angle = 0.0; angle < 6.28318; angle += 0.7854)
     {
-        for(float d = 1.0; d <= 3.0; d += 1.0)
-        {
-            vec2 offset = vec2(cos(angle), sin(angle)) * px * d;
-            float a = texture2D(uSampler, vTextureCoord + offset).a;
-            float weight = 1.0 / d;
-            glow += a * weight;
-            total += weight;
-        }
+        vec2 offset = vec2(cos(angle), sin(angle)) * px;
+        float a = texture2D(uSampler, vTextureCoord + offset).a;
+        edgeFactor += (1.0 - a);
+        samples += 1.0;
     }
-    glow /= total;
+    edgeFactor /= samples;
 
-    if(glow > 0.01)
-    {
-        gl_FragColor = vec4(glowColor * glow * glowStrength, glow * glowStrength * 0.8);
-    }
-    else
-    {
-        gl_FragColor = vec4(0.0);
-    }
+    float strength = glowStrength * (0.3 + 0.7 * edgeFactor);
+    vec3 glowed = mix(color.rgb, glowColor * color.a, strength);
+    gl_FragColor = vec4(glowed, color.a);
 }`;
 
 export class GlowFilter extends NitroFilter
@@ -66,7 +56,6 @@ export class GlowFilter extends NitroFilter
         this.uniforms.glowColor = new Float32Array(color);
         this.uniforms.glowStrength = strength;
         this.uniforms.distance = dist;
-        this.padding = Math.ceil(dist) * 3;
     }
 
     get glowStrength(): number

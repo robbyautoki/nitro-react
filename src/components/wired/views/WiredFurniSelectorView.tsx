@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { LocalizeText, WiredFurniType } from '../../../api';
 import { Column, Flex, Text } from '../../../common';
 import { useWired } from '../../../hooks';
@@ -13,17 +13,22 @@ export const WiredFurniSelectorView: FC<{}> = props =>
 {
     const { trigger = null, furniIds = [], allowsFurni = WiredFurniType.STUFF_SELECTION_OPTION_NONE } = useWired();
     const [ showAdvanced, setShowAdvanced ] = useState(false);
+    const [ selectionCode, setSelectionCode ] = useState(0);
 
-    const currentCode = trigger?.stuffTypeSelectionCode ?? 0;
+    useEffect(() =>
+    {
+        if(trigger) setSelectionCode(trigger.stuffTypeSelectionCode ?? 0);
+    }, [ trigger ]);
 
     const cycleSelection = (direction: number) =>
     {
         if(!trigger) return;
         const maxOptions = STUFF_SELECTION_LABELS.length;
-        let next = currentCode + direction;
+        let next = selectionCode + direction;
         if(next < 0) next = maxOptions - 1;
         if(next >= maxOptions) next = 0;
         trigger.stuffTypeSelectionCode = next;
+        setSelectionCode(next);
     };
 
     const showSourcePicker = allowsFurni >= WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT;
@@ -42,7 +47,7 @@ export const WiredFurniSelectorView: FC<{}> = props =>
                             <Text bold small>Möbelquelle auswählen:</Text>
                             <Flex alignItems="center" justifyContent="between" gap={ 1 }>
                                 <Text pointer bold className="px-1" onClick={ () => cycleSelection(-1) }>&lt;</Text>
-                                <Text small center className="flex-grow-1">{ STUFF_SELECTION_LABELS[currentCode] || STUFF_SELECTION_LABELS[0] }</Text>
+                                <Text small center className="flex-grow-1">{ STUFF_SELECTION_LABELS[selectionCode] || STUFF_SELECTION_LABELS[0] }</Text>
                                 <Text pointer bold className="px-1" onClick={ () => cycleSelection(1) }>&gt;</Text>
                             </Flex>
                         </Column> }

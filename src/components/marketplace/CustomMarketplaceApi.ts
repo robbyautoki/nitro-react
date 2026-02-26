@@ -38,6 +38,13 @@ export const CustomMarketplaceApi = {
             body: JSON.stringify({ action: 'create-listing', ...data }),
         }).then(r => r.json()),
 
+    updatePrice: (listing_id: number, price: number) =>
+        fetch(`${ getCmsUrl() }/api/marketplace`, {
+            method: 'POST',
+            headers: headers(),
+            body: JSON.stringify({ action: 'update-price', listing_id, price }),
+        }).then(r => r.json()),
+
     cancelListing: (listing_id: number) =>
         fetch(`${ getCmsUrl() }/api/marketplace`, {
             method: 'POST',

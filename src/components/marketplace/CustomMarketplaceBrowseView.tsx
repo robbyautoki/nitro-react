@@ -77,7 +77,9 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
             {
                 setListings(data.listings ?? []);
                 setTotal(data.total ?? 0);
+                setError('');
             })
+            .catch(() => setError('Angebote konnten nicht geladen werden'))
             .finally(() => setLoading(false));
     }, [ searchQuery, minPrice, maxPrice, currency, sortBy ]);
 
@@ -88,10 +90,14 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
         if(!buyTarget) return;
         setBuySubmitting(true);
         setError('');
-        const res = await CustomMarketplaceApi.buy(buyTarget.id);
-        setBuySubmitting(false);
-        if(res.ok) { setBuyTarget(null); doSearch(page); }
-        else setError(res.error || 'Kauf fehlgeschlagen');
+        try
+        {
+            const res = await CustomMarketplaceApi.buy(buyTarget.id);
+            if(res.ok) { setBuyTarget(null); doSearch(page); }
+            else setError(res.error || 'Kauf fehlgeschlagen');
+        }
+        catch { setError('Netzwerkfehler — bitte erneut versuchen'); }
+        finally { setBuySubmitting(false); }
     };
 
     const handleMakeOffer = async () =>
@@ -101,10 +107,14 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
         if(!p || p < 1) return;
         setOfferSubmitting(true);
         setError('');
-        const res = await CustomMarketplaceApi.makeOffer(offerTarget.id, p);
-        setOfferSubmitting(false);
-        if(res.ok) { setOfferTarget(null); setOfferPrice(''); doSearch(page); }
-        else setError(res.error || 'Anfrage fehlgeschlagen');
+        try
+        {
+            const res = await CustomMarketplaceApi.makeOffer(offerTarget.id, p);
+            if(res.ok) { setOfferTarget(null); setOfferPrice(''); doSearch(page); }
+            else setError(res.error || 'Anfrage fehlgeschlagen');
+        }
+        catch { setError('Netzwerkfehler — bitte erneut versuchen'); }
+        finally { setOfferSubmitting(false); }
     };
 
     const toggleWatch = (id: number) => setWatchlist(prev =>

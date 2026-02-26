@@ -90,6 +90,7 @@ function HelpPopover() {
   isLoopbackRef.current = isLoopback;
 
   const reset = () => {
+    stepRef.current = 0; isLoopbackRef.current = false; isGuideRef.current = false;
     setStep(0); setSelectedUser(-1); setSelectedChats([]); setSelectedCat(-1); setSelectedTopic(-1); setMessage("");
     setChatMessages([]); setPartnerName(''); setChatInput(''); setUserRequest(''); setIsTyping(false);
     setIsGuide(false); setHelpRequestDescription(''); setIsLoopback(false);
@@ -215,6 +216,8 @@ function HelpPopover() {
 
   const acceptRequest = () => {
     if (isLoopback) {
+      stepRef.current = 11;
+      isGuideRef.current = true;
       setPartnerName(GetSessionDataManager().userName);
       setIsGuide(true);
       setStep(11);
@@ -229,8 +232,8 @@ function HelpPopover() {
   };
 
   const handlePopoverChange = (open: boolean) => {
-    // Verhindere Schließen während aktiver Session
-    if (!open && [10, 11, 12, 15, 16].includes(step)) return;
+    // Verhindere Schließen während aktiver Session (stepRef für sofortige Werte)
+    if (!open && [10, 11, 12, 15, 16].includes(stepRef.current)) return;
     if (!open) reset();
     setPopoverOpen(open);
   };
@@ -391,15 +394,18 @@ function HelpPopover() {
               </div>
               <Button size="sm" className="h-7 text-xs w-full bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={userRequest.length < 15} onClick={() => {
                 if (isOnDuty) {
-                  // Loopback: Emulator umgehen, lokal simulieren
+                  // Loopback: Refs SOFORT updaten (vor setState, wegen React Batching)
+                  isLoopbackRef.current = true;
+                  stepRef.current = 10;
                   setIsLoopback(true);
                   setHelpRequestDescription(userRequest);
                   setStep(10);
-                  setTimeout(() => { setStep(15); }, 800);
+                  setTimeout(() => { stepRef.current = 15; setStep(15); }, 800);
                 } else {
                   // Normal: Über Emulator
-                  SendMessageComposer(new GuideSessionCreateMessageComposer(1, userRequest));
+                  stepRef.current = 10;
                   setStep(10);
+                  SendMessageComposer(new GuideSessionCreateMessageComposer(1, userRequest));
                 }
               }}>
                 Anfrage senden

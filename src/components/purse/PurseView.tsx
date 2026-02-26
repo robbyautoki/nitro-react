@@ -76,20 +76,23 @@ function HelpPopover() {
   const [isOnDuty, setIsOnDuty] = useState(false);
   const [isGuide, setIsGuide] = useState(false);
   const [helpRequestDescription, setHelpRequestDescription] = useState('');
+  const [isLoopback, setIsLoopback] = useState(false);
   const hasAutoDutied = useRef(false);
 
   // Refs für stale closure prevention in useMessageEvent
   const stepRef = useRef(0);
   const isOnDutyRef = useRef(false);
   const isGuideRef = useRef(false);
+  const isLoopbackRef = useRef(false);
   stepRef.current = step;
   isOnDutyRef.current = isOnDuty;
   isGuideRef.current = isGuide;
+  isLoopbackRef.current = isLoopback;
 
   const reset = () => {
     setStep(0); setSelectedUser(-1); setSelectedChats([]); setSelectedCat(-1); setSelectedTopic(-1); setMessage("");
     setChatMessages([]); setPartnerName(''); setChatInput(''); setUserRequest(''); setIsTyping(false);
-    setIsGuide(false); setHelpRequestDescription('');
+    setIsGuide(false); setHelpRequestDescription(''); setIsLoopback(false);
   };
   const toggleChat = (i: number) => setSelectedChats(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
 
@@ -97,7 +100,7 @@ function HelpPopover() {
     if (step === 3 && selectedCat >= 0 && selectedTopic < 0) { setSelectedCat(-1); return; }
     if (step === 9) { reset(); return; }
     if (step >= 10 && step <= 12) { return; } // Kann nicht zurück während aktiver Session
-    if (step === 15) { SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(false)); reset(); return; }
+    if (step === 15) { if (!isLoopback) SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(false)); reset(); return; }
     if (step === 16) { reset(); return; }
     if (step === 20) { reset(); return; }
     setStep(s => s - 1);
@@ -131,26 +134,24 @@ function HelpPopover() {
     setIsOnDuty(event.getParser().onDuty);
   });
 
-  // === Guide Session WebSocket Events ===
+  // === Guide Session WebSocket Events (alle ignorieren im Loopback-Modus) ===
   useMessageEvent<GuideSessionAttachedMessageEvent>(GuideSessionAttachedMessageEvent, event => {
+    if (isLoopbackRef.current) return;
     const parser = event.getParser();
     if (parser.asGuide && isOnDutyRef.current) {
-      // Admin-Seite: Neue Anfrage reinbekommen
       setHelpRequestDescription(parser.helpRequestDescription);
       setIsGuide(true);
       setStep(15);
       setPopoverOpen(true);
     }
-    // User-Seite: bleibt auf Step 10 (Warteschlange)
   });
 
   useMessageEvent<GuideSessionStartedMessageEvent>(GuideSessionStartedMessageEvent, event => {
+    if (isLoopbackRef.current) return;
     const parser = event.getParser();
     if (isGuideRef.current) {
-      // Admin: Session gestartet mit Requester
       setPartnerName(parser.requesterName);
     } else {
-      // User: Guide hat akzeptiert
       setPartnerName(parser.guideName);
     }
     setStep(11);
@@ -158,6 +159,7 @@ function HelpPopover() {
   });
 
   useMessageEvent<GuideSessionMessageMessageEvent>(GuideSessionMessageMessageEvent, event => {
+    if (isLoopbackRef.current) return;
     const parser = event.getParser();
     const from = parser.senderId === GetSessionDataManager().userId ? 'user' : 'staff';
     setChatMessages(prev => [...prev, { from, text: parser.chatMessage }]);
@@ -165,22 +167,26 @@ function HelpPopover() {
   });
 
   useMessageEvent<GuideSessionPartnerIsTypingMessageEvent>(GuideSessionPartnerIsTypingMessageEvent, event => {
+    if (isLoopbackRef.current) return;
     setIsTyping(event.getParser().isTyping);
   });
 
   useMessageEvent<GuideSessionEndedMessageEvent>(GuideSessionEndedMessageEvent, event => {
-    if (stepRef.current >= 9 && stepRef.current <= 15) {
+    if (isLoopbackRef.current) return;
+    if (stepRef.current >= 9 && stepRef.current <= 16) {
       reset();
     }
   });
 
   useMessageEvent<GuideSessionDetachedMessageEvent>(GuideSessionDetachedMessageEvent, event => {
-    if (stepRef.current >= 9 && stepRef.current <= 15) {
+    if (isLoopbackRef.current) return;
+    if (stepRef.current >= 9 && stepRef.current <= 16) {
       reset();
     }
   });
 
   useMessageEvent<GuideSessionErrorMessageEvent>(GuideSessionErrorMessageEvent, event => {
+    if (isLoopbackRef.current) return;
     if (stepRef.current >= 10 && stepRef.current <= 15) {
       setStep(16);
       setPopoverOpen(true);
@@ -189,26 +195,36 @@ function HelpPopover() {
 
   const sendChatMessage = () => {
     if (!chatInput.trim()) return;
-    SendMessageComposer(new GuideSessionMessageMessageComposer(chatInput));
+    if (isLoopback) {
+      setChatMessages(prev => [...prev, { from: 'user', text: chatInput }]);
+    } else {
+      SendMessageComposer(new GuideSessionMessageMessageComposer(chatInput));
+    }
     setChatInput('');
   };
 
   const cancelRequest = () => {
-    SendMessageComposer(new GuideSessionRequesterCancelsMessageComposer());
+    if (!isLoopback) SendMessageComposer(new GuideSessionRequesterCancelsMessageComposer());
     reset();
   };
 
   const endSession = () => {
-    SendMessageComposer(new GuideSessionResolvedMessageComposer());
+    if (!isLoopback) SendMessageComposer(new GuideSessionResolvedMessageComposer());
     reset();
   };
 
   const acceptRequest = () => {
-    SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(true));
+    if (isLoopback) {
+      setPartnerName(GetSessionDataManager().userName);
+      setIsGuide(true);
+      setStep(11);
+    } else {
+      SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(true));
+    }
   };
 
   const skipRequest = () => {
-    SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(false));
+    if (!isLoopback) SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(false));
     reset();
   };
 
@@ -374,17 +390,16 @@ function HelpPopover() {
                 <span className={`absolute bottom-2 right-2.5 text-[10px] ${userRequest.length >= 15 ? "text-green-400" : "text-muted-foreground/40"}`}>{userRequest.length}/140</span>
               </div>
               <Button size="sm" className="h-7 text-xs w-full bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={userRequest.length < 15} onClick={() => {
-                // Selbsttest: Erst off-duty, dann Anfrage, dann nach Delay wieder on-duty
-                const wasOnDuty = isOnDuty;
-                if (wasOnDuty) {
-                  SendMessageComposer(new GuideSessionOnDutyUpdateMessageComposer(false, false, false, false));
-                }
-                SendMessageComposer(new GuideSessionCreateMessageComposer(1, userRequest));
-                setStep(10);
-                if (wasOnDuty) {
-                  setTimeout(() => {
-                    SendMessageComposer(new GuideSessionOnDutyUpdateMessageComposer(true, false, true, false));
-                  }, 500);
+                if (isOnDuty) {
+                  // Loopback: Emulator umgehen, lokal simulieren
+                  setIsLoopback(true);
+                  setHelpRequestDescription(userRequest);
+                  setStep(10);
+                  setTimeout(() => { setStep(15); }, 800);
+                } else {
+                  // Normal: Über Emulator
+                  SendMessageComposer(new GuideSessionCreateMessageComposer(1, userRequest));
+                  setStep(10);
                 }
               }}>
                 Anfrage senden

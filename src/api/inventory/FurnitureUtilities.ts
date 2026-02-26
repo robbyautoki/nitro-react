@@ -113,7 +113,9 @@ const addGroupableFurnitureItem = (set: GroupItem[], item: FurnitureItem, unseen
 
 export const addFurnitureItem = (set: GroupItem[], item: FurnitureItem, unseen: boolean) =>
 {
-    if(!item.isGroupable)
+    const isLtd = item.stuffData.uniqueNumber > 0;
+
+    if(isLtd)
     {
         addSingleFurnitureItem(set, item, unseen);
     }

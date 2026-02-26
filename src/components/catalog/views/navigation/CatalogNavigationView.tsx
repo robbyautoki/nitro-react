@@ -117,15 +117,15 @@ export const CatalogNavigationView: FC<CatalogNavigationViewProps> = ({ staffVie
             return (
                 <div key={ index } className={ index > 0 ? 'mt-0.5' : '' }>
                     <button
-                        className="w-full flex items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/30"
+                        className="w-full flex items-center gap-2.5 px-3 py-1.5 transition-colors hover:bg-accent/30"
                         onClick={ () => { setOpenSection(isOpen && !hasActiveChild ? null : topNode.pageId); onSectionClick(topNode); } }
                     >
                         <CatalogIconView icon={ topNode.iconId } />
-                        <span className="flex-1 text-left truncate text-xs font-bold uppercase tracking-wide text-muted-foreground/70">
+                        <span className="flex-1 text-left truncate text-xs font-semibold text-foreground/80">
                             { stripPageId(topNode.localization) }
                         </span>
-                        { (() => { const count = getTotalOffers(topNode); return count > 0 ? <span className="text-[10px] text-muted-foreground/40 tabular-nums shrink-0">{ count.toLocaleString('de-DE') }</span> : null; })() }
-                        <ChevronRight className={ `w-3.5 h-3.5 shrink-0 text-muted-foreground/30 transition-transform duration-200 ${ isOpen ? 'rotate-90' : '' }` } />
+                        { (() => { const count = getTotalOffers(topNode); return count > 0 ? <span className="text-[11px] text-muted-foreground/50 tabular-nums shrink-0">{ count.toLocaleString('de-DE') }</span> : null; })() }
+                        <ChevronRight className={ `w-3.5 h-3.5 shrink-0 text-muted-foreground/50 transition-transform duration-200 ${ isOpen ? 'rotate-90' : '' }` } />
                     </button>
                     <div
                         className="grid transition-[grid-template-rows,opacity] duration-200 ease-in-out"

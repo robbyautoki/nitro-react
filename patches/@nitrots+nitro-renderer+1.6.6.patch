@@ -441,7 +441,7 @@ index 15c6404..b3d3542 100644
              if(Math.abs((_local_5 - width)) <= 1) _local_5 = width;
  
 diff --git a/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts b/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
-index 6a88da8..72f5cea 100644
+index 6a88da8..bf22537 100644
 --- a/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
 +++ b/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
 @@ -23,6 +23,7 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
@@ -481,7 +481,7 @@ index 6a88da8..72f5cea 100644
  
          if(asDelta)
          {
-@@ -332,20 +340,26 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
+@@ -332,16 +340,16 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
  
          if((this._width !== this._renderedWidth) || (this._height !== this._renderedHeight)) update = true;
  
@@ -502,27 +502,3 @@ index 6a88da8..72f5cea 100644
  
              update = true;
          }
- 
-+        const shouldCache = (this._scale !== 1);
-+        if(this._display.cacheAsBitmap !== shouldCache)
-+        {
-+            this._display.cacheAsBitmap = shouldCache;
-+        }
-+
-         this.doMagic();
- 
-         const frame = Math.round(this._totalTimeRunning / (60 / this._animationFPS));
-@@ -392,6 +406,13 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
- 
-         if(update || updateVisuals) this._canvasUpdated = true;
- 
-+        // Cache-Invalidierung: cacheAsBitmap erkennt Sprite-Property-Änderungen nicht
-+        if(this._display.cacheAsBitmap && this._canvasUpdated)
-+        {
-+            this._display.cacheAsBitmap = false;
-+            this._display.cacheAsBitmap = true;
-+        }
-+
-         this._renderTimestamp = this._totalTimeRunning;
-         this._renderedWidth = this._width;
-         this._renderedHeight = this._height;

@@ -2,6 +2,7 @@ import { NitroPoint, RoomObjectCategory } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useRef, useState } from 'react';
 import { GetRoomEngine, GetRoomObjectScreenLocation } from '../../api';
 import { useRoom } from '../../hooks';
+import { Frame, FramePanel } from '../ui/frame';
 
 const MAX_HIGHLIGHT_SCALE = 3;
 const LERP_SPEED = 0.1;
@@ -147,21 +148,40 @@ export const HighlightEffectView: FC<{}> = () =>
 
     // Visual overlay: spotlight vignette + label
     return (
-        <div
-            className="fixed inset-0 z-[200] pointer-events-none"
-            style={{
-                opacity: isFading ? 0 : 1,
-                transition: 'opacity 600ms ease-out'
-            }}>
+        <>
+            <style>{ `
+                @keyframes spotlight-glow {
+                    0%, 100% { box-shadow: 0 0 8px oklch(0.8 0.15 85), 0 0 20px oklch(0.8 0.15 85 / 0.3); }
+                    50% { box-shadow: 0 0 16px oklch(0.8 0.15 85), 0 0 40px oklch(0.8 0.15 85 / 0.5); }
+                }
+            ` }</style>
             <div
-                className="absolute inset-0"
+                className="fixed inset-0 z-[200] pointer-events-none"
                 style={{
-                    background: 'radial-gradient(circle at center, transparent 25%, oklch(var(--background) / 0.6) 100%)'
-                }}
-            />
-            <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-card/80 backdrop-blur-sm text-card-foreground px-4 py-2 rounded-full text-sm font-medium border border-border/40 animate-pulse">
-                Spotlight
+                    opacity: isFading ? 0 : 1,
+                    transition: 'opacity 600ms ease-out'
+                }}>
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: 'radial-gradient(circle at center, transparent 25%, oklch(var(--background) / 0.6) 100%)'
+                    }}
+                />
             </div>
-        </div>
+            <div
+                className={ `fixed top-20 left-1/2 -translate-x-1/2 z-[200] pointer-events-none transition-all duration-500 ${ isFading ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0' }` }>
+                <Frame
+                    className="max-w-sm"
+                    style={{ animation: 'spotlight-glow 1.5s ease-in-out infinite', '--frame-radius': '9999px' } as React.CSSProperties}>
+                    <FramePanel className="!p-0">
+                        <div className="px-6 py-2.5 text-center">
+                            <span className="text-sm font-bold text-amber-500 tracking-wider uppercase">
+                                Spotlight
+                            </span>
+                        </div>
+                    </FramePanel>
+                </Frame>
+            </div>
+        </>
     );
 };

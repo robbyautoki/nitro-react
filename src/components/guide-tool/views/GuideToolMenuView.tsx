@@ -1,6 +1,5 @@
 import { FC } from 'react';
-import { LocalizeText } from '../../../api';
-import { Base, Button, Column, Flex, Text } from '../../../common';
+import { Users, Shield, HelpCircle } from 'lucide-react';
 
 interface GuideToolMenuViewProps
 {
@@ -32,45 +31,78 @@ export const GuideToolMenuView: FC<GuideToolMenuViewProps> = props =>
         guardiansOnDuty = 0,
         processAction = null
     } = props;
-    
+
     return (
-        <Column>
-            <Flex alignItems="center" gap={ 2 } className="bg-muted p-2 rounded">
-                <Base className={ 'duty-switch' + (isOnDuty ? '' : ' off') } onClick={ event => processAction('toggle_duty') } />
-                <Column gap={ 0 }>
-                    <Text bold>{ LocalizeText('guide.help.guide.tool.yourstatus') }</Text>
-                    <Text>{ LocalizeText(`guide.help.guide.tool.duty.${ (isOnDuty ? 'on' : 'off') }`) }</Text>
-                </Column>
-            </Flex>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('guide.help.guide.tool.tickettypeselection.caption') }</Text>
-                <Flex alignItems="center" gap={ 1 }>
-                    <input className="form-check-input" disabled={ isOnDuty } type="checkbox" checked={ isHandlingGuideRequests } onChange={ event => setIsHandlingGuideRequests(event.target.checked) } />
-                    <Text>{ LocalizeText('guide.help.guide.tool.tickettypeselection.guiderequests') }</Text>
-                </Flex>
-                <Flex alignItems="center" gap={ 1 }>
-                    <input className="form-check-input" disabled={ isOnDuty } type="checkbox" checked={ isHandlingHelpRequests } onChange={ event => setIsHandlingHelpRequests(event.target.checked) } />
-                    <Text>{ LocalizeText('guide.help.guide.tool.tickettypeselection.onlyhelprequests') }</Text>
-                </Flex>
-                <Flex alignItems="center" gap={ 1 }>
-                    <input className="form-check-input" disabled={ isOnDuty } type="checkbox" checked={ isHandlingBullyReports } onChange={ event => setIsHandlingBullyReports(event.target.checked) } />
-                    <Text>{ LocalizeText('guide.help.guide.tool.tickettypeselection.bullyreports') }</Text>
-                </Flex>
-            </Column>
-            <hr className="bg-gray-900 m-0" />
-            <Flex center gap={ 2 }>
-                <Base className="info-icon" />
-                <Column gap={ 1 }>
-                    <Base dangerouslySetInnerHTML={ { __html: LocalizeText('guide.help.guide.tool.guidesonduty', [ 'amount' ], [ guidesOnDuty.toString() ]) } } />
-                    <Base dangerouslySetInnerHTML={ { __html: LocalizeText('guide.help.guide.tool.helpersonduty', [ 'amount' ], [ helpersOnDuty.toString() ]) } } />
-                    <Base dangerouslySetInnerHTML={ { __html: LocalizeText('guide.help.guide.tool.guardiansonduty', [ 'amount' ], [ guardiansOnDuty.toString() ]) } } />
-                </Column>
-            </Flex>
-            <hr className="bg-gray-900 m-0" />
-            <Flex justifyContent="between" gap={ 2 }>
-                <Button disabled onClick={ event => processAction('forum_link') }>{ LocalizeText('guide.help.guide.tool.forum.link') }</Button>
-                <Button disabled>{ LocalizeText('guide.help.guide.tool.skill.link') }</Button>
-            </Flex>
-        </Column>
+        <div className="flex flex-col gap-3">
+            {/* Duty-Toggle */}
+            <div className="flex items-center gap-3 rounded-lg border border-border/40 bg-muted/50 p-3">
+                <button
+                    className={ `relative w-10 h-5 rounded-full transition-colors ${ isOnDuty ? 'bg-green-500' : 'bg-muted-foreground/30' }` }
+                    onClick={ () => processAction('toggle_duty') }
+                >
+                    <span className={ `absolute top-0.5 w-4 h-4 rounded-full bg-background shadow transition-transform ${ isOnDuty ? 'left-[22px]' : 'left-0.5' }` } />
+                </button>
+                <div>
+                    <span className="text-sm font-semibold text-foreground block">Dein Status</span>
+                    <span className={ `text-[11px] font-medium ${ isOnDuty ? 'text-green-500' : 'text-muted-foreground' }` }>
+                        { isOnDuty ? 'Im Dienst' : 'Nicht im Dienst' }
+                    </span>
+                </div>
+            </div>
+
+            {/* Queue-Auswahl */}
+            <div className="flex flex-col gap-2">
+                <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide">Warteschlangen</span>
+                <label className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-border/30 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                    <input
+                        type="checkbox"
+                        disabled={ isOnDuty }
+                        checked={ isHandlingGuideRequests }
+                        onChange={ e => setIsHandlingGuideRequests(e.target.checked) }
+                        className="w-3.5 h-3.5 rounded border-border accent-primary"
+                    />
+                    <span className="text-sm text-foreground/80">Guide-Anfragen</span>
+                </label>
+                <label className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-border/30 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                    <input
+                        type="checkbox"
+                        disabled={ isOnDuty }
+                        checked={ isHandlingHelpRequests }
+                        onChange={ e => setIsHandlingHelpRequests(e.target.checked) }
+                        className="w-3.5 h-3.5 rounded border-border accent-primary"
+                    />
+                    <span className="text-sm text-foreground/80">Hilfe-Anfragen</span>
+                </label>
+                <label className="flex items-center gap-2.5 px-3 py-2 rounded-lg border border-border/30 bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
+                    <input
+                        type="checkbox"
+                        disabled={ isOnDuty }
+                        checked={ isHandlingBullyReports }
+                        onChange={ e => setIsHandlingBullyReports(e.target.checked) }
+                        className="w-3.5 h-3.5 rounded border-border accent-primary"
+                    />
+                    <span className="text-sm text-foreground/80">Mobbing-Meldungen</span>
+                </label>
+            </div>
+
+            {/* Separator */}
+            <div className="h-px bg-border/40" />
+
+            {/* Online-Statistiken */}
+            <div className="flex flex-col gap-1.5 px-1">
+                <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                    <Users className="w-3.5 h-3.5" />
+                    <span><strong className="text-foreground">{ guidesOnDuty }</strong> Guides im Dienst</span>
+                </div>
+                <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                    <HelpCircle className="w-3.5 h-3.5" />
+                    <span><strong className="text-foreground">{ helpersOnDuty }</strong> Helfer im Dienst</span>
+                </div>
+                <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+                    <Shield className="w-3.5 h-3.5" />
+                    <span><strong className="text-foreground">{ guardiansOnDuty }</strong> Wächter im Dienst</span>
+                </div>
+            </div>
+        </div>
     );
 }

@@ -1,13 +1,15 @@
 import { FC } from 'react';
-import { LocalizeText } from '../../../api';
-import { Column, Text } from '../../../common';
+import { UserX } from 'lucide-react';
 
-export const GuideToolUserNoHelpersView: FC<{}> = props =>
+export const GuideToolUserNoHelpersView: FC<{}> = () =>
 {
     return (
-        <Column gap={ 1 }>
-            <Text bold>{ LocalizeText('guide.help.request.no_tour_guides.title') }</Text>
-            <Text>{ LocalizeText('guide.help.request.no_tour_guides.message') }</Text>
-        </Column>
+        <div className="flex flex-col items-center gap-3 py-4">
+            <UserX className="w-10 h-10 text-amber-400" />
+            <div className="text-center">
+                <span className="text-sm font-semibold text-foreground block mb-1">Keine Helfer verfügbar</span>
+                <span className="text-[12px] text-muted-foreground">Leider ist gerade kein Teammitglied im Dienst. Bitte versuche es später erneut.</span>
+            </div>
+        </div>
     );
 };

@@ -1,7 +1,7 @@
 import { GuideSessionFeedbackMessageComposer } from '@nitrots/nitro-renderer';
 import { FC } from 'react';
-import { LocalizeText, SendMessageComposer } from '../../../api';
-import { Button, Column, Flex, Text } from '../../../common';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import { SendMessageComposer } from '../../../api';
 
 interface GuideToolUserFeedbackViewProps
 {
@@ -15,29 +15,41 @@ export const GuideToolUserFeedbackView: FC<GuideToolUserFeedbackViewProps> = pro
     const giveFeedback = (recommend: boolean) => SendMessageComposer(new GuideSessionFeedbackMessageComposer(recommend));
 
     return (
-        <Column>
-            <Flex justifyContent="between" gap={ 1 } className="bg-muted p-2 rounded">
-                <Column gap={ 0 }>
-                    <Text bold>{ userName }</Text>
-                    <Text>{ LocalizeText('guide.help.request.user.feedback.guide.desc') }</Text>
-                </Column>
-                <Button variant="danger" disabled>{ LocalizeText('guide.help.common.report.link') }</Button>
-            </Flex>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('guide.help.request.user.feedback.closed.title') }</Text>
-                <Text>{ LocalizeText('guide.help.request.user.feedback.closed.desc') }</Text>
-            </Column>
-            { userName && (userName.length > 0) &&
+        <div className="flex flex-col gap-3">
+            {/* Gesprächs-Info */}
+            <div className="rounded-lg border border-border/40 bg-muted/50 p-3">
+                <span className="text-sm font-semibold text-foreground block">{ userName }</span>
+                <span className="text-[12px] text-muted-foreground">Das Gespräch wurde beendet.</span>
+            </div>
+
+            {/* Bewertung */}
+            { userName && userName.length > 0 && (
                 <>
-                    <hr className="bg-gray-900 m-0 mt-auto" />
-                    <Column>
-                        <Text center bold>{ LocalizeText('guide.help.request.user.feedback.question') }</Text>
-                        <Flex gap={ 1 }>
-                            <Button fullWidth variant="success" onClick={ event => giveFeedback(true) }>{ LocalizeText('guide.help.request.user.feedback.positive.button') }</Button>
-                            <Button fullWidth variant="danger" onClick={ event => giveFeedback(false) }>{ LocalizeText('guide.help.request.user.feedback.negative.button') }</Button>
-                        </Flex>
-                    </Column>
-                </> }
-        </Column>
+                    <div className="h-px bg-border/40" />
+
+                    <div className="text-center">
+                        <span className="text-sm font-semibold text-foreground block mb-1">Wie war die Hilfe?</span>
+                        <span className="text-[12px] text-muted-foreground">Würdest du diesen Helfer weiterempfehlen?</span>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <button
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-green-600 text-primary-foreground text-sm font-medium hover:bg-green-500 transition-colors"
+                            onClick={ () => giveFeedback(true) }
+                        >
+                            <ThumbsUp className="w-4 h-4" />
+                            Ja
+                        </button>
+                        <button
+                            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border border-red-500/30 text-red-400 text-sm font-medium hover:bg-red-500/10 transition-colors"
+                            onClick={ () => giveFeedback(false) }
+                        >
+                            <ThumbsDown className="w-4 h-4" />
+                            Nein
+                        </button>
+                    </div>
+                </>
+            ) }
+        </div>
     );
 };

@@ -14,10 +14,22 @@ import { GuideToolUserPendingView } from './views/GuideToolUserPendingView';
 import { GuideToolUserSomethingWrogView } from './views/GuideToolUserSomethingWrogView';
 import { GuideToolUserThanksView } from './views/GuideToolUserThanksView';
 
+// Deutsche Header-Texte fuer jeden State
+const STATE_HEADERS: Record<string, string> = {
+    [GuideSessionState.GUIDE_TOOL_MENU]: 'Support-Tool',
+    [GuideSessionState.GUIDE_ACCEPT]: 'Neue Anfrage',
+    [GuideSessionState.USER_CREATE]: 'Support anfragen',
+    [GuideSessionState.USER_PENDING]: 'Warteschlange',
+    [GuideSessionState.USER_FEEDBACK]: 'Bewertung',
+    [GuideSessionState.USER_THANKS]: 'Danke!',
+    [GuideSessionState.USER_NO_HELPERS]: 'Nicht verfügbar',
+    [GuideSessionState.USER_SOMETHING_WRONG]: 'Fehler',
+};
+
 export const GuideToolView: FC<{}> = props =>
 {
     const [ isVisible, setIsVisible ] = useState<boolean>(false);
-    const [ headerText, setHeaderText ] = useState<string>(LocalizeText('guide.help.guide.tool.title'));
+    const [ headerText, setHeaderText ] = useState<string>('Support-Tool');
     const [ noCloseButton, setNoCloseButton ] = useState<boolean>(false);
     const [ sessionState, setSessionState ] = useState<string>(GuideSessionState.GUIDE_TOOL_MENU);
 
@@ -46,50 +58,25 @@ export const GuideToolView: FC<{}> = props =>
 
     const updateSessionState = useCallback((newState: string, replacement?: string) =>
     {
-        switch(newState)
+        const isOngoing = (newState === GuideSessionState.GUIDE_ONGOING || newState === GuideSessionState.USER_ONGOING);
+        const canClose = [
+            GuideSessionState.GUIDE_TOOL_MENU,
+            GuideSessionState.USER_CREATE,
+            GuideSessionState.USER_THANKS,
+            GuideSessionState.USER_NO_HELPERS,
+            GuideSessionState.USER_SOMETHING_WRONG,
+        ].includes(newState);
+
+        if(isOngoing)
         {
-            case GuideSessionState.GUIDE_TOOL_MENU:
-                setHeaderText(LocalizeText('guide.help.guide.tool.title'));
-                setNoCloseButton(false);
-                break;
-            case GuideSessionState.GUIDE_ACCEPT:
-                setHeaderText(LocalizeText('guide.help.request.guide.accept.title'));
-                setNoCloseButton(true);
-                break;
-            case GuideSessionState.GUIDE_ONGOING:
-                setHeaderText(LocalizeText('guide.help.request.guide.ongoing.title', [ 'name' ], [ replacement ]));
-                setNoCloseButton(true);
-                break;
-            case GuideSessionState.USER_CREATE:
-                setHeaderText(LocalizeText('guide.help.request.user.create.title'));
-                setNoCloseButton(false);
-                break;
-            case GuideSessionState.USER_PENDING:
-                setHeaderText(LocalizeText('guide.help.request.user.pending.title'));
-                setNoCloseButton(true);
-                break;
-            case GuideSessionState.USER_ONGOING:
-                setHeaderText(LocalizeText('guide.help.request.user.ongoing.title', [ 'name' ], [ replacement ]));
-                setNoCloseButton(true);
-                break;
-            case GuideSessionState.USER_FEEDBACK:
-                setHeaderText(LocalizeText('guide.help.request.user.feedback.title'));
-                setNoCloseButton(true);
-                break;
-            case GuideSessionState.USER_THANKS:
-                setHeaderText(LocalizeText('guide.help.request.user.thanks.title'));
-                setNoCloseButton(false);
-                break;
-            case GuideSessionState.USER_NO_HELPERS:
-                setHeaderText(LocalizeText('guide.help.request.no_tour_guides.heading'));
-                setNoCloseButton(false);
-                break;
-            case GuideSessionState.USER_SOMETHING_WRONG:
-                setHeaderText(LocalizeText('guide.help.request.user.guide.disconnected.error.heading'));
-                setNoCloseButton(false);
-                break;
+            setHeaderText(`Chat mit ${ replacement || '' }`);
+        }
+        else
+        {
+            setHeaderText(STATE_HEADERS[newState] || 'Support-Tool');
         }
 
+        setNoCloseButton(!canClose);
         setSessionState(newState);
         setIsVisible(true);
     }, []);
@@ -250,7 +237,7 @@ export const GuideToolView: FC<{}> = props =>
 
         // SOMETHING_WRONG_REQUEST = 0, NO_HELPERS_AVAILABLE = 1, NO_GUARDIANS_AVAILABLE = 2
 
-        switch (parser['errorCode'])
+        switch (parser.errorCode)
         {
             case 0:
                 updateSessionState(GuideSessionState.USER_SOMETHING_WRONG);
@@ -337,15 +324,17 @@ export const GuideToolView: FC<{}> = props =>
 
     if(!isVisible) return null;
 
+    const isChat = [ GuideSessionState.GUIDE_ONGOING, GuideSessionState.USER_ONGOING ].includes(sessionState);
+
     return (
-        <NitroCardView className="nitro-guide-tool" theme="primary-slim">
+        <NitroCardView className="nitro-guide-tool" theme="primary-slim" style={ { width: 360, height: isChat ? 480 : undefined } }>
             <NitroCardHeaderView headerText={ headerText } onCloseClick={ event => processAction('close') } noCloseButton={ noCloseButton } />
-            <NitroCardContentView className="text-white/90">
+            <NitroCardContentView className="text-foreground">
                 { (sessionState === GuideSessionState.GUIDE_TOOL_MENU) &&
                     <GuideToolMenuView isOnDuty={ isOnDuty } isHandlingGuideRequests={ isHandlingGuideRequests } setIsHandlingGuideRequests={ setIsHandlingGuideRequests } isHandlingHelpRequests={ isHandlingHelpRequests } setIsHandlingHelpRequests={ setIsHandlingHelpRequests } isHandlingBullyReports={ isHandlingBullyReports } setIsHandlingBullyReports={ setIsHandlingBullyReports } guidesOnDuty={ guidesOnDuty } helpersOnDuty={ helpersOnDuty } guardiansOnDuty={ guardiansOnDuty } processAction={ processAction } /> }
                 { (sessionState === GuideSessionState.GUIDE_ACCEPT) &&
                     <GuideToolAcceptView helpRequestDescription={ helpRequestDescription } helpRequestAverageTime={ helpRequestAverageTime } /> }
-                { [ GuideSessionState.GUIDE_ONGOING, GuideSessionState.USER_ONGOING ].includes(sessionState) &&
+                { isChat &&
                     <GuideToolOngoingView isGuide={ isOnDuty } userId={ ongoingUserId } userName={ ongoingUsername } userFigure={ ongoingFigure } isTyping={ ongoingIsTyping } messageGroups={ ongoingMessageGroups } /> }
                 { (sessionState === GuideSessionState.USER_CREATE) &&
                     <GuideToolUserCreateRequestView userRequest={ userRequest } setUserRequest={ setUserRequest } /> }

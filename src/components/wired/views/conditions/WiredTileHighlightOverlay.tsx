@@ -10,6 +10,8 @@ interface Props
     active: boolean;
 }
 
+const tileKey = (x: number, y: number) => `${ x },${ y }`;
+
 const drawTile3D = (
     ctx: CanvasRenderingContext2D,
     cx: number,
@@ -17,32 +19,38 @@ const drawTile3D = (
     halfTileW: number,
     halfTileH: number,
     thicknessPx: number,
-    isPreview: boolean
+    isPreview: boolean,
+    showLeftFace: boolean,
+    showRightFace: boolean
 ) =>
 {
-    const topAlpha = isPreview ? 0.35 : 0.75;
-    const rightAlpha = isPreview ? 0.25 : 0.65;
-    const leftAlpha = isPreview ? 0.2 : 0.55;
+    const topAlpha = isPreview ? 0.15 : 0.25;
 
-    // Left side face (draw first — behind)
-    ctx.beginPath();
-    ctx.moveTo(cx - halfTileW, cy);
-    ctx.lineTo(cx, cy + halfTileH);
-    ctx.lineTo(cx, cy + halfTileH + thicknessPx);
-    ctx.lineTo(cx - halfTileW, cy + thicknessPx);
-    ctx.closePath();
-    ctx.fillStyle = `rgba(180, 180, 180, ${ leftAlpha })`;
-    ctx.fill();
+    // Left side face — only at bottom-left edge of selection
+    if(showLeftFace)
+    {
+        ctx.beginPath();
+        ctx.moveTo(cx - halfTileW, cy);
+        ctx.lineTo(cx, cy + halfTileH);
+        ctx.lineTo(cx, cy + halfTileH + thicknessPx);
+        ctx.lineTo(cx - halfTileW, cy + thicknessPx);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(180, 180, 180, ${ isPreview ? 0.25 : 0.45 })`;
+        ctx.fill();
+    }
 
-    // Right side face
-    ctx.beginPath();
-    ctx.moveTo(cx + halfTileW, cy);
-    ctx.lineTo(cx, cy + halfTileH);
-    ctx.lineTo(cx, cy + halfTileH + thicknessPx);
-    ctx.lineTo(cx + halfTileW, cy + thicknessPx);
-    ctx.closePath();
-    ctx.fillStyle = `rgba(220, 220, 220, ${ rightAlpha })`;
-    ctx.fill();
+    // Right side face — only at bottom-right edge of selection
+    if(showRightFace)
+    {
+        ctx.beginPath();
+        ctx.moveTo(cx + halfTileW, cy);
+        ctx.lineTo(cx, cy + halfTileH);
+        ctx.lineTo(cx, cy + halfTileH + thicknessPx);
+        ctx.lineTo(cx + halfTileW, cy + thicknessPx);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(220, 220, 220, ${ isPreview ? 0.30 : 0.55 })`;
+        ctx.fill();
+    }
 
     // Top face (draw last — on top)
     ctx.beginPath();
@@ -53,7 +61,7 @@ const drawTile3D = (
     ctx.closePath();
     ctx.fillStyle = `rgba(255, 255, 255, ${ topAlpha })`;
     ctx.fill();
-    ctx.strokeStyle = `rgba(255, 255, 255, ${ isPreview ? 0.4 : 0.8 })`;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${ isPreview ? 0.2 : 0.3 })`;
     ctx.lineWidth = 1;
     ctx.stroke();
 };
@@ -134,7 +142,11 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
                     const cx = Math.round((screenPt.x * scale) + (w / 2) + offsetX);
                     const cy = Math.round((screenPt.y * scale) + (h / 2) + offsetY);
 
-                    drawTile3D(ctx, cx, cy, halfTileW, halfTileH, thicknessPx, isPreview);
+                    // Edge detection: only show side faces at selection boundary
+                    const showLeftFace = !tiles.has(tileKey(tx, ty + 1));
+                    const showRightFace = !tiles.has(tileKey(tx + 1, ty));
+
+                    drawTile3D(ctx, cx, cy, halfTileW, halfTileH, thicknessPx, isPreview, showLeftFace, showRightFace);
                 });
             };
 
@@ -160,7 +172,7 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
                 width: '100vw',
                 height: '100vh',
                 pointerEvents: 'none',
-                zIndex: 9999
+                zIndex: 150
             } }
         />,
         document.body

@@ -117,6 +117,20 @@ const useChatWidgetState = () =>
             return;
         }
 
+        // Intercept [HIGHLIGHT] whispers — trigger spotlight zoom effect, suppress bubble
+        if(text.startsWith('[HIGHLIGHT]'))
+        {
+            try
+            {
+                const data = JSON.parse(text.substring('[HIGHLIGHT]'.length));
+                window.dispatchEvent(new CustomEvent('highlight_effect', {
+                    detail: { senderIndex: data.senderIndex, durationMs: data.durationMs || 5000 }
+                }));
+            }
+            catch(e) { /* ignore parse errors */ }
+            return;
+        }
+
         if(userData)
         {
             userType = userData.type;

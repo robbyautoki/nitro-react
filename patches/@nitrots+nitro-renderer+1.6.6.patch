@@ -427,3 +427,44 @@ index a1f92ec..9afca14 100644
      }
  
      protected createSizeData(scale: number, layerCount: number, angle: number): SizeData
+diff --git a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/room/RoomPlane.ts b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/room/RoomPlane.ts
+index 15c6404..b3d3542 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/room/RoomPlane.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/nitro/room/object/visualization/room/RoomPlane.ts
+@@ -633,7 +633,7 @@ export class RoomPlane implements IRoomPlane
+         let _local_5: number = (this._cornerB.x - this._cornerC.x);
+         let _local_6: number = (this._cornerB.y - this._cornerC.y);
+ 
+-        if((this._type === RoomPlane.TYPE_WALL) || (this._type === RoomPlane.TYPE_LANDSCAPE))
++        if((this._type === RoomPlane.TYPE_WALL) || (this._type === RoomPlane.TYPE_LANDSCAPE) || (this._type === RoomPlane.TYPE_FLOOR))
+         {
+             if(Math.abs((_local_5 - width)) <= 1) _local_5 = width;
+ 
+diff --git a/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts b/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
+index 6a88da8..be0b5af 100644
+--- a/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
++++ b/node_modules/@nitrots/nitro-renderer/src/room/renderer/RoomSpriteCanvas.ts
+@@ -640,8 +640,10 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
+             this.updateEnterRoomEffect(extendedSprite, objectSprite);
+         }
+ 
+-        if(extendedSprite.x !== sprite.x) extendedSprite.x = sprite.x;
+-        if(extendedSprite.y !== sprite.y) extendedSprite.y = sprite.y;
++        const _sX = (this._scale !== 1) ? (Math.round(sprite.x * this._scale) / this._scale) : sprite.x;
++        const _sY = (this._scale !== 1) ? (Math.round(sprite.y * this._scale) / this._scale) : sprite.y;
++        if(extendedSprite.x !== _sX) extendedSprite.x = _sX;
++        if(extendedSprite.y !== _sY) extendedSprite.y = _sY;
+ 
+         extendedSprite.offsetX = objectSprite.offsetX;
+         extendedSprite.offsetY = objectSprite.offsetY;
+@@ -667,8 +669,8 @@ export class RoomSpriteCanvas implements IRoomRenderingCanvas
+         extendedSprite.alphaTolerance = sprite.alphaTolerance;
+         extendedSprite.alpha = (sprite.alpha / 255);
+         extendedSprite.tint = sprite.color;
+-        extendedSprite.x = sortableSprite.x;
+-        extendedSprite.y = sortableSprite.y;
++        extendedSprite.x = (this._scale !== 1) ? (Math.round(sortableSprite.x * this._scale) / this._scale) : sortableSprite.x;
++        extendedSprite.y = (this._scale !== 1) ? (Math.round(sortableSprite.y * this._scale) / this._scale) : sortableSprite.y;
+         extendedSprite.offsetX = sprite.offsetX;
+         extendedSprite.offsetY = sprite.offsetY;
+         extendedSprite.name = sprite.name;

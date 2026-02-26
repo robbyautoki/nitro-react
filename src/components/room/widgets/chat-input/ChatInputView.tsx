@@ -63,6 +63,7 @@ const CHAT_COMMANDS: ChatCommand[] = [
     { command: ':send', description: 'Währung senden', minRank: 0, category: 'Allgemein', params: [{ name: 'name', type: 'user' }, { name: 'typ', type: 'text' }, { name: 'anzahl', type: 'number' }] },
     { command: '@', description: 'Person markieren / Nachricht', minRank: 0, category: 'Allgemein', params: [{ name: 'name', type: 'user' }, { name: 'text', type: 'text' }] },
     { command: ':win', description: 'Event-Win vergeben', minRank: 13, category: 'GameX', params: [{ name: 'name', type: 'user' }] },
+    { command: ':highlight', description: 'Spotlight-Zoom auf dich', minRank: 0, category: 'Allgemein' },
     { command: ':sit', description: 'Hinsetzen', minRank: 0, category: 'Allgemein' },
     { command: ':stand', description: 'Aufstehen', minRank: 0, category: 'Allgemein' },
     { command: ':lay', description: 'Hinlegen', minRank: 0, category: 'Allgemein' },

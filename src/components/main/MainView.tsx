@@ -15,7 +15,8 @@ import { FloorplanEditorView } from '../floorplan-editor/FloorplanEditorView';
 import { FriendsV2View } from '../friends-v2/FriendsV2View';
 import { GameCenterView } from '../game-center/GameCenterView';
 import { GroupsView } from '../groups/GroupsView';
-import { GuideToolView } from '../guide-tool/GuideToolView';
+// GuideToolView deaktiviert — Support-System läuft komplett im HelpPopover (PurseView)
+// import { GuideToolView } from '../guide-tool/GuideToolView';
 import { HcCenterView } from '../hc-center/HcCenterView';
 import { HelpView } from '../help/HelpView';
 import { HotelView } from '../hotel-view/HotelView';
@@ -134,7 +135,7 @@ export const MainView: FC<{}> = props =>
             <CameraWidgetView />
             <HelpView />
             <NitropediaView />
-            <GuideToolView />
+            {/* <GuideToolView /> — deaktiviert, Support läuft im HelpPopover */}
             <HcCenterView />
             <CampaignView />
             <GameCenterView />

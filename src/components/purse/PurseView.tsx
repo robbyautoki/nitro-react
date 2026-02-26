@@ -1,4 +1,4 @@
-import { FriendlyTime, HabboClubLevelEnum, RateFlatMessageComposer, GuideSessionCreateMessageComposer, GuideSessionAttachedMessageEvent, GuideSessionStartedMessageEvent, GuideSessionMessageMessageComposer, GuideSessionMessageMessageEvent, GuideSessionRequesterCancelsMessageComposer, GuideSessionResolvedMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionPartnerIsTypingMessageEvent } from '@nitrots/nitro-renderer';
+import { FriendlyTime, HabboClubLevelEnum, RateFlatMessageComposer, GuideSessionCreateMessageComposer, GuideSessionAttachedMessageEvent, GuideSessionStartedMessageEvent, GuideSessionMessageMessageComposer, GuideSessionMessageMessageEvent, GuideSessionRequesterCancelsMessageComposer, GuideSessionResolvedMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionPartnerIsTypingMessageEvent, PerkAllowancesMessageEvent, PerkEnum, GuideSessionOnDutyUpdateMessageComposer, GuideOnDutyStatusMessageEvent, GuideSessionGuideDecidesMessageComposer, GuideSessionDetachedMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, LocalizeFormattedNumber, LocalizeShortNumber, LocalizeText, SendMessageComposer, getAuthHeaders } from '../../api';
 import { LayoutCurrencyIcon } from '../../common';
@@ -52,7 +52,7 @@ const DEMO_CATEGORIES = [
 
 const STEP_TITLES: Record<number, string> = {
   0: "Hilfe", 1: "Wen möchtest du melden?", 2: "Nachrichten auswählen", 3: "Kategorie wählen",
-  4: "Beschreibe das Problem", 5: "Meldung absenden", 9: "Live-Support", 10: "Live-Support", 11: "Live-Support", 12: "Live-Support", 20: "Sanktionsstatus",
+  4: "Beschreibe das Problem", 5: "Meldung absenden", 9: "Live-Support", 10: "Live-Support", 11: "Live-Support", 12: "Live-Support", 15: "Neue Anfrage", 20: "Sanktionsstatus",
 };
 
 function HelpPopover() {
@@ -71,12 +71,25 @@ function HelpPopover() {
   const [isTyping, setIsTyping] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Guide/Admin State
+  const [isOnDuty, setIsOnDuty] = useState(false);
+  const [isGuide, setIsGuide] = useState(false);
+  const [helpRequestDescription, setHelpRequestDescription] = useState('');
+  const hasAutoDutied = useRef(false);
+
+  // Refs für stale closure prevention in useMessageEvent
   const stepRef = useRef(0);
+  const isOnDutyRef = useRef(false);
+  const isGuideRef = useRef(false);
   stepRef.current = step;
+  isOnDutyRef.current = isOnDuty;
+  isGuideRef.current = isGuide;
 
   const reset = () => {
     setStep(0); setSelectedUser(-1); setSelectedChats([]); setSelectedCat(-1); setSelectedTopic(-1); setMessage("");
     setChatMessages([]); setPartnerName(''); setChatInput(''); setUserRequest(''); setIsTyping(false);
+    setIsGuide(false); setHelpRequestDescription('');
   };
   const toggleChat = (i: number) => setSelectedChats(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
 
@@ -84,6 +97,7 @@ function HelpPopover() {
     if (step === 3 && selectedCat >= 0 && selectedTopic < 0) { setSelectedCat(-1); return; }
     if (step === 9) { reset(); return; }
     if (step >= 10 && step <= 12) { return; } // Kann nicht zurück während aktiver Session
+    if (step === 15) { SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(false)); reset(); return; }
     if (step === 20) { reset(); return; }
     setStep(s => s - 1);
   };
@@ -98,14 +112,46 @@ function HelpPopover() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  // Guide Session WebSocket Events
+  // === Auto-Duty Logik (aus GuideToolView übernommen) ===
+  useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event => {
+    const parser = event.getParser();
+    if (!parser.isAllowed(PerkEnum.USE_GUIDE_TOOL) && isOnDutyRef.current) {
+      setIsOnDuty(false);
+      SendMessageComposer(new GuideSessionOnDutyUpdateMessageComposer(false, false, false, false));
+    }
+    if (parser.isAllowed(PerkEnum.GIVE_GUIDE_TOUR) && !hasAutoDutied.current) {
+      hasAutoDutied.current = true;
+      setIsOnDuty(true);
+      SendMessageComposer(new GuideSessionOnDutyUpdateMessageComposer(true, false, true, false));
+    }
+  });
+
+  useMessageEvent<GuideOnDutyStatusMessageEvent>(GuideOnDutyStatusMessageEvent, event => {
+    setIsOnDuty(event.getParser().onDuty);
+  });
+
+  // === Guide Session WebSocket Events ===
   useMessageEvent<GuideSessionAttachedMessageEvent>(GuideSessionAttachedMessageEvent, event => {
-    // User ist in Warteschlange — bleibt auf Step 10
+    const parser = event.getParser();
+    if (parser.asGuide && isOnDutyRef.current) {
+      // Admin-Seite: Neue Anfrage reinbekommen
+      setHelpRequestDescription(parser.helpRequestDescription);
+      setIsGuide(true);
+      setStep(15);
+      setPopoverOpen(true);
+    }
+    // User-Seite: bleibt auf Step 10 (Warteschlange)
   });
 
   useMessageEvent<GuideSessionStartedMessageEvent>(GuideSessionStartedMessageEvent, event => {
     const parser = event.getParser();
-    setPartnerName(parser.guideName);
+    if (isGuideRef.current) {
+      // Admin: Session gestartet mit Requester
+      setPartnerName(parser.requesterName);
+    } else {
+      // User: Guide hat akzeptiert
+      setPartnerName(parser.guideName);
+    }
     setStep(11);
     setPopoverOpen(true);
   });
@@ -122,14 +168,19 @@ function HelpPopover() {
   });
 
   useMessageEvent<GuideSessionEndedMessageEvent>(GuideSessionEndedMessageEvent, event => {
-    if (stepRef.current >= 9 && stepRef.current <= 12) {
+    if (stepRef.current >= 9 && stepRef.current <= 15) {
+      reset();
+    }
+  });
+
+  useMessageEvent<GuideSessionDetachedMessageEvent>(GuideSessionDetachedMessageEvent, event => {
+    if (stepRef.current >= 9 && stepRef.current <= 15) {
       reset();
     }
   });
 
   useMessageEvent<GuideSessionErrorMessageEvent>(GuideSessionErrorMessageEvent, event => {
-    const parser = event.getParser();
-    if (stepRef.current >= 9 && stepRef.current <= 12) {
+    if (stepRef.current >= 9 && stepRef.current <= 15) {
       reset();
     }
   });
@@ -150,9 +201,18 @@ function HelpPopover() {
     reset();
   };
 
+  const acceptRequest = () => {
+    SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(true));
+  };
+
+  const skipRequest = () => {
+    SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(false));
+    reset();
+  };
+
   const handlePopoverChange = (open: boolean) => {
     // Verhindere Schließen während aktiver Session
-    if (!open && step >= 10 && step <= 12) return;
+    if (!open && [10, 11, 12, 15].includes(step)) return;
     if (!open) reset();
     setPopoverOpen(open);
   };
@@ -167,7 +227,7 @@ function HelpPopover() {
       <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
-            {step > 0 && step !== 10 && step !== 11 && step !== 12 && (
+            {step > 0 && step !== 10 && step !== 11 && step !== 12 && step !== 15 && (
               <button onClick={goBack} className="p-0.5 rounded-md hover:bg-accent/50 transition-colors">
                 <ChevronLeft className="size-4 text-muted-foreground" />
               </button>
@@ -363,6 +423,26 @@ function HelpPopover() {
                 <Button size="sm" className="h-7 text-xs shrink-0 bg-muted/50 hover:bg-accent/60 text-white border-0" onClick={sendChatMessage}>Senden</Button>
               </div>
               <Button variant="outline" size="sm" className="h-7 text-xs w-full text-green-400 border-green-500/20 hover:bg-green-500/10" onClick={endSession}>Gespräch beenden</Button>
+            </div>
+          )}
+
+          {step === 15 && (
+            <div className="space-y-3">
+              <div className="rounded-xl border border-border/40 bg-muted/20 p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <MessageCircle className="size-4 text-blue-400" />
+                  <span className="text-xs font-semibold text-foreground">Neue Supportanfrage</span>
+                </div>
+                <p className="text-xs text-foreground/80 break-words leading-relaxed">{helpRequestDescription}</p>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Button size="sm" className="h-7 text-xs w-full bg-green-600 hover:bg-green-500 text-primary-foreground border-0" onClick={acceptRequest}>
+                  Anfrage annehmen
+                </Button>
+                <Button variant="outline" size="sm" className="h-7 text-xs w-full border-border/50 text-muted-foreground hover:bg-muted/50" onClick={skipRequest}>
+                  Überspringen
+                </Button>
+              </div>
             </div>
           )}
 

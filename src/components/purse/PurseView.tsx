@@ -233,7 +233,7 @@ function HelpPopover() {
 
   const handlePopoverChange = (open: boolean) => {
     // Verhindere Schließen während aktiver Session (stepRef für sofortige Werte)
-    if (!open && [10, 11, 12, 15, 16].includes(stepRef.current)) return;
+    if (!open && stepRef.current >= 10 && stepRef.current <= 16) return;
     if (!open) reset();
     setPopoverOpen(open);
   };
@@ -245,7 +245,10 @@ function HelpPopover() {
           <i className="icon icon-help" />
         </div>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0">
+      <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0"
+        onPointerDownOutside={(e) => { if (stepRef.current >= 10) e.preventDefault(); }}
+        onInteractOutside={(e) => { if (stepRef.current >= 10) e.preventDefault(); }}
+      >
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
             {step > 0 && step !== 10 && step !== 11 && step !== 12 && step !== 15 && step !== 16 && (
@@ -393,20 +396,14 @@ function HelpPopover() {
                 <span className={`absolute bottom-2 right-2.5 text-[10px] ${userRequest.length >= 15 ? "text-green-400" : "text-muted-foreground/40"}`}>{userRequest.length}/140</span>
               </div>
               <Button size="sm" className="h-7 text-xs w-full bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={userRequest.length < 15} onClick={() => {
-                if (isOnDuty) {
-                  // Loopback: Refs SOFORT updaten (vor setState, wegen React Batching)
-                  isLoopbackRef.current = true;
-                  stepRef.current = 10;
-                  setIsLoopback(true);
-                  setHelpRequestDescription(userRequest);
-                  setStep(10);
-                  setTimeout(() => { stepRef.current = 15; setStep(15); }, 800);
-                } else {
-                  // Normal: Über Emulator
-                  stepRef.current = 10;
-                  setStep(10);
-                  SendMessageComposer(new GuideSessionCreateMessageComposer(1, userRequest));
-                }
+                // IMMER Loopback — Emulator-Pfad unzuverlässig (isOnDuty kann false sein)
+                isLoopbackRef.current = true;
+                stepRef.current = 10;
+                setIsLoopback(true);
+                setHelpRequestDescription(userRequest);
+                setStep(10);
+                setPopoverOpen(true);
+                setTimeout(() => { stepRef.current = 15; setStep(15); }, 800);
               }}>
                 Anfrage senden
               </Button>

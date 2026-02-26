@@ -8,8 +8,9 @@ import { SparkleFilter } from './filters/SparkleFilter';
 import { HologramFilter } from './filters/HologramFilter';
 import { ShadowGlowFilter } from './filters/ShadowGlowFilter';
 import { PlasmaGlowFilter } from './filters/PlasmaGlowFilter';
+import { AuraGlowFilter } from './filters/AuraGlowFilter';
 
-export type GlowType = 'neon' | 'rainbow' | 'fire' | 'sparkle' | 'hologram' | 'shadow' | 'plasma';
+export type GlowType = 'neon' | 'rainbow' | 'fire' | 'sparkle' | 'hologram' | 'shadow' | 'plasma' | 'aura';
 
 interface ActiveGlow
 {
@@ -108,6 +109,7 @@ export class GlowEffectManager
             case 'hologram': return new HologramFilter();
             case 'shadow': return new ShadowGlowFilter(color);
             case 'plasma': return new PlasmaGlowFilter();
+            case 'aura': return new AuraGlowFilter(c);
             default: return new NeonGlowFilter(c);
         }
     }

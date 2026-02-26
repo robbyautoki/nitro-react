@@ -144,6 +144,7 @@ const CHAT_COMMANDS: ChatCommand[] = [
     { command: ':glow hologram', description: 'Holographischer Schimmer', minRank: 15, category: 'Admin', params: [{ name: 'furni_id', type: 'number' }] },
     { command: ':glow shadow', description: 'Dunkle Schatten-Aura', minRank: 15, category: 'Admin', params: [{ name: 'furni_id', type: 'number' }] },
     { command: ':glow plasma', description: 'Plasma/Warp Effekt', minRank: 15, category: 'Admin', params: [{ name: 'furni_id', type: 'number' }] },
+    { command: ':glow aura', description: 'Organische Simplex-Noise Aura', minRank: 15, category: 'Admin', params: [{ name: 'furni_id', type: 'number' }, { name: 'farbe', type: 'text' }] },
     { command: ':glow off', description: 'Glow entfernen (furni_id)', minRank: 15, category: 'Admin', params: [{ name: 'furni_id', type: 'number' }] },
     { command: ':glow clear', description: 'Alle Glows entfernen', minRank: 15, category: 'Admin' },
     { command: ':radio on', description: 'Radio einschalten', minRank: 15, category: 'Admin' },

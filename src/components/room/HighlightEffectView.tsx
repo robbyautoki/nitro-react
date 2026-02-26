@@ -62,14 +62,13 @@ export const HighlightEffectView: FC<{}> = () =>
 
             if(phaseRef.current === 'zoom-in')
             {
-                // Zoom-in done -> hold
+                // Zoom-in done -> hold (rAF keeps running to track sender)
                 updatePhase('hold');
                 holdTimerRef.current = setTimeout(() =>
                 {
                     // Hold done -> zoom-out + fade overlay
                     targetScaleRef.current = originalScaleRef.current;
                     updatePhase('zoom-out');
-                    rafRef.current = requestAnimationFrame(() => animateRef.current?.());
                 }, holdDurationRef.current);
             }
             else if(phaseRef.current === 'zoom-out')
@@ -77,6 +76,22 @@ export const HighlightEffectView: FC<{}> = () =>
                 // Zoom-out done -> fade overlay then idle
                 updatePhase('fade-out');
                 fadeTimerRef.current = setTimeout(() => updatePhase('idle'), 600);
+                return;
+            }
+
+            if(phaseRef.current === 'hold')
+            {
+                // During hold: keep tracking sender position so camera follows movement
+                const senderPos = GetRoomObjectScreenLocation(
+                    roomId, senderIndexRef.current, RoomObjectCategory.UNIT
+                );
+                if(senderPos)
+                {
+                    GetRoomEngine().setRoomInstanceRenderingCanvasScale(
+                        roomId, 1, target, new NitroPoint(senderPos.x, senderPos.y)
+                    );
+                }
+                rafRef.current = requestAnimationFrame(() => animateRef.current?.());
             }
 
             return;

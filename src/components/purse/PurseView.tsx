@@ -52,7 +52,7 @@ const DEMO_CATEGORIES = [
 
 const STEP_TITLES: Record<number, string> = {
   0: "Hilfe", 1: "Wen möchtest du melden?", 2: "Nachrichten auswählen", 3: "Kategorie wählen",
-  4: "Beschreibe das Problem", 5: "Meldung absenden", 9: "Live-Support", 10: "Live-Support", 11: "Live-Support", 12: "Live-Support", 15: "Neue Anfrage", 20: "Sanktionsstatus",
+  4: "Beschreibe das Problem", 5: "Meldung absenden", 9: "Live-Support", 10: "Live-Support", 11: "Live-Support", 12: "Live-Support", 15: "Neue Anfrage", 16: "Fehler", 20: "Sanktionsstatus",
 };
 
 function HelpPopover() {
@@ -98,6 +98,7 @@ function HelpPopover() {
     if (step === 9) { reset(); return; }
     if (step >= 10 && step <= 12) { return; } // Kann nicht zurück während aktiver Session
     if (step === 15) { SendMessageComposer(new GuideSessionGuideDecidesMessageComposer(false)); reset(); return; }
+    if (step === 16) { reset(); return; }
     if (step === 20) { reset(); return; }
     setStep(s => s - 1);
   };
@@ -180,8 +181,9 @@ function HelpPopover() {
   });
 
   useMessageEvent<GuideSessionErrorMessageEvent>(GuideSessionErrorMessageEvent, event => {
-    if (stepRef.current >= 9 && stepRef.current <= 15) {
-      reset();
+    if (stepRef.current >= 10 && stepRef.current <= 15) {
+      setStep(16);
+      setPopoverOpen(true);
     }
   });
 
@@ -212,7 +214,7 @@ function HelpPopover() {
 
   const handlePopoverChange = (open: boolean) => {
     // Verhindere Schließen während aktiver Session
-    if (!open && [10, 11, 12, 15].includes(step)) return;
+    if (!open && [10, 11, 12, 15, 16].includes(step)) return;
     if (!open) reset();
     setPopoverOpen(open);
   };
@@ -227,7 +229,7 @@ function HelpPopover() {
       <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
-            {step > 0 && step !== 10 && step !== 11 && step !== 12 && step !== 15 && (
+            {step > 0 && step !== 10 && step !== 11 && step !== 12 && step !== 15 && step !== 16 && (
               <button onClick={goBack} className="p-0.5 rounded-md hover:bg-accent/50 transition-colors">
                 <ChevronLeft className="size-4 text-muted-foreground" />
               </button>
@@ -371,7 +373,20 @@ function HelpPopover() {
                 <textarea value={userRequest} onChange={e => setUserRequest(e.target.value)} placeholder="Wie können wir dir helfen?" rows={4} maxLength={140} className="w-full px-3 py-2 text-xs rounded-lg border border-border/50 bg-accent/30 text-foreground placeholder:text-muted-foreground/40 outline-none focus:ring-1 focus:ring-ring resize-none" />
                 <span className={`absolute bottom-2 right-2.5 text-[10px] ${userRequest.length >= 15 ? "text-green-400" : "text-muted-foreground/40"}`}>{userRequest.length}/140</span>
               </div>
-              <Button size="sm" className="h-7 text-xs w-full bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={userRequest.length < 15} onClick={() => { SendMessageComposer(new GuideSessionCreateMessageComposer(1, userRequest)); setStep(10); }}>
+              <Button size="sm" className="h-7 text-xs w-full bg-muted/50 hover:bg-accent/60 text-white border-0" disabled={userRequest.length < 15} onClick={() => {
+                // Selbsttest: Erst off-duty, dann Anfrage, dann nach Delay wieder on-duty
+                const wasOnDuty = isOnDuty;
+                if (wasOnDuty) {
+                  SendMessageComposer(new GuideSessionOnDutyUpdateMessageComposer(false, false, false, false));
+                }
+                SendMessageComposer(new GuideSessionCreateMessageComposer(1, userRequest));
+                setStep(10);
+                if (wasOnDuty) {
+                  setTimeout(() => {
+                    SendMessageComposer(new GuideSessionOnDutyUpdateMessageComposer(true, false, true, false));
+                  }, 500);
+                }
+              }}>
                 Anfrage senden
               </Button>
             </div>
@@ -443,6 +458,17 @@ function HelpPopover() {
                   Überspringen
                 </Button>
               </div>
+            </div>
+          )}
+
+          {step === 16 && (
+            <div className="flex flex-col items-center text-center py-4 space-y-3">
+              <AlertTriangle className="size-8 text-amber-400" />
+              <div>
+                <p className="text-xs font-semibold text-foreground">Keine Helfer verfügbar</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Aktuell ist kein Teammitglied im Dienst. Versuche es später erneut.</p>
+              </div>
+              <Button variant="outline" size="sm" className="h-7 text-xs" onClick={reset}>Zurück</Button>
             </div>
           )}
 

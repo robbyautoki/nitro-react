@@ -55,8 +55,12 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = props =>
         }
         else
         {
+            const DESC_OVERRIDES: Record<string, string> = {
+                'wf_trg_recv_signal desc': 'Wird ausgelöst, wenn ein Signal an die ausgewählten Möbel gesendet wird.',
+                'wf_act_send_signal desc': 'Sendet ein Signal an die ausgewählten Möbel.',
+            };
             setWiredName(furniData.name);
-            setWiredDescription(furniData.description);
+            setWiredDescription(DESC_OVERRIDES[furniData.description] || furniData.description);
         }
 
         if(hasSpecialInput)

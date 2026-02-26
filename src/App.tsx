@@ -1,4 +1,4 @@
-import { PRECISION } from '@pixi/constants';
+import { PRECISION, SCALE_MODES } from '@pixi/constants';
 import { settings } from '@pixi/settings';
 import { ConfigurationEvent, GetAssetManager, HabboWebTools, LegacyExternalInterface, Nitro, NitroCommunicationDemoEvent, NitroConfiguration, NitroEvent, NitroLocalizationEvent, NitroVersion, RoomEngineEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
@@ -11,6 +11,7 @@ import { MainView } from './components/main/MainView';
 import { useConfigurationEvent, useLocalizationEvent, useMainEvent, useRoomEngineEvent } from './hooks';
 
 settings.PRECISION_FRAGMENT = PRECISION.HIGH;
+settings.SCALE_MODE = SCALE_MODES.NEAREST;
 
 NitroVersion.UI_VERSION = GetUIVersion();
 initSessionToken();

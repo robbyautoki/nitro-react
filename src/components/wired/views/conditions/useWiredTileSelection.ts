@@ -32,7 +32,7 @@ const buildScreenToTile = (): ((clientX: number, clientY: number) => { x: number
     const roomId = engine.activeRoomId;
     if(roomId < 0) return null;
 
-    const rc = engine.getRoomInstanceRenderingCanvas(roomId, 0);
+    const rc = engine.getRoomInstanceRenderingCanvas(roomId, 1);
     if(!rc) return null;
 
     const geo = rc.geometry;

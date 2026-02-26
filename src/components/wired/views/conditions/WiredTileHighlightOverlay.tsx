@@ -80,7 +80,7 @@ export const WiredTileHighlightOverlay: FC<Props> = ({ selectedTiles, previewTil
             const roomId = engine.activeRoomId;
             if(roomId < 0) return;
 
-            const renderingCanvas = engine.getRoomInstanceRenderingCanvas(roomId, 0);
+            const renderingCanvas = engine.getRoomInstanceRenderingCanvas(roomId, 1);
             if(!renderingCanvas) return;
 
             const geometry = renderingCanvas.geometry;

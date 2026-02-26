@@ -1,3 +1,5 @@
+import { PRECISION } from '@pixi/constants';
+import { settings } from '@pixi/settings';
 import { ConfigurationEvent, GetAssetManager, HabboWebTools, LegacyExternalInterface, Nitro, NitroCommunicationDemoEvent, NitroConfiguration, NitroEvent, NitroLocalizationEvent, NitroVersion, RoomEngineEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -7,6 +9,8 @@ import { DisconnectOverlayView } from './components/disconnect-overlay/Disconnec
 import { LoadingView } from './components/loading/LoadingView';
 import { MainView } from './components/main/MainView';
 import { useConfigurationEvent, useLocalizationEvent, useMainEvent, useRoomEngineEvent } from './hooks';
+
+settings.PRECISION_FRAGMENT = PRECISION.HIGH;
 
 NitroVersion.UI_VERSION = GetUIVersion();
 initSessionToken();

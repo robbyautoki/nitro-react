@@ -1,13 +1,10 @@
 import { AvatarAction, AvatarExpressionEnum, RoomControllerLevel, RoomObjectCategory, RoomUnitDropHandItemComposer } from '@nitrots/nitro-renderer';
 import { Dispatch, FC, SetStateAction, useState } from 'react';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import { Armchair, Hand, Hash, Laugh, Moon, Music, Package, Paintbrush, PersonStanding, Shirt, SmilePlus, User, Wind } from 'lucide-react';
+import { Armchair, ChevronLeft, ChevronRight, Hand, Hash, Laugh, Moon, Music, Package, Paintbrush, PersonStanding, Shirt, SmilePlus, User, Wind } from 'lucide-react';
 import { AvatarInfoUser, CreateLinkEvent, DispatchUiEvent, GetCanStandUp, GetCanUseExpression, GetOwnPosture, GetUserProfile, HasHabboClub, HasHabboVip, IsRidingHorse, LocalizeText, PostureTypeEnum, SendMessageComposer } from '../../../../../api';
-import { Flex, LayoutCurrencyIcon } from '../../../../../common';
+import { LayoutCurrencyIcon } from '../../../../../common';
 import { HelpNameChangeEvent } from '../../../../../events';
 import { useRoom } from '../../../../../hooks';
-import { ContextMenuHeaderView } from '../../context-menu/ContextMenuHeaderView';
-import { ContextMenuListItemView } from '../../context-menu/ContextMenuListItemView';
 import { ContextMenuView } from '../../context-menu/ContextMenuView';
 
 interface AvatarInfoWidgetOwnAvatarViewProps
@@ -115,194 +112,145 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
     
     const isRidingHorse = IsRidingHorse();
 
+    const MI = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-white/80 hover:bg-white/10 cursor-pointer transition-all duration-75 rounded-[3px]';
+    const IC = 'size-3.5 shrink-0 text-white/45 group-hover:text-white/75 transition-colors';
+    const AR = 'size-3 text-white/30 group-hover:text-white/50 transition-colors ml-auto';
+
     return (
         <ContextMenuView objectId={ avatarInfo.roomIndex } category={ RoomObjectCategory.UNIT } userType={ avatarInfo.userType } onClose={ onClose } collapsable={ true }>
-            
-            <ContextMenuHeaderView className="cursor-pointer" onClick={ event => GetUserProfile(avatarInfo.webID) }>
+            <button onClick={ () => GetUserProfile(avatarInfo.webID) } className="w-full px-3 py-2 text-center text-[13px] font-bold text-white/90 border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors rounded-t-[3px]">
                 { avatarInfo.name }
-            </ContextMenuHeaderView>
+            </button>
             { (mode === MODE_NORMAL) &&
-                <>
+                <div className="flex flex-col gap-0.5 p-0.5">
                     { avatarInfo.allowNameChange &&
-                        <ContextMenuListItemView onClick={ event => processAction('change_name') }>
-                            <User className="menu-icon" />
-                            { LocalizeText('widget.avatar.change_name') }
-                        </ContextMenuListItemView> }
+                        <button className={ MI } onClick={ () => processAction('change_name') }>
+                            <User className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.avatar.change_name') }</span>
+                        </button> }
                     { isShowDecorate() &&
-                        <ContextMenuListItemView onClick={ event => processAction('decorate') }>
-                            <Paintbrush className="menu-icon" />
-                            { LocalizeText('widget.avatar.decorate') }
-                        </ContextMenuListItemView> }
-                    <ContextMenuListItemView onClick={ event => processAction('change_looks') }>
-                        <Shirt className="menu-icon" />
-                        { LocalizeText('widget.memenu.myclothes') }
-                    </ContextMenuListItemView>
+                        <button className={ MI } onClick={ () => processAction('decorate') }>
+                            <Paintbrush className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.avatar.decorate') }</span>
+                        </button> }
+                    <button className={ MI } onClick={ () => processAction('change_looks') }>
+                        <Shirt className={ IC } />
+                        <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.myclothes') }</span>
+                    </button>
                     { (HasHabboClub() && !isRidingHorse) &&
-                        <ContextMenuListItemView onClick={ event => processAction('dance_menu') }>
-                            <Music className="menu-icon" />
-                            { LocalizeText('widget.memenu.dance') }
-                            <FaChevronRight className="right fa-icon" />
-                        </ContextMenuListItemView> }
+                        <button className={ MI } onClick={ () => processAction('dance_menu') }>
+                            <Music className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance') }</span>
+                            <ChevronRight className={ AR } />
+                        </button> }
                     { (!isDancing && !HasHabboClub() && !isRidingHorse) &&
-                        <ContextMenuListItemView onClick={ event => processAction('dance') }>
-                            <Music className="menu-icon" />
-                            { LocalizeText('widget.memenu.dance') }
-                        </ContextMenuListItemView> }
+                        <button className={ MI } onClick={ () => processAction('dance') }>
+                            <Music className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance') }</span>
+                        </button> }
                     { (isDancing && !HasHabboClub() && !isRidingHorse) &&
-                        <ContextMenuListItemView onClick={ event => processAction('dance_stop') }>
-                            <Music className="menu-icon" />
-                            { LocalizeText('widget.memenu.dance.stop') }
-                        </ContextMenuListItemView> }
-                    <ContextMenuListItemView onClick={ event => processAction('expressions') }>
-                        <SmilePlus className="menu-icon" />
-                        { LocalizeText('infostand.link.expressions') }
-                        <FaChevronRight className="right fa-icon" />
-                    </ContextMenuListItemView>
-                    <ContextMenuListItemView onClick={ event => processAction('signs') }>
-                        <Hash className="menu-icon" />
-                        { LocalizeText('infostand.show.signs') }
-                        <FaChevronRight className="right fa-icon" />
-                    </ContextMenuListItemView>
+                        <button className={ MI } onClick={ () => processAction('dance_stop') }>
+                            <Music className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance.stop') }</span>
+                        </button> }
+                    <button className={ MI } onClick={ () => processAction('expressions') }>
+                        <SmilePlus className={ IC } />
+                        <span className="flex-1 text-left truncate">{ LocalizeText('infostand.link.expressions') }</span>
+                        <ChevronRight className={ AR } />
+                    </button>
+                    <button className={ MI } onClick={ () => processAction('signs') }>
+                        <Hash className={ IC } />
+                        <span className="flex-1 text-left truncate">{ LocalizeText('infostand.show.signs') }</span>
+                        <ChevronRight className={ AR } />
+                    </button>
                     { (avatarInfo.carryItem > 0) &&
-                        <ContextMenuListItemView onClick={ event => processAction('drop_carry_item') }>
-                            <Package className="menu-icon" />
-                            { LocalizeText('avatar.widget.drop_hand_item') }
-                        </ContextMenuListItemView> }
-                </> }
+                        <button className={ MI } onClick={ () => processAction('drop_carry_item') }>
+                            <Package className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('avatar.widget.drop_hand_item') }</span>
+                        </button> }
+                </div> }
             { (mode === MODE_CLUB_DANCES) &&
-                <>
+                <div className="flex flex-col gap-0.5 p-0.5">
                     { isDancing &&
-                        <ContextMenuListItemView onClick={ event => processAction('dance_stop') }>
-                            { LocalizeText('widget.memenu.dance.stop') }
-                        </ContextMenuListItemView> }
-                    <ContextMenuListItemView onClick={ event => processAction('dance_1') }>
-                        { LocalizeText('widget.memenu.dance1') }
-                    </ContextMenuListItemView>
-                    <ContextMenuListItemView onClick={ event => processAction('dance_2') }>
-                        { LocalizeText('widget.memenu.dance2') }
-                    </ContextMenuListItemView>
-                    <ContextMenuListItemView onClick={ event => processAction('dance_3') }>
-                        { LocalizeText('widget.memenu.dance3') }
-                    </ContextMenuListItemView>
-                    <ContextMenuListItemView onClick={ event => processAction('dance_4') }>
-                        { LocalizeText('widget.memenu.dance4') }
-                    </ContextMenuListItemView>
-                    <ContextMenuListItemView onClick={ event => processAction('back') }>
-                        <FaChevronLeft className="left fa-icon" />
-                        { LocalizeText('generic.back') }
-                    </ContextMenuListItemView>
-                </> }
+                        <button className={ MI } onClick={ () => processAction('dance_stop') }>
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance.stop') }</span>
+                        </button> }
+                    <button className={ MI } onClick={ () => processAction('dance_1') }><span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance1') }</span></button>
+                    <button className={ MI } onClick={ () => processAction('dance_2') }><span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance2') }</span></button>
+                    <button className={ MI } onClick={ () => processAction('dance_3') }><span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance3') }</span></button>
+                    <button className={ MI } onClick={ () => processAction('dance_4') }><span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance4') }</span></button>
+                    <button className={ `${ MI } text-white/50` } onClick={ () => processAction('back') }>
+                        <ChevronLeft className="size-3 text-white/30" />
+                        <span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span>
+                    </button>
+                </div> }
             { (mode === MODE_EXPRESSIONS) &&
-                <>
+                <div className="flex flex-col gap-0.5 p-0.5">
                     { (GetOwnPosture() === AvatarAction.POSTURE_STAND) &&
-                        <ContextMenuListItemView onClick={ event => processAction('sit') }>
-                            <Armchair className="menu-icon" />
-                            { LocalizeText('widget.memenu.sit') }
-                        </ContextMenuListItemView> }
+                        <button className={ MI } onClick={ () => processAction('sit') }>
+                            <Armchair className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.sit') }</span>
+                        </button> }
                     { GetCanStandUp() &&
-                        <ContextMenuListItemView onClick={ event => processAction('stand') }>
-                            <PersonStanding className="menu-icon" />
-                            { LocalizeText('widget.memenu.stand') }
-                        </ContextMenuListItemView> }
+                        <button className={ MI } onClick={ () => processAction('stand') }>
+                            <PersonStanding className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.stand') }</span>
+                        </button> }
                     { GetCanUseExpression() &&
-                        <ContextMenuListItemView onClick={ event => processAction('wave') }>
-                            <Hand className="menu-icon" />
-                            { LocalizeText('widget.memenu.wave') }
-                        </ContextMenuListItemView> }
+                        <button className={ MI } onClick={ () => processAction('wave') }>
+                            <Hand className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.wave') }</span>
+                        </button> }
                     { GetCanUseExpression() &&
-                        <ContextMenuListItemView disabled={ !HasHabboVip() } onClick={ event => processAction('laugh') }>
-                            <Laugh className="menu-icon" />
+                        <button className={ HasHabboVip() ? MI : `${ MI } opacity-40 cursor-not-allowed` } onClick={ () => { if(HasHabboVip()) processAction('laugh'); } }>
+                            <Laugh className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.laugh') }</span>
                             { !HasHabboVip() && <LayoutCurrencyIcon type="hc" /> }
-                            { LocalizeText('widget.memenu.laugh') }
-                        </ContextMenuListItemView> }
+                        </button> }
                     { GetCanUseExpression() &&
-                        <ContextMenuListItemView disabled={ !HasHabboVip() } onClick={ event => processAction('blow') }>
-                            <Wind className="menu-icon" />
+                        <button className={ HasHabboVip() ? MI : `${ MI } opacity-40 cursor-not-allowed` } onClick={ () => { if(HasHabboVip()) processAction('blow'); } }>
+                            <Wind className={ IC } />
+                            <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.blow') }</span>
                             { !HasHabboVip() && <LayoutCurrencyIcon type="hc" /> }
-                            { LocalizeText('widget.memenu.blow') }
-                        </ContextMenuListItemView> }
-                    <ContextMenuListItemView onClick={ event => processAction('idle') }>
-                        <Moon className="menu-icon" />
-                        { LocalizeText('widget.memenu.idle') }
-                    </ContextMenuListItemView>
-                    <ContextMenuListItemView onClick={ event => processAction('back') }>
-                        <FaChevronLeft className="left fa-icon" />
-                        { LocalizeText('generic.back') }
-                    </ContextMenuListItemView>
-                </> }
+                        </button> }
+                    <button className={ MI } onClick={ () => processAction('idle') }>
+                        <Moon className={ IC } />
+                        <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.idle') }</span>
+                    </button>
+                    <button className={ `${ MI } text-white/50` } onClick={ () => processAction('back') }>
+                        <ChevronLeft className="size-3 text-white/30" />
+                        <span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span>
+                    </button>
+                </div> }
             { (mode === MODE_SIGNS) &&
-                <>
-                    <Flex className="menu-list-split-3">
-                        <ContextMenuListItemView onClick={ event => processAction('sign_1') }>
-                            1
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_2') }>
-                            2
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_3') }>
-                            3
-                        </ContextMenuListItemView>
-                    </Flex>
-                    <Flex className="menu-list-split-3">
-                        <ContextMenuListItemView onClick={ event => processAction('sign_4') }>
-                            4
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_5') }>
-                            5
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_6') }>
-                            6
-                        </ContextMenuListItemView>
-                    </Flex>
-                    <Flex className="menu-list-split-3">
-                        <ContextMenuListItemView onClick={ event => processAction('sign_7') }>
-                            7
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_8') }>
-                            8
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_9') }>
-                            9
-                        </ContextMenuListItemView>
-                    </Flex>
-                    <Flex className="menu-list-split-3">
-                        <ContextMenuListItemView onClick={ event => processAction('sign_10') }>
-                            10
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_11') }>
-                            <i className="icon icon-sign-heart" />
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_12') }>
-                            <i className="icon icon-sign-skull" />
-                        </ContextMenuListItemView>
-                    </Flex>
-                    <Flex className="menu-list-split-3">
-                        <ContextMenuListItemView onClick={ event => processAction('sign_0') }>
-                            0
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_13') }>
-                            <i className="icon icon-sign-exclamation" />
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_15') }>
-                            <i className="icon icon-sign-smile" />
-                        </ContextMenuListItemView>
-                    </Flex>
-                    <Flex className="menu-list-split-3">
-                        <ContextMenuListItemView onClick={ event => processAction('sign_14') }>
-                            <i className="icon icon-sign-soccer" />
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_17') }>
-                            <i className="icon icon-sign-yellow" />
-                        </ContextMenuListItemView>
-                        <ContextMenuListItemView onClick={ event => processAction('sign_16') }>
-                            <i className="icon icon-sign-red" />
-                        </ContextMenuListItemView>
-                    </Flex>
-                    <ContextMenuListItemView onClick={ event => processAction('back') }>
-                        <FaChevronLeft className="left fa-icon" />
-                        { LocalizeText('generic.back') }
-                    </ContextMenuListItemView>
-                </> }
+                <div className="p-1 space-y-0.5">
+                    { [[1,2,3],[4,5,6],[7,8,9]].map((row, ri) => (
+                        <div key={ ri } className="grid grid-cols-3 gap-0.5">
+                            { row.map(n => (
+                                <button key={ n } onClick={ () => processAction(`sign_${ n }`) } className="h-6 rounded bg-white/5 hover:bg-white/12 text-[12px] font-bold text-white/80 cursor-pointer transition-colors">{ n }</button>
+                            )) }
+                        </div>
+                    )) }
+                    <div className="grid grid-cols-3 gap-0.5">
+                        <button onClick={ () => processAction('sign_10') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-[11px] font-bold text-white/80 cursor-pointer transition-colors">10</button>
+                        <button onClick={ () => processAction('sign_11') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-heart" /></button>
+                        <button onClick={ () => processAction('sign_12') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-skull" /></button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-0.5">
+                        <button onClick={ () => processAction('sign_0') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-[12px] font-bold text-white/80 cursor-pointer transition-colors">0</button>
+                        <button onClick={ () => processAction('sign_13') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-exclamation" /></button>
+                        <button onClick={ () => processAction('sign_15') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-smile" /></button>
+                    </div>
+                    <div className="grid grid-cols-3 gap-0.5">
+                        <button onClick={ () => processAction('sign_14') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-soccer" /></button>
+                        <button onClick={ () => processAction('sign_17') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-yellow" /></button>
+                        <button onClick={ () => processAction('sign_16') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-red" /></button>
+                    </div>
+                    <button className={ `${ MI } text-white/50` } onClick={ () => processAction('back') }>
+                        <ChevronLeft className="size-3 text-white/30" />
+                        <span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span>
+                    </button>
+                </div> }
         </ContextMenuView>
     );
 }

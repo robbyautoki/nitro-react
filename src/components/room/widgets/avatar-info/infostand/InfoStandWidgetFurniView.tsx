@@ -402,7 +402,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     { canMove && (
                         <button
                             aria-label="Position bearbeiten"
-                            className={ `p-0.5 rounded transition-all ${ isEditorOpen ? 'text-primary rotate-90' : 'text-muted-foreground/25 hover:text-foreground/70' }` }
+                            className={ `p-0.5 rounded transition-all cursor-pointer ${ isEditorOpen ? 'text-primary rotate-90' : 'text-muted-foreground/25 hover:text-foreground/70' }` }
                             onClick={ () => setIsEditorOpen(prev => !prev) }
                         >
                             <Wrench className="w-2.5 h-2.5" />
@@ -476,7 +476,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
             {/* Group */}
             { avatarInfo.groupId > 0 && (
-                <button className="flex items-center gap-1.5 hover:opacity-80 transition-opacity" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
+                <button className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
                     <LayoutBadgeImageView badgeCode={ getGroupBadgeCode() } isGroup={ true } />
                     <span className="text-[11px] text-foreground/70 underline">{ groupName }</span>
                 </button>
@@ -589,7 +589,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     <TooltipContent side="top">Ziehen zum Ändern · Shift = schneller · Alt = feiner</TooltipContent>
                 </Tooltip>
                 <button
-                    className="w-5 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/20 transition-colors text-[10px]"
+                    className="w-5 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/20 transition-colors text-[10px] cursor-pointer"
                     onClick={ () => onIncrement(-step) }
                     aria-label={ `${label} verringern` }
                 >
@@ -602,7 +602,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     { decimals > 0 ? value.toFixed(decimals) : value }
                 </div>
                 <button
-                    className="w-5 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/20 transition-colors text-[10px]"
+                    className="w-5 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/20 transition-colors text-[10px] cursor-pointer"
                     onClick={ () => onIncrement(step) }
                     aria-label={ `${label} erhöhen` }
                 >
@@ -633,7 +633,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                             <Tooltip key={ s }>
                                 <TooltipTrigger asChild>
                                     <button
-                                        className={ `px-1 py-1 text-[8px] font-mono transition-colors rounded ${
+                                        className={ `px-1 py-1 text-[8px] font-mono transition-colors rounded cursor-pointer ${
                                             heightStep === s ? 'text-primary bg-primary/10' : 'text-muted-foreground/30 hover:text-muted-foreground/60'
                                         }` }
                                         onClick={ () => setHeightStep(s) }
@@ -649,7 +649,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                 <div className="flex items-center h-7 rounded-md border border-border/30 overflow-hidden">
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors" onClick={ () => handleRotate(false) } aria-label="Links drehen">
+                            <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors cursor-pointer" onClick={ () => handleRotate(false) } aria-label="Links drehen">
                                 <RotateCw className="w-3 h-3 -scale-x-100" />
                             </button>
                         </TooltipTrigger>
@@ -658,7 +658,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     <div className="w-px h-3 bg-border/30" />
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors" onClick={ () => handleRotate(true) } aria-label="Rechts drehen">
+                            <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors cursor-pointer" onClick={ () => handleRotate(true) } aria-label="Rechts drehen">
                                 <RotateCw className="w-3 h-3" />
                             </button>
                         </TooltipTrigger>
@@ -682,7 +682,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     <Tooltip key={ i }>
                         <TooltipTrigger asChild>
                             <button
-                                className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors"
+                                className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors cursor-pointer"
                                 onClick={ () => processButtonAction(btn.action) }
                                 aria-label={ btn.label }
                             >
@@ -697,7 +697,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
             { avatarInfo.purchaseOfferId > 0 && (
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => processButtonAction('buy_one') } aria-label="Kaufen">
+                        <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors cursor-pointer" onClick={ () => processButtonAction('buy_one') } aria-label="Kaufen">
                             <ShoppingCart className="w-3.5 h-3.5" />
                         </button>
                     </TooltipTrigger>
@@ -707,7 +707,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
             { isRarity && (
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => CreateLinkEvent('pricelist/toggle') } aria-label="Preisliste">
+                        <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors cursor-pointer" onClick={ () => CreateLinkEvent('pricelist/toggle') } aria-label="Preisliste">
                             <List className="w-3.5 h-3.5" />
                         </button>
                     </TooltipTrigger>

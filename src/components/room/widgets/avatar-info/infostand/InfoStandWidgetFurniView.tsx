@@ -1,10 +1,9 @@
 import { CrackableDataType, FurnitureFloorUpdateComposer, FurnitureStackHeightComposer, GroupInformationComposer, GroupInformationEvent, NowPlayingEvent, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter, RoomWidgetFurniInfoUsagePolicyEnum, SetObjectDataMessageComposer, SongInfoReceivedEvent, StringDataType } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaUser, FaMusic, FaUserAlt, FaShoppingCart, FaListUl, FaWrench, FaUndo, FaRedo } from 'react-icons/fa';
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { FaUser, FaMusic, FaUserAlt, FaUndo, FaRedo } from 'react-icons/fa';
+import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Move, RotateCw, PackageOpen, Hand, ShoppingCart, List, Wrench, Hash } from 'lucide-react';
 import { AvatarInfoFurni, CreateLinkEvent, GetGroupInformation, GetNitroInstance, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Base, Column, Flex, LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, Text, UserProfileIconView } from '../../../../../common';
+import { LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, UserProfileIconView } from '../../../../../common';
 import { useMessageEvent, useRoom, useSoundEvent } from '../../../../../hooks';
 import { useFurnitureRarity } from '../../../../../hooks/rooms/widgets/useFurnitureRarity';
 import { useFurnitureDurability } from '../../../../../hooks/rooms/widgets/useFurnitureDurability';
@@ -28,13 +27,20 @@ const RARITY_CSS_MAP: Record<string, string> = {
     'drachen_rare': 'rarity-drachen',
 };
 
-const SEAL_CSS_MAP: Record<string, string> = {
-    'og_rare': 'seal-og',
-    'weekly_rare': 'seal-weekly',
-    'monthly_rare': 'seal-monthly',
-    'cashshop_rare': 'seal-cashshop',
-    'bonzen_rare': 'seal-bonzen',
-    'drachen_rare': 'seal-drachen',
+const RARITY_COLORS: Record<string, string> = {
+    'og_rare': '#ff5078',
+    'weekly_rare': '#10b981',
+    'monthly_rare': '#8b5cf6',
+    'cashshop_rare': '#f97316',
+    'bonzen_rare': '#fbbf24',
+    'drachen_rare': '#6366f1',
+};
+
+const ACTION_ICONS: Record<string, FC<{ className?: string }>> = {
+    'move': Move,
+    'rotate': RotateCw,
+    'pickup': PackageOpen,
+    'use': Hand,
 };
 
 export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props =>
@@ -68,6 +74,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
     const isLtd = avatarInfo?.stuffData?.isUnique ?? false;
     const isRarity = !!rarityData;
+    const rarityColor = rarityData ? RARITY_COLORS[rarityData.rarityType.name] : isLtd ? '#06b6d4' : undefined;
 
     const panelClass = useMemo(() =>
     {
@@ -76,8 +83,9 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         return '';
     }, [ rarityData, isLtd ]);
 
-    // Stable unique SVG filter ID for electric card
     const filterId = useMemo(() => `swirl-${Math.random().toString(36).slice(2, 8)}`, []);
+
+    // ─── Sound events ───
 
     useSoundEvent<NowPlayingEvent>(NowPlayingEvent.NPE_SONG_CHANGED, event =>
     {
@@ -87,14 +95,13 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     useSoundEvent<NowPlayingEvent>(SongInfoReceivedEvent.SIR_TRAX_SONG_INFO_RECEIVED, event =>
     {
         if(event.id !== songId) return;
-
         const songInfo = GetNitroInstance().soundManager.musicController.getSongInfo(event.id);
-
         if(!songInfo) return;
-
         setSongName(songInfo.name);
         setSongCreator(songInfo.creator);
     }, (isJukeBox || isSongDisk));
+
+    // ─── Setup effect ───
 
     useEffect(() =>
     {
@@ -121,14 +128,10 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         {
             canMove = true;
             canRotate = !avatarInfo.isWallItem;
-
             if(avatarInfo.roomControllerLevel >= RoomControllerLevel.MODERATOR) godMode = true;
         }
 
-        if(avatarInfo.isAnyRoomController)
-        {
-            canSeeFurniId = true;
-        }
+        if(avatarInfo.isAnyRoomController) canSeeFurniId = true;
 
         if((((avatarInfo.usagePolicy === RoomWidgetFurniInfoUsagePolicyEnum.EVERYBODY) || ((avatarInfo.usagePolicy === RoomWidgetFurniInfoUsagePolicyEnum.CONTROLLER) && isValidController)) || ((avatarInfo.extraParam === RoomWidgetEnumItemExtradataParameter.JUKEBOX) && isValidController)) || ((avatarInfo.extraParam === RoomWidgetEnumItemExtradataParameter.USABLE_PRODUCT) && isValidController)) canUse = true;
 
@@ -137,44 +140,32 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
             if(avatarInfo.extraParam === RoomWidgetEnumItemExtradataParameter.CRACKABLE_FURNI)
             {
                 const stuffData = (avatarInfo.stuffData as CrackableDataType);
-
                 canUse = true;
                 isCrackable = true;
                 crackableHits = stuffData.hits;
                 crackableTarget = stuffData.target;
             }
-
             else if(avatarInfo.extraParam === RoomWidgetEnumItemExtradataParameter.JUKEBOX)
             {
                 const playlist = GetNitroInstance().soundManager.musicController.getRoomItemPlaylist();
-
-                if(playlist)
-                {
-                    furniSongId = playlist.nowPlayingSongId;
-                }
-
+                if(playlist) furniSongId = playlist.nowPlayingSongId;
                 furniIsJukebox = true;
             }
-
             else if(avatarInfo.extraParam.indexOf(RoomWidgetEnumItemExtradataParameter.SONGDISK) === 0)
             {
                 furniSongId = parseInt(avatarInfo.extraParam.substr(RoomWidgetEnumItemExtradataParameter.SONGDISK.length));
-
                 furniIsSongDisk = true;
             }
 
             if(godMode)
             {
                 const extraParam = avatarInfo.extraParam.substr(RoomWidgetEnumItemExtradataParameter.BRANDING_OPTIONS.length);
-
                 if(extraParam)
                 {
                     const parts = extraParam.split('\t');
-
                     for(const part of parts)
                     {
                         const value = part.split('=');
-
                         if(value && (value.length === 2))
                         {
                             furniKeyss.push(value[0]);
@@ -185,30 +176,8 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
             }
         }
 
-        if(godMode)
-        {
-            const roomObject = GetRoomEngine().getRoomObject(roomSession.roomId, avatarInfo.id, (avatarInfo.isWallItem) ? RoomObjectCategory.WALL : RoomObjectCategory.FLOOR);
-
-            if(roomObject)
-            {
-                const customVariables = roomObject.model.getValue<string[]>(RoomObjectVariable.FURNITURE_CUSTOM_VARIABLES);
-                const furnitureData = roomObject.model.getValue<{ [index: string]: string }>(RoomObjectVariable.FURNITURE_DATA);
-
-                if(customVariables && customVariables.length)
-                {
-                    for(const customVariable of customVariables)
-                    {
-                        customKeyss.push(customVariable);
-                        customValuess.push((furnitureData[customVariable]) || '');
-                    }
-                }
-            }
-        }
-
         if(avatarInfo.isOwner || avatarInfo.isAnyRoomController) pickupMode = PICKUP_MODE_FULL;
-
         else if(avatarInfo.isRoomOwner || (avatarInfo.roomControllerLevel >= RoomControllerLevel.GUILD_ADMIN)) pickupMode = PICKUP_MODE_EJECT;
-
         if(avatarInfo.isStickie) pickupMode = PICKUP_MODE_NONE;
 
         setPickupMode(pickupMode);
@@ -235,58 +204,44 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     useMessageEvent<GroupInformationEvent>(GroupInformationEvent, event =>
     {
         const parser = event.getParser();
-
         if(!avatarInfo || avatarInfo.groupId !== parser.id || parser.flag) return;
-
         if(groupName) setGroupName(null);
-
         setGroupName(parser.title);
     });
 
     useEffect(() =>
     {
         const songInfo = GetNitroInstance().soundManager.musicController.getSongInfo(songId);
-
         setSongName(songInfo?.name ?? '');
         setSongCreator(songInfo?.creator ?? '');
     }, [ songId ]);
 
+    // ─── Callbacks ───
+
     const onFurniSettingChange = useCallback((index: number, value: string) =>
     {
         const clone = Array.from(furniValues);
-
         clone[index] = value;
-
         setFurniValues(clone);
     }, [ furniValues ]);
 
     const onCustomVariableChange = useCallback((index: number, value: string) =>
     {
         const clone = Array.from(customValues);
-
         clone[index] = value;
-
         setCustomValues(clone);
     }, [ customValues ]);
 
     const getFurniSettingsAsString = useCallback(() =>
     {
         if(furniKeys.length === 0 || furniValues.length === 0) return '';
-
         let data = '';
-
         let i = 0;
-
         while(i < furniKeys.length)
         {
-            const key = furniKeys[i];
-            const value = furniValues[i];
-
-            data = (data + (key + '=' + value + '\t'));
-
+            data = (data + (furniKeys[i] + '=' + furniValues[i] + '\t'));
             i++;
         }
-
         return data;
     }, [ furniKeys, furniValues ]);
 
@@ -307,13 +262,9 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                 break;
             case 'pickup':
                 if(pickupMode === PICKUP_MODE_FULL)
-                {
                     GetRoomEngine().processRoomObjectOperation(avatarInfo.id, avatarInfo.category, RoomObjectOperationType.OBJECT_PICKUP);
-                }
                 else
-                {
                     GetRoomEngine().processRoomObjectOperation(avatarInfo.id, avatarInfo.category, RoomObjectOperationType.OBJECT_EJECT);
-                }
                 break;
             case 'use':
                 GetRoomEngine().useRoomObject(avatarInfo.id, avatarInfo.category);
@@ -321,36 +272,32 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
             case 'save_branding_configuration': {
                 const mapData = new Map<string, string>();
                 const dataParts = getFurniSettingsAsString().split('\t');
-
                 if(dataParts)
                 {
                     for(const part of dataParts)
                     {
                         const [ key, value ] = part.split('=', 2);
-
                         mapData.set(key, value);
                     }
                 }
-
                 GetRoomEngine().modifyRoomObjectDataWithMap(avatarInfo.id, avatarInfo.category, RoomObjectOperationType.OBJECT_SAVE_STUFF_DATA, mapData);
                 break;
             }
             case 'save_custom_variables': {
                 const map = new Map();
-
                 for(let i = 0; i < customKeys.length; i++)
                 {
                     const key = customKeys[i];
                     const value = customValues[i];
-
                     if((key && key.length) && (value && value.length)) map.set(key, value);
                 }
-
                 SendMessageComposer(new SetObjectDataMessageComposer(avatarInfo.id, map));
                 break;
             }
         }
     }, [ avatarInfo, pickupMode, customKeys, customValues, getFurniSettingsAsString ]);
+
+    // ─── Live position tracker for editor ───
 
     useEffect(() =>
     {
@@ -359,65 +306,53 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         const refresh = () =>
         {
             const obj = GetRoomEngine().getRoomObject(roomSession.roomId, avatarInfo.id, RoomObjectCategory.FLOOR);
-
             if(obj)
             {
                 const loc = obj.getLocation();
-
                 setLivePos({ x: Math.floor(loc.x), y: Math.floor(loc.y), z: Math.round(loc.z * 100) / 100 });
             }
         };
 
         refresh();
         const interval = setInterval(refresh, 300);
-
         return () => clearInterval(interval);
     }, [ isEditorOpen, roomSession, avatarInfo ]);
 
     const handleMoveDirection = useCallback((deltaX: number, deltaY: number) =>
     {
         if(!canMove || !roomSession) return;
-
         const obj = GetRoomEngine().getRoomObject(roomSession.roomId, avatarInfo.id, RoomObjectCategory.FLOOR);
-
         if(!obj) return;
-
         const loc = obj.getLocation();
         const dir = Math.trunc((obj.getDirection().x % 360) / 45);
-
         SendMessageComposer(new FurnitureFloorUpdateComposer(avatarInfo.id, Math.floor(loc.x) + deltaX, Math.floor(loc.y) + deltaY, dir));
     }, [ avatarInfo, canMove, roomSession ]);
 
     const handleRotate = useCallback((positive: boolean) =>
     {
         if(!canRotate) return;
-
         GetRoomEngine().processRoomObjectOperation(avatarInfo.id, avatarInfo.category, positive ? RoomObjectOperationType.OBJECT_ROTATE_POSITIVE : RoomObjectOperationType.OBJECT_ROTATE_NEGATIVE);
     }, [ avatarInfo, canRotate ]);
 
     const handleHeightChange = useCallback((delta: number) =>
     {
         if(!canMove || !roomSession) return;
-
         const obj = GetRoomEngine().getRoomObject(roomSession.roomId, avatarInfo.id, RoomObjectCategory.FLOOR);
-
         if(!obj) return;
-
         const newH = Math.max(0, Math.min(40, Math.round((obj.getLocation().z + delta) * 100) / 100));
-
         SendMessageComposer(new FurnitureStackHeightComposer(avatarInfo.id, ~~(newH * 100)));
     }, [ avatarInfo, canMove, roomSession ]);
 
     const getGroupBadgeCode = useCallback(() =>
     {
         const stringDataType = (avatarInfo.stuffData as StringDataType);
-
         if(!stringDataType || !(stringDataType instanceof StringDataType)) return null;
-
         return stringDataType.getValue(2);
     }, [ avatarInfo ]);
 
     if(!avatarInfo) return null;
+
+    // ─── Action buttons config ───
 
     const actionButtons: { label: string; action: string }[] = [];
 
@@ -428,118 +363,159 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     if(furniKeys.length > 0 && furniValues.length > 0 && furniKeys.length === furniValues.length) actionButtons.push({ label: LocalizeText('save'), action: 'save_branding_configuration' });
     if(customKeys.length > 0 && customValues.length > 0 && customKeys.length === customValues.length) actionButtons.push({ label: LocalizeText('save'), action: 'save_custom_variables' });
 
-    // ─── Shared content fragments (used by both Electric + Normal card) ───
+    // ─── Durability bar color ───
 
-    const detailsContent = (
-        <>
-            <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                <FaUser className="furni-meta-icon" />
+    const durColor = durabilityData
+        ? durabilityData.status === 'broken' ? 'bg-muted-foreground/30'
+            : durabilityData.durabilityRemaining > 50 ? 'bg-emerald-500'
+            : durabilityData.durabilityRemaining > 25 ? 'bg-amber-500'
+            : 'bg-red-500'
+        : '';
+
+    const durTextColor = durabilityData
+        ? durabilityData.status === 'broken' ? 'text-muted-foreground'
+            : durabilityData.durabilityRemaining > 50 ? 'text-emerald-400'
+            : durabilityData.durabilityRemaining > 25 ? 'text-amber-400'
+            : 'text-red-400'
+        : '';
+
+    // ═══════════════════════════════════════════════
+    // SHARED CONTENT BLOCKS
+    // ═══════════════════════════════════════════════
+
+    const infoContent = (
+        <div className="flex flex-col gap-1.5 px-3 py-2.5">
+            {/* Owner */}
+            <div className="flex items-center gap-1.5">
+                <FaUser className="w-2.5 h-2.5 text-muted-foreground/30 shrink-0" />
                 <UserProfileIconView userId={ avatarInfo.ownerId } />
-                <Text small wrap>{ avatarInfo.ownerName }</Text>
-            </Flex>
+                <span className="text-[11px] text-foreground/90 truncate">{ avatarInfo.ownerName }</span>
+            </div>
 
-            { !avatarInfo.isWallItem &&
-                <div className="furni-coords">
-                    <span>X: { isEditorOpen ? livePos.x : avatarInfo.posX }</span>
-                    <span>Y: { isEditorOpen ? livePos.y : avatarInfo.posY }</span>
-                    <span>H: { (isEditorOpen ? livePos.z : avatarInfo.posZ).toFixed(2) }</span>
-                    { canMove &&
-                        <FaWrench className={ `furni-edit-toggle ${ isEditorOpen ? 'active' : '' }` } onClick={ () => setIsEditorOpen(prev => !prev) } /> }
-                </div> }
+            {/* Position */}
+            { !avatarInfo.isWallItem && (
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-muted-foreground/50 tabular-nums">
+                        X:{ isEditorOpen ? livePos.x : avatarInfo.posX } Y:{ isEditorOpen ? livePos.y : avatarInfo.posY } H:{ (isEditorOpen ? livePos.z : avatarInfo.posZ).toFixed(2) }
+                    </span>
+                    { canMove && (
+                        <button
+                            aria-label="Position bearbeiten"
+                            className={ `p-0.5 rounded transition-all ${ isEditorOpen ? 'text-primary rotate-90' : 'text-muted-foreground/25 hover:text-foreground/70' }` }
+                            onClick={ () => setIsEditorOpen(prev => !prev) }
+                        >
+                            <Wrench className="w-2.5 h-2.5" />
+                        </button>
+                    ) }
+                </div>
+            ) }
 
-            { isRarity && rarityData.circulation > 0 &&
-                <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                    <Text small style={ { color: 'rgba(255,255,255,0.5)', fontSize: '10px' } }>
-                        Umlauf: { rarityData.circulation.toLocaleString() } Stk.
-                    </Text>
-                </Flex> }
+            {/* Rarity: Circulation */}
+            { isRarity && rarityData.circulation > 0 && (
+                <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-muted-foreground/50">Umlauf: { rarityData.circulation.toLocaleString('de-DE') } Stk.</span>
+                </div>
+            ) }
 
-            { isRarity && rarityData.tradeValue !== null && rarityData.tradeValue > 0 &&
-                <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                    <Text small style={ { color: 'rgba(255,255,255,0.5)', fontSize: '10px' } }>
-                        Wert: { rarityData.tradeValue.toLocaleString() } Credits
-                    </Text>
-                </Flex> }
+            {/* Rarity: Trade Value */}
+            { isRarity && rarityData.tradeValue !== null && rarityData.tradeValue > 0 && (
+                <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-medium tabular-nums" style={ rarityColor ? { color: rarityColor } : undefined }>
+                        Wert: { rarityData.tradeValue.toLocaleString('de-DE') } Credits
+                    </span>
+                </div>
+            ) }
 
-            { durabilityData &&
-                <div className="mt-1 mb-1">
-                    <div className="flex items-center gap-1 mb-0.5">
-                        <FaWrench style={ { fontSize: '9px', color: 'rgba(255,255,255,0.45)' } } />
-                        <Text small style={ { color: 'rgba(255,255,255,0.5)', fontSize: '10px' } }>
-                            Haltbarkeit: { durabilityData.durabilityRemaining }%
-                        </Text>
+            {/* Durability */}
+            { durabilityData && (
+                <div className="flex flex-col gap-0.5 mt-0.5">
+                    <div className="flex items-center gap-1">
+                        <Wrench className="w-2.5 h-2.5 text-muted-foreground/30" />
+                        <span className={ `text-[10px] tabular-nums ${ durTextColor }` }>Haltbarkeit: { durabilityData.durabilityRemaining }%</span>
                     </div>
-                    <div style={ { width: '100%', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.08)', overflow: 'hidden' } }>
-                        <div style={ {
-                            width: `${ durabilityData.durabilityRemaining }%`,
-                            height: '100%',
-                            borderRadius: '2px',
-                            transition: 'width 0.3s',
-                            background: durabilityData.status === 'broken' ? '#6b7280'
-                                : durabilityData.durabilityRemaining > 50 ? '#22c55e'
-                                : durabilityData.durabilityRemaining > 25 ? '#eab308'
-                                : '#ef4444',
-                        } } />
+                    <div className="w-full h-1 rounded-full bg-foreground/[0.08] overflow-hidden">
+                        <div className={ `h-full rounded-full transition-all ${ durColor }` } style={ { width: `${ Math.max(durabilityData.durabilityRemaining, 2) }%` } } />
                     </div>
-                    { durabilityData.status === 'broken' &&
-                        <Text small style={ { color: '#ef4444', fontSize: '10px', marginTop: '2px' } }>
-                            ZERBROCHEN - Repariere in der Werkstatt!
-                        </Text> }
-                </div> }
+                    { durabilityData.status === 'broken' && (
+                        <span className="text-[10px] text-destructive font-medium">ZERBROCHEN - Repariere in der Werkstatt!</span>
+                    ) }
+                </div>
+            ) }
 
-            { (isJukeBox || isSongDisk) &&
+            {/* Music */}
+            { (isJukeBox || isSongDisk) && (
                 <>
-                    { (songId === -1) &&
-                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                            <FaMusic className="furni-meta-icon" />
-                            <Text small wrap>{ LocalizeText('infostand.jukebox.text.not.playing') }</Text>
-                        </Flex> }
-                    { !!songName.length &&
-                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                            <FaMusic className="furni-meta-icon" />
-                            <Text small wrap>{ songName }</Text>
-                        </Flex> }
-                    { !!songCreator.length &&
-                        <Flex alignItems="center" gap={ 1 } className="furni-meta">
-                            <FaUserAlt className="furni-meta-icon" />
-                            <Text small wrap>{ songCreator }</Text>
-                        </Flex> }
-                </> }
-            { isCrackable &&
-                <Text small wrap className="furni-meta-text">
+                    { songId === -1 && (
+                        <div className="flex items-center gap-1.5">
+                            <FaMusic className="w-2.5 h-2.5 text-muted-foreground/30" />
+                            <span className="text-[11px] text-muted-foreground/70">{ LocalizeText('infostand.jukebox.text.not.playing') }</span>
+                        </div>
+                    ) }
+                    { !!songName.length && (
+                        <div className="flex items-center gap-1.5">
+                            <FaMusic className="w-2.5 h-2.5 text-muted-foreground/30" />
+                            <span className="text-[11px] text-foreground/80 truncate">{ songName }</span>
+                        </div>
+                    ) }
+                    { !!songCreator.length && (
+                        <div className="flex items-center gap-1.5">
+                            <FaUserAlt className="w-2.5 h-2.5 text-muted-foreground/30" />
+                            <span className="text-[11px] text-muted-foreground/70 truncate">{ songCreator }</span>
+                        </div>
+                    ) }
+                </>
+            ) }
+
+            {/* Crackable */}
+            { isCrackable && (
+                <span className="text-[10px] text-muted-foreground/50">
                     { LocalizeText('infostand.crackable_furni.hits_remaining', [ 'hits', 'target' ], [ crackableHits.toString(), crackableTarget.toString() ]) }
-                </Text> }
-            { avatarInfo.groupId > 0 &&
-                <Flex pointer alignItems="center" gap={ 1 } className="furni-meta" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
+                </span>
+            ) }
+
+            {/* Group */}
+            { avatarInfo.groupId > 0 && (
+                <button className="flex items-center gap-1.5 hover:opacity-80 transition-opacity" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
                     <LayoutBadgeImageView badgeCode={ getGroupBadgeCode() } isGroup={ true } />
-                    <Text small underline>{ groupName }</Text>
-                </Flex> }
-            { godMode && canSeeFurniId &&
-                <Text small wrap className="furni-id">ID: { avatarInfo.id }</Text> }
-            { godMode && (furniKeys.length > 0) &&
-                <Column gap={ 1 } className="furni-meta">
-                    { furniKeys.map((key, index) =>
-                    {
-                        return (
-                            <Flex key={ index } alignItems="center" gap={ 1 }>
-                                <Text small wrap align="end" className="col-4">{ key }</Text>
-                                <input type="text" className="form-control form-control-sm" value={ furniValues[index] } onChange={ event => onFurniSettingChange(index, event.target.value) }/>
-                            </Flex>);
-                    }) }
-                </Column> }
-            { (customKeys.length > 0) &&
-                <Column gap={ 1 } className="furni-meta">
-                    { customKeys.map((key, index) =>
-                    {
-                        return (
-                            <Flex key={ index } alignItems="center" gap={ 1 }>
-                                <Text small wrap align="end" className="col-4">{ key }</Text>
-                                <input type="text" className="form-control form-control-sm" value={ customValues[index] } onChange={ event => onCustomVariableChange(index, event.target.value) }/>
-                            </Flex>);
-                    }) }
-                </Column> }
-        </>
+                    <span className="text-[11px] text-foreground/70 underline">{ groupName }</span>
+                </button>
+            ) }
+
+            {/* Furni ID (admin only) */}
+            { godMode && canSeeFurniId && (
+                <div className="flex items-center gap-1">
+                    <Hash className="w-2.5 h-2.5 text-muted-foreground/20" />
+                    <span className="text-[9px] font-mono text-muted-foreground/30 tabular-nums">ID: { avatarInfo.id }</span>
+                </div>
+            ) }
+
+            {/* Branding config (god mode) */}
+            { godMode && (furniKeys.length > 0) && (
+                <div className="flex flex-col gap-1 mt-1">
+                    { furniKeys.map((key, index) => (
+                        <div key={ index } className="flex items-center gap-1.5">
+                            <span className="text-[9px] text-muted-foreground/40 w-16 text-right shrink-0 truncate">{ key }</span>
+                            <input type="text" className="flex-1 h-5 px-1.5 text-[10px] rounded border border-border/30 bg-transparent text-foreground outline-none focus:border-ring/50" value={ furniValues[index] } onChange={ e => onFurniSettingChange(index, e.target.value) } />
+                        </div>
+                    )) }
+                </div>
+            ) }
+
+            {/* Custom variables */}
+            { (customKeys.length > 0) && (
+                <div className="flex flex-col gap-1 mt-1">
+                    { customKeys.map((key, index) => (
+                        <div key={ index } className="flex items-center gap-1.5">
+                            <span className="text-[9px] text-muted-foreground/40 w-16 text-right shrink-0 truncate">{ key }</span>
+                            <input type="text" className="flex-1 h-5 px-1.5 text-[10px] rounded border border-border/30 bg-transparent text-foreground outline-none focus:border-ring/50" value={ customValues[index] } onChange={ e => onCustomVariableChange(index, e.target.value) } />
+                        </div>
+                    )) }
+                </div>
+            ) }
+        </div>
     );
+
+    // ─── Position Editor ───
 
     const editorContent = isEditorOpen && canMove && !avatarInfo.isWallItem && (
         <div className="furni-editor">
@@ -547,62 +523,77 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                 <div className="editor-section">
                     <span className="editor-label">Position</span>
                     <div className="diamond-grid">
-                        <div className="diamond-btn nw" onClick={ () => handleMoveDirection(0, -1) }><ChevronUp size={ 14 } /></div>
-                        <div className="diamond-btn ne" onClick={ () => handleMoveDirection(1, 0) }><ChevronRight size={ 14 } /></div>
-                        <div className="diamond-btn sw" onClick={ () => handleMoveDirection(-1, 0) }><ChevronLeft size={ 14 } /></div>
-                        <div className="diamond-btn se" onClick={ () => handleMoveDirection(0, 1) }><ChevronDown size={ 14 } /></div>
+                        <button className="diamond-btn nw" aria-label="Nach oben bewegen" onClick={ () => handleMoveDirection(0, -1) }><ChevronUp size={ 14 } /></button>
+                        <button className="diamond-btn ne" aria-label="Nach rechts bewegen" onClick={ () => handleMoveDirection(1, 0) }><ChevronRight size={ 14 } /></button>
+                        <button className="diamond-btn sw" aria-label="Nach links bewegen" onClick={ () => handleMoveDirection(-1, 0) }><ChevronLeft size={ 14 } /></button>
+                        <button className="diamond-btn se" aria-label="Nach unten bewegen" onClick={ () => handleMoveDirection(0, 1) }><ChevronDown size={ 14 } /></button>
                     </div>
                     <span className="editor-label" style={ { marginTop: '6px' } }>Drehen</span>
                     <div className="rotate-controls">
-                        <div className="rotate-btn" onClick={ () => handleRotate(false) }><FaUndo /></div>
-                        <div className="rotate-btn" onClick={ () => handleRotate(true) }><FaRedo /></div>
+                        <button className="rotate-btn" aria-label="Links drehen" onClick={ () => handleRotate(false) }><FaUndo /></button>
+                        <button className="rotate-btn" aria-label="Rechts drehen" onClick={ () => handleRotate(true) }><FaRedo /></button>
                     </div>
                 </div>
                 <div className="editor-section">
                     <span className="editor-label">Höhe</span>
                     <div className="height-display">{ livePos.z.toFixed(2) }</div>
                     <div className="height-grid">
-                        <div className="height-btn plus" onClick={ () => handleHeightChange(1) }>+1</div>
-                        <div className="height-btn plus" onClick={ () => handleHeightChange(0.1) }>+0.1</div>
-                        <div className="height-btn plus" onClick={ () => handleHeightChange(0.01) }>+0.01</div>
-                        <div className="height-btn minus" onClick={ () => handleHeightChange(-1) }>-1</div>
-                        <div className="height-btn minus" onClick={ () => handleHeightChange(-0.1) }>-0.1</div>
-                        <div className="height-btn minus" onClick={ () => handleHeightChange(-0.01) }>-0.01</div>
+                        { [ 1, 0.1, 0.01 ].map(d => (
+                            <button key={ `+${d}` } className="height-btn plus" onClick={ () => handleHeightChange(d) }>+{ d }</button>
+                        )) }
+                        { [ 1, 0.1, 0.01 ].map(d => (
+                            <button key={ `-${d}` } className="height-btn minus" onClick={ () => handleHeightChange(-d) }>-{ d }</button>
+                        )) }
                     </div>
                 </div>
             </div>
         </div>
     );
 
+    // ─── Action Buttons ───
+
     const actionsContent = actionButtons.length > 0 && (
-        <Flex alignItems="stretch" className="furni-actions">
+        <div className="flex items-stretch divide-x divide-border/20 border-t border-border/20">
             { actionButtons.map((btn, i) =>
             {
+                const IconComp = ACTION_ICONS[btn.action];
                 return (
-                    <Flex key={ i } grow justifyContent="center" alignItems="center" pointer className="furni-action" onClick={ () => processButtonAction(btn.action) }>
-                        { btn.label }
-                    </Flex>
+                    <button
+                        key={ i }
+                        className="flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors"
+                        onClick={ () => processButtonAction(btn.action) }
+                        aria-label={ btn.label }
+                    >
+                        { IconComp && <IconComp className="w-3.5 h-3.5" /> }
+                        <span>{ btn.label }</span>
+                    </button>
                 );
             }) }
-        </Flex>
-    );
-
-    const linksContent = (avatarInfo.purchaseOfferId > 0 || isRarity) && (
-        <div className="furni-links">
-            { avatarInfo.purchaseOfferId > 0 &&
-                <div className="furni-link" onClick={ () => processButtonAction('buy_one') }>
-                    <FaShoppingCart className="link-icon" />
-                    <span>Kaufen</span>
-                </div> }
-            { isRarity &&
-                <div className="furni-link" onClick={ () => CreateLinkEvent('pricelist/toggle') }>
-                    <FaListUl className="link-icon" />
-                    <span>Preisliste</span>
-                </div> }
         </div>
     );
 
-    // ─── Electric Card (Rarity / LTD items) ───
+    // ─── Quick Links ───
+
+    const linksContent = (avatarInfo.purchaseOfferId > 0 || isRarity) && (
+        <div className="flex items-stretch divide-x divide-border/20 border-t border-border/20">
+            { avatarInfo.purchaseOfferId > 0 && (
+                <button className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => processButtonAction('buy_one') } aria-label="Kaufen">
+                    <ShoppingCart className="w-3 h-3" />
+                    <span>Kaufen</span>
+                </button>
+            ) }
+            { isRarity && (
+                <button className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => CreateLinkEvent('pricelist/toggle') } aria-label="Preisliste">
+                    <List className="w-3 h-3" />
+                    <span>Preisliste</span>
+                </button>
+            ) }
+        </div>
+    );
+
+    // ═══════════════════════════════════════════════
+    // ELECTRIC CARD (Rarity / LTD)
+    // ═══════════════════════════════════════════════
 
     if(isRarity || isLtd)
     {
@@ -646,6 +637,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     <div className="ec-bg-glow" />
 
                     <div className="ec-content">
+                        {/* Preview Zone */}
                         <div className="ec-top">
                             <div className="ec-badge">
                                 { rarityData?.rarityType.displayName || 'LTD' }
@@ -658,23 +650,26 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
                             { avatarInfo.image && avatarInfo.image.src.length &&
                                 <div className="furni-image-wrap">
-                                    <img src={ avatarInfo.image.src } alt="" />
+                                    <img src={ avatarInfo.image.src } alt={ avatarInfo.name } />
                                 </div> }
 
                             <p className="ec-title">{ avatarInfo.name }</p>
                             { avatarInfo.description &&
                                 <p className="ec-desc">{ avatarInfo.description }</p> }
 
-                            { isRarity && rarityData.setName &&
-                                <span className="furni-seal seal-set" style={ { marginTop: '8px' } }>{ rarityData.setName }</span> }
-                            { isRarity && rarityData.isOg &&
-                                <span className="furni-seal seal-og" style={ { marginTop: '4px' } }>OG</span> }
+                            { isRarity && rarityData.setName && (
+                                <span className="furni-seal seal-set" style={ { marginTop: '8px' } }>{ rarityData.setName }</span>
+                            ) }
+                            { isRarity && rarityData.isOg && (
+                                <span className="furni-seal seal-og" style={ { marginTop: '4px' } }>OG</span>
+                            ) }
                         </div>
 
                         <hr className="ec-divider" />
 
+                        {/* Info Zone */}
                         <div className="ec-bottom">
-                            { detailsContent }
+                            { infoContent }
                         </div>
 
                         { editorContent }
@@ -686,40 +681,47 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         );
     }
 
-    // ─── Normal Card (non-rarity items) ───
+    // ═══════════════════════════════════════════════
+    // NORMAL CARD (non-rarity)
+    // ═══════════════════════════════════════════════
 
     return (
         <div className="flex flex-col items-end">
-            <Card className="relative w-[280px] rounded-xl shadow-none border-white/10 bg-black text-white p-0 gap-0 overflow-hidden furni-compact">
-                <CardContent className="p-0">
-                <Flex position="relative" justifyContent="center" alignItems="center" className="furni-preview">
-                    { (!isLtd && avatarInfo.stuffData.rarityLevel > -1) &&
-                        <div className="absolute left-1 top-1">
+            <div className="relative w-[280px] rounded-xl border border-border/40 bg-card text-card-foreground shadow-xl overflow-hidden furni-compact">
+                {/* Preview Zone */}
+                <div className="relative flex items-center justify-center min-h-[80px] px-4 py-5 bg-muted/30 border-b border-border/20">
+                    { (!isLtd && avatarInfo.stuffData.rarityLevel > -1) && (
+                        <div className="absolute left-2 top-2">
                             <LayoutRarityLevelView level={ avatarInfo.stuffData.rarityLevel } />
-                        </div> }
-                    { avatarInfo.image && avatarInfo.image.src.length &&
+                        </div>
+                    ) }
+                    { avatarInfo.image && avatarInfo.image.src.length && (
                         <div className="furni-image-wrap">
-                            <img src={ avatarInfo.image.src } alt="" />
-                        </div> }
-                </Flex>
-
-                <div className="furni-body">
-                    <div className="furni-section">
-                        <Text className="furni-name">{ avatarInfo.name }</Text>
-                        { avatarInfo.description &&
-                            <Text className="furni-desc">{ avatarInfo.description }</Text> }
-                    </div>
-
-                    <div className="furni-section">
-                        { detailsContent }
-                    </div>
+                            <img src={ avatarInfo.image.src } alt={ avatarInfo.name } />
+                        </div>
+                    ) }
                 </div>
 
+                {/* Name + Description */}
+                <div className="px-3 py-2.5 border-b border-border/10">
+                    <p className="text-[14px] font-bold leading-tight">{ avatarInfo.name }</p>
+                    { avatarInfo.description && (
+                        <p className="text-[11px] text-muted-foreground/60 leading-relaxed mt-0.5 break-words">{ avatarInfo.description }</p>
+                    ) }
+                </div>
+
+                {/* Info Zone */}
+                { infoContent }
+
+                {/* Editor */}
                 { editorContent }
+
+                {/* Actions */}
                 { actionsContent }
+
+                {/* Links */}
                 { linksContent }
-                </CardContent>
-            </Card>
+            </div>
         </div>
     );
 }

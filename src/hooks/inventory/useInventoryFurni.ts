@@ -102,38 +102,14 @@ const useInventoryFurniState = () =>
                 {
                     groupItem.hasUnseenItems = true;
 
-                    newValue[i] = CloneObject(groupItem);
+                    newValue.splice(i, 1);
+                    newValue.unshift(CloneObject(groupItem));
                 }
                 else
                 {
                     const furniture = new FurnitureItem(item);
 
-                    let addedToExisting = false;
-
-                    for(let k = 0; k < newValue.length; k++)
-                    {
-                        const group = newValue[k];
-
-                        if(group.type === furniture.type && group.isWallItem === furniture.isWallItem)
-                        {
-                            group.push(furniture);
-                            group.hasUnseenItems = true;
-
-                            if(k > 0)
-                            {
-                                newValue.splice(k, 1);
-                                newValue.unshift(group);
-                            }
-
-                            addedToExisting = true;
-                            break;
-                        }
-                    }
-
-                    if(!addedToExisting)
-                    {
-                        addFurnitureItem(newValue, furniture, true);
-                    }
+                    addFurnitureItem(newValue, furniture, true);
 
                     DispatchUiEvent(new InventoryFurniAddedEvent(furniture.id, furniture.type, furniture.category));
                 }

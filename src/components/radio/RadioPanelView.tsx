@@ -442,7 +442,7 @@ export const RadioPanelView: FC<{ embedded?: boolean }> = ({ embedded = false })
         <TooltipProvider delayDuration={200}>
             <div ref={ytContainerRef} style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }} />
 
-            <div className={embedded ? "flex flex-col gap-3" : "fixed top-3 left-20 z-[65] pointer-events-auto flex flex-col gap-3"}>
+            <div className={embedded ? "relative" : "fixed top-3 left-20 z-[65] pointer-events-auto flex flex-col gap-3"}>
                 <div className={`inline-flex items-center gap-1 py-2 px-3 ${embedded ? 'bg-transparent' : 'rounded-2xl bg-card/80 border border-border/40 shadow-lg backdrop-blur-xl'}`}>
                     {!embedded && (
                         <>
@@ -517,7 +517,7 @@ export const RadioPanelView: FC<{ embedded?: boolean }> = ({ embedded = false })
                 </div>
 
                 {announcement && (
-                    <div className="min-w-[340px] max-w-[400px] animate-in slide-in-from-top-2 fade-in duration-300">
+                    <div className={`min-w-[340px] max-w-[400px] animate-in slide-in-from-top-2 fade-in duration-300 ${embedded ? 'absolute top-full right-0 mt-2 z-[80] pointer-events-auto' : ''}`}>
                         <Frame>
                             <FramePanel className="!p-0">
                                 <div className="flex items-start gap-3 p-3">

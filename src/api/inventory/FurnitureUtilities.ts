@@ -44,7 +44,7 @@ const addGroupableFurnitureItem = (set: GroupItem[], item: FurnitureItem, unseen
 
     for(const groupItem of set)
     {
-        if((groupItem.type === item.type) && (groupItem.isWallItem === item.isWallItem) && groupItem.isGroupable)
+        if((groupItem.type === item.type) && (groupItem.isWallItem === item.isWallItem))
         {
             if(item.category === FurniCategory.POSTER)
             {

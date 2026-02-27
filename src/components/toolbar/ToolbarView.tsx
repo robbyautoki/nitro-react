@@ -1,5 +1,5 @@
 import { Dispose, DropBounce, EaseOut, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Volume2, Mic, MicOff, Headphones, PhoneOff, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, MessengerIconState, OpenMessengerChat, VisitDesktop } from '../../api';
@@ -157,7 +157,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   }, [expanded, updateCssVar]);
 
   // Set initial CSS var
-  useMemo(() => {
+  useEffect(() => {
     document.documentElement.style.setProperty('--sidebar-width', '80px');
   }, []);
 
@@ -168,7 +168,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
       <div className="nitro-toolbar fixed left-0 top-0 h-screen z-[70] pointer-events-auto shrink-0">
         <div
           className={cn(
-            'border-r border-border/40 bg-card flex flex-col items-center py-2 gap-0 overflow-hidden h-screen pt-[52px]',
+            'border-r border-border/40 bg-card flex flex-col py-2 gap-0 overflow-hidden h-screen pt-[52px]',
             'transition-all duration-300 ease-out',
             expanded ? 'w-[280px]' : 'w-[80px]'
           )}

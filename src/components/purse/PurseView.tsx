@@ -16,8 +16,12 @@ import {
   HelpCircle, ShieldAlert, MessageCircle, Scale, Settings,
   User, MessageSquare, Check, ChevronLeft, ChevronRight, Send,
   Loader2, CheckCircle2, Clock, AlertTriangle, Sparkles, Gift,
-  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp, Home,
+  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp,
 } from 'lucide-react';
+
+function TopbarIcon({ name, w, h }: { name: string; w: number; h: number }) {
+  return <img src={`/toolbar-icons/${name}`} alt={name} style={{ width: w, height: h, imageRendering: 'pixelated', objectFit: 'contain' }} draggable={false} />;
+}
 
 function CurrencyIcon({ type }: { type: string }) {
   const assetsUrl = GetConfiguration<string>('currency.asset.icon.url', '').replace('%type%', type);
@@ -743,7 +747,7 @@ export const PurseView: FC<{}> = props => {
           <div className="flex items-center gap-2">
             {roomSession ? (
               <>
-                <Home className="size-4 text-muted-foreground" />
+                <TopbarIcon name="house.png" w={18} h={18} />
                 <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{roomName || 'Raum'}</span>
                 {userCount != null && userCount > 0 && (
                   <Badge variant="outline" className="text-xs text-muted-foreground font-normal">{userCount} online</Badge>
@@ -786,7 +790,7 @@ export const PurseView: FC<{}> = props => {
               </>
             ) : (
               <>
-                <Home className="size-4 text-muted-foreground" />
+                <TopbarIcon name="habbo.png" w={20} h={18} />
                 <span className="text-sm font-medium text-foreground">Hotel View</span>
               </>
             )}

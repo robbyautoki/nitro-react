@@ -168,7 +168,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
       <div className="nitro-toolbar fixed left-0 top-0 h-screen z-[70] pointer-events-auto shrink-0">
         <div
           className={cn(
-            'border-r border-border/40 bg-card flex flex-col py-2 gap-0 overflow-hidden h-screen pt-[52px]',
+            'border-r border-border/40 bg-card flex flex-col items-center py-2 gap-0 overflow-y-auto overflow-x-hidden h-screen pt-[52px]',
             'transition-all duration-300 ease-out',
             expanded ? 'w-[280px]' : 'w-[80px]'
           )}
@@ -178,8 +178,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
             onClick={handleToggleExpand}
             className="flex items-center gap-3 p-3 cursor-pointer hover:bg-accent/50 transition-colors shrink-0 w-full"
           >
-            <div className="relative w-12 h-12 rounded-full overflow-hidden shrink-0 bg-accent/30">
-              <LayoutAvatarImageView figure={userFigure} direction={2} className="!absolute top-0 left-1/2" style={{ transform: 'translateX(-50%) scale(0.55)', transformOrigin: 'top center' }} />
+            <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-accent/30">
+              <LayoutAvatarImageView figure={userFigure} direction={2} className="!absolute top-0 left-1/2" style={{ transform: 'translateX(-50%) scale(0.6)', transformOrigin: 'top center' }} />
             </div>
             {expanded && (
               <div className="flex-1 min-w-0">

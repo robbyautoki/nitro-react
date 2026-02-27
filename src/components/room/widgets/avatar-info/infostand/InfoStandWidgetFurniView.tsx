@@ -1,7 +1,7 @@
 import { CrackableDataType, FurnitureFloorUpdateComposer, FurnitureStackHeightComposer, GroupInformationComposer, GroupInformationEvent, NowPlayingEvent, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter, RoomWidgetFurniInfoUsagePolicyEnum, SetObjectDataMessageComposer, SongInfoReceivedEvent, StringDataType } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaUser, FaMusic, FaUserAlt, FaUndo, FaRedo } from 'react-icons/fa';
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Move, RotateCw, PackageOpen, Hand, ShoppingCart, List, Wrench, Hash } from 'lucide-react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FaUser, FaMusic, FaUserAlt } from 'react-icons/fa';
+import { Move, RotateCw, PackageOpen, Hand, ShoppingCart, List, Wrench, Hash, ChevronsLeftRight } from 'lucide-react';
 import { AvatarInfoFurni, CreateLinkEvent, GetGroupInformation, GetNitroInstance, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, UserProfileIconView } from '../../../../../common';
 import { useMessageEvent, useRoom, useSoundEvent } from '../../../../../hooks';
@@ -515,36 +515,175 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         </div>
     );
 
+    // ─── Scrub Input Component ───
+
+    const ScrubField: FC<{
+        label: string;
+        value: number;
+        onIncrement: (delta: number) => void;
+        step?: number;
+        decimals?: number;
+        ariaLabel: string;
+        icon?: FC<{ className?: string }>;
+    }> = useCallback(({ label, value, onIncrement, step = 1, decimals = 0, ariaLabel, icon: Icon }) =>
+    {
+        const scrubRef = useRef<HTMLDivElement>(null);
+        const startXRef = useRef(0);
+        const accRef = useRef(0);
+
+        const onPointerDown = useCallback((e: React.PointerEvent) =>
+        {
+            e.preventDefault();
+            startXRef.current = e.clientX;
+            accRef.current = 0;
+            const el = e.currentTarget as HTMLElement;
+            el.setPointerCapture(e.pointerId);
+            el.style.cursor = 'ew-resize';
+        }, []);
+
+        const onPointerMove = useCallback((e: React.PointerEvent) =>
+        {
+            if(!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+            const dx = e.clientX - startXRef.current;
+            const sensitivity = e.shiftKey ? 5 : e.altKey ? 50 : 15;
+            const ticks = Math.trunc(dx / sensitivity);
+            if(ticks !== accRef.current)
+            {
+                const delta = ticks - accRef.current;
+                accRef.current = ticks;
+                onIncrement(delta * step);
+            }
+        }, [ onIncrement, step ]);
+
+        const onPointerUp = useCallback((e: React.PointerEvent) =>
+        {
+            const el = e.currentTarget as HTMLElement;
+            if(el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+            el.style.cursor = '';
+        }, []);
+
+        const onWheel = useCallback((e: React.WheelEvent) =>
+        {
+            e.stopPropagation();
+            const delta = e.deltaY < 0 ? step : -step;
+            onIncrement(delta);
+        }, [ onIncrement, step ]);
+
+        return (
+            <div className="flex items-center h-7 rounded-md border border-border/30 bg-accent/5 overflow-hidden group hover:border-border/60 transition-colors" role="group" aria-label={ ariaLabel }>
+                <div
+                    ref={ scrubRef }
+                    className="flex items-center gap-1 px-2 select-none cursor-ew-resize shrink-0 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 group-hover:text-muted-foreground/80 transition-colors"
+                    onPointerDown={ onPointerDown }
+                    onPointerMove={ onPointerMove }
+                    onPointerUp={ onPointerUp }
+                    title={ `Ziehen zum Ändern · Shift = schneller · Alt = feiner` }
+                >
+                    { Icon && <Icon className="w-2.5 h-2.5" /> }
+                    <span>{ label }</span>
+                    <ChevronsLeftRight className="w-2 h-2 opacity-0 group-hover:opacity-60 transition-opacity" />
+                </div>
+                <button
+                    className="w-5 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/20 transition-colors text-[10px]"
+                    onClick={ () => onIncrement(-step) }
+                    aria-label={ `${label} verringern` }
+                >
+                    ‹
+                </button>
+                <div
+                    className="flex-1 text-center text-[11px] font-mono font-semibold tabular-nums text-foreground/90"
+                    onWheel={ onWheel }
+                >
+                    { decimals > 0 ? value.toFixed(decimals) : value }
+                </div>
+                <button
+                    className="w-5 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/20 transition-colors text-[10px]"
+                    onClick={ () => onIncrement(step) }
+                    aria-label={ `${label} erhöhen` }
+                >
+                    ›
+                </button>
+            </div>
+        );
+    }, []);
+
+    // ─── Step size state ───
+
+    const [ heightStep, setHeightStep ] = useState<number>(0.1);
+    const STEP_OPTIONS = [ 1, 0.1, 0.01 ] as const;
+
     // ─── Position Editor ───
 
     const editorContent = isEditorOpen && canMove && !avatarInfo.isWallItem && (
-        <div className="furni-editor">
-            <div className="editor-row">
-                <div className="editor-section">
-                    <span className="editor-label">Position</span>
-                    <div className="diamond-grid">
-                        <button className="diamond-btn nw" aria-label="Nach oben bewegen" onClick={ () => handleMoveDirection(0, -1) }><ChevronUp size={ 14 } /></button>
-                        <button className="diamond-btn ne" aria-label="Nach rechts bewegen" onClick={ () => handleMoveDirection(1, 0) }><ChevronRight size={ 14 } /></button>
-                        <button className="diamond-btn sw" aria-label="Nach links bewegen" onClick={ () => handleMoveDirection(-1, 0) }><ChevronLeft size={ 14 } /></button>
-                        <button className="diamond-btn se" aria-label="Nach unten bewegen" onClick={ () => handleMoveDirection(0, 1) }><ChevronDown size={ 14 } /></button>
-                    </div>
-                    <span className="editor-label" style={ { marginTop: '6px' } }>Drehen</span>
-                    <div className="rotate-controls">
-                        <button className="rotate-btn" aria-label="Links drehen" onClick={ () => handleRotate(false) }><FaUndo /></button>
-                        <button className="rotate-btn" aria-label="Rechts drehen" onClick={ () => handleRotate(true) }><FaRedo /></button>
+        <div className="border-t border-border/20 bg-accent/[0.03] animate-[editorSlideIn_0.2s_ease-out]">
+            <div className="px-3 py-2.5 flex flex-col gap-1.5">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/40">Transform</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-1.5">
+                    <ScrubField
+                        label="X"
+                        value={ livePos.x }
+                        onIncrement={ (d) => handleMoveDirection(d, 0) }
+                        step={ 1 }
+                        ariaLabel="X-Position"
+                    />
+                    <ScrubField
+                        label="Y"
+                        value={ livePos.y }
+                        onIncrement={ (d) => handleMoveDirection(0, d) }
+                        step={ 1 }
+                        ariaLabel="Y-Position"
+                    />
+                </div>
+
+                <div className="grid grid-cols-2 gap-1.5">
+                    <ScrubField
+                        label="Z"
+                        value={ livePos.z }
+                        onIncrement={ (d) => handleHeightChange(d) }
+                        step={ heightStep }
+                        decimals={ 2 }
+                        ariaLabel="Höhe"
+                    />
+                    <div className="flex items-center h-7 rounded-md border border-border/30 bg-accent/5 overflow-hidden group hover:border-border/60 transition-colors">
+                        <button
+                            className="w-7 h-full flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-purple-500/10 transition-colors"
+                            onClick={ () => handleRotate(false) }
+                            aria-label="Links drehen"
+                        >
+                            <RotateCw className="w-3 h-3 -scale-x-100" />
+                        </button>
+                        <div className="flex-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+                            ↻
+                        </div>
+                        <button
+                            className="w-7 h-full flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-purple-500/10 transition-colors"
+                            onClick={ () => handleRotate(true) }
+                            aria-label="Rechts drehen"
+                        >
+                            <RotateCw className="w-3 h-3" />
+                        </button>
                     </div>
                 </div>
-                <div className="editor-section">
-                    <span className="editor-label">Höhe</span>
-                    <div className="height-display">{ livePos.z.toFixed(2) }</div>
-                    <div className="height-grid">
-                        { [ 1, 0.1, 0.01 ].map(d => (
-                            <button key={ `+${d}` } className="height-btn plus" onClick={ () => handleHeightChange(d) }>+{ d }</button>
-                        )) }
-                        { [ 1, 0.1, 0.01 ].map(d => (
-                            <button key={ `-${d}` } className="height-btn minus" onClick={ () => handleHeightChange(-d) }>-{ d }</button>
-                        )) }
-                    </div>
+
+                <div className="flex items-center gap-1 mt-0.5">
+                    <span className="text-[8px] text-muted-foreground/30 mr-1">Schritt:</span>
+                    { STEP_OPTIONS.map(s => (
+                        <button
+                            key={ s }
+                            className={ `px-1.5 py-0.5 rounded text-[9px] font-mono transition-colors ${
+                                heightStep === s
+                                    ? 'bg-primary/15 text-primary border border-primary/30'
+                                    : 'text-muted-foreground/40 hover:text-muted-foreground/70 border border-transparent'
+                            }` }
+                            onClick={ () => setHeightStep(s) }
+                            aria-label={ `Schritt ${s}` }
+                        >
+                            { s }
+                        </button>
+                    )) }
                 </div>
             </div>
         </div>

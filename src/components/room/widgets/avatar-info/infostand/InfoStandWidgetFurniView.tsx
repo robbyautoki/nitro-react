@@ -19,15 +19,6 @@ const PICKUP_MODE_NONE: number = 0;
 const PICKUP_MODE_EJECT: number = 1;
 const PICKUP_MODE_FULL: number = 2;
 
-const RARITY_CSS_MAP: Record<string, string> = {
-    'og_rare': 'rarity-og',
-    'weekly_rare': 'rarity-weekly',
-    'monthly_rare': 'rarity-monthly',
-    'cashshop_rare': 'rarity-cashshop',
-    'bonzen_rare': 'rarity-bonzen',
-    'drachen_rare': 'rarity-drachen',
-};
-
 const RARITY_COLORS: Record<string, string> = {
     'og_rare': '#bf2d3e',
     'weekly_rare': '#2a8f7a',
@@ -77,14 +68,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     const isRarity = !!rarityData;
     const rarityColor = rarityData ? RARITY_COLORS[rarityData.rarityType.name] : isLtd ? '#7c93a8' : undefined;
 
-    const panelClass = useMemo(() =>
-    {
-        if(rarityData) return RARITY_CSS_MAP[rarityData.rarityType.name] || '';
-        if(isLtd) return 'rarity-ltd';
-        return '';
-    }, [ rarityData, isLtd ]);
 
-    const filterId = useMemo(() => `swirl-${Math.random().toString(36).slice(2, 8)}`, []);
 
     // ─── Sound events ───
 
@@ -708,152 +692,97 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     const linksContent = null;
 
     // ═══════════════════════════════════════════════
-    // ELECTRIC CARD (Rarity / LTD)
+    // UNIFIED CARD (Normal + Rare + LTD)
     // ═══════════════════════════════════════════════
 
-    if(isRarity || isLtd)
-    {
-        return (
-            <TooltipProvider delayDuration={ 300 }>
-            <div className="flex flex-col items-end">
-                <div className={ `ec-wrap furni-compact ${ panelClass }` } style={ rarityColor ? { borderColor: `${ rarityColor }25` } : undefined }>
-                    <svg className="ec-filters" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <defs>
-                            <filter id={ filterId } colorInterpolationFilters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
-                                <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise1" seed="1" />
-                                <feOffset in="noise1" dx="0" dy="0" result="offsetNoise1">
-                                    <animate attributeName="dy" values="700; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
-                                </feOffset>
-                                <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise2" seed="1" />
-                                <feOffset in="noise2" dx="0" dy="0" result="offsetNoise2">
-                                    <animate attributeName="dy" values="0; -700" dur="6s" repeatCount="indefinite" calcMode="linear" />
-                                </feOffset>
-                                <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise3" seed="2" />
-                                <feOffset in="noise3" dx="0" dy="0" result="offsetNoise3">
-                                    <animate attributeName="dx" values="490; 0" dur="6s" repeatCount="indefinite" calcMode="linear" />
-                                </feOffset>
-                                <feTurbulence type="turbulence" baseFrequency="0.02" numOctaves="10" result="noise4" seed="2" />
-                                <feOffset in="noise4" dx="0" dy="0" result="offsetNoise4">
-                                    <animate attributeName="dx" values="0; -490" dur="6s" repeatCount="indefinite" calcMode="linear" />
-                                </feOffset>
-                                <feComposite in="offsetNoise1" in2="offsetNoise2" result="part1" />
-                                <feComposite in="offsetNoise3" in2="offsetNoise4" result="part2" />
-                                <feBlend in="part1" in2="part2" mode="color-dodge" result="combinedNoise" />
-                                <feDisplacementMap in="SourceGraphic" in2="combinedNoise" scale="30" xChannelSelector="R" yChannelSelector="B" />
-                            </filter>
-                        </defs>
-                    </svg>
-
-                    <div className="ec-backdrop">
-                        <div className="ec-border">
-                            <div className="ec-main" style={ { filter: `url(#${ filterId })` } } />
-                        </div>
-                        <div className="ec-glow-1" />
-                        <div className="ec-glow-2" />
-                    </div>
-                    <div className="ec-bg-glow" />
-
-                    <div className="ec-content">
-                        {/* Preview Zone */}
-                        <div className="ec-top relative">
-                            {/* Rarity atmosphere gradient */}
-                            { rarityColor && (
-                                <div
-                                    className="absolute inset-0 z-0 rounded-t-lg pointer-events-none"
-                                    style={ { background: `radial-gradient(ellipse at 50% 40%, ${ rarityColor }12 0%, transparent 70%)` } }
-                                />
-                            ) }
-
-                            {/* Shimmer line */}
-                            { rarityColor && (
-                                <div
-                                    className="absolute top-0 left-0 right-0 h-[3px] z-10 pointer-events-none"
-                                    style={ {
-                                        backgroundImage: `linear-gradient(90deg, transparent 0%, ${ rarityColor }50 30%, ${ rarityColor }cc 50%, ${ rarityColor }50 70%, transparent 100%)`,
-                                        backgroundSize: '200% 100%',
-                                        animation: 'shimmerSlide 6s ease-in-out infinite',
-                                        filter: 'blur(0.5px)',
-                                        opacity: 0.7,
-                                    } }
-                                />
-                            ) }
-
-                            {/* Frosted rarity badge */}
-                            <div className="relative z-[5] flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide text-muted-foreground" style={ { backdropFilter: 'blur(4px)', background: 'var(--color-card, rgba(255,255,255,0.7))', border: '1px solid rgba(128,128,128,0.15)' } }>
-                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={ { backgroundColor: rarityColor } } />
-                                { rarityData?.rarityType.displayName || 'LTD' }
-                            </div>
-
-                            { isLtd &&
-                                <LayoutLimitedEditionCompactPlateView
-                                    uniqueNumber={ avatarInfo.stuffData.uniqueNumber }
-                                    uniqueSeries={ avatarInfo.stuffData.uniqueSeries } /> }
-
-                            { avatarInfo.image && avatarInfo.image.src.length &&
-                                <div className="furni-image-wrap relative z-[1]">
-                                    <img
-                                        src={ avatarInfo.image.src }
-                                        alt={ avatarInfo.name }
-                                        style={ rarityColor ? { filter: `drop-shadow(0 2px 8px ${ rarityColor }30)` } : undefined }
-                                    />
-                                </div> }
-
-                            <p className="ec-title relative z-[1]">{ avatarInfo.name }</p>
-                            { avatarInfo.description &&
-                                <p className="ec-desc relative z-[1]">{ avatarInfo.description }</p> }
-
-                            { isRarity && rarityData.setName && (
-                                <span className="relative z-[1] px-1.5 py-0.5 rounded text-[8px] font-medium uppercase text-muted-foreground" style={ { marginTop: '8px', background: 'rgba(128,128,128,0.1)' } }>{ rarityData.setName }</span>
-                            ) }
-                            { isRarity && rarityData.isOg && (
-                                <span className="relative z-[1] px-1.5 py-0.5 rounded text-[8px] font-bold uppercase text-muted-foreground" style={ { marginTop: '4px', backdropFilter: 'blur(4px)', background: 'var(--color-card, rgba(255,255,255,0.7))', border: '1px solid rgba(128,128,128,0.15)' } }>OG</span>
-                            ) }
-                        </div>
-
-                        <hr className="ec-divider" />
-
-                        {/* Info Zone */}
-                        <div className="ec-bottom">
-                            { infoContent }
-                        </div>
-
-                        { editorContent }
-                        { actionsContent }
-                        { linksContent }
-                    </div>
-                </div>
-            </div>
-            </TooltipProvider>
-        );
-    }
-
-    // ═══════════════════════════════════════════════
-    // NORMAL CARD (non-rarity)
-    // ═══════════════════════════════════════════════
+    const isSpecial = isRarity || isLtd;
+    const rarityLabel = rarityData?.rarityType.displayName || (isLtd ? 'LTD' : null);
 
     return (
         <TooltipProvider delayDuration={ 300 }>
         <div className="flex flex-col items-end">
-            <div className="relative w-[280px] rounded-xl border border-border/40 bg-card text-card-foreground shadow-xl overflow-hidden furni-compact">
+            <div
+                className="relative w-[280px] rounded-xl border bg-card text-card-foreground shadow-xl overflow-hidden furni-compact group"
+                style={ isSpecial && rarityColor ? { borderColor: `${ rarityColor }25` } : undefined }
+            >
                 {/* Preview Zone */}
-                <div className="relative flex items-center justify-center min-h-[80px] px-4 py-5 bg-muted/30 border-b border-border/20">
-                    { (!isLtd && avatarInfo.stuffData.rarityLevel > -1) && (
+                <div className="relative flex items-center justify-center min-h-[80px] px-4 py-5 bg-muted/30 border-b border-border/20 overflow-hidden">
+                    {/* Rarity atmosphere gradient */}
+                    { isSpecial && rarityColor && (
+                        <div
+                            className="absolute inset-0 z-0 pointer-events-none"
+                            style={ { background: `radial-gradient(ellipse at 50% 40%, ${ rarityColor }12 0%, transparent 70%)` } }
+                        />
+                    ) }
+
+                    {/* Shimmer line */}
+                    { isSpecial && rarityColor && (
+                        <div
+                            className="absolute top-0 left-0 right-0 h-[3px] z-10 pointer-events-none group-hover:opacity-100 transition-opacity duration-300"
+                            style={ {
+                                backgroundImage: `linear-gradient(90deg, transparent 0%, ${ rarityColor }50 30%, ${ rarityColor }cc 50%, ${ rarityColor }50 70%, transparent 100%)`,
+                                backgroundSize: '200% 100%',
+                                animation: 'shimmerSlide 6s ease-in-out infinite',
+                                filter: 'blur(0.5px)',
+                                opacity: 0.7,
+                            } }
+                        />
+                    ) }
+
+                    {/* Frosted rarity badge */}
+                    { isSpecial && rarityLabel && (
+                        <span
+                            className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide text-muted-foreground"
+                            style={ { backdropFilter: 'blur(4px)', background: 'var(--color-card, rgba(255,255,255,0.7))', border: '1px solid rgba(128,128,128,0.15)' } }
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={ { backgroundColor: rarityColor } } />
+                            { rarityLabel }
+                        </span>
+                    ) }
+
+                    {/* OG badge */}
+                    { isRarity && rarityData.isOg && (
+                        <span
+                            className="absolute top-2.5 right-2.5 z-20 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase text-muted-foreground"
+                            style={ { backdropFilter: 'blur(4px)', background: 'var(--color-card, rgba(255,255,255,0.7))', border: '1px solid rgba(128,128,128,0.15)' } }
+                        >OG</span>
+                    ) }
+
+                    {/* Rarity level (non-rare, non-ltd) */}
+                    { !isSpecial && avatarInfo.stuffData.rarityLevel > -1 && (
                         <div className="absolute left-2 top-2">
                             <LayoutRarityLevelView level={ avatarInfo.stuffData.rarityLevel } />
                         </div>
                     ) }
+
+                    {/* LTD plate */}
+                    { isLtd && (
+                        <div className="absolute top-2.5 right-2.5 z-20">
+                            <LayoutLimitedEditionCompactPlateView
+                                uniqueNumber={ avatarInfo.stuffData.uniqueNumber }
+                                uniqueSeries={ avatarInfo.stuffData.uniqueSeries } />
+                        </div>
+                    ) }
+
                     { avatarInfo.image && avatarInfo.image.src.length && (
-                        <div className="furni-image-wrap">
-                            <img src={ avatarInfo.image.src } alt={ avatarInfo.name } />
+                        <div className="furni-image-wrap relative z-[1]">
+                            <img
+                                src={ avatarInfo.image.src }
+                                alt={ avatarInfo.name }
+                                style={ isSpecial && rarityColor ? { filter: `drop-shadow(0 2px 8px ${ rarityColor }30)` } : undefined }
+                            />
                         </div>
                     ) }
                 </div>
 
-                {/* Name + Description */}
+                {/* Name + Description + Set */}
                 <div className="px-3 py-2.5 border-b border-border/10">
                     <p className="text-[14px] font-bold leading-tight">{ avatarInfo.name }</p>
                     { avatarInfo.description && (
                         <p className="text-[12px] text-muted-foreground/60 leading-relaxed mt-0.5 break-words">{ avatarInfo.description }</p>
+                    ) }
+                    { isRarity && rarityData.setName && (
+                        <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-medium text-muted-foreground border border-border/30">{ rarityData.setName }</span>
                     ) }
                 </div>
 

@@ -9,20 +9,30 @@ interface ToolbarMeViewProps {
   useGuideTool: boolean;
   unseenAchievementCount: number;
   userFigure: string;
+  expanded?: boolean;
 }
 
-// 1:1 from prototype ME_ICONS — using CSS sprite icons instead of ToolbarIcon PNGs
+function MeIcon({ name, w, h }: { name: string; w: number; h: number }) {
+  return (
+    <img
+      src={`/toolbar-icons/${name}`}
+      alt={name}
+      style={{ width: w, height: h, imageRendering: 'pixelated', objectFit: 'contain' }}
+      draggable={false}
+    />
+  );
+}
+
 const ME_ITEMS = [
-  { iconClass: 'icon-me-achievements', label: 'Achievements', action: () => CreateLinkEvent('achievements/toggle') },
-  { iconClass: 'icon-me-profile', label: 'Profil', action: () => GetUserProfile(GetSessionDataManager().userId) },
-  { iconClass: 'icon-me-rooms', label: 'Meine Räume', action: () => CreateLinkEvent('navigator/search/myworld_view') },
-  { iconClass: 'icon-me-clothing', label: 'Avatar', action: () => CreateLinkEvent('avatar-editor/toggle') },
-  { iconClass: 'icon-me-settings', label: 'Einstellungen', action: () => CreateLinkEvent('user-settings/toggle') },
+  { icon: 'me-menu/achievements.png', w: 32, h: 30, label: 'Achievements', action: () => CreateLinkEvent('achievements/toggle') },
+  { icon: 'me-menu/profile.png', w: 32, h: 30, label: 'Profil', action: () => GetUserProfile(GetSessionDataManager().userId) },
+  { icon: 'me-menu/my-rooms.png', w: 32, h: 30, label: 'Meine Räume', action: () => CreateLinkEvent('navigator/search/myworld_view') },
+  { icon: 'me-menu/clothing.png', w: 32, h: 30, label: 'Avatar', action: () => CreateLinkEvent('avatar-editor/toggle') },
+  { icon: 'me-menu/cog.png', w: 32, h: 30, label: 'Einstellungen', action: () => CreateLinkEvent('user-settings/toggle') },
 ];
 
-// 1:1 from prototype LeftSidebar Me-Menü Popover
 export const ToolbarMeView: FC<ToolbarMeViewProps> = props => {
-  const { useGuideTool = false, unseenAchievementCount = 0, userFigure = null } = props;
+  const { useGuideTool = false, unseenAchievementCount = 0, userFigure = null, expanded = false } = props;
 
   useEffect(() => {
     const roomSession = GetRoomSession();
@@ -30,27 +40,36 @@ export const ToolbarMeView: FC<ToolbarMeViewProps> = props => {
     GetRoomEngine().selectRoomObject(roomSession.roomId, roomSession.ownRoomIndex, RoomObjectCategory.UNIT);
   }, []);
 
+  const triggerContent = expanded ? (
+    <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl cursor-pointer hover:bg-accent/50 transition-colors text-left">
+      <MeIcon name="me-menu/profile.png" w={24} h={24} />
+      <span className="text-xs font-medium">Mein Menü</span>
+    </button>
+  ) : (
+    <div className="relative w-10 h-10 flex items-center justify-center rounded-xl cursor-pointer hover:bg-accent/50 transition-colors mb-1">
+      <MeIcon name="me-menu/profile.png" w={28} h={26} />
+    </div>
+  );
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <div className="relative w-12 h-12 overflow-hidden cursor-pointer rounded-xl hover:ring-2 hover:ring-primary/20 transition-all mb-1 bg-accent/30">
-          <LayoutAvatarImageView figure={userFigure} direction={2} className="!absolute top-0 left-1/2" style={{ transform: 'translateX(-50%) scale(0.55)', transformOrigin: 'top center' }} />
-        </div>
+        {triggerContent}
       </PopoverTrigger>
-      <PopoverContent side="right" align="start" sideOffset={8} className="w-[180px] p-1.5">
+      <PopoverContent side="right" align="start" sideOffset={8} className="w-[200px] p-1.5">
         {(GetConfiguration('guides.enabled') && useGuideTool) && (
           <button className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer hover:bg-accent/40 transition-colors" onClick={() => DispatchUiEvent(new GuideToolEvent(GuideToolEvent.TOGGLE_GUIDE_TOOL))}>
-            <div className="icon icon-me-helper-tool shrink-0" />
+            <MeIcon name="me-menu/helper-tool.png" w={24} h={22} />
             <span className="text-xs font-medium">Helper</span>
           </button>
         )}
         {ME_ITEMS.map(item => (
-          <button key={item.iconClass} className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer hover:bg-accent/40 transition-colors" onClick={() => item.action()}>
-            <div className={`icon ${item.iconClass} shrink-0`} />
+          <button key={item.icon} className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg cursor-pointer hover:bg-accent/40 transition-colors" onClick={() => item.action()}>
+            <MeIcon name={item.icon} w={item.w} h={item.h} />
             <span className="text-xs font-medium">{item.label}</span>
           </button>
         ))}
       </PopoverContent>
     </Popover>
   );
-}
+};

@@ -3,6 +3,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, LocalizeFormattedNumber, LocalizeShortNumber, LocalizeText, SendMessageComposer, getAuthHeaders } from '../../api';
 import { LayoutCurrencyIcon } from '../../common';
 import { useAchievements, useMessageEvent, useNavigator, usePurse, useRoom } from '../../hooks';
+import { RadioPanelView } from '../radio/RadioPanelView';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +16,7 @@ import {
   HelpCircle, ShieldAlert, MessageCircle, Scale, Settings,
   User, MessageSquare, Check, ChevronLeft, ChevronRight, Send,
   Loader2, CheckCircle2, Clock, AlertTriangle, Sparkles, Gift,
-  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp,
+  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp, Home,
 } from 'lucide-react';
 
 function CurrencyIcon({ type }: { type: string }) {
@@ -31,7 +32,7 @@ function CatalogIcon({ iconId }: { iconId: number }) {
 const TOOL_ICONS: { iconId: number; label: string; link: string }[] = [
   { iconId: 69, label: "Marktplatz", link: "marketplace/toggle" },
   { iconId: 71, label: "Preisliste", link: "pricelist/toggle" },
-  { iconId: 1004, label: "Werkstatt", link: "workshop/toggle" },
+  { iconId: 37, label: "Werkstatt", link: "workshop/toggle" },
   { iconId: 221, label: "Sets", link: "sets/toggle" },
 ];
 
@@ -655,10 +656,17 @@ function SettingsPopover() {
   );
 }
 
+const CURRENCY_COLORS: Record<number, { bg: string; hover: string }> = {
+  [-1]: { bg: "bg-amber-500/10", hover: "hover:bg-amber-500/20" },
+  5: { bg: "bg-sky-500/10", hover: "hover:bg-sky-500/20" },
+  0: { bg: "bg-emerald-500/10", hover: "hover:bg-emerald-500/20" },
+};
+
 export const PurseView: FC<{}> = props => {
   const { purse = null, hcDisabled = false } = usePurse();
   const { roomSession = null } = useRoom();
   const { navigatorData = null } = useNavigator();
+  const [catalogOpen, setCatalogOpen] = useState(false);
   const [ isZoomedIn, setIsZoomedIn ] = useState(false);
 
   const handleZoom = useCallback(() => {
@@ -673,6 +681,7 @@ export const PurseView: FC<{}> = props => {
 
   const displayedCurrencies = useMemo(() => GetConfiguration<number[]>('system.currency.types', []), []);
   const currencyDisplayNumberShort = useMemo(() => GetConfiguration<boolean>('currency.display.number.short', false), []);
+  const imageLibraryUrl = useMemo(() => GetConfiguration<string>('image.library.url', 'http://localhost:8080/c_images/'), []);
 
   const [offerCount, setOfferCount] = useState(0);
 
@@ -693,28 +702,20 @@ export const PurseView: FC<{}> = props => {
     return () => clearInterval(interval);
   }, []);
 
-  const getClubText = (() => {
-    if (!purse) return null;
-    const totalDays = ((purse.clubPeriods * 31) + purse.clubDays);
-    const minutesUntilExpiration = purse.minutesUntilExpiration;
-    if (purse.clubLevel === HabboClubLevelEnum.NO_CLUB) return LocalizeText('purse.clubdays.zero.amount.text');
-    else if ((minutesUntilExpiration > -1) && (minutesUntilExpiration < (60 * 24))) return FriendlyTime.shortFormat(minutesUntilExpiration * 60);
-    else return FriendlyTime.shortFormat(totalDays * 86400);
-  })();
-
-  const getCurrencyElements = () => {
+  const getCurrencyPills = () => {
     if (!purse || !purse.activityPoints || !purse.activityPoints.size) return null;
     const types = Array.from(purse.activityPoints.keys()).filter(type => displayedCurrencies.indexOf(type) >= 0);
     return types.map(type => {
       const amount = purse.activityPoints.get(type);
       const display = currencyDisplayNumberShort ? LocalizeShortNumber(amount) : LocalizeFormattedNumber(amount);
+      const colors = CURRENCY_COLORS[type] ?? { bg: "bg-muted/30", hover: "hover:bg-muted/50" };
       return (
         <Tooltip key={type}>
           <TooltipTrigger asChild>
-            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
+            <button className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${colors.bg} ${colors.hover}`}>
               <CurrencyIcon type={String(type)} />
-              <span className="text-xs font-semibold text-foreground tabular-nums">{display}</span>
-            </div>
+              <span className="text-xs font-bold text-foreground tabular-nums">{display}</span>
+            </button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs">Währung {type}</TooltipContent>
         </Tooltip>
@@ -725,100 +726,133 @@ export const PurseView: FC<{}> = props => {
   if (!purse) return null;
 
   const creditsDisplay = currencyDisplayNumberShort ? LocalizeShortNumber(purse.credits) : LocalizeFormattedNumber(purse.credits);
+  const roomName = navigatorData?.enteredGuestRoom?.roomName;
+  const userCount = navigatorData?.enteredGuestRoom?.userCount;
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-[69] pointer-events-auto inline-flex items-center gap-1 py-1.5 px-3 rounded-2xl bg-card border border-border/40 shadow-md">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-              <CurrencyIcon type="-1" />
-              <span className="text-xs font-semibold text-foreground tabular-nums">{creditsDisplay}</span>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs">Credits</TooltipContent>
-        </Tooltip>
-
-        {getCurrencyElements()}
-
-        <div className="w-px h-6 bg-accent/50 mx-1.5" />
-
-        <LevelPopover />
-
-        <div className="w-px h-6 bg-accent/50 mx-1.5" />
-
-        {!hcDisabled && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent('habboUI/open/hccenter')}>
-                <CurrencyIcon type="hc" />
-                <span className="text-xs font-medium text-foreground">{getClubText}</span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">Habbo Club</TooltipContent>
-          </Tooltip>
-        )}
-
-        {!hcDisabled && <div className="w-px h-6 bg-accent/50 mx-1.5" />}
-
-        {TOOL_ICONS.map(({ iconId, label, link }) => (
-          <Tooltip key={label}>
-            <TooltipTrigger asChild>
-              <div className="relative p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent(link)}>
-                <CatalogIcon iconId={iconId} />
-                {label === "Marktplatz" && offerCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold leading-none shadow-sm">{offerCount}</span>
+      <style>{`
+        @keyframes dragonGlow {
+          0%, 100% { filter: drop-shadow(0 0 3px rgba(255,165,0,0.3)); }
+          50% { filter: drop-shadow(0 0 6px rgba(255,165,0,0.5)); }
+        }
+      `}</style>
+      <div className="fixed top-0 left-0 right-0 h-12 z-[69] pointer-events-auto bg-card border-b border-border/40">
+        <div className="flex items-center justify-between h-full pl-[80px] pr-4">
+          {/* Left: Room Info */}
+          <div className="flex items-center gap-2">
+            {roomSession ? (
+              <>
+                <Home className="size-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{roomName || 'Raum'}</span>
+                {userCount != null && userCount > 0 && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground font-normal">{userCount} online</Badge>
                 )}
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs">{label}</TooltipContent>
-          </Tooltip>
-        ))}
+                <div className="w-px h-6 bg-border/30 mx-1" />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent('navigator/toggle-room-info')}>
+                      <Info className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs">Raum Info</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={handleZoom}>
+                      {isZoomedIn ? <ZoomOut className="w-3.5 h-3.5 text-muted-foreground" /> : <ZoomIn className="w-3.5 h-3.5 text-muted-foreground" />}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs">{isZoomedIn ? 'Herauszoomen' : 'Hineinzoomen'}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent('chat-history/toggle')}>
+                      <MessageSquareDashed className="w-3.5 h-3.5 text-muted-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-xs">Chat-Verlauf</TooltipContent>
+                </Tooltip>
+                {navigatorData?.canRate && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => SendMessageComposer(new RateFlatMessageComposer(1))}>
+                        <ThumbsUp className="w-3.5 h-3.5 text-muted-foreground" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="text-xs">Raum bewerten</TooltipContent>
+                  </Tooltip>
+                )}
+              </>
+            ) : (
+              <>
+                <Home className="size-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">Hotel View</span>
+              </>
+            )}
+          </div>
 
-        { roomSession && (
-          <>
-            <div className="w-px h-6 bg-accent/50 mx-1.5" />
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={ () => CreateLinkEvent('navigator/toggle-room-info') }>
-                  <Info className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">Raum Info</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={ handleZoom }>
-                  { isZoomedIn ? <ZoomOut className="w-4 h-4 text-muted-foreground" /> : <ZoomIn className="w-4 h-4 text-muted-foreground" /> }
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">{ isZoomedIn ? 'Herauszoomen' : 'Hineinzoomen' }</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={ () => CreateLinkEvent('chat-history/toggle') }>
-                  <MessageSquareDashed className="w-4 h-4 text-muted-foreground" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">Chat-Verlauf</TooltipContent>
-            </Tooltip>
-            { navigatorData?.canRate && (
+          {/* Right */}
+          <div className="flex items-center gap-1.5">
+            {/* Zone 0: Radio */}
+            <RadioPanelView embedded />
+
+            <div className="w-px h-6 bg-border/30" />
+
+            {/* Zone 1: Katalog Hover-Slide */}
+            <div
+              className="flex items-center"
+              onMouseEnter={() => setCatalogOpen(true)}
+              onMouseLeave={() => setCatalogOpen(false)}
+            >
+              <div className={`flex items-center gap-0.5 overflow-hidden transition-all duration-300 ease-out ${catalogOpen ? 'max-w-[200px] opacity-100 mr-1' : 'max-w-0 opacity-0'}`}>
+                {TOOL_ICONS.map(({ iconId, label, link }) => (
+                  <Tooltip key={iconId}>
+                    <TooltipTrigger asChild>
+                      <button className="relative p-1.5 rounded-lg hover:bg-accent/50 transition-colors shrink-0" onClick={() => CreateLinkEvent(link)}>
+                        <CatalogIcon iconId={iconId} />
+                        {label === "Marktplatz" && offerCount > 0 && (
+                          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold leading-none shadow-sm">{offerCount}</span>
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-xs">{label}</TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+              <button className="group p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent('catalog/toggle')}>
+                <img
+                  src={`${imageLibraryUrl}catalogue/dragon.gif`}
+                  alt="Katalog"
+                  className="group-hover:[filter:drop-shadow(0_0_8px_rgba(255,165,0,0.6))]"
+                  style={{ width: 20, height: 20, objectFit: 'contain', animation: 'dragonGlow 2s ease-in-out infinite' }}
+                />
+              </button>
+            </div>
+
+            <div className="w-px h-6 bg-border/30" />
+
+            {/* Zone 2: Wallet (colored pills) */}
+            <div className="flex items-center gap-1 px-1.5 py-1 rounded-xl bg-muted/30 border border-border/30">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors" onClick={ () => SendMessageComposer(new RateFlatMessageComposer(1)) }>
-                    <ThumbsUp className="w-4 h-4 text-muted-foreground" />
-                  </div>
+                  <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer bg-amber-500/10 hover:bg-amber-500/20">
+                    <CurrencyIcon type="-1" />
+                    <span className="text-xs font-bold text-foreground tabular-nums">{creditsDisplay}</span>
+                  </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs">Raum bewerten</TooltipContent>
+                <TooltipContent side="bottom" className="text-xs">Credits</TooltipContent>
               </Tooltip>
-            ) }
-          </>
-        ) }
+              {getCurrencyPills()}
+            </div>
 
-        <div className="w-px h-6 bg-accent/50 mx-1.5" />
+            <div className="w-px h-6 bg-border/30" />
 
-        <HelpPopover />
-        <SettingsPopover />
+            {/* Zone 3: Utilities */}
+            <HelpPopover />
+            <SettingsPopover />
+          </div>
+        </div>
       </div>
     </TooltipProvider>
   );

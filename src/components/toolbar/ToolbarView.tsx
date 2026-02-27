@@ -1,11 +1,10 @@
 import { Dispose, DropBounce, EaseOut, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useState } from 'react';
-import { Sun, Moon, ChevronUp, ChevronDown, Radio, Mic } from 'lucide-react';
+import { Sun, Moon, Mic } from 'lucide-react';
 import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, MessengerIconState, OpenMessengerChat, VisitDesktop } from '../../api';
 import { LayoutAvatarImageView } from '../../common';
 import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useRoomEngineEvent, useSessionInfo } from '../../hooks';
 import { ToolbarMeView } from './ToolbarMeView';
-import { RadioPanelView } from '../radio/RadioPanelView';
 import { VoiceChannelView } from '../room/VoiceChannelView';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -88,7 +87,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   const { iconState = MessengerIconState.HIDDEN } = useMessenger();
   const isMod = GetSessionDataManager().isModerator;
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
-  const [radioBarOpen, setRadioBarOpen] = useState(true);
 
   const toggleTheme = useCallback(() => {
     const next = !isDark;
@@ -130,26 +128,8 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
 
   return (
     <TooltipProvider delayDuration={200}>
-      {/* Top Radio Bar — docked above sidebar */}
-      <div className={`fixed top-0 left-0 z-[71] pointer-events-auto transition-transform duration-200 ${radioBarOpen ? 'translate-y-0' : '-translate-y-full'}`}>
-        <div className="flex items-center h-11 pl-[72px] pr-4 bg-card/80 border-b border-border/40 backdrop-blur-xl">
-          <RadioPanelView embedded />
-        </div>
-      </div>
-
       <div className="nitro-toolbar fixed left-0 top-0 h-screen z-[70] pointer-events-auto shrink-0">
-        <div className={`border-r border-border/40 bg-card w-[72px] flex flex-col items-center py-2 gap-1 overflow-hidden h-screen ${radioBarOpen ? 'pt-[52px]' : ''}`}>
-
-          {/* Radio Toggle */}
-          <button
-            className="flex items-center justify-center w-8 h-6 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors shrink-0 mb-1"
-            onClick={() => setRadioBarOpen(v => !v)}
-          >
-            {radioBarOpen
-              ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground/60" />
-              : <Radio className="w-3.5 h-3.5 text-muted-foreground/60" />
-            }
-          </button>
+        <div className="border-r border-border/40 bg-card w-[72px] flex flex-col items-center py-2 gap-1 overflow-hidden h-screen pt-[52px]">
 
           <ToolbarMeView
             useGuideTool={useGuideTool}

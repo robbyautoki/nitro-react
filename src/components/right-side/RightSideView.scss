@@ -1,6 +1,6 @@
 .nitro-right-side {
     position: absolute;
-    top: 56px;
+    top: 64px;
     right: calc(var(--drawer-width, 0px) + 10px);
     transition: right 0.3s ease-out;
     min-width: 280px;

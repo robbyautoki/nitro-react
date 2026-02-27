@@ -168,7 +168,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
       <div className="nitro-toolbar fixed left-0 top-0 h-screen z-[70] pointer-events-auto shrink-0">
         <div
           className={cn(
-            'border-r border-border/40 bg-card flex flex-col items-center py-2 gap-0 overflow-y-auto overflow-x-hidden h-screen pt-[52px]',
+            'border-r border-border/40 bg-card flex flex-col items-center py-2 gap-0 overflow-y-auto overflow-x-hidden h-screen pt-[64px]',
             'transition-all duration-300 ease-out',
             expanded ? 'w-[280px]' : 'w-[80px]'
           )}

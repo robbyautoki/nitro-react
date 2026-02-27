@@ -290,7 +290,7 @@ export const FriendsV2View: FC<{}> = () => {
                 <DrawerPrimitive.Portal>
                     {isVisible && <div className="fixed inset-0 z-[78]" onClick={() => setIsVisible(false)} />}
                     <DrawerPrimitive.Content
-                        className="fixed right-0 top-12 bottom-0 w-[420px] z-[79] flex flex-col overflow-hidden bg-background border-l border-border/40 shadow-xl"
+                        className="fixed right-0 top-[60px] bottom-0 w-[420px] z-[79] flex flex-col overflow-hidden bg-background border-l border-border/40 shadow-xl"
                         style={{ '--initial-transform': 'calc(100%)' } as React.CSSProperties}
                     >
                         {/* ═══ VIEW: LIST ═══ */}

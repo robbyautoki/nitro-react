@@ -741,7 +741,7 @@ export const PurseView: FC<{}> = props => {
           50% { filter: drop-shadow(0 0 6px rgba(255,165,0,0.5)); }
         }
       `}</style>
-      <div className="fixed top-0 left-0 right-0 h-12 z-[71] pointer-events-auto bg-card border-b border-border/40">
+      <div className="fixed top-0 left-0 right-0 h-[60px] z-[71] pointer-events-auto bg-card border-b border-border/40">
         <div className="flex items-center h-full pr-4 transition-all duration-300 ease-out" style={{ paddingLeft: 'calc(var(--sidebar-width, 80px) - 8px)' }}>
           {/* Left: Room Info */}
           <div className="flex items-center gap-2">

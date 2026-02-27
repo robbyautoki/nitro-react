@@ -1,9 +1,16 @@
 import { FC, useMemo } from 'react';
-import { Flex, FlexProps } from '../../../../common';
+import { Column, Flex, FlexProps } from '../../../../common';
 
-export const ContextMenuHeaderView: FC<FlexProps> = props =>
+interface ContextMenuHeaderViewProps extends FlexProps
 {
-    const { justifyContent = 'center', alignItems = 'center', classNames = [], ...rest } = props;
+    subtitle?: string;
+    relationshipIcon?: string;
+    relationshipColor?: string;
+}
+
+export const ContextMenuHeaderView: FC<ContextMenuHeaderViewProps> = props =>
+{
+    const { subtitle, relationshipIcon, relationshipColor, justifyContent = 'center', alignItems = 'center', classNames = [], children, ...rest } = props;
 
     const getClassNames = useMemo(() =>
     {
@@ -14,5 +21,18 @@ export const ContextMenuHeaderView: FC<FlexProps> = props =>
         return newClassNames;
     }, [ classNames ]);
 
-    return <Flex justifyContent={ justifyContent } alignItems={ alignItems } classNames={ getClassNames } { ...rest } />;
+    if(subtitle || relationshipIcon)
+    {
+        return (
+            <Column classNames={ getClassNames } { ...rest }>
+                <Flex justifyContent="center" alignItems="center" gap={ 1 }>
+                    { children }
+                    { relationshipIcon && <span style={{ fontSize: '12px', color: relationshipColor || 'inherit' }}>{ relationshipIcon }</span> }
+                </Flex>
+                { subtitle && <span style={{ fontSize: '10px', opacity: 0.55, marginTop: '-2px' }}>{ subtitle }</span> }
+            </Column>
+        );
+    }
+
+    return <Flex justifyContent={ justifyContent } alignItems={ alignItems } classNames={ getClassNames } { ...rest }>{ children }</Flex>;
 }

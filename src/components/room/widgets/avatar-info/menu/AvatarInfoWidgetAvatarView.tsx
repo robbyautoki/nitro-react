@@ -1,5 +1,5 @@
 import { RoomControllerLevel, RoomObjectCategory, RoomObjectVariable, RoomUnitGiveHandItemComposer, SetRelationshipStatusComposer, TradingOpenComposer } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { AvatarInfoUser, CreateLinkEvent, DispatchUiEvent, GetOwnRoomObject, GetSessionDataManager, GetUserProfile, LocalizeText, MessengerFriend, ReportType, RoomWidgetUpdateChatInputContentEvent, SendMessageComposer } from '../../../../../api';
 import { Base, Flex } from '../../../../../common';
@@ -7,6 +7,14 @@ import { useFriends, useHelp, useRoom, useSessionInfo } from '../../../../../hoo
 import { ContextMenuHeaderView } from '../../context-menu/ContextMenuHeaderView';
 import { ContextMenuListItemView } from '../../context-menu/ContextMenuListItemView';
 import { ContextMenuView } from '../../context-menu/ContextMenuView';
+
+const RELATIONSHIP_DISPLAY: Record<number, { icon: string; color: string }> = {
+    [MessengerFriend.RELATIONSHIP_HEART]: { icon: '♥', color: '#f87171' },
+    [MessengerFriend.RELATIONSHIP_SMILE]: { icon: '☺', color: '#fbbf24' },
+    [MessengerFriend.RELATIONSHIP_BOBBA]: { icon: '👊', color: '#a78bfa' },
+};
+
+const roomJoinTimes = new Map<number, number>();
 
 interface AvatarInfoWidgetAvatarViewProps
 {
@@ -26,10 +34,47 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
 {
     const { avatarInfo = null, onClose = null } = props;
     const [ mode, setMode ] = useState(MODE_NORMAL);
-    const { canRequestFriend = null } = useFriends();
+    const { canRequestFriend = null, getFriend = null, followFriend = null } = useFriends();
     const { report = null } = useHelp();
     const { roomSession = null } = useRoom();
     const { userRespectRemaining = 0, respectUser = null } = useSessionInfo();
+
+    const friend = useMemo(() => getFriend?.(avatarInfo?.webID), [ getFriend, avatarInfo?.webID ]);
+    const isFriend = useMemo(() => !canRequestFriend?.(avatarInfo?.webID), [ canRequestFriend, avatarInfo?.webID ]);
+
+    const relationshipDisplay = useMemo(() =>
+    {
+        if(!friend || friend.relationshipStatus <= 0) return null;
+        return RELATIONSHIP_DISPLAY[friend.relationshipStatus] || null;
+    }, [ friend ]);
+
+    const [ timeInRoom, setTimeInRoom ] = useState('');
+
+    useEffect(() =>
+    {
+        if(!avatarInfo) return;
+
+        if(!roomJoinTimes.has(avatarInfo.roomIndex)) roomJoinTimes.set(avatarInfo.roomIndex, Date.now());
+
+        const update = () =>
+        {
+            const joined = roomJoinTimes.get(avatarInfo.roomIndex);
+            if(!joined) return;
+
+            const diffMs = Date.now() - joined;
+            const mins = Math.floor(diffMs / 60000);
+            const hrs = Math.floor(mins / 60);
+            const remainMins = mins % 60;
+
+            if(hrs > 0) setTimeInRoom(`Seit ${hrs}h ${remainMins}min im Raum`);
+            else if(mins > 0) setTimeInRoom(`Seit ${mins}min im Raum`);
+            else setTimeInRoom('Gerade angekommen');
+        };
+
+        update();
+        const interval = setInterval(update, 30000);
+        return () => clearInterval(interval);
+    }, [ avatarInfo ]);
 
     const isShowGiveRights = useMemo(() =>
     {
@@ -157,6 +202,9 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                 case 'report':
                     report(ReportType.BULLY, { reportedUserId: avatarInfo.webID });
                     break;
+                case 'follow':
+                    if(friend) followFriend(friend);
+                    break;
                 case 'pass_hand_item':
                     SendMessageComposer(new RoomUnitGiveHandItemComposer(avatarInfo.webID));
                     break;
@@ -203,7 +251,13 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
 
     return (
         <ContextMenuView objectId={ avatarInfo.roomIndex } category={ RoomObjectCategory.UNIT } userType={ avatarInfo.userType } onClose={ onClose } collapsable={ true }>
-            <ContextMenuHeaderView className="cursor-pointer" onClick={ event => GetUserProfile(avatarInfo.webID) }>
+            <ContextMenuHeaderView
+                className="cursor-pointer"
+                onClick={ event => GetUserProfile(avatarInfo.webID) }
+                subtitle={ timeInRoom || undefined }
+                relationshipIcon={ relationshipDisplay?.icon }
+                relationshipColor={ relationshipDisplay?.color }
+            >
                 { avatarInfo.name }
             </ContextMenuHeaderView>
             { (mode === MODE_NORMAL) &&
@@ -222,7 +276,11 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                         <ContextMenuListItemView onClick={ event => processAction('respect') }>
                             { LocalizeText('infostand.button.respect', [ 'count' ], [ userRespectRemaining.toString() ]) }
                         </ContextMenuListItemView> }
-                    { !canRequestFriend(avatarInfo.webID) &&
+                    { isFriend && friend?.followingAllowed &&
+                        <ContextMenuListItemView onClick={ event => processAction('follow') }>
+                            Folgen
+                        </ContextMenuListItemView> }
+                    { isFriend &&
                         <ContextMenuListItemView onClick={ event => processAction('relationship') }>
                             { LocalizeText('infostand.link.relationship') }
                             <FaChevronRight className="right fa-icon" />
@@ -235,22 +293,23 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                         <ContextMenuListItemView onClick={ event => processAction('unignore') }>
                             { LocalizeText('infostand.button.unignore') }
                         </ContextMenuListItemView> }
-                    <ContextMenuListItemView onClick={ event => processAction('report') }>
+                    { canGiveHandItem &&
+                        <ContextMenuListItemView onClick={ event => processAction('pass_hand_item') }>
+                            { LocalizeText('avatar.widget.pass_hand_item') }
+                        </ContextMenuListItemView> }
+                    <ContextMenuListItemView classNames={ [ 'menu-item-danger' ] } onClick={ event => processAction('report') }>
                         { LocalizeText('infostand.button.report') }
                     </ContextMenuListItemView>
                     { moderateMenuHasContent &&
-                        <ContextMenuListItemView onClick={ event => processAction('moderate') }>
+                        <ContextMenuListItemView classNames={ [ 'menu-item-warning' ] } onClick={ event => processAction('moderate') }>
                             <FaChevronRight className="right fa-icon" />
                             { LocalizeText('infostand.link.moderate') }
                         </ContextMenuListItemView> }
                     { avatarInfo.isAmbassador &&
-                        <ContextMenuListItemView onClick={ event => processAction('ambassador') }>
+                        <ContextMenuListItemView classNames={ [ 'menu-item-warning' ] } onClick={ event => processAction('ambassador') }>
                             <FaChevronRight className="right fa-icon" />
                             { LocalizeText('infostand.link.ambassador') }
                         </ContextMenuListItemView> }
-                    { canGiveHandItem && <ContextMenuListItemView onClick={ event => processAction('pass_hand_item') }>
-                        { LocalizeText('avatar.widget.pass_hand_item') }
-                    </ContextMenuListItemView> }
                 </> }
             { (mode === MODE_MODERATE) &&
                 <>

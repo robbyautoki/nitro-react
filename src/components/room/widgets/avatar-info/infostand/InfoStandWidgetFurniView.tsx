@@ -2,6 +2,7 @@ import { CrackableDataType, FurnitureFloorUpdateComposer, FurnitureStackHeightCo
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaUser, FaMusic, FaUserAlt } from 'react-icons/fa';
 import { Move, RotateCw, PackageOpen, Hand, ShoppingCart, List, Wrench, Hash, ChevronsLeftRight } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../../ui/tooltip';
 import { AvatarInfoFurni, CreateLinkEvent, GetGroupInformation, GetNitroInstance, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, UserProfileIconView } from '../../../../../common';
 import { useMessageEvent, useRoom, useSoundEvent } from '../../../../../hooks';
@@ -571,18 +572,22 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
         return (
             <div className="flex items-center h-7 rounded-md border border-border/30 bg-accent/5 overflow-hidden group hover:border-border/60 transition-colors" role="group" aria-label={ ariaLabel }>
-                <div
-                    ref={ scrubRef }
-                    className="flex items-center gap-1 px-2 select-none cursor-ew-resize shrink-0 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 group-hover:text-muted-foreground/80 transition-colors"
-                    onPointerDown={ onPointerDown }
-                    onPointerMove={ onPointerMove }
-                    onPointerUp={ onPointerUp }
-                    title={ `Ziehen zum Ändern · Shift = schneller · Alt = feiner` }
-                >
-                    { Icon && <Icon className="w-2.5 h-2.5" /> }
-                    <span>{ label }</span>
-                    <ChevronsLeftRight className="w-2 h-2 opacity-0 group-hover:opacity-60 transition-opacity" />
-                </div>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <div
+                            ref={ scrubRef }
+                            className="flex items-center gap-1 px-2 select-none cursor-ew-resize shrink-0 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50 group-hover:text-muted-foreground/80 transition-colors"
+                            onPointerDown={ onPointerDown }
+                            onPointerMove={ onPointerMove }
+                            onPointerUp={ onPointerUp }
+                        >
+                            { Icon && <Icon className="w-2.5 h-2.5" /> }
+                            <span>{ label }</span>
+                            <ChevronsLeftRight className="w-2 h-2 opacity-0 group-hover:opacity-60 transition-opacity" />
+                        </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Ziehen zum Ändern · Shift = schneller · Alt = feiner</TooltipContent>
+                </Tooltip>
                 <button
                     className="w-5 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/20 transition-colors text-[10px]"
                     onClick={ () => onIncrement(-step) }
@@ -625,27 +630,40 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     <ScrubField label="Z" value={ livePos.z } onIncrement={ (d) => handleHeightChange(d) } step={ heightStep } decimals={ 2 } ariaLabel="Höhe" />
                     <div className="flex items-center gap-px">
                         { STEP_OPTIONS.map(s => (
-                            <button
-                                key={ s }
-                                className={ `px-1 py-1 text-[8px] font-mono transition-colors rounded ${
-                                    heightStep === s ? 'text-primary bg-primary/10' : 'text-muted-foreground/30 hover:text-muted-foreground/60'
-                                }` }
-                                onClick={ () => setHeightStep(s) }
-                                title={ `Schritt ${s}` }
-                            >
-                                { s }
-                            </button>
+                            <Tooltip key={ s }>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        className={ `px-1 py-1 text-[8px] font-mono transition-colors rounded ${
+                                            heightStep === s ? 'text-primary bg-primary/10' : 'text-muted-foreground/30 hover:text-muted-foreground/60'
+                                        }` }
+                                        onClick={ () => setHeightStep(s) }
+                                    >
+                                        { s }
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top">Schritt { s }</TooltipContent>
+                            </Tooltip>
                         )) }
                     </div>
                 </div>
                 <div className="flex items-center h-7 rounded-md border border-border/30 overflow-hidden">
-                    <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors" onClick={ () => handleRotate(false) } aria-label="Links drehen" title="Links drehen">
-                        <RotateCw className="w-3 h-3 -scale-x-100" />
-                    </button>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors" onClick={ () => handleRotate(false) } aria-label="Links drehen">
+                                <RotateCw className="w-3 h-3 -scale-x-100" />
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">Links drehen</TooltipContent>
+                    </Tooltip>
                     <div className="w-px h-3 bg-border/30" />
-                    <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors" onClick={ () => handleRotate(true) } aria-label="Rechts drehen" title="Rechts drehen">
-                        <RotateCw className="w-3 h-3" />
-                    </button>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors" onClick={ () => handleRotate(true) } aria-label="Rechts drehen">
+                                <RotateCw className="w-3 h-3" />
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">Rechts drehen</TooltipContent>
+                    </Tooltip>
                 </div>
             </div>
         </div>
@@ -661,27 +679,40 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
             {
                 const IconComp = ACTION_ICONS[btn.action];
                 return (
-                    <button
-                        key={ i }
-                        className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors"
-                        onClick={ () => processButtonAction(btn.action) }
-                        title={ btn.label }
-                        aria-label={ btn.label }
-                    >
-                        { IconComp && <IconComp className="w-3.5 h-3.5" /> }
-                    </button>
+                    <Tooltip key={ i }>
+                        <TooltipTrigger asChild>
+                            <button
+                                className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors"
+                                onClick={ () => processButtonAction(btn.action) }
+                                aria-label={ btn.label }
+                            >
+                                { IconComp && <IconComp className="w-3.5 h-3.5" /> }
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">{ btn.label }</TooltipContent>
+                    </Tooltip>
                 );
             }) }
             { hasLinks && actionButtons.length > 0 && <div className="w-px h-4 bg-border/20 mx-0.5" /> }
             { avatarInfo.purchaseOfferId > 0 && (
-                <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => processButtonAction('buy_one') } title="Kaufen" aria-label="Kaufen">
-                    <ShoppingCart className="w-3.5 h-3.5" />
-                </button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => processButtonAction('buy_one') } aria-label="Kaufen">
+                            <ShoppingCart className="w-3.5 h-3.5" />
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Kaufen</TooltipContent>
+                </Tooltip>
             ) }
             { isRarity && (
-                <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => CreateLinkEvent('pricelist/toggle') } title="Preisliste" aria-label="Preisliste">
-                    <List className="w-3.5 h-3.5" />
-                </button>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => CreateLinkEvent('pricelist/toggle') } aria-label="Preisliste">
+                            <List className="w-3.5 h-3.5" />
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">Preisliste</TooltipContent>
+                </Tooltip>
             ) }
         </div>
     );
@@ -695,6 +726,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     if(isRarity || isLtd)
     {
         return (
+            <TooltipProvider delayDuration={ 300 }>
             <div className="flex flex-col items-end">
                 <div className={ `ec-wrap furni-compact ${ panelClass }` }>
                     <svg className="ec-filters" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -775,6 +807,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                     </div>
                 </div>
             </div>
+            </TooltipProvider>
         );
     }
 
@@ -783,6 +816,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     // ═══════════════════════════════════════════════
 
     return (
+        <TooltipProvider delayDuration={ 300 }>
         <div className="flex flex-col items-end">
             <div className="relative w-[280px] rounded-xl border border-border/40 bg-card text-card-foreground shadow-xl overflow-hidden furni-compact">
                 {/* Preview Zone */}
@@ -820,5 +854,6 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                 { linksContent }
             </div>
         </div>
+        </TooltipProvider>
     );
 }

@@ -71,7 +71,10 @@ import {
 } from "lucide-react";
 
 import { GetConfiguration } from '@/api';
-const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
+const ASSETS_URL = () => {
+  try { const v = GetConfiguration<string>('asset.url', ''); if (v && !v.includes('localhost')) return v; } catch {}
+  return window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://assets.bahhos.de';
+};
 const IMAGE_LIB_URL = `${ASSETS_URL()}`;
 
 const CURRENCY_ICONS = {

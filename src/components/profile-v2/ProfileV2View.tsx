@@ -11,7 +11,10 @@ import {
 } from "lucide-react";
 
 import { GetConfiguration } from '@/api';
-const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
+const ASSETS_URL = () => {
+  try { const v = GetConfiguration<string>('asset.url', ''); if (v && !v.includes('localhost')) return v; } catch {}
+  return window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://assets.bahhos.de';
+};
 const KLIPY_KEY = process.env.NEXT_PUBLIC_KLIPY_API_KEY ?? "";
 
 interface KlipyGif { id: number; slug: string; title: string; file: { md: { gif: { url: string } }; sm: { webp: { url: string } } } }

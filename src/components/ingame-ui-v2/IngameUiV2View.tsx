@@ -54,7 +54,10 @@ import {
 } from "lucide-react";
 
 import { GetConfiguration } from '@/api';
-const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
+const ASSETS_URL = () => {
+  try { const v = GetConfiguration<string>('asset.url', ''); if (v && !v.includes('localhost')) return v; } catch {}
+  return window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://assets.bahhos.de';
+};
 
 function CurrencyIcon({ type }: { type: string }) {
   return <img src={`${ASSETS_URL()}/wallet/${type}.png`} alt={type} className="w-4 h-4" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;

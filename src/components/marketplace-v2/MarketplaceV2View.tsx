@@ -58,7 +58,10 @@ import {
 } from "lucide-react";
 
 import { GetConfiguration } from '@/api';
-const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
+const ASSETS_URL = () => {
+  try { const v = GetConfiguration<string>('asset.url', ''); if (v && !v.includes('localhost')) return v; } catch {}
+  return window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://assets.bahhos.de';
+};
 function getFurniIcon(n: string) { return `${ASSETS_URL()}/c_images/${n.split("*")[0]}_icon.png`; }
 const MARKETPLACE_BANNER = `${ASSETS_URL()}/c_images/catalogue/bonush.gif`;
 

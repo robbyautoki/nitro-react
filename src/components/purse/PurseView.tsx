@@ -742,7 +742,7 @@ export const PurseView: FC<{}> = props => {
         }
       `}</style>
       <div className="fixed top-0 left-0 right-0 h-12 z-[71] pointer-events-auto bg-card border-b border-border/40">
-        <div className="flex items-center justify-between h-full pr-4 transition-all duration-300 ease-out" style={{ paddingLeft: 'calc(var(--sidebar-width, 80px) - 8px)' }}>
+        <div className="flex items-center h-full pr-4 transition-all duration-300 ease-out" style={{ paddingLeft: 'calc(var(--sidebar-width, 80px) - 8px)' }}>
           {/* Left: Room Info */}
           <div className="flex items-center gap-2">
             {roomSession ? (
@@ -796,8 +796,10 @@ export const PurseView: FC<{}> = props => {
             )}
           </div>
 
+          <div className="flex-1" />
+
           {/* Right */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Zone 0: Radio */}
             <RadioPanelView embedded />
 

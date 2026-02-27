@@ -48,8 +48,8 @@ export const InventoryPetView: FC<InventoryPetViewProps> = ({ roomSession }) =>
 
     return (
         <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
-            <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
-                <span className="text-xs font-medium text-[oklch(var(--foreground))]/50">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                <span className="text-xs font-medium text-muted-foreground">
                     {petItems.length} {petItems.length === 1 ? 'Haustier' : 'Haustiere'}
                 </span>
             </div>

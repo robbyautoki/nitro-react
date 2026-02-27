@@ -32,14 +32,14 @@ export const InventoryPetItemView: FC<InventoryPetItemViewProps> = ({ petItem, h
             className={
                 'flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ' +
                 (isActive
-                    ? 'bg-white/[0.08]'
-                    : 'bg-transparent hover:bg-white/[0.04]')
+                    ? 'bg-accent'
+                    : 'bg-transparent hover:bg-accent')
             }
             onClick={handleClick}
             onDoubleClick={handleDblClick}
         >
             {/* Pet Image */}
-            <div className="w-10 h-10 shrink-0 rounded-md bg-white/[0.04] flex items-center justify-center overflow-hidden relative">
+            <div className="w-10 h-10 shrink-0 rounded-md bg-accent flex items-center justify-center overflow-hidden relative">
                 <LayoutPetImageView figure={petItem.petData.figureData.figuredata} direction={2} headOnly={false} scale={1} style={{ imageRendering: 'pixelated' }} />
                 {unseen && (
                     <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.6)]" />
@@ -48,11 +48,11 @@ export const InventoryPetItemView: FC<InventoryPetItemViewProps> = ({ petItem, h
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-[oklch(var(--foreground))] leading-tight truncate">
+                <div className="text-sm font-semibold text-foreground leading-tight truncate">
                     {petItem.petData.name}
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/[0.06] text-[oklch(var(--foreground))]/50 leading-none">
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent text-muted-foreground leading-none">
                         Lv. {petItem.petData.level}
                     </span>
                 </div>

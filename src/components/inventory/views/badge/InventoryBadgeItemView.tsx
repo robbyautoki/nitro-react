@@ -20,8 +20,8 @@ export const InventoryBadgeItemView: FC<InventoryBadgeItemViewProps> = ({ badgeC
             className={
                 'relative w-10 h-10 rounded-md flex items-center justify-center cursor-pointer transition-all ' +
                 (isActive
-                    ? 'bg-white/[0.12] ring-1 ring-white/20'
-                    : 'bg-white/[0.03] hover:bg-white/[0.06]')
+                    ? 'bg-accent ring-1 ring-border'
+                    : 'bg-transparent hover:bg-accent')
             }
             onClick={() => setSelectedBadgeCode(badgeCode)}
             onDoubleClick={() => toggleBadge(badgeCode)}

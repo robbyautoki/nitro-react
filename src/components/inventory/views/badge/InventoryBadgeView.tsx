@@ -34,7 +34,7 @@ export const InventoryBadgeView: FC<{}> = () =>
             {/* Active Badges Section */}
             {activeBadgeCodes && activeBadgeCodes.length > 0 && (
                 <div className="px-3 pt-2 pb-1">
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-[oklch(var(--foreground))]/30 mb-1.5 block">
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground mb-1.5 block">
                         Aktive Abzeichen
                     </span>
                     <div className="flex flex-wrap gap-1">
@@ -47,7 +47,7 @@ export const InventoryBadgeView: FC<{}> = () =>
 
             {/* Divider */}
             {activeBadgeCodes && activeBadgeCodes.length > 0 && inactiveBadges.length > 0 && (
-                <div className="mx-3 border-b border-white/[0.06] my-1" />
+                <div className="mx-3 border-b border-border my-1" />
             )}
 
             {/* All Badges Grid */}
@@ -68,12 +68,12 @@ export const InventoryBadgeView: FC<{}> = () =>
 
             {/* Selected Badge Footer */}
             {selectedBadgeCode && (
-                <div className="flex items-center gap-3 px-3 py-2 border-t border-white/[0.06]">
-                    <div className="w-10 h-10 shrink-0 rounded-md bg-white/[0.04] flex items-center justify-center">
+                <div className="flex items-center gap-3 px-3 py-2 border-t border-border">
+                    <div className="w-10 h-10 shrink-0 rounded-md bg-accent flex items-center justify-center">
                         <LayoutBadgeImageView badgeCode={selectedBadgeCode} />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-[oklch(var(--foreground))] leading-tight truncate">
+                        <div className="text-sm font-semibold text-foreground leading-tight truncate">
                             {LocalizeBadgeName(selectedBadgeCode)}
                         </div>
                     </div>

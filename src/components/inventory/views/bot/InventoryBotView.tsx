@@ -49,8 +49,8 @@ export const InventoryBotView: FC<InventoryBotViewProps> = ({ roomSession }) =>
     return (
         <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
-                <span className="text-xs font-medium text-[oklch(var(--foreground))]/50">
+            <div className="flex items-center justify-between px-3 py-2 border-b border-border">
+                <span className="text-xs font-medium text-muted-foreground">
                     {botItems.length} {botItems.length === 1 ? 'Bot' : 'Bots'}
                 </span>
             </div>

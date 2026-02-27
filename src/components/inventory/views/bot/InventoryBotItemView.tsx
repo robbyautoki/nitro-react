@@ -38,14 +38,14 @@ export const InventoryBotItemView: FC<InventoryBotItemViewProps> = ({ botItem, h
             className={
                 'flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ' +
                 (isActive
-                    ? 'bg-white/[0.08]'
-                    : 'bg-transparent hover:bg-white/[0.04]')
+                    ? 'bg-accent'
+                    : 'bg-transparent hover:bg-accent')
             }
             onClick={handleClick}
             onDoubleClick={handleDblClick}
         >
             {/* Avatar */}
-            <div className="w-10 h-10 shrink-0 rounded-md bg-white/[0.04] flex items-center justify-center overflow-hidden relative">
+            <div className="w-10 h-10 shrink-0 rounded-md bg-accent flex items-center justify-center overflow-hidden relative">
                 {!imgError ? (
                     <img
                         src={avatarUrl(botItem.botData.figure)}
@@ -65,11 +65,11 @@ export const InventoryBotItemView: FC<InventoryBotItemViewProps> = ({ botItem, h
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-                <div className="text-sm font-semibold text-[oklch(var(--foreground))] leading-tight truncate">
+                <div className="text-sm font-semibold text-foreground leading-tight truncate">
                     {botItem.botData.name}
                 </div>
                 {botItem.botData.motto && (
-                    <div className="text-xs text-[oklch(var(--foreground))]/40 italic leading-tight truncate mt-0.5">
+                    <div className="text-xs text-muted-foreground italic leading-tight truncate mt-0.5">
                         {botItem.botData.motto}
                     </div>
                 )}

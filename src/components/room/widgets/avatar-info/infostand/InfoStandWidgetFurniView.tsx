@@ -615,75 +615,37 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     // ─── Position Editor ───
 
     const editorContent = isEditorOpen && canMove && !avatarInfo.isWallItem && (
-        <div className="border-t border-border/20 bg-accent/[0.03] animate-[editorSlideIn_0.2s_ease-out]">
-            <div className="px-3 py-2.5 flex flex-col gap-1.5">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/40">Transform</span>
+        <div className="border-t border-border/20 animate-[editorSlideIn_0.2s_ease-out]">
+            <div className="px-3 py-2 flex flex-col gap-1">
+                <div className="grid grid-cols-2 gap-1">
+                    <ScrubField label="X" value={ livePos.x } onIncrement={ (d) => handleMoveDirection(d, 0) } step={ 1 } ariaLabel="X-Position" />
+                    <ScrubField label="Y" value={ livePos.y } onIncrement={ (d) => handleMoveDirection(0, d) } step={ 1 } ariaLabel="Y-Position" />
                 </div>
-
-                <div className="grid grid-cols-2 gap-1.5">
-                    <ScrubField
-                        label="X"
-                        value={ livePos.x }
-                        onIncrement={ (d) => handleMoveDirection(d, 0) }
-                        step={ 1 }
-                        ariaLabel="X-Position"
-                    />
-                    <ScrubField
-                        label="Y"
-                        value={ livePos.y }
-                        onIncrement={ (d) => handleMoveDirection(0, d) }
-                        step={ 1 }
-                        ariaLabel="Y-Position"
-                    />
-                </div>
-
-                <div className="grid grid-cols-2 gap-1.5">
-                    <ScrubField
-                        label="Z"
-                        value={ livePos.z }
-                        onIncrement={ (d) => handleHeightChange(d) }
-                        step={ heightStep }
-                        decimals={ 2 }
-                        ariaLabel="Höhe"
-                    />
-                    <div className="flex items-center h-7 rounded-md border border-border/30 bg-accent/5 overflow-hidden group hover:border-border/60 transition-colors">
-                        <button
-                            className="w-7 h-full flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-purple-500/10 transition-colors"
-                            onClick={ () => handleRotate(false) }
-                            aria-label="Links drehen"
-                        >
-                            <RotateCw className="w-3 h-3 -scale-x-100" />
-                        </button>
-                        <div className="flex-1 text-center text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/50">
-                            ↻
-                        </div>
-                        <button
-                            className="w-7 h-full flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-purple-500/10 transition-colors"
-                            onClick={ () => handleRotate(true) }
-                            aria-label="Rechts drehen"
-                        >
-                            <RotateCw className="w-3 h-3" />
-                        </button>
+                <div className="grid grid-cols-[1fr_auto] gap-1 items-center">
+                    <ScrubField label="Z" value={ livePos.z } onIncrement={ (d) => handleHeightChange(d) } step={ heightStep } decimals={ 2 } ariaLabel="Höhe" />
+                    <div className="flex items-center gap-px">
+                        { STEP_OPTIONS.map(s => (
+                            <button
+                                key={ s }
+                                className={ `px-1 py-1 text-[8px] font-mono transition-colors rounded ${
+                                    heightStep === s ? 'text-primary bg-primary/10' : 'text-muted-foreground/30 hover:text-muted-foreground/60'
+                                }` }
+                                onClick={ () => setHeightStep(s) }
+                                title={ `Schritt ${s}` }
+                            >
+                                { s }
+                            </button>
+                        )) }
                     </div>
                 </div>
-
-                <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-[8px] text-muted-foreground/30 mr-1">Schritt:</span>
-                    { STEP_OPTIONS.map(s => (
-                        <button
-                            key={ s }
-                            className={ `px-1.5 py-0.5 rounded text-[9px] font-mono transition-colors ${
-                                heightStep === s
-                                    ? 'bg-primary/15 text-primary border border-primary/30'
-                                    : 'text-muted-foreground/40 hover:text-muted-foreground/70 border border-transparent'
-                            }` }
-                            onClick={ () => setHeightStep(s) }
-                            aria-label={ `Schritt ${s}` }
-                        >
-                            { s }
-                        </button>
-                    )) }
+                <div className="flex items-center h-7 rounded-md border border-border/30 overflow-hidden">
+                    <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors" onClick={ () => handleRotate(false) } aria-label="Links drehen" title="Links drehen">
+                        <RotateCw className="w-3 h-3 -scale-x-100" />
+                    </button>
+                    <div className="w-px h-3 bg-border/30" />
+                    <button className="flex-1 h-full flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-purple-500/10 transition-colors" onClick={ () => handleRotate(true) } aria-label="Rechts drehen" title="Rechts drehen">
+                        <RotateCw className="w-3 h-3" />
+                    </button>
                 </div>
             </div>
         </div>
@@ -691,44 +653,40 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
     // ─── Action Buttons ───
 
-    const actionsContent = actionButtons.length > 0 && (
-        <div className="flex items-stretch divide-x divide-border/20 border-t border-border/20">
+    const hasLinks = avatarInfo.purchaseOfferId > 0 || isRarity;
+
+    const actionsContent = (actionButtons.length > 0 || hasLinks) && (
+        <div className="flex items-center border-t border-border/20 px-2 py-1.5 gap-0.5">
             { actionButtons.map((btn, i) =>
             {
                 const IconComp = ACTION_ICONS[btn.action];
                 return (
                     <button
                         key={ i }
-                        className="flex-1 flex flex-col items-center gap-0.5 py-2 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors"
+                        className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors"
                         onClick={ () => processButtonAction(btn.action) }
+                        title={ btn.label }
                         aria-label={ btn.label }
                     >
                         { IconComp && <IconComp className="w-3.5 h-3.5" /> }
-                        <span>{ btn.label }</span>
                     </button>
                 );
             }) }
-        </div>
-    );
-
-    // ─── Quick Links ───
-
-    const linksContent = (avatarInfo.purchaseOfferId > 0 || isRarity) && (
-        <div className="flex items-stretch divide-x divide-border/20 border-t border-border/20">
+            { hasLinks && actionButtons.length > 0 && <div className="w-px h-4 bg-border/20 mx-0.5" /> }
             { avatarInfo.purchaseOfferId > 0 && (
-                <button className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => processButtonAction('buy_one') } aria-label="Kaufen">
-                    <ShoppingCart className="w-3 h-3" />
-                    <span>Kaufen</span>
+                <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => processButtonAction('buy_one') } title="Kaufen" aria-label="Kaufen">
+                    <ShoppingCart className="w-3.5 h-3.5" />
                 </button>
             ) }
             { isRarity && (
-                <button className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => CreateLinkEvent('pricelist/toggle') } aria-label="Preisliste">
-                    <List className="w-3 h-3" />
-                    <span>Preisliste</span>
+                <button className="flex-1 flex items-center justify-center h-7 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent/30 transition-colors" onClick={ () => CreateLinkEvent('pricelist/toggle') } title="Preisliste" aria-label="Preisliste">
+                    <List className="w-3.5 h-3.5" />
                 </button>
             ) }
         </div>
     );
+
+    const linksContent = null;
 
     // ═══════════════════════════════════════════════
     // ELECTRIC CARD (Rarity / LTD)

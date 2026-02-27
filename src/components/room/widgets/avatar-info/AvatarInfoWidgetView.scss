@@ -151,23 +151,7 @@
         position: relative;
         transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-        // Grid pattern overlay (bottom-right fade)
-        &::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-            background-size: 32px 32px;
-            mask-image: radial-gradient(ellipse 80% 80% at 100% 100%, #000 50%, transparent 90%);
-            -webkit-mask-image: radial-gradient(ellipse 80% 80% at 100% 100%, #000 50%, transparent 90%);
-            pointer-events: none;
-            z-index: 0;
-            border-radius: inherit;
-        }
 
-        // All card content above grid
-        > * { position: relative; z-index: 1; }
 
         .furni-preview {
             position: relative;

@@ -1,70 +1,14 @@
-.nitro-mod-tools {
-    width: $nitro-mod-tools-width;
-}
+.nitro-mod-tools-v2 {
+    width: 340px;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
 
-.nitro-mod-tools-room {
-    width: 240px;
-
-    .username {
-        color: rgba(56, 189, 248, 0.80);
-        text-decoration: underline;
-    }
-}
-
-.nitro-mod-tools-user {
-    width: 350px;
-    height: 370px;
-
-    .username {
-        color: rgba(56, 189, 248, 0.80);
-        text-decoration: underline;
+    &::-webkit-scrollbar {
+        width: 4px;
     }
 
-    .table {
-        color: rgba(255, 255, 255, 0.80);
-
-        > :not(caption)>*>* {
-            box-shadow: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        &.table-striped>tbody>tr:nth-of-type(odd) {
-            color: rgba(255, 255, 255, 0.80);
-            background: rgba(255, 255, 255, 0.04);
-        }
-    }
-}
-
-.nitro-mod-tools-user-visits {
-    min-width: 300px;
-}
-
-.nitro-mod-tools-chatlog {
-    width: 400px;
-    height: 250px;
-}
-
-.nitro-mod-tools-user-visits {
-    width: 250px;
-    height: 250px;
-}
-
-.nitro-mod-tools-tickets {
-    width: 400px;
-    height: 200px;
-}
-
-.nitro-mod-tools-handle-issue {
-    width: 400px;
-}
-
-.nitro-mod-tools-chatlog,
-.nitro-mod-tools-user-visits {
-
-    .log-entry {
-
-        &.highlighted {
-            border: 1px solid $red;
-        }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 2px;
     }
 }

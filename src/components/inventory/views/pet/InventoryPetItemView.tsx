@@ -1,43 +1,72 @@
-import { MouseEventType } from '@nitrots/nitro-renderer';
-import { FC, MouseEvent, PropsWithChildren, useState } from 'react';
+import { FC, MouseEvent, useState } from 'react';
 import { attemptPetPlacement, IPetItem, UnseenItemCategory } from '../../../../api';
-import { LayoutGridItem, LayoutPetImageView } from '../../../../common';
+import { LayoutPetImageView } from '../../../../common';
 import { useInventoryPets, useInventoryUnseenTracker } from '../../../../hooks';
 
-export const InventoryPetItemView: FC<PropsWithChildren<{ petItem: IPetItem }>> = props =>
+interface InventoryPetItemViewProps {
+    petItem: IPetItem;
+    hasRoomSession: boolean;
+}
+
+export const InventoryPetItemView: FC<InventoryPetItemViewProps> = ({ petItem, hasRoomSession }) =>
 {
-    const { petItem = null, children = null, ...rest } = props;
-    const [ isMouseDown, setMouseDown ] = useState(false);
-    const { selectedPet = null, setSelectedPet = null } = useInventoryPets();
+    const { selectedPet, setSelectedPet } = useInventoryPets();
     const { isUnseen } = useInventoryUnseenTracker();
+
+    const isActive = selectedPet === petItem;
     const unseen = isUnseen(UnseenItemCategory.PET, petItem.petData.id);
 
-    const onMouseEvent = (event: MouseEvent) =>
-    {
-        switch(event.type)
-        {
-            case MouseEventType.MOUSE_DOWN:
-                setSelectedPet(petItem);
-                setMouseDown(true);
-                return;
-            case MouseEventType.MOUSE_UP:
-                setMouseDown(false);
-                return;
-            case MouseEventType.ROLL_OUT:
-                if(!isMouseDown || !(petItem === selectedPet)) return;
+    const handleClick = () => setSelectedPet(petItem);
 
-                attemptPetPlacement(petItem);
-                return;
-            case 'dblclick':
-                attemptPetPlacement(petItem);
-                return;
-        }
-    }
+    const handleDblClick = () => {
+        if (hasRoomSession) attemptPetPlacement(petItem);
+    };
+
+    const handlePlace = (e: MouseEvent) => {
+        e.stopPropagation();
+        attemptPetPlacement(petItem);
+    };
 
     return (
-        <LayoutGridItem itemActive={ (petItem === selectedPet) } itemUnseen={ unseen } onMouseDown={ onMouseEvent } onMouseUp={ onMouseEvent } onMouseOut={ onMouseEvent } onDoubleClick={ onMouseEvent } { ...rest }>
-            <LayoutPetImageView figure={ petItem.petData.figureData.figuredata } direction={ 3 } headOnly={ true } />
-            { children }
-        </LayoutGridItem>
+        <div
+            className={
+                'flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ' +
+                (isActive
+                    ? 'bg-white/[0.08]'
+                    : 'bg-transparent hover:bg-white/[0.04]')
+            }
+            onClick={handleClick}
+            onDoubleClick={handleDblClick}
+        >
+            {/* Pet Image */}
+            <div className="w-10 h-10 shrink-0 rounded-md bg-white/[0.04] flex items-center justify-center overflow-hidden relative">
+                <LayoutPetImageView figure={petItem.petData.figureData.figuredata} direction={2} headOnly={false} scale={1} style={{ imageRendering: 'pixelated' }} />
+                {unseen && (
+                    <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.6)]" />
+                )}
+            </div>
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-[oklch(var(--foreground))] leading-tight truncate">
+                    {petItem.petData.name}
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-white/[0.06] text-[oklch(var(--foreground))]/50 leading-none">
+                        Lv. {petItem.petData.level}
+                    </span>
+                </div>
+            </div>
+
+            {/* Place Button */}
+            {hasRoomSession && isActive && (
+                <button
+                    className="shrink-0 px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors cursor-pointer"
+                    onClick={handlePlace}
+                >
+                    Platzieren
+                </button>
+            )}
+        </div>
     );
-}
+};

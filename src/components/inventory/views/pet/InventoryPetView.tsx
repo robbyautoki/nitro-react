@@ -1,89 +1,68 @@
-import { IRoomSession, RoomObjectVariable, RoomPreviewer } from '@nitrots/nitro-renderer';
+import { IRoomSession, RoomPreviewer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
-import { attemptPetPlacement, GetRoomEngine, LocalizeText, UnseenItemCategory } from '../../../../api';
-import { AutoGrid, Button, Column } from '../../../../common';
+import { UnseenItemCategory } from '../../../../api';
 import { useInventoryPets, useInventoryUnseenTracker } from '../../../../hooks';
-import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryPetItemView } from './InventoryPetItemView';
 
-interface InventoryPetViewProps
-{
+interface InventoryPetViewProps {
     roomSession: IRoomSession;
     roomPreviewer: RoomPreviewer;
 }
 
-export const InventoryPetView: FC<InventoryPetViewProps> = props =>
+export const InventoryPetView: FC<InventoryPetViewProps> = ({ roomSession }) =>
 {
-    const { roomSession = null, roomPreviewer = null } = props;
-    const [ isVisible, setIsVisible ] = useState(false);
-    const { petItems = null, selectedPet = null, activate = null, deactivate = null } = useInventoryPets();
-    const { isUnseen = null, removeUnseen = null } = useInventoryUnseenTracker();
+    const [isVisible, setIsVisible] = useState(false);
+    const { petItems, selectedPet, activate, deactivate } = useInventoryPets();
+    const { isUnseen, removeUnseen, resetCategory } = useInventoryUnseenTracker();
 
-    useEffect(() =>
-    {
-        if(!selectedPet || !roomPreviewer) return;
-
-        const petData = selectedPet.petData;
-        const roomEngine = GetRoomEngine();
-
-        let wallType = roomEngine.getRoomInstanceVariable<string>(roomEngine.activeRoomId, RoomObjectVariable.ROOM_WALL_TYPE);
-        let floorType = roomEngine.getRoomInstanceVariable<string>(roomEngine.activeRoomId, RoomObjectVariable.ROOM_FLOOR_TYPE);
-        let landscapeType = roomEngine.getRoomInstanceVariable<string>(roomEngine.activeRoomId, RoomObjectVariable.ROOM_LANDSCAPE_TYPE);
-
-        wallType = (wallType && wallType.length) ? wallType : '101';
-        floorType = (floorType && floorType.length) ? floorType : '101';
-        landscapeType = (landscapeType && landscapeType.length) ? landscapeType : '1.1';
-
-        roomPreviewer.reset(false);
-        roomPreviewer.updateRoomWallsAndFloorVisibility(true, true);
-        roomPreviewer.updateObjectRoom(floorType, wallType, landscapeType);
-        roomPreviewer.addPetIntoRoom(petData.figureString);
-    }, [ roomPreviewer, selectedPet ]);
-
-    useEffect(() =>
-    {
-        if(!selectedPet || !isUnseen(UnseenItemCategory.PET, selectedPet.petData.id)) return;
-
+    useEffect(() => {
+        if (!selectedPet || !isUnseen(UnseenItemCategory.PET, selectedPet.petData.id)) return;
         removeUnseen(UnseenItemCategory.PET, selectedPet.petData.id);
-    }, [ selectedPet, isUnseen, removeUnseen ]);
+    }, [selectedPet, isUnseen, removeUnseen]);
 
-    useEffect(() =>
-    {
-        if(!isVisible) return;
-
+    useEffect(() => {
+        if (!isVisible) return;
         const id = activate();
-
         return () => deactivate(id);
-    }, [ isVisible, activate, deactivate ]);
+    }, [isVisible, activate, deactivate]);
 
-    useEffect(() =>
-    {
+    useEffect(() => {
+        if (!isVisible) return;
+        return () => { resetCategory(UnseenItemCategory.PET); };
+    }, [isVisible, resetCategory]);
+
+    useEffect(() => {
         setIsVisible(true);
-
         return () => setIsVisible(false);
     }, []);
 
-    if(!petItems || !petItems.length) return <InventoryCategoryEmptyView title={ LocalizeText('inventory.empty.pets.title') } desc={ LocalizeText('inventory.empty.pets.desc') } />;
+    if (!petItems || !petItems.length) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center gap-2 opacity-40 select-none py-12">
+                <span className="text-3xl">🐾</span>
+                <span className="text-sm font-medium">Keine Haustiere vorhanden</span>
+                <span className="text-xs opacity-60">Kaufe Haustiere im Katalog</span>
+            </div>
+        );
+    }
 
     return (
-        <Column grow gap={ 0 } style={{ minHeight: 0 }}>
-            <div className="inv-items-grid">
-                <AutoGrid columnCount={ 7 }>
-                    { petItems && (petItems.length > 0) && petItems.map(item => <InventoryPetItemView key={ item.petData.id } petItem={ item } />) }
-                </AutoGrid>
+        <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
+            <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
+                <span className="text-xs font-medium text-[oklch(var(--foreground))]/50">
+                    {petItems.length} {petItems.length === 1 ? 'Haustier' : 'Haustiere'}
+                </span>
             </div>
-            { selectedPet && selectedPet.petData &&
-                <div className="inv-footer">
-                    <div className="inv-footer-info">
-                        <div className="inv-footer-name">{ selectedPet.petData.name }</div>
-                        <div className="inv-footer-actions">
-                            { !!roomSession &&
-                                <Button variant="success" size="sm" onClick={ event => attemptPetPlacement(selectedPet) }>
-                                    { LocalizeText('inventory.furni.placetoroom') }
-                                </Button> }
-                        </div>
-                    </div>
-                </div> }
-        </Column>
+
+            <div className="flex-1 overflow-y-auto p-1.5 flex flex-col gap-0.5" style={{ minHeight: 0 }}>
+                {petItems.map(item => (
+                    <InventoryPetItemView
+                        key={item.petData.id}
+                        petItem={item}
+                        hasRoomSession={!!roomSession}
+                    />
+                ))}
+            </div>
+        </div>
     );
-}
+};

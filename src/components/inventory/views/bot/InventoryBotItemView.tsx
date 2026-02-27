@@ -5,7 +5,7 @@ import { useInventoryBots, useInventoryUnseenTracker } from '../../../../hooks';
 const HABBO_IMAGER = 'https://www.habbo.de/habbo-imaging/avatarimage';
 
 function avatarUrl(figure: string) {
-    return `${HABBO_IMAGER}?figure=${encodeURIComponent(figure)}&direction=2&head_direction=2&size=l&gesture=sml`;
+    return `${HABBO_IMAGER}?figure=${encodeURIComponent(figure)}&headonly=1&direction=2&head_direction=2&size=l&gesture=sml`;
 }
 
 interface InventoryBotItemViewProps {
@@ -36,22 +36,22 @@ export const InventoryBotItemView: FC<InventoryBotItemViewProps> = ({ botItem, h
     return (
         <div
             className={
-                'flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all border-l-2 ' +
+                'flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all ' +
                 (isActive
-                    ? 'bg-white/[0.08] border-l-emerald-500'
-                    : 'bg-transparent border-l-transparent hover:bg-white/[0.04]')
+                    ? 'bg-white/[0.08]'
+                    : 'bg-transparent hover:bg-white/[0.04]')
             }
             onClick={handleClick}
             onDoubleClick={handleDblClick}
         >
             {/* Avatar */}
-            <div className="w-12 h-12 shrink-0 rounded-md bg-white/[0.04] flex items-center justify-center overflow-hidden relative">
+            <div className="w-10 h-10 shrink-0 rounded-md bg-white/[0.04] flex items-center justify-center overflow-hidden relative">
                 {!imgError ? (
                     <img
                         src={avatarUrl(botItem.botData.figure)}
                         alt=""
-                        className="h-14 object-contain"
-                        style={{ imageRendering: 'pixelated', marginTop: '6px' }}
+                        className="h-10 object-contain"
+                        style={{ imageRendering: 'pixelated' }}
                         draggable={false}
                         onError={() => setImgError(true)}
                     />

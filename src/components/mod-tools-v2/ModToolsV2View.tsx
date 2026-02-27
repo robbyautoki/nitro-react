@@ -33,6 +33,7 @@ import {
 } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { CreateLinkEvent, GetIssueCategoryName, GetSessionDataManager, ISelectedUser, LocalizeText, ModActionDefinition, NotificationAlertType, SendMessageComposer, TryVisitRoom } from '../../api';
+import { DraggableWindow, DraggableWindowPosition } from '../../common';
 import { useMessageEvent, useModTools, useNotification } from '../../hooks';
 
 import { Badge } from '@/components/ui/reui-badge';
@@ -800,15 +801,18 @@ export const ModToolsV2View: FC<ModToolsV2ViewProps> = ({ currentRoomId, selecte
     const toggle = (p: ActivePanel) => setActive(v => v === p ? null : p);
 
     return (
-        <div className="nitro-mod-tools-v2 fixed top-12 left-3 z-50">
-            <div className="space-y-2">
-                <Frame>
-                    <FramePanel className="p-0!">
-                        <PanelHeader icon={Shield} title="Mod Tools" right={
-                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={onClose}>
-                                <X className="size-3.5" />
-                            </Button>
-                        } />
+        <DraggableWindow uniqueKey="mod-tools" handleSelector=".drag-handler" windowPosition={DraggableWindowPosition.TOP_LEFT}>
+            <div className="nitro-mod-tools-v2">
+                <div className="space-y-2">
+                    <Frame>
+                        <FramePanel className="p-0!">
+                            <div className="drag-handler cursor-grab active:cursor-grabbing select-none">
+                                <PanelHeader icon={Shield} title="Mod Tools" right={
+                                    <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={onClose}>
+                                        <X className="size-3.5" />
+                                    </Button>
+                                } />
+                            </div>
                         <div className="p-2 space-y-1">
                             {([
                                 ['room', Home, 'Room Tool', currentRoomId <= 0],
@@ -829,11 +833,12 @@ export const ModToolsV2View: FC<ModToolsV2ViewProps> = ({ currentRoomId, selecte
                     </FramePanel>
                 </Frame>
 
-                {active === 'room' && currentRoomId > 0 && <RoomToolPanel roomId={currentRoomId} />}
-                {active === 'chatlog' && currentRoomId > 0 && <ChatlogPanel roomId={currentRoomId} />}
-                {active === 'user' && selectedUser && <UserToolPanel userId={selectedUser.userId} username={selectedUser.username} />}
-                {active === 'tickets' && <TicketsPanel />}
+                    {active === 'room' && currentRoomId > 0 && <RoomToolPanel roomId={currentRoomId} />}
+                    {active === 'chatlog' && currentRoomId > 0 && <ChatlogPanel roomId={currentRoomId} />}
+                    {active === 'user' && selectedUser && <UserToolPanel userId={selectedUser.userId} username={selectedUser.username} />}
+                    {active === 'tickets' && <TicketsPanel />}
+                </div>
             </div>
-        </div>
+        </DraggableWindow>
     );
 };

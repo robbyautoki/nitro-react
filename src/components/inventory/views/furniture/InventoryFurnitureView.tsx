@@ -35,7 +35,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
     const [ showBatchDeleteDialog, setShowBatchDeleteDialog ] = useState(false);
     const [ showCategoryDropdown, setShowCategoryDropdown ] = useState(false);
     const [ showInspectorCatPicker, setShowInspectorCatPicker ] = useState(false);
-    const [ sortMode, setSortMode ] = useState<'name' | 'count' | 'rarity'>('name');
+    const [ sortMode, setSortMode ] = useState<'recent' | 'name' | 'count' | 'rarity'>('recent');
 
     const categoryFilteredItems = filterByCategory(groupItems, activeCategory);
 
@@ -45,6 +45,8 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
         const items = [ ...filteredGroupItems ];
         switch(sortMode)
         {
+            case 'recent':
+                return items;
             case 'count':
                 return items.sort((a, b) => b.getUnlockedCount() - a.getUnlockedCount());
             case 'rarity':
@@ -269,9 +271,9 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             <div className="inv-toolbar-row">
                 <InventoryFurnitureSearchView groupItems={ categoryFilteredItems } setGroupItems={ setFilteredGroupItems } />
                 <div className="inv-toolbar-sep" />
-                { (['name', 'count', 'rarity'] as const).map(mode => (
+                { (['recent', 'name', 'count', 'rarity'] as const).map(mode => (
                     <div key={ mode } className={ 'inv-sort-btn' + (sortMode === mode ? ' active' : '') } onClick={ () => setSortMode(mode) }>
-                        { mode === 'name' ? 'A-Z' : mode === 'count' ? 'Menge' : 'Rarität' }
+                        { mode === 'recent' ? 'Neueste' : mode === 'name' ? 'A-Z' : mode === 'count' ? 'Menge' : 'Rarität' }
                     </div>
                 )) }
                 <div className="inv-toolbar-sep" />

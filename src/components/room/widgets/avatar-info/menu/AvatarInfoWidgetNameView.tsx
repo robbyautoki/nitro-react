@@ -34,6 +34,7 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
 
         if(nameInfo.isFriend) newClassNames.push('is-friend');
         if(nameInfo.userType === RoomObjectType.USER && nameInfo.figure) newClassNames.push('has-nameplate');
+        if(nameInfo.userType === RoomObjectType.BOT) newClassNames.push('is-bot');
 
         return newClassNames;
     }, [ nameInfo ]);

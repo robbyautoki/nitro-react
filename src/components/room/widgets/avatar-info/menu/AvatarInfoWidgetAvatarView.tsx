@@ -1,6 +1,7 @@
 import { RoomControllerLevel, RoomObjectCategory, RoomObjectVariable, RoomUnitGiveHandItemComposer, SetRelationshipStatusComposer, TradingOpenComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { ArrowLeftRight, Crown, Eye, EyeOff, Flag, Handshake, Heart, Shield, Star, UserPlus, UserRoundSearch, Volume2 } from 'lucide-react';
 import { AvatarInfoUser, CreateLinkEvent, DispatchUiEvent, GetOwnRoomObject, GetSessionDataManager, GetUserProfile, LocalizeText, MessengerFriend, ReportType, RoomWidgetUpdateChatInputContentEvent, SendMessageComposer } from '../../../../../api';
 import { Base, Flex } from '../../../../../common';
 import { useFriends, useHelp, useRoom, useSessionInfo } from '../../../../../hooks';
@@ -264,51 +265,63 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                 <>
                     { canRequestFriend(avatarInfo.webID) &&
                         <ContextMenuListItemView onClick={ event => processAction('friend') }>
+                            <UserPlus className="menu-icon" />
                             { LocalizeText('infostand.button.friend') }
                         </ContextMenuListItemView> }
                     <ContextMenuListItemView onClick={ event => processAction('trade') }>
+                        <ArrowLeftRight className="menu-icon" />
                         { LocalizeText('infostand.button.trade') }
                     </ContextMenuListItemView>
                     <ContextMenuListItemView onClick={ event => processAction('whisper') }>
+                        <Volume2 className="menu-icon" />
                         { LocalizeText('infostand.button.whisper') }
                     </ContextMenuListItemView>
                     { (userRespectRemaining > 0) &&
                         <ContextMenuListItemView onClick={ event => processAction('respect') }>
+                            <Star className="menu-icon" />
                             { LocalizeText('infostand.button.respect', [ 'count' ], [ userRespectRemaining.toString() ]) }
                         </ContextMenuListItemView> }
                     { isFriend && friend?.followingAllowed &&
                         <ContextMenuListItemView onClick={ event => processAction('follow') }>
+                            <UserRoundSearch className="menu-icon" />
                             Folgen
                         </ContextMenuListItemView> }
                     { isFriend &&
                         <ContextMenuListItemView onClick={ event => processAction('relationship') }>
+                            <Heart className="menu-icon" />
                             { LocalizeText('infostand.link.relationship') }
                             <FaChevronRight className="right fa-icon" />
                         </ContextMenuListItemView> }
                     { !avatarInfo.isIgnored &&
                         <ContextMenuListItemView onClick={ event => processAction('ignore') }>
+                            <EyeOff className="menu-icon" />
                             { LocalizeText('infostand.button.ignore') }
                         </ContextMenuListItemView> }
                     { avatarInfo.isIgnored &&
                         <ContextMenuListItemView onClick={ event => processAction('unignore') }>
+                            <Eye className="menu-icon" />
                             { LocalizeText('infostand.button.unignore') }
                         </ContextMenuListItemView> }
                     { canGiveHandItem &&
                         <ContextMenuListItemView onClick={ event => processAction('pass_hand_item') }>
+                            <Handshake className="menu-icon" />
                             { LocalizeText('avatar.widget.pass_hand_item') }
                         </ContextMenuListItemView> }
                     <ContextMenuListItemView classNames={ [ 'menu-item-danger' ] } onClick={ event => processAction('report') }>
+                        <Flag className="menu-icon" />
                         { LocalizeText('infostand.button.report') }
                     </ContextMenuListItemView>
                     { moderateMenuHasContent &&
                         <ContextMenuListItemView classNames={ [ 'menu-item-warning' ] } onClick={ event => processAction('moderate') }>
-                            <FaChevronRight className="right fa-icon" />
+                            <Shield className="menu-icon" />
                             { LocalizeText('infostand.link.moderate') }
+                            <FaChevronRight className="right fa-icon" />
                         </ContextMenuListItemView> }
                     { avatarInfo.isAmbassador &&
                         <ContextMenuListItemView classNames={ [ 'menu-item-warning' ] } onClick={ event => processAction('ambassador') }>
-                            <FaChevronRight className="right fa-icon" />
+                            <Crown className="menu-icon" />
                             { LocalizeText('infostand.link.ambassador') }
+                            <FaChevronRight className="right fa-icon" />
                         </ContextMenuListItemView> }
                 </> }
             { (mode === MODE_MODERATE) &&

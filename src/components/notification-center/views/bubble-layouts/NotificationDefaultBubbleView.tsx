@@ -53,6 +53,7 @@ export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProp
 {
     const { item = null, onClose = null } = props;
     const [ isVisible, setIsVisible ] = useState(false);
+    const [ imageFailed, setImageFailed ] = useState(false);
 
     const htmlText = item.message.replace(/\r\n|\r|\n/g, '<br />');
 
@@ -89,8 +90,8 @@ export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProp
                 <Frame>
                     <FramePanel className="!p-0">
                         <div className="flex items-start gap-3 px-3.5 py-2.5">
-                            { item.iconUrl && item.iconUrl.length
-                                ? <img className="no-select size-5 shrink-0 mt-0.5" src={ item.iconUrl } alt="" />
+                            { item.iconUrl && item.iconUrl.length && !imageFailed
+                                ? <img className="no-select size-5 shrink-0 mt-0.5" src={ item.iconUrl } alt="" onError={ () => setImageFailed(true) } />
                                 : <IconComponent className={ `size-4 shrink-0 mt-0.5 ${iconEntry.color}` } />
                             }
                             <div className="min-w-0 flex-1">

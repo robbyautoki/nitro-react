@@ -112,13 +112,13 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
     
     const isRidingHorse = IsRidingHorse();
 
-    const MI = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-white/80 hover:bg-white/10 cursor-pointer transition-all duration-75 rounded-[3px]';
-    const IC = 'size-3.5 shrink-0 text-white/45 group-hover:text-white/75 transition-colors';
-    const AR = 'size-3 text-white/30 group-hover:text-white/50 transition-colors ml-auto';
+    const MI = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-75 rounded-[3px]';
+    const IC = 'size-3.5 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors';
+    const AR = 'size-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors ml-auto';
 
     return (
         <ContextMenuView objectId={ avatarInfo.roomIndex } category={ RoomObjectCategory.UNIT } userType={ avatarInfo.userType } onClose={ onClose } collapsable={ true }>
-            <button onClick={ () => GetUserProfile(avatarInfo.webID) } className="w-full px-3 py-2 text-center text-[13px] font-bold text-white/90 border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors rounded-t-[3px]">
+            <button onClick={ () => GetUserProfile(avatarInfo.webID) } className="w-full px-3 py-2 text-center text-[13px] font-bold text-foreground border-b border-border/50 hover:bg-accent/50 cursor-pointer transition-colors rounded-t-[3px]">
                 { avatarInfo.name }
             </button>
             { (mode === MODE_NORMAL) &&
@@ -179,8 +179,8 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
                     <button className={ MI } onClick={ () => processAction('dance_2') }><span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance2') }</span></button>
                     <button className={ MI } onClick={ () => processAction('dance_3') }><span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance3') }</span></button>
                     <button className={ MI } onClick={ () => processAction('dance_4') }><span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.dance4') }</span></button>
-                    <button className={ `${ MI } text-white/50` } onClick={ () => processAction('back') }>
-                        <ChevronLeft className="size-3 text-white/30" />
+                    <button className={ `${ MI } text-muted-foreground` } onClick={ () => processAction('back') }>
+                        <ChevronLeft className="size-3 text-muted-foreground/50" />
                         <span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span>
                     </button>
                 </div> }
@@ -217,8 +217,8 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
                         <Moon className={ IC } />
                         <span className="flex-1 text-left truncate">{ LocalizeText('widget.memenu.idle') }</span>
                     </button>
-                    <button className={ `${ MI } text-white/50` } onClick={ () => processAction('back') }>
-                        <ChevronLeft className="size-3 text-white/30" />
+                    <button className={ `${ MI } text-muted-foreground` } onClick={ () => processAction('back') }>
+                        <ChevronLeft className="size-3 text-muted-foreground/50" />
                         <span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span>
                     </button>
                 </div> }
@@ -227,27 +227,27 @@ export const AvatarInfoWidgetOwnAvatarView: FC<AvatarInfoWidgetOwnAvatarViewProp
                     { [[1,2,3],[4,5,6],[7,8,9]].map((row, ri) => (
                         <div key={ ri } className="grid grid-cols-3 gap-0.5">
                             { row.map(n => (
-                                <button key={ n } onClick={ () => processAction(`sign_${ n }`) } className="h-6 rounded bg-white/5 hover:bg-white/12 text-[12px] font-bold text-white/80 cursor-pointer transition-colors">{ n }</button>
+                                <button key={ n } onClick={ () => processAction(`sign_${ n }`) } className="h-6 rounded bg-accent hover:bg-accent/80 text-[12px] font-bold text-foreground cursor-pointer transition-colors">{ n }</button>
                             )) }
                         </div>
                     )) }
                     <div className="grid grid-cols-3 gap-0.5">
-                        <button onClick={ () => processAction('sign_10') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-[11px] font-bold text-white/80 cursor-pointer transition-colors">10</button>
-                        <button onClick={ () => processAction('sign_11') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-heart" /></button>
-                        <button onClick={ () => processAction('sign_12') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-skull" /></button>
+                        <button onClick={ () => processAction('sign_10') } className="h-6 rounded bg-accent hover:bg-accent/80 text-[11px] font-bold text-foreground cursor-pointer transition-colors">10</button>
+                        <button onClick={ () => processAction('sign_11') } className="h-6 rounded bg-accent hover:bg-accent/80 text-foreground cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-heart" /></button>
+                        <button onClick={ () => processAction('sign_12') } className="h-6 rounded bg-accent hover:bg-accent/80 text-foreground cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-skull" /></button>
                     </div>
                     <div className="grid grid-cols-3 gap-0.5">
-                        <button onClick={ () => processAction('sign_0') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-[12px] font-bold text-white/80 cursor-pointer transition-colors">0</button>
-                        <button onClick={ () => processAction('sign_13') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-exclamation" /></button>
-                        <button onClick={ () => processAction('sign_15') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-smile" /></button>
+                        <button onClick={ () => processAction('sign_0') } className="h-6 rounded bg-accent hover:bg-accent/80 text-[12px] font-bold text-foreground cursor-pointer transition-colors">0</button>
+                        <button onClick={ () => processAction('sign_13') } className="h-6 rounded bg-accent hover:bg-accent/80 text-foreground cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-exclamation" /></button>
+                        <button onClick={ () => processAction('sign_15') } className="h-6 rounded bg-accent hover:bg-accent/80 text-foreground cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-smile" /></button>
                     </div>
                     <div className="grid grid-cols-3 gap-0.5">
-                        <button onClick={ () => processAction('sign_14') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-soccer" /></button>
-                        <button onClick={ () => processAction('sign_17') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-yellow" /></button>
-                        <button onClick={ () => processAction('sign_16') } className="h-6 rounded bg-white/5 hover:bg-white/12 text-white/80 cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-red" /></button>
+                        <button onClick={ () => processAction('sign_14') } className="h-6 rounded bg-accent hover:bg-accent/80 text-foreground cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-soccer" /></button>
+                        <button onClick={ () => processAction('sign_17') } className="h-6 rounded bg-accent hover:bg-accent/80 text-foreground cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-yellow" /></button>
+                        <button onClick={ () => processAction('sign_16') } className="h-6 rounded bg-accent hover:bg-accent/80 text-foreground cursor-pointer transition-colors flex items-center justify-center"><i className="icon icon-sign-red" /></button>
                     </div>
-                    <button className={ `${ MI } text-white/50` } onClick={ () => processAction('back') }>
-                        <ChevronLeft className="size-3 text-white/30" />
+                    <button className={ `${ MI } text-muted-foreground` } onClick={ () => processAction('back') }>
+                        <ChevronLeft className="size-3 text-muted-foreground/50" />
                         <span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span>
                     </button>
                 </div> }

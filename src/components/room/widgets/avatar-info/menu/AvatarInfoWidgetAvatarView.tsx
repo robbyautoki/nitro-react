@@ -247,22 +247,22 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
         setMode(MODE_NORMAL);
     }, [ avatarInfo ]);
 
-    const MI = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-white/80 hover:bg-white/10 cursor-pointer transition-all duration-75 rounded-[3px]';
-    const IC = 'size-3.5 shrink-0 text-white/45 group-hover:text-white/75 transition-colors';
-    const AR = 'size-3 text-white/30 group-hover:text-white/50 transition-colors ml-auto';
-    const DANGER = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-red-400 hover:bg-red-500/10 cursor-pointer transition-all duration-75 rounded-[3px]';
-    const WARNING = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-amber-400 hover:bg-amber-500/10 cursor-pointer transition-all duration-75 rounded-[3px]';
-    const BACK = `${ MI } text-white/50`;
+    const MI = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-foreground hover:bg-accent cursor-pointer transition-all duration-75 rounded-[3px]';
+    const IC = 'size-3.5 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors';
+    const AR = 'size-3 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors ml-auto';
+    const DANGER = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-destructive hover:bg-destructive/10 cursor-pointer transition-all duration-75 rounded-[3px]';
+    const WARNING = 'group w-full flex items-center gap-2 px-3 py-[6px] text-[12px] font-medium text-amber-600 dark:text-amber-500 hover:bg-amber-500/10 cursor-pointer transition-all duration-75 rounded-[3px]';
+    const BACK = `${ MI } text-muted-foreground`;
 
     return (
         <ContextMenuView objectId={ avatarInfo.roomIndex } category={ RoomObjectCategory.UNIT } userType={ avatarInfo.userType } onClose={ onClose } collapsable={ true }>
             {/* Header */}
-            <button onClick={ () => GetUserProfile(avatarInfo.webID) } className="w-full px-3 py-2 text-center border-b border-white/10 hover:bg-white/5 cursor-pointer transition-colors rounded-t-[3px]">
+            <button onClick={ () => GetUserProfile(avatarInfo.webID) } className="w-full px-3 py-2 text-center border-b border-border/50 hover:bg-accent/50 cursor-pointer transition-colors rounded-t-[3px]">
                 <div className="flex items-center justify-center gap-1.5">
-                    <span className="text-[13px] font-bold text-white/90">{ avatarInfo.name }</span>
+                    <span className="text-[13px] font-bold text-foreground">{ avatarInfo.name }</span>
                     { relationshipDisplay && <span style={{ fontSize: '12px', color: relationshipDisplay.color }}>{ relationshipDisplay.icon }</span> }
                 </div>
-                { timeInRoom && <p className="text-[10px] text-white/40 mt-0.5 flex items-center justify-center gap-1"><Clock className="size-2.5" />{ timeInRoom }</p> }
+                { timeInRoom && <p className="text-[10px] text-muted-foreground mt-0.5 flex items-center justify-center gap-1"><Clock className="size-2.5" />{ timeInRoom }</p> }
             </button>
 
             { (mode === MODE_NORMAL) &&
@@ -312,20 +312,20 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                             <span className="flex-1 text-left truncate">{ LocalizeText('avatar.widget.pass_hand_item') }</span>
                         </button> }
                     <button className={ DANGER } onClick={ () => processAction('report') }>
-                        <Flag className="size-3.5 shrink-0 text-red-400/70 group-hover:text-red-400 transition-colors" />
+                        <Flag className="size-3.5 shrink-0 text-destructive/70 group-hover:text-destructive transition-colors" />
                         <span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.report') }</span>
                     </button>
                     { moderateMenuHasContent &&
                         <button className={ WARNING } onClick={ () => processAction('moderate') }>
-                            <Shield className="size-3.5 shrink-0 text-amber-400/70 group-hover:text-amber-400 transition-colors" />
+                            <Shield className="size-3.5 shrink-0 opacity-70 group-hover:opacity-100 transition-colors" />
                             <span className="flex-1 text-left truncate">{ LocalizeText('infostand.link.moderate') }</span>
-                            <ChevronRight className="size-3 text-amber-400/30 group-hover:text-amber-400/60 transition-colors ml-auto" />
+                            <ChevronRight className="size-3 opacity-30 group-hover:opacity-60 transition-colors ml-auto" />
                         </button> }
                     { avatarInfo.isAmbassador &&
                         <button className={ WARNING } onClick={ () => processAction('ambassador') }>
-                            <Crown className="size-3.5 shrink-0 text-amber-400/70 group-hover:text-amber-400 transition-colors" />
+                            <Crown className="size-3.5 shrink-0 opacity-70 group-hover:opacity-100 transition-colors" />
                             <span className="flex-1 text-left truncate">{ LocalizeText('infostand.link.ambassador') }</span>
-                            <ChevronRight className="size-3 text-amber-400/30 group-hover:text-amber-400/60 transition-colors ml-auto" />
+                            <ChevronRight className="size-3 opacity-30 group-hover:opacity-60 transition-colors ml-auto" />
                         </button> }
                 </div> }
 
@@ -336,7 +336,7 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                     <button className={ MI } onClick={ () => processAction('ban') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.ban') }</span><ChevronRight className={ AR } /></button>
                     { isShowGiveRights && <button className={ MI } onClick={ () => processAction('give_rights') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.giverights') }</span></button> }
                     { isShowRemoveRights && <button className={ MI } onClick={ () => processAction('remove_rights') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.removerights') }</span></button> }
-                    <button className={ BACK } onClick={ () => processAction('back') }><ChevronLeft className="size-3 text-white/30" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
+                    <button className={ BACK } onClick={ () => processAction('back') }><ChevronLeft className="size-3 text-muted-foreground/50" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
                 </div> }
 
             { (mode === MODE_MODERATE_BAN) &&
@@ -344,7 +344,7 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                     <button className={ MI } onClick={ () => processAction('ban_hour') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.ban_hour') }</span></button>
                     <button className={ MI } onClick={ () => processAction('ban_day') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.ban_day') }</span></button>
                     <button className={ MI } onClick={ () => processAction('perm_ban') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.perm_ban') }</span></button>
-                    <button className={ BACK } onClick={ () => processAction('back_moderate') }><ChevronLeft className="size-3 text-white/30" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
+                    <button className={ BACK } onClick={ () => processAction('back_moderate') }><ChevronLeft className="size-3 text-muted-foreground/50" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
                 </div> }
 
             { (mode === MODE_MODERATE_MUTE) &&
@@ -352,7 +352,7 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                     <button className={ MI } onClick={ () => processAction('mute_2min') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.mute_2min') }</span></button>
                     <button className={ MI } onClick={ () => processAction('mute_5min') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.mute_5min') }</span></button>
                     <button className={ MI } onClick={ () => processAction('mute_10min') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.mute_10min') }</span></button>
-                    <button className={ BACK } onClick={ () => processAction('back_moderate') }><ChevronLeft className="size-3 text-white/30" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
+                    <button className={ BACK } onClick={ () => processAction('back_moderate') }><ChevronLeft className="size-3 text-muted-foreground/50" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
                 </div> }
 
             { (mode === MODE_AMBASSADOR) &&
@@ -360,7 +360,7 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                     <button className={ MI } onClick={ () => processAction('ambassador_alert') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.alert') }</span></button>
                     <button className={ MI } onClick={ () => processAction('ambassador_kick') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.kick') }</span></button>
                     <button className={ MI } onClick={ () => processAction('ambassador_mute') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.mute') }</span><ChevronRight className={ AR } /></button>
-                    <button className={ BACK } onClick={ () => processAction('back') }><ChevronLeft className="size-3 text-white/30" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
+                    <button className={ BACK } onClick={ () => processAction('back') }><ChevronLeft className="size-3 text-muted-foreground/50" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
                 </div> }
 
             { (mode === MODE_AMBASSADOR_MUTE) &&
@@ -369,24 +369,24 @@ export const AvatarInfoWidgetAvatarView: FC<AvatarInfoWidgetAvatarViewProps> = p
                     <button className={ MI } onClick={ () => processAction('ambassador_mute_10min') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.mute_10min') }</span></button>
                     <button className={ MI } onClick={ () => processAction('ambassador_mute_60min') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.mute_60min') }</span></button>
                     <button className={ MI } onClick={ () => processAction('ambassador_mute_18hr') }><span className="flex-1 text-left truncate">{ LocalizeText('infostand.button.mute_18hour') }</span></button>
-                    <button className={ BACK } onClick={ () => processAction('back_ambassador') }><ChevronLeft className="size-3 text-white/30" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
+                    <button className={ BACK } onClick={ () => processAction('back_ambassador') }><ChevronLeft className="size-3 text-muted-foreground/50" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
                 </div> }
 
             { (mode === MODE_RELATIONSHIP) &&
                 <div className="p-1 space-y-0.5">
                     <div className="grid grid-cols-3 gap-1">
-                        <button onClick={ () => processAction('rship_heart') } className="h-8 rounded bg-white/5 hover:bg-rose-500/15 hover:text-rose-400 text-white/80 cursor-pointer transition-all flex items-center justify-center">
+                        <button onClick={ () => processAction('rship_heart') } className="h-8 rounded bg-accent hover:bg-rose-500/15 hover:text-rose-400 text-foreground cursor-pointer transition-all flex items-center justify-center">
                             <Base pointer className="nitro-friends-spritesheet icon-heart" />
                         </button>
-                        <button onClick={ () => processAction('rship_smile') } className="h-8 rounded bg-white/5 hover:bg-amber-500/15 hover:text-amber-400 text-white/80 cursor-pointer transition-all flex items-center justify-center">
+                        <button onClick={ () => processAction('rship_smile') } className="h-8 rounded bg-accent hover:bg-amber-500/15 hover:text-amber-400 text-foreground cursor-pointer transition-all flex items-center justify-center">
                             <Base pointer className="nitro-friends-spritesheet icon-smile" />
                         </button>
-                        <button onClick={ () => processAction('rship_bobba') } className="h-8 rounded bg-white/5 hover:bg-violet-500/15 hover:text-violet-400 text-white/80 cursor-pointer transition-all flex items-center justify-center">
+                        <button onClick={ () => processAction('rship_bobba') } className="h-8 rounded bg-accent hover:bg-violet-500/15 hover:text-violet-400 text-foreground cursor-pointer transition-all flex items-center justify-center">
                             <Base pointer className="nitro-friends-spritesheet icon-bobba" />
                         </button>
                     </div>
                     <button className={ MI } onClick={ () => processAction('rship_none') }><span className="flex-1 text-left truncate">{ LocalizeText('avatar.widget.clear_relationship') }</span></button>
-                    <button className={ BACK } onClick={ () => processAction('back') }><ChevronLeft className="size-3 text-white/30" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
+                    <button className={ BACK } onClick={ () => processAction('back') }><ChevronLeft className="size-3 text-muted-foreground/50" /><span className="flex-1 text-left truncate">{ LocalizeText('generic.back') }</span></button>
                 </div> }
         </ContextMenuView>
     );

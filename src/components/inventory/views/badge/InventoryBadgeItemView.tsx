@@ -9,8 +9,8 @@ interface InventoryBadgeItemViewProps {
 
 export const InventoryBadgeItemView: FC<InventoryBadgeItemViewProps> = ({ badgeCode }) =>
 {
-    const { selectedBadgeCode, setSelectedBadgeCode, toggleBadge } = useInventoryBadges();
-    const { isUnseen, getBadgeId } = useInventoryUnseenTracker();
+    const { selectedBadgeCode, setSelectedBadgeCode, toggleBadge, getBadgeId } = useInventoryBadges();
+    const { isUnseen } = useInventoryUnseenTracker();
 
     const isActive = selectedBadgeCode === badgeCode;
     const unseen = isUnseen(UnseenItemCategory.BADGE, getBadgeId(badgeCode));

@@ -1,7 +1,7 @@
 import { CrackableDataType, FurnitureFloorUpdateComposer, FurnitureStackHeightComposer, GroupInformationComposer, GroupInformationEvent, NowPlayingEvent, RoomControllerLevel, RoomObjectCategory, RoomObjectOperationType, RoomObjectVariable, RoomWidgetEnumItemExtradataParameter, RoomWidgetFurniInfoUsagePolicyEnum, SetObjectDataMessageComposer, SongInfoReceivedEvent, StringDataType } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaUser, FaMusic, FaUserAlt } from 'react-icons/fa';
-import { Move, RotateCw, PackageOpen, Hand, ShoppingCart, List, Wrench, Hash, ChevronsLeftRight } from 'lucide-react';
+import { FaMusic, FaUserAlt } from 'react-icons/fa';
+import { Move, RotateCw, PackageOpen, Hand, ShoppingCart, List, Wrench, ChevronsLeftRight } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../../ui/tooltip';
 import { AvatarInfoFurni, CreateLinkEvent, GetGroupInformation, GetNitroInstance, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { LayoutBadgeImageView, LayoutLimitedEditionCompactPlateView, LayoutRarityLevelView, UserProfileIconView } from '../../../../../common';
@@ -29,12 +29,12 @@ const RARITY_CSS_MAP: Record<string, string> = {
 };
 
 const RARITY_COLORS: Record<string, string> = {
-    'og_rare': '#ff5078',
-    'weekly_rare': '#10b981',
-    'monthly_rare': '#8b5cf6',
-    'cashshop_rare': '#f97316',
-    'bonzen_rare': '#fbbf24',
-    'drachen_rare': '#6366f1',
+    'og_rare': '#bf2d3e',
+    'weekly_rare': '#2a8f7a',
+    'monthly_rare': '#6d3fc0',
+    'cashshop_rare': '#c47e1a',
+    'bonzen_rare': '#b8962a',
+    'drachen_rare': '#4040b8',
 };
 
 const ACTION_ICONS: Record<string, FC<{ className?: string }>> = {
@@ -75,7 +75,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
     const isLtd = avatarInfo?.stuffData?.isUnique ?? false;
     const isRarity = !!rarityData;
-    const rarityColor = rarityData ? RARITY_COLORS[rarityData.rarityType.name] : isLtd ? '#06b6d4' : undefined;
+    const rarityColor = rarityData ? RARITY_COLORS[rarityData.rarityType.name] : isLtd ? '#7c93a8' : undefined;
 
     const panelClass = useMemo(() =>
     {
@@ -367,17 +367,10 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     // ─── Durability bar color ───
 
     const durColor = durabilityData
-        ? durabilityData.status === 'broken' ? 'bg-muted-foreground/30'
-            : durabilityData.durabilityRemaining > 50 ? 'bg-emerald-500'
-            : durabilityData.durabilityRemaining > 25 ? 'bg-amber-500'
-            : 'bg-red-500'
-        : '';
-
-    const durTextColor = durabilityData
-        ? durabilityData.status === 'broken' ? 'text-muted-foreground'
-            : durabilityData.durabilityRemaining > 50 ? 'text-emerald-400'
-            : durabilityData.durabilityRemaining > 25 ? 'text-amber-400'
-            : 'text-red-400'
+        ? durabilityData.status === 'broken' ? 'bg-muted-foreground/20'
+            : durabilityData.durabilityRemaining > 50 ? 'bg-foreground/20'
+            : durabilityData.durabilityRemaining > 25 ? 'bg-foreground/15'
+            : 'bg-destructive/40'
         : '';
 
     // ═══════════════════════════════════════════════
@@ -388,9 +381,8 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         <div className="flex flex-col gap-1.5 px-3 py-2.5">
             {/* Owner */}
             <div className="flex items-center gap-1.5">
-                <FaUser className="w-2.5 h-2.5 text-muted-foreground/30 shrink-0" />
                 <UserProfileIconView userId={ avatarInfo.ownerId } />
-                <span className="text-[11px] text-foreground/90 truncate">{ avatarInfo.ownerName }</span>
+                <span className="text-[11px] text-foreground/90 truncate cursor-pointer hover:underline">{ avatarInfo.ownerName }</span>
             </div>
 
             {/* Position */}
@@ -411,34 +403,33 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                 </div>
             ) }
 
-            {/* Rarity: Circulation */}
-            { isRarity && rarityData.circulation > 0 && (
-                <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] text-muted-foreground/50">Umlauf: { rarityData.circulation.toLocaleString('de-DE') } Stk.</span>
-                </div>
-            ) }
-
-            {/* Rarity: Trade Value */}
-            { isRarity && rarityData.tradeValue !== null && rarityData.tradeValue > 0 && (
-                <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-medium tabular-nums" style={ rarityColor ? { color: rarityColor } : undefined }>
-                        Wert: { rarityData.tradeValue.toLocaleString('de-DE') } Credits
-                    </span>
-                </div>
+            {/* Rarity: Circulation + Trade Value */}
+            { isRarity && (rarityData.circulation > 0 || (rarityData.tradeValue !== null && rarityData.tradeValue > 0)) && (
+                <span className="text-[10px] text-muted-foreground">
+                    { rarityData.circulation > 0 ? `${ rarityData.circulation.toLocaleString('de-DE') } Stk.` : '' }
+                    { rarityData.circulation > 0 && rarityData.tradeValue > 0 ? ' · ' : '' }
+                    { rarityData.tradeValue > 0 ? `${ rarityData.tradeValue.toLocaleString('de-DE') } Cr.` : '' }
+                </span>
             ) }
 
             {/* Durability */}
             { durabilityData && (
-                <div className="flex flex-col gap-0.5 mt-0.5">
-                    <div className="flex items-center gap-1">
-                        <Wrench className="w-2.5 h-2.5 text-muted-foreground/30" />
-                        <span className={ `text-[10px] tabular-nums ${ durTextColor }` }>Haltbarkeit: { durabilityData.durabilityRemaining }%</span>
-                    </div>
-                    <div className="w-full h-1 rounded-full bg-foreground/[0.08] overflow-hidden">
-                        <div className={ `h-full rounded-full transition-all ${ durColor }` } style={ { width: `${ Math.max(durabilityData.durabilityRemaining, 2) }%` } } />
-                    </div>
+                <div className="flex flex-col gap-0.5">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="flex items-center gap-1.5 cursor-default">
+                                <div className="flex-1 h-[3px] rounded-full bg-muted/30 overflow-hidden">
+                                    <div className={ `h-full rounded-full transition-all ${ durColor }` } style={ { width: `${ Math.max(durabilityData.durabilityRemaining, 2) }%` } } />
+                                </div>
+                                <span className="text-[9px] text-muted-foreground/50 tabular-nums shrink-0">{ durabilityData.durabilityRemaining }%</span>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                            { durabilityData.status === 'broken' ? 'Zerbrochen — 0%' : `Haltbarkeit: ${ durabilityData.durabilityRemaining }%` }
+                        </TooltipContent>
+                    </Tooltip>
                     { durabilityData.status === 'broken' && (
-                        <span className="text-[10px] text-destructive font-medium">ZERBROCHEN - Repariere in der Werkstatt!</span>
+                        <span className="text-[9px] text-destructive font-medium">Zerbrochen — Werkstatt</span>
                     ) }
                 </div>
             ) }
@@ -484,10 +475,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
             {/* Furni ID (admin only) */}
             { godMode && canSeeFurniId && (
-                <div className="flex items-center gap-1">
-                    <Hash className="w-2.5 h-2.5 text-muted-foreground/20" />
-                    <span className="text-[9px] font-mono text-muted-foreground/30 tabular-nums">ID: { avatarInfo.id }</span>
-                </div>
+                <span className="text-[9px] font-mono text-muted-foreground/30 tabular-nums">#{ avatarInfo.id }</span>
             ) }
 
             {/* Branding config (god mode) */}
@@ -728,7 +716,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
         return (
             <TooltipProvider delayDuration={ 300 }>
             <div className="flex flex-col items-end">
-                <div className={ `ec-wrap furni-compact ${ panelClass }` }>
+                <div className={ `ec-wrap furni-compact ${ panelClass }` } style={ rarityColor ? { borderColor: `${ rarityColor }25` } : undefined }>
                     <svg className="ec-filters" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <defs>
                             <filter id={ filterId } colorInterpolationFilters="sRGB" x="-20%" y="-20%" width="140%" height="140%">
@@ -767,8 +755,32 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
 
                     <div className="ec-content">
                         {/* Preview Zone */}
-                        <div className="ec-top">
-                            <div className="ec-badge">
+                        <div className="ec-top relative">
+                            {/* Rarity atmosphere gradient */}
+                            { rarityColor && (
+                                <div
+                                    className="absolute inset-0 z-0 rounded-t-lg pointer-events-none"
+                                    style={ { background: `radial-gradient(ellipse at 50% 40%, ${ rarityColor }12 0%, transparent 70%)` } }
+                                />
+                            ) }
+
+                            {/* Shimmer line */}
+                            { rarityColor && (
+                                <div
+                                    className="absolute top-0 left-0 right-0 h-[3px] z-10 pointer-events-none"
+                                    style={ {
+                                        backgroundImage: `linear-gradient(90deg, transparent 0%, ${ rarityColor }50 30%, ${ rarityColor }cc 50%, ${ rarityColor }50 70%, transparent 100%)`,
+                                        backgroundSize: '200% 100%',
+                                        animation: 'shimmerSlide 6s ease-in-out infinite',
+                                        filter: 'blur(0.5px)',
+                                        opacity: 0.7,
+                                    } }
+                                />
+                            ) }
+
+                            {/* Frosted rarity badge */}
+                            <div className="relative z-[5] flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide text-muted-foreground" style={ { backdropFilter: 'blur(4px)', background: 'var(--color-card, rgba(255,255,255,0.7))', border: '1px solid rgba(128,128,128,0.15)' } }>
+                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={ { backgroundColor: rarityColor } } />
                                 { rarityData?.rarityType.displayName || 'LTD' }
                             </div>
 
@@ -778,19 +790,23 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                                     uniqueSeries={ avatarInfo.stuffData.uniqueSeries } /> }
 
                             { avatarInfo.image && avatarInfo.image.src.length &&
-                                <div className="furni-image-wrap">
-                                    <img src={ avatarInfo.image.src } alt={ avatarInfo.name } />
+                                <div className="furni-image-wrap relative z-[1]">
+                                    <img
+                                        src={ avatarInfo.image.src }
+                                        alt={ avatarInfo.name }
+                                        style={ rarityColor ? { filter: `drop-shadow(0 2px 8px ${ rarityColor }30)` } : undefined }
+                                    />
                                 </div> }
 
-                            <p className="ec-title">{ avatarInfo.name }</p>
+                            <p className="ec-title relative z-[1]">{ avatarInfo.name }</p>
                             { avatarInfo.description &&
-                                <p className="ec-desc">{ avatarInfo.description }</p> }
+                                <p className="ec-desc relative z-[1]">{ avatarInfo.description }</p> }
 
                             { isRarity && rarityData.setName && (
-                                <span className="furni-seal seal-set" style={ { marginTop: '8px' } }>{ rarityData.setName }</span>
+                                <span className="relative z-[1] px-1.5 py-0.5 rounded text-[8px] font-medium uppercase text-muted-foreground" style={ { marginTop: '8px', background: 'rgba(128,128,128,0.1)' } }>{ rarityData.setName }</span>
                             ) }
                             { isRarity && rarityData.isOg && (
-                                <span className="furni-seal seal-og" style={ { marginTop: '4px' } }>OG</span>
+                                <span className="relative z-[1] px-1.5 py-0.5 rounded text-[8px] font-bold uppercase text-muted-foreground" style={ { marginTop: '4px', backdropFilter: 'blur(4px)', background: 'var(--color-card, rgba(255,255,255,0.7))', border: '1px solid rgba(128,128,128,0.15)' } }>OG</span>
                             ) }
                         </div>
 

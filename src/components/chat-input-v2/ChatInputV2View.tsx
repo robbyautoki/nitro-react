@@ -24,10 +24,11 @@ import {
   Layers,
 } from "lucide-react";
 
-const ASSETS_URL = process.env.NEXT_PUBLIC_ASSETS_URL ?? "http://localhost:8080";
+import { GetConfiguration } from '@/api';
+const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
 
 function getFurniIcon(cn: string) {
-  return `${ASSETS_URL}/c_images/${cn.split("*")[0]}_icon.png`;
+  return `${ASSETS_URL()}/c_images/${cn.split("*")[0]}_icon.png`;
 }
 
 function getAvatarHead(figure: string) {

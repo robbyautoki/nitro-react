@@ -70,14 +70,15 @@ import {
   Shirt,
 } from "lucide-react";
 
-const ASSETS_URL = process.env.NEXT_PUBLIC_ASSETS_URL ?? "http://localhost:8080";
-const IMAGE_LIB_URL = `${ASSETS_URL}`;
+import { GetConfiguration } from '@/api';
+const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
+const IMAGE_LIB_URL = `${ASSETS_URL()}`;
 
 const CURRENCY_ICONS = {
-  credits: `${ASSETS_URL}/wallet/-1.png`,
-  duckets: `${ASSETS_URL}/wallet/0.png`,
-  diamonds: `${ASSETS_URL}/wallet/5.png`,
-  hc: `${ASSETS_URL}/wallet/hc.png`,
+  credits: `${ASSETS_URL()}/wallet/-1.png`,
+  duckets: `${ASSETS_URL()}/wallet/0.png`,
+  diamonds: `${ASSETS_URL()}/wallet/5.png`,
+  hc: `${ASSETS_URL()}/wallet/hc.png`,
 } as const;
 
 const HABBO_IMAGER = "https://www.habbo.de/habbo-imaging/avatarimage";
@@ -88,10 +89,10 @@ const HC_FIGURES = [
 ];
 
 function getFurniIcon(cn: string) {
-  return `${ASSETS_URL}/c_images/${cn.split("*")[0]}_icon.png`;
+  return `${ASSETS_URL()}/c_images/${cn.split("*")[0]}_icon.png`;
 }
 function getCatalogIcon(iconId: number) {
-  return `${ASSETS_URL}/c_images/catalogue/icon_${iconId}.png`;
+  return `${ASSETS_URL()}/c_images/catalogue/icon_${iconId}.png`;
 }
 
 const PAGE_SIZE = 100;
@@ -664,7 +665,7 @@ function LayoutPets({ detail, items, selectedItem, onSelect }: {
                   className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border transition-all duration-200 ${isActive
                     ? "border-primary bg-primary/10 ring-2 ring-primary/20 shadow-lg" : "border-border/50 bg-card hover:border-primary/30 hover:shadow-md"}`}>
                   <div className="w-20 h-16 flex items-center justify-center">
-                    <img src={`${ASSETS_URL}/c_images/${item.classname.split("*")[0]}_icon.png`} alt={item.public_name}
+                    <img src={`${ASSETS_URL()}/c_images/${item.classname.split("*")[0]}_icon.png`} alt={item.public_name}
                       className="max-w-full max-h-full object-contain" style={{ imageRendering: "pixelated" }}
                       onError={(e) => { (e.target as HTMLImageElement).src = ""; (e.target as HTMLImageElement).style.display = "none"; }} />
                     {/* Fallback */}
@@ -1653,7 +1654,7 @@ function PreviewPanel({ item, onClose }: { item: CatalogItem; onClose: () => voi
     const total = 10;
     const results: string[] = [];
     for (let i = 1; i <= total; i++) {
-      const url = `${ASSETS_URL}/c_images/${baseName}*${i}_icon.png`;
+      const url = `${ASSETS_URL()}/c_images/${baseName}*${i}_icon.png`;
       urls.push(url);
       const img = new Image();
       img.onload = () => { results.push(url); loaded++; if (loaded === total) setLoadedVariants([...results]); };

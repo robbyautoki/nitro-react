@@ -27,15 +27,15 @@ import {
 } from "@/components/ui/tooltip";
 import { Star, X, Gift, ChevronRight } from "lucide-react";
 
-const ASSETS_URL =
-  process.env.NEXT_PUBLIC_ASSETS_URL ?? "http://localhost:8080";
+import { GetConfiguration } from '@/api';
+const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
 
 function getCategoryImage(code: string, active: boolean) {
-  return `${ASSETS_URL}/c_images/Quests/achcategory_${code}_${active ? "active" : "inactive"}.png`;
+  return `${ASSETS_URL()}/c_images/Quests/achcategory_${code}_${active ? "active" : "inactive"}.png`;
 }
 
 function getBadgeImage(badgeCode: string) {
-  return `${ASSETS_URL}/c_images/album1584/${badgeCode}.gif`;
+  return `${ASSETS_URL()}/c_images/album1584/${badgeCode}.gif`;
 }
 
 function PixelImg({
@@ -316,7 +316,7 @@ function AchievementMainPanel() {
         <div className="flex items-center justify-between px-4 py-2.5 border-b bg-muted/30">
           <div className="flex items-center gap-2.5">
             <PixelImg
-              src={`${ASSETS_URL}/c_images/Quests/ach_receive_star.png`}
+              src={`${ASSETS_URL()}/c_images/Quests/ach_receive_star.png`}
               alt="star"
               size={22}
             />
@@ -451,7 +451,7 @@ function AchievementMainPanel() {
         <div className="flex items-center justify-between px-4 py-2.5 border-t bg-muted/20">
           <div className="flex items-center gap-2 text-xs">
             <PixelImg
-              src={`${ASSETS_URL}/c_images/Quests/ach_receive_star.png`}
+              src={`${ASSETS_URL()}/c_images/Quests/ach_receive_star.png`}
               alt="star"
               size={16}
             />
@@ -536,7 +536,7 @@ function AchievementDetail({ achievement }: { achievement: MockAchievement }) {
         {achievement.completed && (
           <div className="flex items-center gap-1.5 mt-0.5">
             <img
-              src={`${ASSETS_URL}/c_images/Quests/category_completed.png`}
+              src={`${ASSETS_URL()}/c_images/Quests/category_completed.png`}
               alt="done"
               style={{
                 width: 14,
@@ -599,7 +599,7 @@ function LevelPrestigePreview() {
 
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <PixelImg
-                src={`${ASSETS_URL}/c_images/Quests/ach_receive_star.png`}
+                src={`${ASSETS_URL()}/c_images/Quests/ach_receive_star.png`}
                 alt="star"
                 size={18}
               />
@@ -662,7 +662,7 @@ function AchievementUnlockDialog() {
           <div className="relative">
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
               <PixelImg
-                src={`${ASSETS_URL}/c_images/Quests/ach_receive_star.png`}
+                src={`${ASSETS_URL()}/c_images/Quests/ach_receive_star.png`}
                 alt="star-bg"
                 size={120}
               />
@@ -773,7 +773,7 @@ function ScoreSummaryPreview() {
                     </div>
                     {pct === 100 && (
                       <img
-                        src={`${ASSETS_URL}/c_images/Quests/category_completed.png`}
+                        src={`${ASSETS_URL()}/c_images/Quests/category_completed.png`}
                         alt="done"
                         className="shrink-0"
                         style={{

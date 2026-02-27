@@ -10,7 +10,8 @@ import {
   X, Pen, Heart, Smile, UserPlus, MessageCircle, DoorOpen, Layers, Star, Users, Shield, Calendar, ChevronRight, Sparkles, Crown, Gem,
 } from "lucide-react";
 
-const ASSETS_URL = process.env.NEXT_PUBLIC_ASSETS_URL ?? "http://localhost:8080";
+import { GetConfiguration } from '@/api';
+const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
 const KLIPY_KEY = process.env.NEXT_PUBLIC_KLIPY_API_KEY ?? "";
 
 interface KlipyGif { id: number; slug: string; title: string; file: { md: { gif: { url: string } }; sm: { webp: { url: string } } } }
@@ -28,10 +29,10 @@ function getGroupBadgeUrl(code: string) {
   return `https://www.habbo.com/habbo-imaging/badge/${code}.gif`;
 }
 function getFurniIcon(name: string) {
-  return `${ASSETS_URL}/c_images/${name.split("*")[0]}_icon.png`;
+  return `${ASSETS_URL()}/c_images/${name.split("*")[0]}_icon.png`;
 }
 
-const CURRENCY_ICONS = { credits: `${ASSETS_URL}/wallet/-1.png` } as const;
+const CURRENCY_ICONS = { credits: `${ASSETS_URL()}/wallet/-1.png` } as const;
 function CurrencyIcon({ className }: { className?: string }) {
   return <img src={CURRENCY_ICONS.credits} alt="Credits" className={className || "w-3.5 h-3.5"} style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
 }

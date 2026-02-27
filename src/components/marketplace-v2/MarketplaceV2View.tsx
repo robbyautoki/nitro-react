@@ -57,15 +57,16 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 
-const ASSETS_URL = process.env.NEXT_PUBLIC_ASSETS_URL ?? "http://localhost:8080";
-function getFurniIcon(n: string) { return `${ASSETS_URL}/c_images/${n.split("*")[0]}_icon.png`; }
-const MARKETPLACE_BANNER = `${ASSETS_URL}/c_images/catalogue/bonush.gif`;
+import { GetConfiguration } from '@/api';
+const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
+function getFurniIcon(n: string) { return `${ASSETS_URL()}/c_images/${n.split("*")[0]}_icon.png`; }
+const MARKETPLACE_BANNER = `${ASSETS_URL()}/c_images/catalogue/bonush.gif`;
 
 const CURRENCY_ICONS = {
-  credits: `${ASSETS_URL}/wallet/-1.png`,
-  duckets: `${ASSETS_URL}/wallet/0.png`,
-  diamonds: `${ASSETS_URL}/wallet/5.png`,
-  hc: `${ASSETS_URL}/wallet/hc.png`,
+  credits: `${ASSETS_URL()}/wallet/-1.png`,
+  duckets: `${ASSETS_URL()}/wallet/0.png`,
+  diamonds: `${ASSETS_URL()}/wallet/5.png`,
+  hc: `${ASSETS_URL()}/wallet/hc.png`,
 } as const;
 
 function CurrencyIcon({ type, className }: { type: keyof typeof CURRENCY_ICONS; className?: string }) {

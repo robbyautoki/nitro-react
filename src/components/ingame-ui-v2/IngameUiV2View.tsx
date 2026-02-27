@@ -53,10 +53,11 @@ import {
   Gift,
 } from "lucide-react";
 
-const ASSETS_URL = process.env.NEXT_PUBLIC_ASSETS_URL ?? "http://localhost:8080";
+import { GetConfiguration } from '@/api';
+const ASSETS_URL = () => GetConfiguration<string>('asset.url', 'http://localhost:8080');
 
 function CurrencyIcon({ type }: { type: string }) {
-  return <img src={`${ASSETS_URL}/wallet/${type}.png`} alt={type} className="w-4 h-4" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
+  return <img src={`${ASSETS_URL()}/wallet/${type}.png`} alt={type} className="w-4 h-4" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
 }
 
 function ToolbarIcon({ name, w, h }: { name: string; w: number; h: number }) {
@@ -68,7 +69,7 @@ function AvatarImg({ figure, size = "l" }: { figure: string; size?: string }) {
 }
 
 function CatalogIcon({ iconId }: { iconId: number }) {
-  return <img src={`${ASSETS_URL}/c_images/catalogue/icon_${iconId}.png`} alt="" className="w-5 h-5" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
+  return <img src={`${ASSETS_URL()}/c_images/catalogue/icon_${iconId}.png`} alt="" className="w-5 h-5" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
 }
 
 const DEMO_FIGURE = "hr-3163-45.hd-180-1.ch-3030-73.lg-3116-73-1408.sh-3016-73.ha-3614-73";

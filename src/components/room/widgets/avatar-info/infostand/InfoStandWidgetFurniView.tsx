@@ -837,7 +837,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                 <div className="px-3 py-2.5 border-b border-border/10">
                     <p className="text-[14px] font-bold leading-tight">{ avatarInfo.name }</p>
                     { avatarInfo.description && (
-                        <p className="text-[11px] text-muted-foreground/60 leading-relaxed mt-0.5 break-words">{ avatarInfo.description }</p>
+                        <p className="text-[12px] text-muted-foreground/60 leading-relaxed mt-0.5 break-words">{ avatarInfo.description }</p>
                     ) }
                 </div>
 

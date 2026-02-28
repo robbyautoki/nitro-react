@@ -16,6 +16,7 @@ import { WiredConditionTimeElapsedLessView } from './WiredConditionTimeElapsedLe
 import { WiredConditionTimeElapsedMoreView } from './WiredConditionTimeElapsedMoreView';
 import { WiredConditionUserCountInRoomView } from './WiredConditionUserCountInRoomView';
 import { WiredSelectorAreaView } from './WiredSelectorAreaView';
+import { WiredSelectorNeighborhoodView } from './WiredSelectorNeighborhoodView';
 import { WiredSelectorFurniPickerView } from './WiredSelectorFurniPickerView';
 import { WiredSelectorNoConfigView } from './WiredSelectorNoConfigView';
 import { WiredSelectorTeamView } from './WiredSelectorTeamView';
@@ -76,7 +77,7 @@ export const WiredConditionLayoutView = (code: number) =>
         case WiredConditionlayout.SELECTOR_FURNI_AREA:
             return <WiredSelectorAreaView title="Furni Area" />;
         case WiredConditionlayout.SELECTOR_FURNI_NEIGHBORHOOD:
-            return <WiredSelectorAreaView title="Furni Neighborhood" />;
+            return <WiredSelectorNeighborhoodView title="Möbel in der Nähe" />;
         case WiredConditionlayout.SELECTOR_FURNI_BY_TYPE:
             return <WiredSelectorFurniPickerView title="Furni By Type" />;
         case WiredConditionlayout.SELECTOR_FURNI_ON_FURNI:
@@ -92,7 +93,7 @@ export const WiredConditionLayoutView = (code: number) =>
         case WiredConditionlayout.SELECTOR_USERS_AREA:
             return <WiredSelectorAreaView title="Users Area" />;
         case WiredConditionlayout.SELECTOR_USERS_NEIGHBORHOOD:
-            return <WiredSelectorAreaView title="Users Neighborhood" />;
+            return <WiredSelectorNeighborhoodView title="User in der Nähe" />;
         case WiredConditionlayout.SELECTOR_USERS_SIGNAL:
             return <WiredSelectorNoConfigView />;
         case WiredConditionlayout.SELECTOR_USERS_BY_TYPE:

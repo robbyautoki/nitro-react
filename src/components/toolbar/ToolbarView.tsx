@@ -7,7 +7,7 @@ import { getPrestigeFromBadges, getPrestigeInfo, getOwnPrestige } from '../../ap
 import { LayoutAvatarImageView } from '../../common';
 import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useRoomEngineEvent, useSessionInfo } from '../../hooks';
 import { useInventoryBadges } from '../../hooks/inventory';
-import { MePanelView } from './MePanelView';
+import { ToolbarMeView } from './ToolbarMeView';
 import { VoiceChannelView } from '../room/VoiceChannelView';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -87,7 +87,6 @@ function OnlineFriendItem({ name, figure, onChat, onFollow }: { name: string; fi
 export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   const { isInRoom } = props;
   const [expanded, setExpanded] = useState(false);
-  const [mePanelOpen, setMePanelOpen] = useState(false);
   const [useGuideTool, setUseGuideTool] = useState(false);
   const { userFigure = null } = useSessionInfo();
   const { getFullCount = 0 } = useInventoryUnseenTracker();
@@ -192,16 +191,26 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
             )}
           </div>
 
-          {/* Me-Panel Trigger */}
-          <div className="w-full px-2 mb-1">
-            <SidebarItem
-              icon={<ToolbarIcon name="me-menu/profile.png" w={expanded ? 24 : 28} h={expanded ? 24 : 26} />}
-              label="Mein Menü"
-              expanded={expanded}
-              active={mePanelOpen}
-              onClick={() => setMePanelOpen(prev => !prev)}
+          {/* Me-Menu Popover (under avatar when collapsed) */}
+          {!expanded && (
+            <ToolbarMeView
+              useGuideTool={useGuideTool}
+              unseenAchievementCount={getTotalUnseen}
+              userFigure={userFigure}
             />
-          </div>
+          )}
+
+          {/* Me-Menu inline trigger when expanded */}
+          {expanded && (
+            <div className="w-full px-2 mb-1">
+              <ToolbarMeView
+                useGuideTool={useGuideTool}
+                unseenAchievementCount={getTotalUnseen}
+                userFigure={userFigure}
+                expanded={true}
+              />
+            </div>
+          )}
 
           <Separator className="opacity-50 mx-4" />
 
@@ -338,8 +347,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
           </div>
         </div>
       </div>
-
-      <MePanelView open={mePanelOpen} onClose={() => setMePanelOpen(false)} useGuideTool={useGuideTool} />
 
       <div className="fixed bottom-1 left-1/2 -translate-x-1/2 z-[70] pointer-events-auto w-[550px]">
         <div id="toolbar-chat-input-container" />

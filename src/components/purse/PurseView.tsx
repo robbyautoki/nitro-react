@@ -1,11 +1,13 @@
 import { FriendlyTime, HabboClubLevelEnum, RateFlatMessageComposer, GuideSessionCreateMessageComposer, GuideSessionAttachedMessageEvent, GuideSessionStartedMessageEvent, GuideSessionMessageMessageComposer, GuideSessionMessageMessageEvent, GuideSessionRequesterCancelsMessageComposer, GuideSessionResolvedMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionPartnerIsTypingMessageEvent, PerkAllowancesMessageEvent, PerkEnum, GuideSessionOnDutyUpdateMessageComposer, GuideOnDutyStatusMessageEvent, GuideSessionGuideDecidesMessageComposer, GuideSessionDetachedMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, SendMessageComposer, getAuthHeaders } from '../../api';
-import { useMessageEvent, useNavigator, useRoom } from '../../hooks';
+import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, LocalizeFormattedNumber, LocalizeShortNumber, LocalizeText, SendMessageComposer, getAuthHeaders } from '../../api';
+import { LayoutCurrencyIcon } from '../../common';
+import { useAchievements, useMessageEvent, useNavigator, usePurse, useRoom } from '../../hooks';
 import { RadioPanelView } from '../radio/RadioPanelView';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -13,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import {
   HelpCircle, ShieldAlert, MessageCircle, Scale, Settings,
   User, MessageSquare, Check, ChevronLeft, ChevronRight, Send,
-  Loader2, CheckCircle2, Clock, AlertTriangle,
+  Loader2, CheckCircle2, Clock, AlertTriangle, Sparkles, Gift,
   Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp,
 } from 'lucide-react';
 
@@ -21,6 +23,10 @@ function TopbarIcon({ name, w, h }: { name: string; w: number; h: number }) {
   return <img src={`/toolbar-icons/${name}`} alt={name} style={{ width: w, height: h, imageRendering: 'pixelated', objectFit: 'contain' }} draggable={false} />;
 }
 
+function CurrencyIcon({ type }: { type: string }) {
+  const assetsUrl = GetConfiguration<string>('currency.asset.icon.url', '').replace('%type%', type);
+  return <img src={assetsUrl} alt={type} className="w-4 h-4" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
+}
 
 function CatalogIcon({ iconId }: { iconId: number }) {
   const imageUrl = GetConfiguration<string>('image.library.url', 'http://localhost:8080/c_images/');
@@ -523,6 +529,68 @@ function HelpPopover() {
   );
 }
 
+const LEVEL_STATS = [
+  { emoji: "🕐", label: "Spielzeit", value: "142 Stunden" },
+  { emoji: "💬", label: "Nachrichten", value: "8.430" },
+  { emoji: "🏠", label: "Räume besucht", value: "1.240" },
+  { emoji: "⭐", label: "Respekt", value: "347" },
+];
+
+function LevelPopover() {
+  const { achievementScore = 0 } = useAchievements();
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
+          <span className="text-xs font-semibold text-foreground">Lvl {Math.floor(achievementScore / 100) || 1}</span>
+          <div className="w-[60px] h-[3px] bg-muted/50 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full" style={{ width: `${(achievementScore % 100) || 67}%` }} />
+          </div>
+        </div>
+      </PopoverTrigger>
+      <PopoverContent align="center" sideOffset={8} className="w-[260px] p-0">
+        <div className="px-4 pt-3 pb-2 border-b border-border/40">
+          <div className="flex items-center gap-2">
+            <Sparkles className="size-4 text-amber-400" />
+            <span className="text-sm font-bold text-foreground">Level {Math.floor(achievementScore / 100) || 1}</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Erfahrener Spieler</p>
+        </div>
+
+        <div className="p-4 space-y-4">
+          <div className="space-y-1.5">
+            <Progress value={achievementScore % 100 || 67} className="h-2 bg-muted/50 [&>div]:bg-gradient-to-r [&>div]:from-amber-400 [&>div]:to-yellow-500" />
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground tabular-nums">{achievementScore} XP</span>
+              <span className="text-[11px] font-semibold text-foreground tabular-nums">{achievementScore % 100 || 67}%</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {LEVEL_STATS.map(s => (
+              <div key={s.label} className="px-2.5 py-2 rounded-lg border border-border/40 bg-muted/20">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <span className="text-xs leading-none">{s.emoji}</span>
+                  <span className="text-[10px] text-muted-foreground">{s.label}</span>
+                </div>
+                <p className="text-xs font-semibold text-foreground tabular-nums">{s.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-amber-500/20 bg-amber-500/10">
+            <Gift className="size-4 text-amber-400 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold text-amber-300">Nächste Belohnung</p>
+              <p className="text-[10px] text-amber-400/60">Exklusiver Badge + 500 Diamanten</p>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 const SETTINGS_TOGGLES = [
   { label: "Alten Chat bevorzugen", defaultOn: false },
@@ -592,7 +660,14 @@ function SettingsPopover() {
   );
 }
 
+const CURRENCY_COLORS: Record<number, { bg: string; hover: string }> = {
+  [-1]: { bg: "bg-amber-500/10", hover: "hover:bg-amber-500/20" },
+  5: { bg: "bg-sky-500/10", hover: "hover:bg-sky-500/20" },
+  0: { bg: "bg-emerald-500/10", hover: "hover:bg-emerald-500/20" },
+};
+
 export const PurseView: FC<{}> = props => {
+  const { purse = null, hcDisabled = false } = usePurse();
   const { roomSession = null } = useRoom();
   const { navigatorData = null } = useNavigator();
   const [catalogOpen, setCatalogOpen] = useState(false);
@@ -608,6 +683,8 @@ export const PurseView: FC<{}> = props => {
     });
   }, [roomSession]);
 
+  const displayedCurrencies = useMemo(() => GetConfiguration<number[]>('system.currency.types', []), []);
+  const currencyDisplayNumberShort = useMemo(() => GetConfiguration<boolean>('currency.display.number.short', false), []);
   const imageLibraryUrl = useMemo(() => GetConfiguration<string>('image.library.url', 'http://localhost:8080/c_images/'), []);
 
   const [offerCount, setOfferCount] = useState(0);
@@ -629,6 +706,30 @@ export const PurseView: FC<{}> = props => {
     return () => clearInterval(interval);
   }, []);
 
+  const getCurrencyPills = () => {
+    if (!purse || !purse.activityPoints || !purse.activityPoints.size) return null;
+    const types = Array.from(purse.activityPoints.keys()).filter(type => displayedCurrencies.indexOf(type) >= 0);
+    return types.map(type => {
+      const amount = purse.activityPoints.get(type);
+      const display = currencyDisplayNumberShort ? LocalizeShortNumber(amount) : LocalizeFormattedNumber(amount);
+      const colors = CURRENCY_COLORS[type] ?? { bg: "bg-muted/30", hover: "hover:bg-muted/50" };
+      return (
+        <Tooltip key={type}>
+          <TooltipTrigger asChild>
+            <button className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${colors.bg} ${colors.hover}`}>
+              <CurrencyIcon type={String(type)} />
+              <span className="text-xs font-bold text-foreground tabular-nums">{display}</span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom" className="text-xs">Währung {type}</TooltipContent>
+        </Tooltip>
+      );
+    });
+  };
+
+  if (!purse) return null;
+
+  const creditsDisplay = currencyDisplayNumberShort ? LocalizeShortNumber(purse.credits) : LocalizeFormattedNumber(purse.credits);
   const roomName = navigatorData?.enteredGuestRoom?.roomName;
   const userCount = navigatorData?.enteredGuestRoom?.userCount;
 
@@ -737,7 +838,23 @@ export const PurseView: FC<{}> = props => {
 
             <div className="w-px h-6 bg-border/30" />
 
-            {/* Zone 2: Utilities */}
+            {/* Zone 2: Wallet (colored pills) */}
+            <div className="flex items-center gap-1 px-1.5 py-1 rounded-xl bg-muted/30 border border-border/30">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer bg-amber-500/10 hover:bg-amber-500/20">
+                    <CurrencyIcon type="-1" />
+                    <span className="text-xs font-bold text-foreground tabular-nums">{creditsDisplay}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">Credits</TooltipContent>
+              </Tooltip>
+              {getCurrencyPills()}
+            </div>
+
+            <div className="w-px h-6 bg-border/30" />
+
+            {/* Zone 3: Utilities */}
             <HelpPopover />
             <SettingsPopover />
           </div>

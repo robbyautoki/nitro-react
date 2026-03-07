@@ -251,6 +251,8 @@ const CHAT_COMMANDS: ChatCommand[] = [
     { command: ':combat unequip', description: 'Alles ablegen', minRank: 0, category: 'Roleplay', roomId: 500 },
     { command: ':rob', description: 'Spieler ausrauben', minRank: 0, category: 'Roleplay', roomId: 500, params: [{ name: 'username', type: 'user' }] },
     { command: ':heal', description: 'HP heilen (20C)', minRank: 0, category: 'Roleplay', roomId: 500 },
+    { command: ':maxfloor', description: 'Floorplan auf 64x64 Maximum', minRank: 1, category: 'Allgemein' },
+    { command: ':bh', description: 'Build-Höhe setzen (-10 bis 40)', minRank: 1, category: 'Allgemein', params: [{ name: 'höhe', type: 'number' }] },
 ];
 
 const RANK_BADGE: Record<string, { label: string; color: string }> = {

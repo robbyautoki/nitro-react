@@ -264,8 +264,17 @@ const RANK_BADGE: Record<string, { label: string; color: string }> = {
     Root: { label: 'ROOT', color: 'bg-red-600/15 text-red-300 border-red-500/25' },
 };
 
+function isCommandPrefix(input: string): boolean {
+    return input.startsWith(':') || input.startsWith(';');
+}
+
+function normalizeCommand(input: string): string {
+    return input.startsWith(';') ? ':' + input.substring(1) : input;
+}
+
 function getGhostText(input: string, commands: ChatCommand[]): string {
-    if (!input.startsWith(':')) return '';
+    if (!isCommandPrefix(input)) return '';
+    input = normalizeCommand(input);
     const sorted = [...commands].sort((a, b) => b.command.length - a.command.length);
     for (const cmd of sorted) {
         if (input.toLowerCase().startsWith(cmd.command.toLowerCase() + ' ') || input.toLowerCase() === cmd.command.toLowerCase()) {
@@ -296,7 +305,8 @@ function getRoomUserNames(roomId: number): { name: string; figure: string }[] {
 }
 
 function shouldShowUserAutocomplete(input: string, commands: ChatCommand[]): { show: boolean; filter: string } {
-    if (!input.startsWith(':')) return { show: false, filter: '' };
+    if (!isCommandPrefix(input)) return { show: false, filter: '' };
+    input = normalizeCommand(input);
     const sorted = [...commands].sort((a, b) => b.command.length - a.command.length);
     for (const cmd of sorted) {
         if (input.toLowerCase().startsWith(cmd.command.toLowerCase() + ' ')) {
@@ -341,7 +351,7 @@ export const ChatInputView: FC<{}> = props =>
 
     const filteredCommands = useMemo(() => {
         if (!showCommands) return [];
-        const q = chatValue.toLowerCase();
+        const q = normalizeCommand(chatValue.toLowerCase());
         return availableCommands.filter(cmd => cmd.command.toLowerCase().includes(q) || cmd.description.toLowerCase().includes(q));
     }, [ showCommands, chatValue, availableCommands ]);
 
@@ -403,7 +413,7 @@ export const ChatInputView: FC<{}> = props =>
     {
         if(!value || (value === '')) return;
 
-        if(value.trim() === ':rel' || value.trim().startsWith(':rel '))
+        if(value.trim() === ':rel' || value.trim().startsWith(':rel ') || value.trim() === ';rel' || value.trim().startsWith(';rel '))
         {
             const relParts = value.trim().split(' ');
             const targetName = relParts.length >= 2 ? relParts[1] : '';
@@ -453,7 +463,7 @@ export const ChatInputView: FC<{}> = props =>
         if(!value || !value.length) { setIsTyping(false); }
         else { setIsTyping(true); setIsIdle(true); }
 
-        if(value.startsWith(':') || value.startsWith('@'))
+        if(value.startsWith(':') || value.startsWith(';') || value.startsWith('@'))
         {
             setShowCommands(true);
             setSelectedCmdIndex(0);

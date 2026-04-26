@@ -1,5 +1,5 @@
 import { FurnitureListComposer } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { SendMessageComposer } from '../../api';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { CustomListingCard } from './CustomListingCard';
@@ -10,13 +10,16 @@ import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignInput from '@/align-ui/components/ui/input';
 import * as AlignModal from '@/align-ui/components/ui/modal';
 import * as FancyButton from '@/align-ui/components/ui/fancy-button';
-import { Package, Loader2, AlertTriangle } from 'lucide-react';
+import { Package, Loader2 } from 'lucide-react';
+import { InlineFeedback } from '../../common';
 
 export const CustomMarketplaceMyListingsView: FC<{}> = () =>
 {
     const [ listings, setListings ] = useState<CustomListing[]>([]);
     const [ loading, setLoading ] = useState(true);
     const [ error, setError ] = useState('');
+    const [ success, setSuccess ] = useState('');
+    const lastListingIdsRef = useRef<Set<number>>(new Set());
 
     const [ editListing, setEditListing ] = useState<CustomListing | null>(null);
     const [ editPrice, setEditPrice ] = useState('');
@@ -26,20 +29,72 @@ export const CustomMarketplaceMyListingsView: FC<{}> = () =>
     const [ removeListing, setRemoveListing ] = useState<CustomListing | null>(null);
     const [ removeSubmitting, setRemoveSubmitting ] = useState(false);
 
-    const loadListings = useCallback(() =>
+    const loadListings = useCallback((silent: boolean = false) =>
     {
-        setLoading(true);
+        if(!silent) setLoading(true);
         setError('');
         CustomMarketplaceApi.myListings()
-            .then(data => setListings(Array.isArray(data) ? data : []))
-            .catch(() => setError('Angebote konnten nicht geladen werden'))
-            .finally(() => setLoading(false));
+            .then(data =>
+            {
+                const next = Array.isArray(data) ? data : [];
+                // Detect listings that disappeared (sold/expired)
+                if(silent && lastListingIdsRef.current.size > 0)
+                {
+                    const currentIds = new Set(next.map(l => l.id));
+                    const removed: CustomListing[] = [];
+                    setListings(prev =>
+                    {
+                        for(const old of prev)
+                        {
+                            if(!currentIds.has(old.id) && lastListingIdsRef.current.has(old.id)) removed.push(old);
+                        }
+                        return next;
+                    });
+                    if(removed.length > 0)
+                    {
+                        const item = removed[0].items[0];
+                        const name = item?.public_name ?? 'Möbel';
+                        const more = removed.length > 1 ? ` (und ${ removed.length - 1 } weitere)` : '';
+                        setSuccess(`Verkauft: "${ name }"${ more }`);
+                    }
+                }
+                else
+                {
+                    setListings(next);
+                }
+                lastListingIdsRef.current = new Set(next.map(l => l.id));
+            })
+            .catch(() => { if(!silent) setError('Angebote konnten nicht geladen werden'); })
+            .finally(() => { if(!silent) setLoading(false); });
     }, []);
 
     useEffect(() =>
     {
         loadListings();
     }, [ loadListings ]);
+
+    // Auto-poll every 15s so verkaufte / abgelaufene Listings + neue Offers live sichtbar werden
+    const loadListingsRef = useRef(loadListings);
+    loadListingsRef.current = loadListings;
+    useEffect(() =>
+    {
+        const id = setInterval(() => loadListingsRef.current(true), 15000);
+        return () => clearInterval(id);
+    }, []);
+
+    // Auto-dismiss banners
+    useEffect(() =>
+    {
+        if(!success) return;
+        const t = setTimeout(() => setSuccess(''), 5000);
+        return () => clearTimeout(t);
+    }, [ success ]);
+    useEffect(() =>
+    {
+        if(!error) return;
+        const t = setTimeout(() => setError(''), 6000);
+        return () => clearTimeout(t);
+    }, [ error ]);
 
     const handleEditPrice = async () =>
     {
@@ -56,6 +111,7 @@ export const CustomMarketplaceMyListingsView: FC<{}> = () =>
             {
                 setListings(prev => prev.map(l => l.id === editListing.id ? { ...l, price } : l));
                 setEditListing(null);
+                setSuccess(`Preis aktualisiert: ${ price.toLocaleString('de-DE') }`);
             }
             else
             {
@@ -82,8 +138,10 @@ export const CustomMarketplaceMyListingsView: FC<{}> = () =>
             if(res.ok)
             {
                 setListings(prev => prev.filter(l => l.id !== listing.id));
+                lastListingIdsRef.current.delete(listing.id);
                 setRemoveListing(null);
                 SendMessageComposer(new FurnitureListComposer());
+                setSuccess('Angebot zurückgezogen — Möbel sind wieder im Inventar');
             }
             else
             {
@@ -104,11 +162,14 @@ export const CustomMarketplaceMyListingsView: FC<{}> = () =>
 
     return (
         <div className="flex flex-col h-full">
-            { /* Error Banner */ }
             { error && (
-                <div className="flex items-center gap-2 border-b border-error-base/20 bg-error-lighter px-3 py-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-error-base shrink-0" />
-                    <span className="text-paragraph-xs text-error-base">{ error }</span>
+                <div className="px-3 pt-3">
+                    <InlineFeedback tone="error" message={ error } onDismiss={ () => setError('') } />
+                </div>
+            ) }
+            { success && (
+                <div className="px-3 pt-3">
+                    <InlineFeedback tone="success" message={ success } onDismiss={ () => setSuccess('') } />
                 </div>
             ) }
             <div className="min-h-0 flex-1 overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>

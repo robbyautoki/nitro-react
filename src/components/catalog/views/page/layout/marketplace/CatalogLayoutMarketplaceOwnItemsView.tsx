@@ -75,36 +75,36 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = prop
     }, []);
 
     return (
-        <div className="flex flex-col h-full gap-3 overflow-hidden bg-bg-white-0 rounded-xl p-3 border border-stroke-soft-200">
+        <div className="flex flex-col h-full gap-3 overflow-hidden p-3">
             { (creditsWaiting <= 0) &&
-                <div className="text-center text-[11px] font-mono bg-bg-weak-50 border border-stroke-soft-200 rounded-lg p-3 text-text-soft-400 uppercase tracking-widest">
+                <div className="rounded-16 bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200 p-3 text-center text-paragraph-xs text-text-sub-600">
                     { LocalizeText('catalog.marketplace.redeem.no_sold_items') }
                 </div> }
             { (creditsWaiting > 0) &&
-                <div className="flex items-center justify-between gap-3 bg-warning-lighter border border-warning-base/20 rounded-lg p-3">
-                    <span className="text-[11px] font-bold font-mono text-warning-base uppercase">
+                <div className="flex items-center justify-between gap-3 rounded-16 bg-warning-lighter ring-1 ring-inset ring-warning-base/30 p-3">
+                    <span className="text-label-sm text-warning-dark">
                         { LocalizeText('catalog.marketplace.redeem.get_credits', [ 'count', 'credits' ], [ soldOffers.length.toString(), creditsWaiting.toString() ]) }
                     </span>
-                    <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" className="h-8 px-4 text-[11px] font-bold font-mono uppercase" onClick={ redeemSoldOffers }>
+                    <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" onClick={ redeemSoldOffers }>
                         { LocalizeText('catalog.marketplace.offer.redeem') }
                     </AlignButton.Root>
                 </div> }
-            <div className="flex flex-col flex-1 min-h-0 mt-2">
-                <div className="flex items-center justify-between shrink-0 px-2 border-b border-stroke-soft-200 pb-2">
-                    <span className="text-[10px] font-bold text-text-soft-400 uppercase tracking-[0.1em]">
+            <div className="flex flex-col flex-1 min-h-0 gap-2">
+                <div className="flex items-center justify-between shrink-0 px-3">
+                    <span className="text-label-xs uppercase tracking-wide text-text-soft-400">
                         { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.length.toString() ]) }
                     </span>
-                    <div className="flex items-center text-[10px] font-bold text-text-soft-400 uppercase tracking-[0.1em] gap-8 pr-[70px]">
-                        <span className="w-16 text-right">Price</span>
+                    <div className="flex items-center text-label-xs uppercase tracking-wide text-text-soft-400 gap-8 pr-[70px]">
+                        <span className="w-16 text-right">Preis</span>
                     </div>
                 </div>
-                <div className="flex flex-col overflow-auto h-full rounded border border-stroke-soft-200 bg-bg-white-0">
+                <div className="flex flex-col overflow-auto h-full rounded-16 bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200 divide-y divide-stroke-soft-200">
                     { offers.length > 0 ? (
                         offers.map(offer => <CatalogLayoutMarketplaceItemView key={ offer.offerId } offerData={ offer } type={ OWN_OFFER } onClick={ takeItemBack } />)
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-text-disabled-300 text-xs gap-2 py-8">
-                            <span className="text-2xl font-mono opacity-50">¯\_(ツ)_/¯</span>
-                            No active listings.
+                        <div className="flex-1 flex flex-col items-center justify-center text-text-soft-400 text-paragraph-xs gap-2 py-8">
+                            <span className="text-subheading-md opacity-50">¯\_(ツ)_/¯</span>
+                            Keine aktiven Angebote.
                         </div>
                     ) }
                 </div>

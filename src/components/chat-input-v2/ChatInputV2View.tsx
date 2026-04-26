@@ -372,36 +372,42 @@ function EmojiPicker({ onSelect }: { onSelect: (emoji: string) => void }) {
 
 function StyleSelectorPopover({ activeStyle, onSelect }: { activeStyle: number; onSelect: (id: number) => void }) {
   return (
-    <div className="w-[440px]">
-      <div className="px-3 pt-3 pb-1.5">
-        <span className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-wider">Chat-Style</span>
+    <div className="w-[380px]">
+      <div className="flex items-center justify-between px-4 pt-4 pb-3">
+        <div className="flex items-center gap-2">
+          <div className="size-6 rounded-md bg-bg-weak-50 flex items-center justify-center">
+            <Palette className="size-3.5 text-text-sub-600" />
+          </div>
+          <span className="text-[13px] font-medium text-text-strong-950">Chat-Style</span>
+        </div>
+        <span className="text-[11px] text-text-soft-400">{BUBBLE_STYLES.length}</span>
       </div>
+      <div className="h-px bg-stroke-soft-200" />
       <ScrollArea className="max-h-[260px]">
-        <div className="grid grid-cols-6 gap-1.5 px-3 pt-1 pb-4">
-          {BUBBLE_STYLES.map(style => (
-            <TooltipProvider key={style.id} delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button onClick={() => onSelect(style.id)}
-                    className={`relative flex items-center justify-center h-[30px] rounded-lg border-2 transition-all overflow-hidden
-                      ${activeStyle === style.id
-                        ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                        : "border-border/20 hover:border-border/50 bg-muted/5 hover:bg-accent/20"}`}>
-                    <img src={style.image} alt={style.name} className="h-[22px] w-auto object-contain" style={{ imageRendering: "pixelated" }}
-                      onError={e => { (e.target as HTMLImageElement).style.opacity = "0.3"; }} />
-                    {activeStyle === style.id && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-primary rounded-tl-md flex items-center justify-center">
-                        <span className="text-[7px] text-white font-bold">✓</span>
-                      </div>
-                    )}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={4}>
-                  <span className="text-[11px]">#{style.id} · {style.name}</span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ))}
+        <div className="grid grid-cols-6 gap-2 px-3 py-3">
+          {BUBBLE_STYLES.map(style => {
+            const active = activeStyle === style.id;
+            return (
+              <TooltipProvider key={style.id} delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={() => onSelect(style.id)}
+                      className={`relative flex items-center justify-center h-9 rounded-lg overflow-hidden transition-all ${
+                        active
+                          ? "ring-2 ring-primary-base bg-primary-alpha-10"
+                          : "ring-1 ring-stroke-soft-200 bg-bg-weak-50 hover:ring-stroke-sub-300 hover:bg-bg-white-0"
+                      }`}>
+                      <img src={style.image} alt={style.name} className="h-6 w-auto object-contain" style={{ imageRendering: "pixelated" }}
+                        onError={e => { (e.target as HTMLImageElement).style.opacity = "0.3"; }} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" sideOffset={4} className="bg-bg-strong-950 text-text-white-0 text-[11px] rounded-md px-2 py-1 border-0">
+                    <span>#{style.id} · {style.name}</span>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            );
+          })}
         </div>
       </ScrollArea>
     </div>
@@ -709,11 +715,11 @@ export const ChatInputV2View: FC<{}> = () => {
             {/* Style Selector */}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="shrink-0 text-muted-foreground/40 hover:text-foreground transition-colors" title="Chat-Style">
+                <button className="shrink-0 text-text-soft-400 hover:text-text-strong-950 transition-colors" title="Chat-Style">
                   <Palette className="w-5 h-5" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent side="top" align="end" sideOffset={12} className="p-0 w-auto">
+              <PopoverContent side="top" align="end" sideOffset={6} collisionPadding={8} className="p-0 w-auto rounded-2xl bg-bg-white-0 ring-1 ring-inset ring-stroke-soft-200 shadow-regular-md border-0">
                 <StyleSelectorPopover activeStyle={activeStyle} onSelect={setActiveStyle} />
               </PopoverContent>
             </Popover>

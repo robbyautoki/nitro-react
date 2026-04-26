@@ -1,10 +1,11 @@
-import { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GetSessionDataManager } from '../../api';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { CustomListingCard } from './CustomListingCard';
 import { CurrencyIcon } from './marketplace-components';
 import { fmtC, CURRENCY_LABELS } from './marketplace-utils';
 import { CustomListing } from './CustomMarketplaceTypes';
+import { InlineFeedback } from '../../common';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignDivider from '@/align-ui/components/ui/divider';
@@ -62,10 +63,34 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
             .finally(() => setLoading(false));
     }, [ searchQuery, minPrice, maxPrice, currency, sortBy ]);
 
+    const doSearchRef = useRef(doSearch);
+    doSearchRef.current = doSearch;
+
     useEffect(() =>
     {
         doSearch(0);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Auto-poll every 20s so newly listed items appear without manual refresh
+    useEffect(() =>
+    {
+        const id = setInterval(() => doSearchRef.current(page), 20000);
+        return () => clearInterval(id);
+    }, [ page ]);
+
+    // Auto-dismiss success / error banners after 5s
+    useEffect(() =>
+    {
+        if(!success) return;
+        const t = setTimeout(() => setSuccess(''), 5000);
+        return () => clearTimeout(t);
+    }, [ success ]);
+    useEffect(() =>
+    {
+        if(!error) return;
+        const t = setTimeout(() => setError(''), 6000);
+        return () => clearTimeout(t);
+    }, [ error ]);
 
     const confirmBuy = async () =>
     {
@@ -221,15 +246,13 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
                 </div>
             </div>
             { error && (
-                <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl border border-error-base/30 bg-error-lighter px-3 py-2 text-paragraph-xs text-error-base">
-                    <AlertTriangle className="size-4 shrink-0" />
-                    { error }
+                <div className="mx-3 mt-3">
+                    <InlineFeedback tone="error" message={ error } onDismiss={ () => setError('') } />
                 </div>
             ) }
             { success && (
-                <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl border border-success-base/30 bg-success-lighter px-3 py-2 text-paragraph-xs text-success-base">
-                    <CheckCircle2 className="size-4 shrink-0" />
-                    { success }
+                <div className="mx-3 mt-3">
+                    <InlineFeedback tone="success" message={ success } onDismiss={ () => setSuccess('') } />
                 </div>
             ) }
             <div className="min-h-0 flex-1 overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>

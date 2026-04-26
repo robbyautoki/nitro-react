@@ -1,0 +1,91 @@
+// =============================================================================
+// Extended user settings — applied via `data-bahhos-*` attributes on <html>.
+// The hook `useExtendedSettings` populates these so SCSS can react to them.
+// =============================================================================
+
+// ─── Font size ───────────────────────────────────────────────────────────────
+html[data-bahhos-font-size='small'] .nitro-chat-widget,
+html[data-bahhos-font-size='small'] .chat-bubble {
+    font-size: 11px;
+    line-height: 1.25;
+}
+
+html[data-bahhos-font-size='large'] .nitro-chat-widget,
+html[data-bahhos-font-size='large'] .chat-bubble {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+// ─── Bubble shape ────────────────────────────────────────────────────────────
+// Override only the corner radius — the existing skin layer keeps its image.
+html[data-bahhos-bubble-shape='1'] .chat-bubble {
+    border-radius: 12px;
+}
+
+html[data-bahhos-bubble-shape='2'] .chat-bubble {
+    border-radius: 999px;
+}
+
+html[data-bahhos-bubble-shape='3'] .chat-bubble {
+    border-radius: 4px;
+}
+
+// ─── Cursor style ────────────────────────────────────────────────────────────
+html[data-bahhos-cursor='modern'] .nitro-game-engine canvas,
+html[data-bahhos-cursor='modern'] body {
+    cursor: default;
+}
+
+html[data-bahhos-cursor='pixel'] .nitro-game-engine canvas,
+html[data-bahhos-cursor='pixel'] body {
+    cursor: crosshair;
+}
+
+// ─── Render quality ──────────────────────────────────────────────────────────
+// "eco" disables expensive blurs/box-shadows on UI overlays.
+html[data-bahhos-render-quality='eco'] .nitro-card,
+html[data-bahhos-render-quality='eco'] .nitro-game-ui-overlay,
+html[data-bahhos-render-quality='eco'] .nitro-chat-widget {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+}
+
+html[data-bahhos-render-quality='ultra'] .nitro-card {
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+// ─── Tile hover ──────────────────────────────────────────────────────────────
+html[data-bahhos-tile-hover='off'] .nitro-tile-cursor {
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+// ─── Pet bubbles ─────────────────────────────────────────────────────────────
+html[data-bahhos-pet-bubbles='off'] .chat-bubble.type-2,
+html[data-bahhos-pet-bubbles='off'] .chat-bubble.type-3 {
+    display: none !important;
+}
+
+// ─── Silent mode ─────────────────────────────────────────────────────────────
+// Soft-mute non-critical visual / audio cues (sounds are handled separately).
+html[data-bahhos-silent='on'] .notification-tray-item,
+html[data-bahhos-silent='on'] .toast {
+    animation: none !important;
+}
+
+// ─── Hotelview variant ───────────────────────────────────────────────────────
+// The variant attribute is consumed by the seasonal-theme system; we keep this
+// hook here so other components can opt-in via :where() selectors later.
+html[data-bahhos-hotelview='christmas'] .hotel-view {
+    --bahhos-hotelview-tint: rgba(220, 38, 38, 0.08);
+}
+
+html[data-bahhos-hotelview='summer'] .hotel-view {
+    --bahhos-hotelview-tint: rgba(245, 158, 11, 0.08);
+}
+
+// ─── Walk speed ──────────────────────────────────────────────────────────────
+// Pure data attribute — the actual walk speed is enforced by the emulator.
+// We keep this here for future client tweaks (e.g. avatar animation speed).

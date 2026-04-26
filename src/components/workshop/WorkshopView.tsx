@@ -1,11 +1,14 @@
-import { FC, useCallback, useMemo, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
     Wrench, Search, X, Coins, Utensils, AlertTriangle, Check,
     Package, ArrowRight
 } from 'lucide-react';
 import { useWorkshop, WorkshopItem, FeedCandidate } from '../../hooks/workshop/useWorkshop';
 import { GetConfiguration } from '../../api';
-import { DraggableWindow, DraggableWindowPosition } from '../../common';
+import { DraggableWindow, DraggableWindowPosition, InlineFeedback } from '../../common';
+import { InventoryFurniAddedEvent } from '../../events';
+import { useUiEvent } from '../../hooks/events';
+import { useDebouncedCallback } from '../../hooks';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignInput from '@/align-ui/components/ui/input';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
@@ -98,7 +101,24 @@ export const WorkshopView: FC<{}> = () =>
         isLoading, isRepairing,
         error, lastRepairResult,
         repairWithCredits, repairWithFeed,
+        loadItems,
     } = useWorkshop();
+
+    const debouncedReload = useDebouncedCallback(() => loadItems(), 500);
+
+    // Live re-sync when new furniture arrives in inventory (e.g. user picks up an item)
+    useUiEvent<InventoryFurniAddedEvent>(InventoryFurniAddedEvent.FURNI_ADDED, () =>
+    {
+        if(isVisible) debouncedReload();
+    });
+
+    // Auto-refresh every 60s while open so grace-period countdown stays current
+    useEffect(() =>
+    {
+        if(!isVisible) return;
+        const id = setInterval(() => loadItems(), 60000);
+        return () => clearInterval(id);
+    }, [ isVisible, loadItems ]);
 
     const [ search, setSearch ] = useState('');
     const [ statusFilter, setStatusFilter ] = useState('');
@@ -319,24 +339,16 @@ export const WorkshopView: FC<{}> = () =>
 
                                 {/* Alerts */}
                                 { error && (
-                                    <div className="flex items-center gap-2 rounded-md border border-error-base/30 bg-error-lighter px-2.5 py-2">
-                                        <AlertTriangle className="w-3.5 h-3.5 text-error-base shrink-0" />
-                                        <p className="text-paragraph-xs text-error-base">{ error }</p>
-                                    </div>
+                                    <InlineFeedback tone="error" message={ error } />
                                 ) }
                                 { lastRepairResult?.success === true && (
-                                    <div className="flex items-center gap-2 rounded-md border border-success-base/30 bg-success-lighter px-2.5 py-2">
-                                        <Check className="w-3.5 h-3.5 text-success-base shrink-0" />
-                                        <p className="text-paragraph-xs text-success-base">
-                                            Reparatur abgeschlossen: { String(lastRepairResult.durabilityBefore ?? selectedItem.durabilityRemaining) }% auf { String(lastRepairResult.durabilityAfter ?? 100) }%.
-                                        </p>
-                                    </div>
+                                    <InlineFeedback
+                                        tone="success"
+                                        message={ `Reparatur abgeschlossen: ${ String(lastRepairResult.durabilityBefore ?? selectedItem.durabilityRemaining) }% auf ${ String(lastRepairResult.durabilityAfter ?? 100) }%.` }
+                                    />
                                 ) }
-                                { lastRepairResult?.error && (
-                                    <div className="flex items-center gap-2 rounded-md border border-error-base/30 bg-error-lighter px-2.5 py-2">
-                                        <AlertTriangle className="w-3.5 h-3.5 text-error-base shrink-0" />
-                                        <p className="text-paragraph-xs text-error-base">{ String(lastRepairResult.error) }</p>
-                                    </div>
+                                { lastRepairResult?.error && !lastRepairResult?.success && (
+                                    <InlineFeedback tone="error" message={ String(lastRepairResult.error) } />
                                 ) }
                                 { isUrgent && (
                                     <div className="flex items-center gap-2 rounded-md border border-error-base/30 bg-error-lighter px-2.5 py-2">

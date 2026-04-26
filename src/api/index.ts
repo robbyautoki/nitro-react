@@ -5,6 +5,7 @@ export * from './campaign';
 export * from './catalog';
 export * from './chat-history';
 export * from './events';
+export * from './extended-settings';
 export * from './friends';
 export * from './GetRendererVersion';
 export * from './GetUIVersion';

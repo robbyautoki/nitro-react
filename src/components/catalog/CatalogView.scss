@@ -164,32 +164,33 @@
 }
 
 .autocomplete-gift-container {
-    background: hsl(var(--align-bg-white-0) / 0.98);
+    background: hsl(var(--align-bg-white-0));
     padding: 8px;
     list-style-type: none;
     min-width: 307px;
-    border-radius: 8px;
+    border-radius: 12px;
     position: absolute;
     font-size: 12px;
     top: 81px;
     left: 8px;
-    border: 1px solid rgba(var(--inv-fg-rgb, 0, 0, 0), 0.08);
     margin: 0;
     box-sizing: border-box;
     max-height: 280px;
     overflow-y: auto;
     z-index: 1;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    color: rgba(var(--inv-fg-rgb, 0, 0, 0), 0.85);
+    box-shadow: var(--shadow-regular-md);
+    color: hsl(var(--align-text-strong-950));
 
     .autocomplete-gift-item {
         width: 100%;
         box-sizing: border-box;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        color: hsl(var(--align-text-sub-600));
 
         &:hover {
-            background-color: rgba(var(--inv-fg-rgb, 0, 0, 0), 0.04);
+            background-color: hsl(var(--align-bg-weak-50));
+            color: hsl(var(--align-text-strong-950));
         }
     }
 }

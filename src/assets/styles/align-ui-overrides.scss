@@ -125,18 +125,18 @@
     background: hsl(var(--align-bg-white-0)) !important;
 }
 
-.nitro-card input,
-.nitro-card textarea,
-.nitro-card select,
-.nitro-catalog input,
-.nitro-catalog textarea,
-.nitro-catalog select,
-.nitro-inventory input,
-.nitro-inventory textarea,
-.nitro-inventory select,
-.nitro-infostand input,
-.nitro-infostand textarea,
-.nitro-infostand select {
+.nitro-card input:not([data-slot="input"]):not([class*="bg-transparent"]),
+.nitro-card textarea:not([data-slot="input"]),
+.nitro-card select:not([data-slot="input"]),
+.nitro-catalog input:not([data-slot="input"]):not([class*="bg-transparent"]),
+.nitro-catalog textarea:not([data-slot="input"]),
+.nitro-catalog select:not([data-slot="input"]),
+.nitro-inventory input:not([data-slot="input"]):not([class*="bg-transparent"]),
+.nitro-inventory textarea:not([data-slot="input"]),
+.nitro-inventory select:not([data-slot="input"]),
+.nitro-infostand input:not([data-slot="input"]):not([class*="bg-transparent"]),
+.nitro-infostand textarea:not([data-slot="input"]),
+.nitro-infostand select:not([data-slot="input"]) {
     color: hsl(var(--align-text-strong-950)) !important;
     background: hsl(var(--align-bg-white-0)) !important;
     border-color: hsl(var(--align-stroke-soft-200)) !important;

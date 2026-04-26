@@ -59,29 +59,29 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
     }, [ offerData, type ]);
 
     return (
-        <div className="flex items-center gap-3 px-3 py-2 bg-bg-white-0 border-b border-stroke-soft-200 hover:bg-bg-weak-50 transition-colors group">
+        <div className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-bg-white-0 group">
             { /* Item Image */ }
-            <div className="w-10 h-10 shrink-0 bg-bg-weak-50 border border-stroke-soft-200 rounded overflow-hidden flex items-center justify-center">
-                <div className="w-8 h-8 bg-center bg-no-repeat opacity-80 group-hover:opacity-100 transition-opacity"
+            <div className="size-10 shrink-0 rounded-10 bg-bg-white-0 ring-1 ring-inset ring-stroke-soft-200 overflow-hidden flex items-center justify-center">
+                <div className="size-8 bg-center bg-no-repeat opacity-80 group-hover:opacity-100 transition-opacity"
                     style={ { backgroundImage: `url(${ GetImageIconUrlForProduct(((offerData.furniType === MarketplaceOfferData.TYPE_FLOOR) ? ProductTypeEnum.FLOOR : ProductTypeEnum.WALL), offerData.furniId, offerData.extraData) })` } } 
                 />
             </div>
             { /* Title & Info */ }
             <div className="flex-1 min-w-0">
-                <div className="text-[11px] font-bold text-text-strong-950 truncate uppercase tracking-wide">
+                <div className="text-label-sm text-text-strong-950 truncate">
                     { getMarketplaceOfferTitle }
                 </div>
                 { (type === OWN_OFFER) && (
-                    <div className="text-[10px] text-text-soft-400 mt-0.5 font-mono">
+                    <div className="text-paragraph-xs text-text-sub-600 mt-0.5">
                         { offerTime() }
                     </div>
                 ) }
                 { (type === PUBLIC_OFFER) && (
-                    <div className="text-[10px] text-text-soft-400 mt-0.5 font-mono flex items-center gap-2">
+                    <div className="text-paragraph-xs text-text-sub-600 mt-0.5 flex items-center gap-2">
                         <span>VOL: { offerData.offerCount }</span>
                         { offerData.averagePrice > 0 && (
                             <>
-                                <span className="text-text-disabled-300">|</span>
+                                <span className="text-text-soft-400">·</span>
                                 <span>Ø { offerData.averagePrice }c</span>
                             </>
                         ) }
@@ -90,11 +90,11 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
             </div>
             { /* Price Data */ }
             <div className="flex flex-col items-end shrink-0 mr-4">
-                <div className="text-[14px] font-bold text-amber-600 font-mono tabular-nums leading-none">
-                    { offerData.price }<span className="text-[10px] text-amber-600/50 ml-0.5">c</span>
+                <div className="text-label-md text-warning-dark tabular-nums leading-none">
+                    { offerData.price }<span className="text-paragraph-xs text-warning-base/60 ml-0.5">c</span>
                 </div>
                 { priceDeltaInfo && (
-                    <div className={ cn('text-[9px] font-bold px-1 rounded mt-1 font-mono', priceDeltaInfo.className) }>
+                    <div className={ cn('text-paragraph-xs font-medium px-1.5 rounded-md mt-1 tabular-nums', priceDeltaInfo.className) }>
                         { priceDeltaInfo.text }
                     </div>
                 ) }
@@ -106,7 +106,6 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
                         variant="neutral"
                         mode="stroke"
                         size="xxsmall"
-                        className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider"
                         onClick={ () => onClick(offerData) }
                     >
                         { LocalizeText('catalog.marketplace.offer.pick') }
@@ -117,7 +116,6 @@ export const CatalogLayoutMarketplaceItemView: FC<MarketplaceItemViewProps> = pr
                         variant="primary"
                         mode="lighter"
                         size="xsmall"
-                        className="h-8 px-4 text-[11px] font-bold uppercase tracking-wider"
                         onClick={ () => onClick(offerData) }
                     >
                         { LocalizeText('buy') }

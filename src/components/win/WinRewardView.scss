@@ -1,0 +1,99 @@
+// =============================================================================
+// Event-Win-Reward-Modal — Premium-Animationen.
+// Wird per `import './WinRewardView.scss'` in WinRewardView.tsx geladen.
+// =============================================================================
+
+// ─── Glow-Pulse für Bonus-Sticker und CTA ─────────────────────────────────────
+@keyframes win-glow-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 138, 0, 0.45);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(255, 138, 0, 0);
+    }
+}
+
+.win-bonus-pill {
+    animation: win-glow-pulse 2.4s ease-in-out infinite;
+}
+
+// ─── Trophy-Burst Strahlen ────────────────────────────────────────────────────
+@keyframes win-rays-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.win-rays {
+    animation: win-rays-rotate 18s linear infinite;
+    transform-origin: 50% 50%;
+}
+
+// ─── Counter-Up Glow (kurz beim Mounten) ──────────────────────────────────────
+@keyframes win-counter-glow {
+    0%   { text-shadow: 0 0 0 currentColor; }
+    50%  { text-shadow: 0 0 14px currentColor; }
+    100% { text-shadow: 0 0 0 currentColor; }
+}
+
+.win-counter {
+    animation: win-counter-glow 900ms ease-out 1;
+}
+
+// ─── Card-Glow on hover (sparkle layer) ───────────────────────────────────────
+.win-currency-card {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: -40%;
+        background: radial-gradient(
+            circle at var(--win-mouse-x, 50%) var(--win-mouse-y, 50%),
+            rgba(255, 255, 255, 0.18),
+            transparent 40%
+        );
+        opacity: 0;
+        transition: opacity 250ms ease-out;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    &:hover::after,
+    &[data-selected='true']::after {
+        opacity: 1;
+    }
+
+    & > * {
+        position: relative;
+        z-index: 2;
+    }
+}
+
+// ─── Shake bei Locked-Click ───────────────────────────────────────────────────
+@keyframes win-shake {
+    10%, 90%   { transform: translate3d(-1px, 0, 0); }
+    20%, 80%   { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+    40%, 60%   { transform: translate3d(3px, 0, 0); }
+}
+
+.win-shake {
+    animation: win-shake 480ms cubic-bezier(.36,.07,.19,.97) both;
+}
+
+// ─── Stagger-Reveal (mounting) ────────────────────────────────────────────────
+@keyframes win-rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.win-stagger {
+    opacity: 0;
+    animation: win-rise 320ms cubic-bezier(.16,1,.3,1) forwards;
+}
+.win-stagger-0 { animation-delay: 0ms; }
+.win-stagger-1 { animation-delay: 80ms; }
+.win-stagger-2 { animation-delay: 160ms; }
+.win-stagger-3 { animation-delay: 240ms; }

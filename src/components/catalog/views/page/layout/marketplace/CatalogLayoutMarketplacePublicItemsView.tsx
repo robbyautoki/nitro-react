@@ -133,38 +133,38 @@ export const CatalogLayoutMarketplacePublicItemsView: FC<CatalogLayoutMarketplac
     });
 
     return (
-        <div className="flex flex-col h-full gap-3 bg-bg-white-0 rounded-xl p-3 border border-stroke-soft-200">
+        <div className="flex flex-col h-full gap-3 p-3">
             <div className="flex gap-1">
-                <AlignButton.Root variant={ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'primary' : 'neutral' } mode={ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'lighter' : 'ghost' } size="xsmall" className="rounded-full px-3 text-xs font-medium" onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
+                <AlignButton.Root variant={ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'primary' : 'neutral' } mode={ searchType === MarketplaceSearchType.BY_ACTIVITY ? 'lighter' : 'ghost' } size="xsmall" onClick={ () => setSearchType(MarketplaceSearchType.BY_ACTIVITY) }>
                     { LocalizeText('catalog.marketplace.search_by_activity') }
                 </AlignButton.Root>
-                <AlignButton.Root variant={ searchType === MarketplaceSearchType.BY_VALUE ? 'primary' : 'neutral' } mode={ searchType === MarketplaceSearchType.BY_VALUE ? 'lighter' : 'ghost' } size="xsmall" className="rounded-full px-3 text-xs font-medium" onClick={ () => setSearchType(MarketplaceSearchType.BY_VALUE) }>
+                <AlignButton.Root variant={ searchType === MarketplaceSearchType.BY_VALUE ? 'primary' : 'neutral' } mode={ searchType === MarketplaceSearchType.BY_VALUE ? 'lighter' : 'ghost' } size="xsmall" onClick={ () => setSearchType(MarketplaceSearchType.BY_VALUE) }>
                     { LocalizeText('catalog.marketplace.search_by_value') }
                 </AlignButton.Root>
-                <AlignButton.Root variant={ searchType === MarketplaceSearchType.ADVANCED ? 'primary' : 'neutral' } mode={ searchType === MarketplaceSearchType.ADVANCED ? 'lighter' : 'ghost' } size="xsmall" className="rounded-full px-3 text-xs font-medium" onClick={ () => setSearchType(MarketplaceSearchType.ADVANCED) }>
+                <AlignButton.Root variant={ searchType === MarketplaceSearchType.ADVANCED ? 'primary' : 'neutral' } mode={ searchType === MarketplaceSearchType.ADVANCED ? 'lighter' : 'ghost' } size="xsmall" onClick={ () => setSearchType(MarketplaceSearchType.ADVANCED) }>
                     { LocalizeText('catalog.marketplace.search_advanced') }
                 </AlignButton.Root>
             </div>
-            <div className="bg-bg-weak-50 p-3 rounded-lg border border-stroke-soft-200">
+            <div className="rounded-16 bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200 p-3">
                 <SearchFormView sortTypes={ getSortTypes } searchType={ searchType } onSearch={ requestOffers } />
             </div>
-            <div className="flex flex-col gap-1.5 flex-1 min-h-0">
-                <div className="flex items-center justify-between shrink-0 px-2 mt-2 border-b border-stroke-soft-200 pb-2">
-                    <span className="text-[10px] font-bold text-text-soft-400 uppercase tracking-[0.1em]">
+            <div className="flex flex-col gap-2 flex-1 min-h-0">
+                <div className="flex items-center justify-between shrink-0 px-3">
+                    <span className="text-label-xs uppercase tracking-wide text-text-soft-400">
                         { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.size.toString() ]) }
                     </span>
-                    <div className="flex items-center text-[10px] font-bold text-text-soft-400 uppercase tracking-[0.1em] gap-8 pr-[70px]">
+                    <div className="flex items-center text-label-xs uppercase tracking-wide text-text-soft-400 gap-8 pr-[70px]">
                         <span className="w-16 text-right">Spread</span>
-                        <span className="w-16 text-right">Price</span>
+                        <span className="w-16 text-right">Preis</span>
                     </div>
                 </div>
-                <div className="flex flex-col overflow-auto h-full rounded border border-stroke-soft-200 bg-bg-white-0">
+                <div className="flex flex-col overflow-auto h-full rounded-16 bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200 divide-y divide-stroke-soft-200">
                     { offers.size > 0 ? (
                         Array.from(offers.values()).map( (entry, index) => <CatalogLayoutMarketplaceItemView key={ index } offerData={ entry } type={ PUBLIC_OFFER } onClick={ purchaseItem } />)
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-text-disabled-300 text-xs gap-2 py-8">
-                            <span className="text-2xl font-mono opacity-50">¯\_(ツ)_/¯</span>
-                            No market data available.
+                        <div className="flex-1 flex flex-col items-center justify-center text-text-soft-400 text-paragraph-xs gap-2 py-8">
+                            <span className="text-subheading-md opacity-50">¯\_(ツ)_/¯</span>
+                            Keine Markt-Daten verfügbar.
                         </div>
                     ) }
                 </div>

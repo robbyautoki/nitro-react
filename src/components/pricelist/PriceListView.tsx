@@ -1,7 +1,7 @@
-import { ComponentProps, FC, useCallback, useEffect, useMemo, useState } from 'react';
+import { ComponentProps, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { AddEventLinkTracker, GetConfiguration, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
-import { DraggableWindow, DraggableWindowPosition, LayoutFurniImageView } from '../../common';
+import { DraggableWindow, DraggableWindowPosition, InlineFeedback, LayoutFurniImageView } from '../../common';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignDivider from '@/align-ui/components/ui/divider';
@@ -9,7 +9,7 @@ import * as AlignInput from '@/align-ui/components/ui/input';
 import * as AlignSurface from '@/align-ui/components/ui/surface';
 import * as AlignTable from '@/align-ui/components/ui/table';
 import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
-import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpWideNarrow, BarChart3, ChevronLeft, ChevronRight, Clock3, Hash, Loader2, Package, Search, ShieldCheck, X } from 'lucide-react';
+import { ArrowDownAZ, ArrowDownWideNarrow, ArrowUpWideNarrow, BarChart3, ChevronLeft, ChevronRight, Clock3, Hash, Loader2, Package, RefreshCw, Search, ShieldCheck, X } from 'lucide-react';
 
 interface PriceListItem
 {
@@ -104,6 +104,22 @@ export const PriceListView: FC<{}> = () =>
     const [ page, setPage ] = useState(1);
     const [ total, setTotal ] = useState(0);
     const [ totalPages, setTotalPages ] = useState(1);
+    const [ lastUpdate, setLastUpdate ] = useState<number | null>(null);
+    const [ refreshTick, setRefreshTick ] = useState(0);
+    const [ feedback, setFeedback ] = useState<{ tone: 'success' | 'error' | 'info' | 'pending'; message: string } | null>(null);
+    const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const showFeedback = useCallback((tone: 'success' | 'error' | 'info' | 'pending', message: string, autoDismissMs: number = 4000) =>
+    {
+        if(feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+        setFeedback({ tone, message });
+        if(autoDismissMs > 0) feedbackTimeoutRef.current = setTimeout(() => setFeedback(null), autoDismissMs);
+    }, []);
+
+    useEffect(() => () =>
+    {
+        if(feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    }, []);
 
     useEffect(() =>
     {
@@ -125,10 +141,10 @@ export const PriceListView: FC<{}> = () =>
         return () => RemoveLinkEventTracker(linkTracker);
     }, []);
 
-    const fetchItems = useCallback(async () =>
+    const fetchItems = useCallback(async (silent: boolean = false) =>
     {
         if(!isVisible) return;
-        setLoading(true);
+        if(!silent) setLoading(true);
         setError('');
         try
         {
@@ -159,18 +175,56 @@ export const PriceListView: FC<{}> = () =>
             setTotal(data.total ?? 0);
             setTotalPages(data.totalPages || 1);
             setSelectedItem(prev => resolvedItems.find((item: PriceListItem) => item.itemBaseId === prev?.itemBaseId) ?? resolvedItems[0] ?? null);
+            setLastUpdate(Date.now());
         }
         catch
         {
-            setItems([]);
-            setSelectedItem(null);
-            setError('Preisliste konnte nicht geladen werden');
+            if(!silent)
+            {
+                setItems([]);
+                setSelectedItem(null);
+                setError('Preisliste konnte nicht geladen werden');
+            }
         }
-        finally { setLoading(false); }
+        finally { if(!silent) setLoading(false); }
     }, [ isVisible, search, activeTab, minValue, maxValue, sortBy, page ]);
 
     useEffect(() => { fetchItems(); }, [ fetchItems ]);
     useEffect(() => { setPage(1); }, [ search, activeTab, minValue, maxValue, sortBy ]);
+
+    // Auto-refresh every 30s while visible (silent)
+    useEffect(() =>
+    {
+        if(!isVisible) return;
+        const id = setInterval(() => fetchItems(true), 30000);
+        return () => clearInterval(id);
+    }, [ isVisible, fetchItems ]);
+
+    // Tick every 5s so "vor X Sek." stays fresh without re-fetching
+    useEffect(() =>
+    {
+        if(!isVisible) return;
+        const id = setInterval(() => setRefreshTick(t => t + 1), 5000);
+        return () => clearInterval(id);
+    }, [ isVisible ]);
+
+    const handleManualRefresh = useCallback(() =>
+    {
+        fetchItems(true).then(() => showFeedback('success', 'Preisliste aktualisiert'));
+    }, [ fetchItems, showFeedback ]);
+
+    const updateAgo = useMemo(() =>
+    {
+        if(!lastUpdate) return null;
+        const sec = Math.max(0, Math.floor((Date.now() - lastUpdate) / 1000));
+        if(sec < 5) return 'gerade eben';
+        if(sec < 60) return `vor ${ sec }s`;
+        const min = Math.floor(sec / 60);
+        if(min < 60) return `vor ${ min }m`;
+        return `vor ${ Math.floor(min / 60) }h`;
+    // refreshTick forces re-eval
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ lastUpdate, refreshTick ]);
 
     const rarityTabs = useMemo(() => stats?.rarityTypes?.length ? stats.rarityTypes : FALLBACK_RARITY_TABS, [ stats ]);
     const onClose = useCallback(() => setIsVisible(false), []);
@@ -187,12 +241,31 @@ export const PriceListView: FC<{}> = () =>
                                 <BarChart3 className="size-4 text-text-sub-600" />
                                 <span>Preisliste</span>
                                 <AlignBadge.Root color="gray" variant="lighter" size="small" square>{ formatNumber(total) } Items</AlignBadge.Root>
+                                { updateAgo && (
+                                    <span className="text-paragraph-xs text-text-soft-400">· { updateAgo }</span>
+                                ) }
+                                <button
+                                    type="button"
+                                    onClick={ handleManualRefresh }
+                                    onPointerDown={ (e) => e.stopPropagation() }
+                                    title="Jetzt aktualisieren"
+                                    className="ml-1 inline-flex size-6 items-center justify-center rounded-md text-text-sub-600 transition-colors hover:bg-bg-weak-50 hover:text-text-strong-950 disabled:opacity-50"
+                                    disabled={ loading }
+                                >
+                                    <RefreshCw className={ `size-3.5 ${ loading ? 'animate-spin' : '' }` } />
+                                </button>
                             </div>
                         }
                         description="Recherche, Wertentwicklung und Marktplatz-Signale"
                         onClose={ onClose }
                         className="drag-handler cursor-grab active:cursor-grabbing"
                     />
+
+                    { feedback && (
+                        <div className="mx-4 mt-3">
+                            <InlineFeedback tone={ feedback.tone } message={ feedback.message } onDismiss={ () => setFeedback(null) } />
+                        </div>
+                    ) }
 
                     <div className="grid grid-cols-4 gap-2 bg-bg-weak-50 px-4 py-3">
                         { [

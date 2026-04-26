@@ -1,11 +1,12 @@
 import { ComponentProps, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { AddEventLinkTracker, attemptItemPlacement, GetConfiguration, GetRoomSession, GetSessionDataManager, RemoveLinkEventTracker } from '../../api';
 import { getAuthHeaders } from '../../api/utils/SessionTokenManager';
-import { DraggableWindow, DraggableWindowPosition } from '../../common';
+import { DraggableWindow, DraggableWindowPosition, InlineFeedback } from '../../common';
 import { InventoryFurniAddedEvent } from '../../events';
 import { useUiEvent } from '../../hooks/events';
-import { useInventoryFurni } from '../../hooks';
+import { useDebouncedCallback, useInventoryFurni } from '../../hooks';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignDivider from '@/align-ui/components/ui/divider';
@@ -138,11 +139,33 @@ export const SetsView: FC<{}> = () =>
     const [ selectedSetId, setSelectedSetId ] = useState<number | null>(null);
     const [ search, setSearch ] = useState('');
     const [ claimDialog, setClaimDialog ] = useState<FurnitureSet | null>(null);
+    const [ feedback, setFeedback ] = useState<{ tone: 'success' | 'error' | 'info' | 'pending'; message: string } | null>(null);
+    const [ claimingId, setClaimingId ] = useState<number | null>(null);
     const ownedNames = useOwnedClassNames();
     const { groupItems } = useInventoryFurni();
     const groupItemsRef = useRef(groupItems);
     groupItemsRef.current = groupItems;
     const pendingPreviewRef = useRef<{ spriteId: number } | null>(null);
+    const setsRef = useRef<FurnitureSet[]>([]);
+    setsRef.current = sets;
+    const ownedNamesRef = useRef<Set<string>>(ownedNames);
+    ownedNamesRef.current = ownedNames;
+    const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const showFeedback = useCallback((tone: 'success' | 'error' | 'info' | 'pending', message: string, autoDismissMs: number = 6000) =>
+    {
+        if(feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+        setFeedback({ tone, message });
+        if(autoDismissMs > 0)
+        {
+            feedbackTimeoutRef.current = setTimeout(() => setFeedback(null), autoDismissMs);
+        }
+    }, []);
+
+    useEffect(() => () =>
+    {
+        if(feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
+    }, []);
 
     useEffect(() =>
     {
@@ -164,10 +187,10 @@ export const SetsView: FC<{}> = () =>
         return () => RemoveLinkEventTracker(linkTracker);
     }, []);
 
-    const fetchSets = useCallback(async () =>
+    const fetchSets = useCallback(async (silent: boolean = false): Promise<FurnitureSet[]> =>
     {
-        if(!isVisible) return;
-        setLoading(true);
+        if(!isVisible) return [];
+        if(!silent) setLoading(true);
         setError('');
         try
         {
@@ -176,17 +199,43 @@ export const SetsView: FC<{}> = () =>
             const data: FurnitureSet[] = await res.json();
             setSets(data);
             setSelectedSetId(prev => data.find(set => set.id === prev)?.id ?? data[0]?.id ?? null);
+            return data;
         }
         catch
         {
-            setSets([]);
-            setSelectedSetId(null);
-            setError('Set-Katalog konnte nicht geladen werden');
+            if(!silent)
+            {
+                setSets([]);
+                setSelectedSetId(null);
+                setError('Set-Katalog konnte nicht geladen werden');
+            }
+            return [];
         }
-        finally { setLoading(false); }
+        finally { if(!silent) setLoading(false); }
     }, [ isVisible ]);
 
     useEffect(() => { fetchSets(); }, [ fetchSets ]);
+
+    // Live re-fetch when new furniture arrives in inventory (debounced to coalesce login bursts)
+    const debouncedRefetch = useDebouncedCallback(() =>
+    {
+        const before = setsRef.current;
+        const beforeProgress = new Map<number, number>();
+        for(const s of before) beforeProgress.set(s.id, getProgress(s, ownedNamesRef.current).percent);
+        fetchSets(true).then(after =>
+        {
+            for(const s of after)
+            {
+                const prevPct = beforeProgress.get(s.id);
+                const nowPct = getProgress(s, ownedNamesRef.current).percent;
+                if(prevPct !== undefined && prevPct < 100 && nowPct === 100)
+                {
+                    showFeedback('success', `Set "${ s.name }" ist komplett! Belohnung verfügbar.`);
+                    break;
+                }
+            }
+        });
+    }, 600);
 
     const selectedSet = useMemo(() => sets.find(s => s.id === selectedSetId) || null, [ sets, selectedSetId ]);
     const completedCount = useMemo(() => sets.filter(set => getProgress(set, ownedNames).percent === 100).length, [ sets, ownedNames ]);
@@ -200,13 +249,18 @@ export const SetsView: FC<{}> = () =>
     useUiEvent<InventoryFurniAddedEvent>(InventoryFurniAddedEvent.FURNI_ADDED, event =>
     {
         const preview = pendingPreviewRef.current;
-        if(!preview || event.spriteId !== preview.spriteId) return;
-        pendingPreviewRef.current = null;
-        setTimeout(() =>
+        if(preview && event.spriteId === preview.spriteId)
         {
-            const group = groupItemsRef.current.find(g => g.type === event.spriteId);
-            if(group) attemptItemPlacement(group);
-        }, 150);
+            pendingPreviewRef.current = null;
+            setTimeout(() =>
+            {
+                const group = groupItemsRef.current.find(g => g.type === event.spriteId);
+                if(group) attemptItemPlacement(group);
+            }, 150);
+            return;
+        }
+        // Re-sync set progress when any new furniture arrives
+        if(isVisible) debouncedRefetch();
     });
 
     const onClose = useCallback(() => setIsVisible(false), []);
@@ -218,8 +272,44 @@ export const SetsView: FC<{}> = () =>
 
     const handleClaim = useCallback((id: number) =>
     {
-        try { const session = GetRoomSession(); if(session) session.sendChatMessage(`:sets claim ${ id }`, 0); } catch {}
-    }, []);
+        const set = setsRef.current.find(s => s.id === id);
+        if(!set) return;
+        if(claimingId !== null) return;
+        if(set.rewardClaimed)
+        {
+            showFeedback('info', `Belohnung für "${ set.name }" wurde bereits eingelöst.`);
+            return;
+        }
+        setClaimingId(id);
+        // Optimistic local update so user sees state change instantly
+        setSets(prev => prev.map(s => s.id === id ? { ...s, rewardClaimed: true } : s));
+        showFeedback('pending', `Belohnung für "${ set.name }" wird abgeholt …`, 0);
+        try
+        {
+            const session = GetRoomSession();
+            if(session) session.sendChatMessage(`:sets claim ${ id }`, 0);
+        }
+        catch {}
+        // Verify after emulator round-trip
+        setTimeout(() =>
+        {
+            fetchSets(true).then(after =>
+            {
+                const fresh = after.find(s => s.id === id);
+                if(fresh?.rewardClaimed)
+                {
+                    showFeedback('success', `Belohnung für "${ fresh.name }" wurde eingelöst!`);
+                }
+                else
+                {
+                    // Rollback optimistic
+                    setSets(prev => prev.map(s => s.id === id ? { ...s, rewardClaimed: false } : s));
+                    showFeedback('error', `Belohnung konnte nicht eingelöst werden. Prüfe deinen Inventarplatz.`);
+                }
+                setClaimingId(null);
+            });
+        }, 1500);
+    }, [ claimingId, fetchSets, showFeedback ]);
 
     const handlePreview = useCallback((item: SetItem) =>
     {
@@ -260,8 +350,13 @@ export const SetsView: FC<{}> = () =>
                     />
 
                     { error && (
-                        <div className="mx-4 mt-3 rounded-xl border border-error-base/30 bg-error-lighter px-3 py-2 text-paragraph-xs text-error-base">
-                            { error }
+                        <div className="mx-4 mt-3">
+                            <InlineFeedback tone="error" message={ error } onDismiss={ () => setError('') } />
+                        </div>
+                    ) }
+                    { feedback && (
+                        <div className="mx-4 mt-3">
+                            <InlineFeedback tone={ feedback.tone } message={ feedback.message } onDismiss={ () => setFeedback(null) } />
                         </div>
                     ) }
 
@@ -445,10 +540,11 @@ export const SetsView: FC<{}> = () =>
                                                         mode={ isComplete && !selectedSet.rewardClaimed ? 'filled' : 'stroke' }
                                                         size="xsmall"
                                                         className="w-full"
-                                                        disabled={ !isComplete || selectedSet.rewardClaimed }
-                                                        onClick={ () => isComplete && !selectedSet.rewardClaimed && setClaimDialog(selectedSet) }
+                                                        disabled={ !isComplete || selectedSet.rewardClaimed || claimingId === selectedSet.id }
+                                                        onClick={ () => isComplete && !selectedSet.rewardClaimed && claimingId === null && setClaimDialog(selectedSet) }
                                                     >
-                                                        { selectedSet.rewardClaimed ? <><Check className="size-4" />Bereits eingelöst</> :
+                                                        { claimingId === selectedSet.id ? <><Loader2 className="size-4 animate-spin" />Wird abgeholt …</> :
+                                                          selectedSet.rewardClaimed ? <><Check className="size-4" />Bereits eingelöst</> :
                                                           isComplete ? <><Gift className="size-4" />Belohnung einlösen</> :
                                                           <><Lock className="size-4" />Alle { selectedSet.items.length } Möbel sammeln</> }
                                                     </AlignButton.Root>
@@ -462,8 +558,15 @@ export const SetsView: FC<{}> = () =>
                                             </AlignButton.Root>
                                         ) }
                                         { selectedSet.isCompleted && !selectedSet.rewardClaimed && hasReward && (
-                                            <AlignButton.Root variant="primary" mode="filled" size="small" className="w-full" onClick={ () => setClaimDialog(selectedSet) }>
-                                                Belohnung abholen
+                                            <AlignButton.Root
+                                                variant="primary"
+                                                mode="filled"
+                                                size="small"
+                                                className="w-full"
+                                                disabled={ claimingId !== null }
+                                                onClick={ () => claimingId === null && setClaimDialog(selectedSet) }
+                                            >
+                                                { claimingId === selectedSet.id ? <><Loader2 className="size-4 animate-spin" />Wird abgeholt …</> : 'Belohnung abholen' }
                                             </AlignButton.Root>
                                         ) }
                                         { selectedSet.isCompleted && selectedSet.rewardClaimed && (
@@ -519,8 +622,10 @@ export const SetsView: FC<{}> = () =>
                     </div>
                 </AlignSurface.Panel>
 
-                { claimDialog && (
-                    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-overlay p-4 backdrop-blur-[10px]">
+            </AlignTooltip.Provider>
+            { claimDialog && createPortal(
+                <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-overlay p-4 backdrop-blur-[10px]" onClick={ () => setClaimDialog(null) }>
+                    <div onClick={ (e) => e.stopPropagation() }>
                         <AlignSurface.Panel className="w-[360px] overflow-hidden">
                             <AlignSurface.Header
                                 title={<span className="flex items-center gap-2"><Gift className="size-4 text-warning-base" />Belohnung einlösen</span>}
@@ -537,13 +642,16 @@ export const SetsView: FC<{}> = () =>
                                 </div>
                                 <div className="flex justify-end gap-2 pt-2">
                                     <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ () => setClaimDialog(null) }>Abbrechen</AlignButton.Root>
-                                    <AlignButton.Root variant="primary" mode="filled" size="small" onClick={ () => { handleClaim(claimDialog.id); setClaimDialog(null); } }>Einlösen</AlignButton.Root>
+                                    <AlignButton.Root variant="primary" mode="filled" size="small" disabled={ claimingId !== null } onClick={ () => { handleClaim(claimDialog.id); setClaimDialog(null); } }>
+                                        { claimingId !== null ? <><Loader2 className="size-4 animate-spin" />Wird abgeholt …</> : 'Einlösen' }
+                                    </AlignButton.Root>
                                 </div>
                             </div>
                         </AlignSurface.Panel>
                     </div>
-                ) }
-            </AlignTooltip.Provider>
+                </div>,
+                document.body
+            ) }
         </DraggableWindow>
     );
 };

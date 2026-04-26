@@ -2,7 +2,7 @@ import { HabboWebTools, ILinkEventTracker, RoomSessionEvent } from '@nitrots/nit
 import { FC, useEffect, useState } from 'react';
 import { AddEventLinkTracker, GetCommunication, RemoveLinkEventTracker } from '../../api';
 import { Base, TransitionAnimation, TransitionAnimationTypes } from '../../common';
-import { useRoomSessionManagerEvent } from '../../hooks';
+import { useExtendedSettings, useRoomSessionManagerEvent } from '../../hooks';
 import { AchievementsView } from '../achievements/AchievementsView';
 import { AvatarEditorView } from '../avatar-editor/AvatarEditorView';
 import { CameraWidgetView } from '../camera/CameraWidgetView';
@@ -51,6 +51,10 @@ export const MainView: FC<{}> = props =>
 {
     const [ isReady, setIsReady ] = useState(false);
     const [ landingViewVisible, setLandingViewVisible ] = useState(true);
+
+    // Initialise the user's extended settings once per session and reflect them
+    // as `data-bahhos-*` attributes on <html>, so SCSS can react to them.
+    useExtendedSettings();
 
     useRoomSessionManagerEvent<RoomSessionEvent>(RoomSessionEvent.CREATED, event => setLandingViewVisible(false));
     useRoomSessionManagerEvent<RoomSessionEvent>(RoomSessionEvent.ENDED, event => setLandingViewVisible(event.openLandingView));

@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { ErrorBoundary, installGlobalErrorHandlers } from './components/error-boundary';
 import './index.scss';
 
 console.log(
@@ -11,4 +12,10 @@ console.log(
   'color: #ccc; font-size: 14px;'
 );
 
-createRoot(document.getElementById('root')).render(<App />);
+installGlobalErrorHandlers();
+
+createRoot(document.getElementById('root')).render(
+  <ErrorBoundary autoReloadSeconds={ 30 }>
+    <App />
+  </ErrorBoundary>
+);

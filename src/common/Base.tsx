@@ -21,17 +21,17 @@ const FLOAT_MAP: Record<string, string> = {
 };
 
 const COLOR_MAP: Record<string, string> = {
-    'white': 'text-white',
-    'black': 'text-black',
-    'primary': 'text-primary',
-    'secondary': 'text-secondary-foreground',
-    'success': 'text-green-500',
-    'danger': 'text-red-500',
-    'warning': 'text-yellow-1/20',
-    'muted': 'text-muted-foreground',
-    'dark': 'text-white/90',
-    'light': 'text-white/60',
-    'link': 'text-blue-400',
+    'white': 'text-text-white-0',
+    'black': 'text-text-strong-950',
+    'primary': 'text-primary-base',
+    'secondary': 'text-text-sub-600',
+    'success': 'text-success-base',
+    'danger': 'text-error-base',
+    'warning': 'text-warning-base',
+    'muted': 'text-text-sub-600',
+    'dark': 'text-text-strong-950',
+    'light': 'text-text-sub-600',
+    'link': 'text-primary-base',
 };
 
 export interface BaseProps<T = HTMLElement> extends DetailedHTMLProps<HTMLAttributes<T>, T>

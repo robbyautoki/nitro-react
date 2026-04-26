@@ -1,7 +1,7 @@
 import { IRoomCameraWidgetEffect, IRoomCameraWidgetSelectedEffect } from '@nitrots/nitro-renderer';
 import { FC } from 'react';
+import { Images } from 'lucide-react';
 import { CameraPictureThumbnail } from '../../../../../api';
-import { Grid } from '../../../../../common';
 import { CameraWidgetEffectListItemView } from './CameraWidgetEffectListItemView';
 
 export interface CameraWidgetEffectListViewProps
@@ -10,15 +10,26 @@ export interface CameraWidgetEffectListViewProps
     selectedEffects: IRoomCameraWidgetSelectedEffect[];
     effects: IRoomCameraWidgetEffect[];
     thumbnails: CameraPictureThumbnail[];
+    emptyLabel?: string;
     processAction: (type: string, name: string) => void;
 }
 
 export const CameraWidgetEffectListView: FC<CameraWidgetEffectListViewProps> = props =>
 {
-    const { myLevel = 0, selectedEffects = [], effects = [], thumbnails = [], processAction = null } = props;
+    const { myLevel = 0, selectedEffects = [], effects = [], thumbnails = [], emptyLabel = 'Keine Effekte verfügbar', processAction = null } = props;
+
+    if(!effects || !effects.length)
+    {
+        return (
+            <div className="nitro-camera-effect-empty">
+                <Images className="size-6" />
+                <span>{ emptyLabel }</span>
+            </div>
+        );
+    }
 
     return (
-        <Grid columnCount={ 3 } overflow="auto">
+        <div className="nitro-camera-effect-grid">
             { effects && (effects.length > 0) && effects.map((effect, index) =>
             {
                 const thumbnailUrl = (thumbnails.find(thumbnail => (thumbnail.effectName === effect.name)));
@@ -26,6 +37,6 @@ export const CameraWidgetEffectListView: FC<CameraWidgetEffectListViewProps> = p
 
                 return <CameraWidgetEffectListItemView key={ index } effect={ effect } thumbnailUrl={ ((thumbnailUrl && thumbnailUrl.thumbnailUrl) || null) } isActive={ isActive } isLocked={ (effect.minLevel > myLevel) } selectEffect={ () => processAction('select_effect', effect.name) } removeEffect={ () => processAction('remove_effect', effect.name) } />
             }) }
-        </Grid>
+        </div>
     );
 }

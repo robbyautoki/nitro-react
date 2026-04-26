@@ -7,7 +7,14 @@ export const NitroCardContentView: FC<ColumnProps> = props =>
 
     const getClassNames = useMemo(() =>
     {
-        const newClassNames: string[] = [ 'container-fluid', 'content-area' ];
+        const newClassNames: string[] = [
+            'container-fluid',
+            'content-area',
+            '!min-h-0',
+            '!bg-bg-white-0',
+            '!p-3',
+            '!text-text-strong-950'
+        ];
 
         if(classNames.length) newClassNames.push(...classNames);
 

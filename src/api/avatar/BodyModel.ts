@@ -43,24 +43,43 @@ export class BodyModel extends CategoryBaseModel
 
         for(const part of category.parts)
         {
-            const resetFigure = (figure: string) =>
+            if(!part || part.isClear || !part.partSet) continue;
+
+            const renderHead = (figure: string) =>
             {
+                if(part.disposed) return;
+
                 const figureString = AvatarEditorUtilities.CURRENT_FIGURE.getFigureStringWithFace(part.id);
-                const avatarImage = GetAvatarRenderManager().createAvatarImage(figureString, AvatarScaleType.LARGE, null, { resetFigure, dispose: null, disposed: false });
-    
+                const listener = { resetFigure: renderHead, dispose: null, disposed: false };
+                const avatarImage = GetAvatarRenderManager().createAvatarImage(figureString, AvatarScaleType.LARGE, null, listener);
+
+                if(!avatarImage)
+                {
+                    return;
+                }
+
+                if(avatarImage.isPlaceholder())
+                {
+                    setTimeout(() => avatarImage.dispose(), 0);
+                    return;
+                }
+
+                avatarImage.setDirection(AvatarSetType.HEAD, 2);
+
                 const sprite = avatarImage.getImageAsSprite(AvatarSetType.HEAD);
-    
+
                 if(sprite)
                 {
                     sprite.y = 10;
-    
                     part.thumbContainer = sprite;
-    
-                    setTimeout(() => avatarImage.dispose(), 0);
                 }
-            }
 
-            resetFigure(null);
+                setTimeout(() => avatarImage.dispose(), 0);
+            };
+
+            // Defer initial render so download-manager has time to register
+            // alias collection updates from already-cached libraries.
+            setTimeout(() => renderHead(null), 0);
         }
     }
 

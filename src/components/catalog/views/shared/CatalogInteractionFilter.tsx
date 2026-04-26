@@ -3,21 +3,21 @@ import { Filter } from 'lucide-react';
 import { IPurchasableOffer } from '../../../../api';
 
 const INTERACTION_LABELS: Record<string, { label: string; color: string }> = {
-    vendingmachine: { label: 'Automat', color: 'text-emerald-500' },
-    gate: { label: 'Tor', color: 'text-blue-500' },
-    teleport: { label: 'Teleporter', color: 'text-purple-500' },
-    trophy: { label: 'Trophäe', color: 'text-amber-500' },
-    badge: { label: 'Badge', color: 'text-cyan-500' },
-    bed: { label: 'Bett', color: 'text-pink-500' },
-    roller: { label: 'Roller', color: 'text-orange-500' },
-    dice: { label: 'Würfel', color: 'text-red-500' },
-    crackable: { label: 'Knackbar', color: 'text-lime-500' },
-    effect: { label: 'Effekt', color: 'text-violet-500' },
-    clothing: { label: 'Kleidung', color: 'text-rose-500' },
-    pressureplate: { label: 'Druckplatte', color: 'text-teal-500' },
-    switch: { label: 'Schalter', color: 'text-yellow-500' },
-    multiheight: { label: 'Multiheight', color: 'text-sky-500' },
-    pet_food: { label: 'Tierfutter', color: 'text-green-500' },
+    vendingmachine: { label: 'Automat', color: 'text-success-base' },
+    gate: { label: 'Tor', color: 'text-information-base' },
+    teleport: { label: 'Teleporter', color: 'text-primary-base' },
+    trophy: { label: 'Trophäe', color: 'text-warning-base' },
+    badge: { label: 'Badge', color: 'text-information-base' },
+    bed: { label: 'Bett', color: 'text-feature-base' },
+    roller: { label: 'Roller', color: 'text-warning-base' },
+    dice: { label: 'Würfel', color: 'text-error-base' },
+    crackable: { label: 'Knackbar', color: 'text-success-base' },
+    effect: { label: 'Effekt', color: 'text-primary-base' },
+    clothing: { label: 'Kleidung', color: 'text-feature-base' },
+    pressureplate: { label: 'Druckplatte', color: 'text-information-base' },
+    switch: { label: 'Schalter', color: 'text-warning-base' },
+    multiheight: { label: 'Multiheight', color: 'text-information-base' },
+    pet_food: { label: 'Tierfutter', color: 'text-success-base' },
 };
 
 export { INTERACTION_LABELS };
@@ -52,11 +52,11 @@ export const CatalogInteractionFilter: FC<CatalogInteractionFilterProps> = ({ of
     if(types.length <= 1) return null;
 
     return (
-        <div className="flex items-center gap-1.5 px-4 py-1.5 border-b border-border/30 bg-muted/10 overflow-x-auto shrink-0" style={ { scrollbarWidth: 'none' } }>
-            <Filter className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+        <div className="flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-2" style={ { scrollbarWidth: 'none' } }>
+            <Filter className="w-3 h-3 text-text-soft-400 shrink-0" />
             <button
                 onClick={ () => onFilter(null) }
-                className={ `shrink-0 px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors ${ !activeFilter ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent/50' }` }
+                className={ `shrink-0 rounded-lg px-2.5 py-1 text-label-xs transition-colors ${ !activeFilter ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs' : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950' }` }
             >
                 Alle
             </button>
@@ -67,10 +67,10 @@ export const CatalogInteractionFilter: FC<CatalogInteractionFilterProps> = ({ of
                     <button
                         key={ type }
                         onClick={ () => onFilter(activeFilter === type ? null : type) }
-                        className={ `shrink-0 px-2 py-0.5 rounded-md text-[11px] font-medium transition-colors flex items-center gap-1 ${ activeFilter === type ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent/50' }` }
+                        className={ `flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1 text-label-xs transition-colors ${ activeFilter === type ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs' : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950' }` }
                     >
                         { info?.label || type }
-                        <span className="opacity-40 text-[9px]">{ count }</span>
+                        <span className="text-subheading-2xs opacity-40">{ count }</span>
                     </button>
                 );
             }) }

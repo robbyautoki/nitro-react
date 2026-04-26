@@ -3,8 +3,8 @@ import { FC, useState } from 'react';
 import { FaTag } from 'react-icons/fa';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
 import { useMessageEvent, useNotification } from '../../../../../hooks';
-import { Button } from '../../../../ui/button';
-import { Input } from '../../../../ui/input';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as Input from '@/align-ui/components/ui/input';
 
 export interface CatalogRedeemVoucherViewProps
 {
@@ -52,10 +52,14 @@ export const CatalogRedeemVoucherView: FC<CatalogRedeemVoucherViewProps> = props
 
     return (
         <div className="flex gap-1">
-            <Input type="text" className="h-8 text-xs" placeholder={ text } value={ voucher } onChange={ event => setVoucher(event.target.value) } />
-            <Button size="icon-sm" onClick={ redeemVoucher } disabled={ isWaiting }>
+            <Input.Root size="xsmall">
+                <Input.Wrapper className="h-8">
+                    <Input.Input type="text" className="text-xs" placeholder={ text } value={ voucher } onChange={ event => setVoucher(event.target.value) } />
+                </Input.Wrapper>
+            </Input.Root>
+            <AlignButton.Root variant="primary" mode="filled" size="xsmall" className="size-8 px-0" onClick={ redeemVoucher } disabled={ isWaiting }>
                 <FaTag className="text-xs" />
-            </Button>
+            </AlignButton.Root>
         </div>
     );
 }

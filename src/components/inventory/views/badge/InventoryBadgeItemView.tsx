@@ -20,16 +20,16 @@ export const InventoryBadgeItemView: FC<InventoryBadgeItemViewProps> = ({ badgeC
             className={
                 'relative w-10 h-10 rounded-md flex items-center justify-center cursor-pointer transition-all ' +
                 (isActive
-                    ? 'bg-accent ring-1 ring-border'
-                    : 'bg-transparent hover:bg-accent')
+                    ? 'bg-primary-alpha-10 ring-1 ring-primary-base'
+                    : 'bg-transparent hover:bg-bg-weak-50')
             }
-            onClick={() => setSelectedBadgeCode(badgeCode)}
-            onDoubleClick={() => toggleBadge(badgeCode)}
+            onClick={ () => setSelectedBadgeCode(badgeCode) }
+            onDoubleClick={ () => toggleBadge(badgeCode) }
         >
-            <LayoutBadgeImageView badgeCode={badgeCode} />
-            {unseen && (
-                <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.6)]" />
-            )}
+            <LayoutBadgeImageView badgeCode={ badgeCode } />
+            { unseen && (
+                <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-success-base ring-2 ring-bg-white-0" />
+            ) }
         </div>
     );
 };

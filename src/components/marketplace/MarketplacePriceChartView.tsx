@@ -1,21 +1,13 @@
 import { IFurnitureData } from '@nitrots/nitro-renderer';
 import { FC, useState, useMemo, useCallback, useEffect } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '../ui/chart';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import { GetSessionDataManager } from '../../api';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
 import { CurrencyIcon, ItemIcon } from './marketplace-components';
 import { fmtC } from './marketplace-utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignPopover from '@/align-ui/components/ui/popover';
 import { ChevronsUpDown, BarChart3, ArrowUp, ArrowDown } from 'lucide-react';
-
-const chartConfig: ChartConfig = {
-    averagePrice: {
-        label: 'Preis',
-        color: 'hsl(var(--primary))',
-    },
-};
 
 export const MarketplacePriceChartView: FC<{}> = () =>
 {
@@ -76,99 +68,103 @@ export const MarketplacePriceChartView: FC<{}> = () =>
 
     return (
         <div className="flex flex-col h-full">
-            <div className="shrink-0 px-3 pt-2 pb-1 border-b border-border/30">
+            <div className="shrink-0 border-b border-stroke-soft-200 bg-bg-weak-50 px-3 py-2">
                 <div className="flex items-center gap-2">
-                    {/* Combobox Item Selector */}
-                    <Popover open={ open } onOpenChange={ setOpen }>
-                        <PopoverTrigger asChild>
-                            <button className="flex items-center gap-2 rounded-md border border-border/40 bg-muted/10 hover:bg-accent/30 px-2 py-1 transition-colors">
+                    { /* Combobox Item Selector */ }
+                    <AlignPopover.Root open={ open } onOpenChange={ setOpen }>
+                        <AlignPopover.Trigger asChild>
+                            <button className="flex items-center gap-2 rounded-10 bg-bg-white-0 px-2 py-1.5 shadow-regular-xs ring-1 ring-stroke-soft-200 transition-colors hover:bg-bg-weak-50">
                                 { displayName ? (
                                     <>
                                         <div className="w-7 h-7 shrink-0 flex items-center justify-center">
                                             <ItemIcon itemName={ selectedClassName } className="w-6 h-6" />
                                         </div>
                                         <div className="text-left">
-                                            <p className="text-[12px] font-semibold leading-tight">{ displayName }</p>
-                                            <p className="text-[9px] text-muted-foreground font-mono leading-tight">
+                                            <p className="text-label-xs leading-tight text-text-strong-950">{ displayName }</p>
+                                            <p className="text-paragraph-xs text-text-soft-400 font-mono leading-tight">
                                                 { selectedFurniType === 1 ? 'Bodenmöbel' : 'Wandmöbel' } · ID { itemStats?.furniTypeId ?? '...' }
                                             </p>
                                         </div>
                                     </>
                                 ) : (
                                     <div className="text-left">
-                                        <p className="text-[12px] font-medium text-muted-foreground">Möbel auswählen...</p>
+                                        <p className="text-label-xs text-text-sub-600">Möbel auswählen...</p>
                                     </div>
                                 ) }
-                                <ChevronsUpDown className="w-3 h-3 text-muted-foreground/50 ml-1 shrink-0" />
+                                <ChevronsUpDown className="w-3 h-3 text-text-soft-400 ml-1 shrink-0" />
                             </button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[280px] p-0" align="start">
-                            <Command shouldFilter={ false }>
-                                <CommandInput
-                                    placeholder="Möbel suchen..."
-                                    className="h-8 text-[12px]"
-                                    value={ searchInput }
-                                    onValueChange={ setSearchInput }
-                                />
-                                <CommandList>
-                                    { searchInput.length < 2 ? (
-                                        <div className="py-4 text-center text-[11px] text-muted-foreground">
-                                            Mindestens 2 Zeichen eingeben...
+                        </AlignPopover.Trigger>
+                        <AlignPopover.Content className="w-[280px] p-2" align="start" showArrow={ false }>
+                            <AlignInput.Root size="xsmall">
+                                <AlignInput.Wrapper className="h-8">
+                                    <AlignInput.Input
+                                        placeholder="Möbel suchen..."
+                                        value={ searchInput }
+                                        onChange={ e => setSearchInput(e.target.value) }
+                                        className="h-8 text-label-xs"
+                                    />
+                                </AlignInput.Wrapper>
+                            </AlignInput.Root>
+                            <div className="mt-2 max-h-[260px] overflow-y-auto pr-1" style={ { scrollbarWidth: 'thin' } }>
+                                { searchInput.length < 2 ? (
+                                    <div className="py-4 text-center text-paragraph-xs text-text-sub-600">
+                                        Mindestens 2 Zeichen eingeben...
+                                    </div>
+                                ) : suggestions.length === 0 ? (
+                                    <div className="py-4 text-center text-paragraph-xs text-text-sub-600">
+                                        Keine Möbel gefunden.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-1">
+                                        <div className="px-2 py-1 text-subheading-2xs uppercase text-text-soft-400">
+                                            { suggestions.length } Ergebnis{ suggestions.length !== 1 ? 'se' : '' }
                                         </div>
-                                    ) : suggestions.length === 0 ? (
-                                        <CommandEmpty className="py-4 text-center text-[11px] text-muted-foreground">
-                                            Keine Möbel gefunden.
-                                        </CommandEmpty>
-                                    ) : (
-                                        <CommandGroup heading={ `${ suggestions.length } Ergebnis${ suggestions.length !== 1 ? 'se' : '' }` }>
-                                            { suggestions.map(item => (
-                                                <CommandItem
-                                                    key={ `${ item.type }-${ item.id }` }
-                                                    className="flex items-center gap-2 text-[11px] cursor-pointer"
-                                                    onSelect={ () => selectItem(item) }
-                                                >
-                                                    <div className="w-7 h-7 shrink-0 rounded border border-border/30 bg-muted/10 flex items-center justify-center">
-                                                        <ItemIcon itemName={ item.className } className="w-5 h-5" />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="truncate font-medium">{ item.name && !item.name.endsWith('_name') ? item.name : item.className }</p>
-                                                        <p className="text-[9px] text-muted-foreground/50 font-mono">
-                                                            { item.type === 'I' ? 'Wand' : 'Boden' } · ID { item.id }
-                                                        </p>
-                                                    </div>
-                                                </CommandItem>
-                                            )) }
-                                        </CommandGroup>
-                                    ) }
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-
-                    {/* Stats in same row, ml-auto */}
+                                        { suggestions.map(item => (
+                                            <button
+                                                key={ `${ item.type }-${ item.id }` }
+                                                className="flex w-full cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left text-paragraph-xs transition-colors hover:bg-bg-weak-50"
+                                                onClick={ () => selectItem(item) }
+                                            >
+                                                <div className="flex w-7 h-7 shrink-0 items-center justify-center rounded-10 bg-bg-weak-50 shadow-regular-xs ring-1 ring-stroke-soft-200">
+                                                    <ItemIcon itemName={ item.className } className="w-5 h-5" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="truncate font-medium text-text-strong-950">{ item.name && !item.name.endsWith('_name') ? item.name : item.className }</p>
+                                                    <p className="font-mono text-paragraph-xs text-text-soft-400">
+                                                        { item.type === 'I' ? 'Wand' : 'Boden' } · ID { item.id }
+                                                    </p>
+                                                </div>
+                                            </button>
+                                        )) }
+                                    </div>
+                                ) }
+                            </div>
+                        </AlignPopover.Content>
+                    </AlignPopover.Root>
+                    { /* Stats in same row, ml-auto */ }
                     { itemStats && (
                         <div className="ml-auto flex items-center gap-3">
                             <div className="text-center">
-                                <p className="text-[9px] text-muted-foreground">Ø Preis</p>
-                                <p className="text-[11px] font-bold tabular-nums flex items-center gap-0.5 justify-center">
+                                <p className="text-subheading-2xs uppercase text-text-soft-400">Ø Preis</p>
+                                <p className="text-label-xs tabular-nums flex items-center gap-0.5 justify-center text-text-strong-950">
                                     <CurrencyIcon type="credits" className="w-3 h-3" />{ fmtC(avg) }
                                 </p>
                             </div>
                             <div className="text-center">
-                                <p className="text-[9px] text-muted-foreground">Min</p>
-                                <p className="text-[11px] font-bold tabular-nums text-emerald-500 flex items-center gap-0.5 justify-center">
+                                <p className="text-subheading-2xs uppercase text-text-soft-400">Min</p>
+                                <p className="text-label-xs tabular-nums text-success-base flex items-center gap-0.5 justify-center">
                                     <CurrencyIcon type="credits" className="w-3 h-3" />{ fmtC(min) }
                                 </p>
                             </div>
                             <div className="text-center">
-                                <p className="text-[9px] text-muted-foreground">Max</p>
-                                <p className="text-[11px] font-bold tabular-nums text-red-500 flex items-center gap-0.5 justify-center">
+                                <p className="text-subheading-2xs uppercase text-text-soft-400">Max</p>
+                                <p className="text-label-xs tabular-nums text-error-base flex items-center gap-0.5 justify-center">
                                     <CurrencyIcon type="credits" className="w-3 h-3" />{ fmtC(max) }
                                 </p>
                             </div>
                             <div className="text-center">
-                                <p className="text-[9px] text-muted-foreground">Trend</p>
-                                <p className={ `text-[11px] font-bold tabular-nums flex items-center gap-0.5 ${ trend >= 0 ? 'text-emerald-500' : 'text-red-500' }` }>
+                                <p className="text-subheading-2xs uppercase text-text-soft-400">Trend</p>
+                                <p className={ `text-label-xs tabular-nums flex items-center gap-0.5 ${ trend >= 0 ? 'text-success-base' : 'text-error-base' }` }>
                                     { trend >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" /> }
                                     { trend >= 0 ? '+' : '' }{ trend }
                                 </p>
@@ -177,34 +173,46 @@ export const MarketplacePriceChartView: FC<{}> = () =>
                     ) }
                 </div>
             </div>
-
             { !itemStats ? (
-                <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground">
+                <div className="flex flex-col items-center justify-center flex-1 text-text-sub-600">
                     <BarChart3 className="w-10 h-10 opacity-20 mb-2" />
-                    <span className="text-xs">Wähle ein Möbelstück um den Preisverlauf zu sehen</span>
+                    <span className="text-paragraph-xs">Wähle ein Möbelstück um den Preisverlauf zu sehen</span>
                 </div>
             ) : chartData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground">
+                <div className="flex flex-col items-center justify-center flex-1 text-text-sub-600">
                     <BarChart3 className="w-8 h-8 opacity-20 mb-2" />
-                    <span className="text-xs">Keine Verlaufsdaten vorhanden</span>
+                    <span className="text-paragraph-xs">Keine Verlaufsdaten vorhanden</span>
                 </div>
             ) : (
                 <div className="flex-1 min-h-0 px-2 py-3">
-                    <ChartContainer config={ chartConfig } className="h-full w-full">
+                    <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={ chartData } margin={ { top: 4, right: 8, left: 0, bottom: 0 } }>
                             <defs>
                                 <linearGradient id="priceGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={ 0.2 } />
-                                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={ 0 } />
+                                    <stop offset="5%" stopColor="hsl(var(--align-primary-base))" stopOpacity={ 0.2 } />
+                                    <stop offset="95%" stopColor="hsl(var(--align-primary-base))" stopOpacity={ 0 } />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={ 0.3 } />
-                            <XAxis dataKey="date" tick={ { fontSize: 9 } } tickLine={ false } axisLine={ false } interval={ 4 } />
-                            <YAxis tick={ { fontSize: 9 } } tickLine={ false } axisLine={ false } width={ 35 } domain={ [ 'dataMin - 10', 'dataMax + 10' ] } />
-                            <ChartTooltip content={ <ChartTooltipContent /> } />
-                            <Area type="monotone" dataKey="averagePrice" stroke="hsl(var(--primary))" strokeWidth={ 2 } fill="url(#priceGrad)" />
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--align-stroke-soft-200))" strokeOpacity={ 0.6 } />
+                            <XAxis dataKey="date" tick={ { fontSize: 9, fill: 'hsl(var(--align-text-soft-400))' } } tickLine={ false } axisLine={ false } interval={ 4 } />
+                            <YAxis tick={ { fontSize: 9, fill: 'hsl(var(--align-text-soft-400))' } } tickLine={ false } axisLine={ false } width={ 35 } domain={ [ 'dataMin - 10', 'dataMax + 10' ] } />
+                            <RechartsTooltip
+                                cursor={ { stroke: 'hsl(var(--align-stroke-sub-300))' } }
+                                contentStyle={ {
+                                    backgroundColor: 'hsl(var(--align-bg-white-0))',
+                                    border: '1px solid hsl(var(--align-stroke-soft-200))',
+                                    borderRadius: '10px',
+                                    boxShadow: 'var(--shadow-regular-md)',
+                                    color: 'hsl(var(--align-text-strong-950))',
+                                    fontSize: 11,
+                                } }
+                                labelStyle={ { color: 'hsl(var(--align-text-sub-600))' } }
+                                itemStyle={ { color: 'hsl(var(--align-primary-base))' } }
+                                formatter={ value => [ fmtC(Number(value)), 'Preis' ] }
+                            />
+                            <Area type="monotone" dataKey="averagePrice" stroke="hsl(var(--align-primary-base))" strokeWidth={ 2 } fill="url(#priceGrad)" />
                         </AreaChart>
-                    </ChartContainer>
+                    </ResponsiveContainer>
                 </div>
             ) }
         </div>

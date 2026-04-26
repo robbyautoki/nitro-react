@@ -5,8 +5,8 @@ import { CatalogPurchaseState, GetConfiguration, LocalizeText, SendMessageCompos
 import { LayoutCurrencyIcon, LayoutLoadingSpinnerView } from '../../../../../common';
 import { CatalogEvent, CatalogPurchasedEvent, CatalogPurchaseFailureEvent } from '../../../../../events';
 import { useCatalog, usePurse, useUiEvent } from '../../../../../hooks';
-import { Button } from '../../../../ui/button';
-import { Separator } from '../../../../ui/separator';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import * as Divider from '@/align-ui/components/ui/divider';
 import { CatalogPriceDisplay } from '../../shared/CatalogPriceDisplay';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
@@ -83,35 +83,33 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
 
     return (
         <div className="flex flex-col h-full overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
-            {/* Hero Header */}
-            <div className="shrink-0 relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-transparent border-b border-amber-400/20 p-6">
+            { /* Hero Header */ }
+            <div className="shrink-0 relative overflow-hidden bg-warning-lighter border-b border-warning-base/20 p-6">
                 <div className="absolute inset-0 opacity-[0.03]" style={ { backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '20px 20px' } } />
                 <div className="relative flex items-center gap-4">
                     <LayoutCurrencyIcon type={ -1 } className="w-10 h-10" />
                     <div>
-                        <h2 className="text-xl font-black tracking-tight flex items-center gap-2">Habbo Club</h2>
-                        <p className="text-xs text-muted-foreground mt-0.5">Werde HC-Mitglied und schalte exklusive Vorteile frei</p>
+                        <h2 className="text-title-h5 flex items-center gap-2 text-text-strong-950">Habbo Club</h2>
+                        <p className="mt-0.5 text-paragraph-xs text-text-sub-600">Werde HC-Mitglied und schalte exklusive Vorteile frei</p>
                     </div>
                 </div>
             </div>
-
             <div className="flex-1 p-6 overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
-                {/* Benefits */}
-                <div className="mb-6 rounded-xl border border-amber-400/20 bg-gradient-to-br from-amber-500/[0.03] to-transparent p-4">
-                    <h3 className="text-sm font-bold flex items-center gap-2 mb-3">
-                        <Crown className="w-4 h-4 text-amber-500" />HC-Vorteile
+                { /* Benefits */ }
+                <div className="mb-6 rounded-16 bg-bg-weak-50 p-4 shadow-regular-xs ring-1 ring-stroke-soft-200">
+                    <h3 className="text-label-sm flex items-center gap-2 mb-3 text-text-strong-950">
+                        <Crown className="w-4 h-4 text-warning-base" />HC-Vorteile
                     </h3>
                     <div className="grid grid-cols-2 gap-2">
                         { HC_BENEFITS.map((b, i) => (
-                            <div key={ i } className="flex items-start gap-2 text-xs text-muted-foreground">
-                                <Sparkles className="w-3 h-3 text-amber-400/60 mt-0.5 shrink-0" />
+                            <div key={ i } className="flex items-start gap-2 text-paragraph-xs text-text-sub-600">
+                                <Sparkles className="w-3 h-3 text-warning-base mt-0.5 shrink-0" />
                                 <span>{ b }</span>
                             </div>
                         )) }
                     </div>
                 </div>
-
-                {/* Offer cards */}
+                { /* Offer cards */ }
                 { clubOffers && clubOffers.length > 0 ? (
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
                         { clubOffers.map((offer, i) =>
@@ -123,48 +121,60 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
                             return (
                                 <button
                                     key={ i }
-                                    onClick={ () => { setPendingOffer(isActive ? null : offer); setPurchaseState(CatalogPurchaseState.NONE); } }
-                                    className={ `group relative flex flex-col items-center rounded-2xl border-2 transition-all duration-300 overflow-hidden ${ isActive
-                                        ? 'border-amber-400 bg-amber-500/10 shadow-xl shadow-amber-500/10 scale-[1.02]'
+                                    onClick={ () => 
+                                    {
+                                        setPendingOffer(isActive ? null : offer); setPurchaseState(CatalogPurchaseState.NONE); 
+                                    } }
+                                    className={ `group relative flex flex-col items-center overflow-hidden rounded-16 ring-1 transition-all duration-300 ${ isActive
+                                        ? 'scale-[1.02] bg-warning-lighter shadow-regular-md ring-warning-base'
                                         : isBest
-                                            ? 'border-amber-400/40 bg-gradient-to-b from-amber-500/5 to-transparent hover:border-amber-400/70 hover:shadow-lg'
-                                            : 'border-border/40 bg-card hover:border-amber-400/30 hover:shadow-md' }` }
+                                            ? 'bg-bg-weak-50 ring-warning-base/40 hover:ring-warning-base hover:shadow-regular-md'
+                                            : 'bg-bg-white-0 ring-stroke-soft-200 hover:ring-warning-base/40 hover:shadow-regular-xs' }` }
                                 >
                                     { isBest && (
-                                        <span className="absolute top-2.5 right-2.5 z-10 text-[9px] font-bold text-amber-600 bg-amber-500/10 border border-amber-500/20 rounded px-1.5 py-0.5">Beliebt</span>
+                                        <span className="absolute top-2.5 right-2.5 z-10 rounded-md bg-warning-lighter px-1.5 py-0.5 text-subheading-2xs text-warning-base ring-1 ring-warning-base/20">Beliebt</span>
                                     ) }
-                                    <div className="relative w-full h-[140px] bg-gradient-to-b from-amber-400/10 to-transparent flex items-end justify-center overflow-hidden">
+                                    <div className="relative w-full h-[140px] bg-gradient-to-b from-warning-lighter to-transparent flex items-end justify-center overflow-hidden">
                                         <div className="absolute inset-0 opacity-5" style={ { backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '16px 16px' } } />
                                         <img
                                             src={ figureUrl }
                                             alt={ getOfferText(offer) }
                                             className="relative h-[120px] object-contain drop-shadow-lg transition-transform duration-300 group-hover:scale-105"
                                             style={ { imageRendering: 'pixelated' } }
-                                            onError={ e => { (e.target as HTMLImageElement).style.display = 'none'; } }
+                                            onError={ e => 
+                                            {
+                                                (e.target as HTMLImageElement).style.display = 'none'; 
+                                            } }
                                         />
                                     </div>
                                     <div className="flex flex-col items-center gap-2 p-4 w-full">
-                                        <span className="text-base font-black tracking-tight">{ getOfferText(offer) }</span>
-                                        <span className="text-[11px] text-muted-foreground">{ offer.months * 31 + offer.extraDays } Tage</span>
-                                        <Separator className="w-full" />
+                                        <span className="text-label-md text-text-strong-950">{ getOfferText(offer) }</span>
+                                        <span className="text-paragraph-xs text-text-sub-600">{ offer.months * 31 + offer.extraDays } Tage</span>
+                                        <Divider.Root className="w-full" />
                                         <CatalogPriceDisplay credits={ offer.priceCredits } points={ offer.priceActivityPoints } size="sm" />
                                         { isActive && (
                                             <div className="w-full mt-2">
                                                 { purchaseState === CatalogPurchaseState.NONE && (
-                                                    <Button className="w-full" size="sm" onClick={ (e) => { e.stopPropagation(); setPurchaseState(CatalogPurchaseState.CONFIRM); } }>
+                                                    <FancyButton.Root className="w-full" size="small" variant="primary" onClick={ (e) => 
+                                                    {
+                                                        e.stopPropagation(); setPurchaseState(CatalogPurchaseState.CONFIRM); 
+                                                    } }>
                                                         { LocalizeText('buy') }
-                                                    </Button>
+                                                    </FancyButton.Root>
                                                 ) }
                                                 { purchaseState === CatalogPurchaseState.CONFIRM && (
-                                                    <Button variant="warning" className="w-full" size="sm" onClick={ (e) => { e.stopPropagation(); purchaseSubscription(); } }>
+                                                    <FancyButton.Root className="w-full" size="small" variant="primary" onClick={ (e) => 
+                                                    {
+                                                        e.stopPropagation(); purchaseSubscription(); 
+                                                    } }>
                                                         { LocalizeText('catalog.marketplace.confirm_title') }
-                                                    </Button>
+                                                    </FancyButton.Root>
                                                 ) }
                                                 { purchaseState === CatalogPurchaseState.PURCHASE && (
-                                                    <Button className="w-full" size="sm" disabled><LayoutLoadingSpinnerView /></Button>
+                                                    <FancyButton.Root className="w-full" size="small" variant="primary" disabled><LayoutLoadingSpinnerView /></FancyButton.Root>
                                                 ) }
                                                 { purchaseState === CatalogPurchaseState.FAILED && (
-                                                    <Button variant="destructive" className="w-full" size="sm" disabled>{ LocalizeText('generic.failed') }</Button>
+                                                    <FancyButton.Root className="w-full" size="small" variant="destructive" disabled>{ LocalizeText('generic.failed') }</FancyButton.Root>
                                                 ) }
                                             </div>
                                         ) }
@@ -174,16 +184,15 @@ export const CatalogLayoutVipBuyView: FC<CatalogLayoutProps> = props =>
                         }) }
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                    <div className="flex flex-col items-center justify-center py-12 text-text-sub-600">
                         <Crown className="w-12 h-12 mb-3 opacity-20" />
                         <p className="font-medium">Keine Club-Angebote verfügbar</p>
                     </div>
                 ) }
-
-                {/* Subscription info */}
+                { /* Subscription info */ }
                 { purse && (purse.clubDays > 0 || purse.clubPeriods > 0) && (
-                    <div className="mt-6 rounded-xl border border-border/40 bg-card p-4">
-                        <div className="text-xs text-muted-foreground leading-relaxed catalog-page-text" dangerouslySetInnerHTML={ { __html: getSubscriptionDetails } } />
+                    <div className="mt-6 rounded-16 bg-bg-weak-50 p-4 shadow-regular-xs ring-1 ring-stroke-soft-200">
+                        <div className="text-paragraph-xs text-text-sub-600 leading-relaxed catalog-page-text" dangerouslySetInnerHTML={ { __html: getSubscriptionDetails } } />
                     </div>
                 ) }
             </div>

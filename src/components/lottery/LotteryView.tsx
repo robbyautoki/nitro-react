@@ -1,7 +1,8 @@
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { useMessageEvent } from '../../hooks';
-import { Frame, FramePanel } from '../ui/frame';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 import { Ticket, PartyPopper, Frown } from 'lucide-react';
 
 type LotteryMode = 'idle' | 'countdown' | 'result' | 'no_winner';
@@ -26,8 +27,14 @@ export const LotteryView: FC<{}> = () =>
 
     const clearTimers = useCallback(() =>
     {
-        if(timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
-        if(hideTimerRef.current) { clearTimeout(hideTimerRef.current); hideTimerRef.current = null; }
+        if(timerRef.current)
+        {
+            clearInterval(timerRef.current); timerRef.current = null;
+        }
+        if(hideTimerRef.current)
+        {
+            clearTimeout(hideTimerRef.current); hideTimerRef.current = null;
+        }
     }, []);
 
     const showView = useCallback((newMode: LotteryMode, autoHideSeconds: number = 0) =>
@@ -42,7 +49,10 @@ export const LotteryView: FC<{}> = () =>
             hideTimerRef.current = setTimeout(() =>
             {
                 setFading(true);
-                setTimeout(() => { setVisible(false); setMode('idle'); }, 600);
+                setTimeout(() =>
+                {
+                    setVisible(false); setMode('idle');
+                }, 600);
             }, autoHideSeconds * 1000);
         }
     }, [ clearTimers ]);
@@ -113,61 +123,58 @@ export const LotteryView: FC<{}> = () =>
 
     return (
         <div className={ `fixed top-20 left-1/2 -translate-x-1/2 z-[100] pointer-events-none transition-all duration-500 ${ fading ? 'opacity-0 -translate-y-2' : 'opacity-100 translate-y-0' }` }>
-            <Frame className="min-w-[320px]">
-                <FramePanel className="!p-0">
-                    { mode === 'countdown' && (
-                        <div className="px-5 py-3 text-center space-y-1.5">
-                            <div className="flex items-center justify-center gap-2">
-                                <Ticket className="size-4 text-amber-500" />
-                                <span className="text-sm font-bold text-amber-500 uppercase tracking-wider">
-                                    Lotto Ziehung in { formatTime(secondsLeft) }
-                                </span>
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                                Jackpot: <span className="text-emerald-500 font-semibold">{ formatCredits(jackpot) } Credits</span>
-                                <span className="mx-2 text-muted-foreground/50">|</span>
-                                { tickets } Tickets
-                            </div>
-                            <div className="text-xs text-muted-foreground/70">
-                                :lotto buy — Jetzt Ticket kaufen! ({ price } Credits)
-                            </div>
+            <AlignSurface.Panel className="min-w-[320px] overflow-hidden">
+                { mode === 'countdown' && (
+                    <div className="space-y-1.5 px-5 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                            <Ticket className="size-4 text-warning-base" />
+                            <span className="text-label-sm font-bold uppercase tracking-normal text-warning-base">
+                                Lotto Ziehung in { formatTime(secondsLeft) }
+                            </span>
                         </div>
-                    ) }
-
-                    { mode === 'result' && (
-                        <div className="px-5 py-3 text-center space-y-1.5">
-                            <div className="flex items-center justify-center gap-2">
-                                <PartyPopper className="size-4 text-amber-500" />
-                                <span className="text-sm font-bold text-amber-500 uppercase tracking-wider">
-                                    Lotto Gewinner!
-                                </span>
-                                <PartyPopper className="size-4 text-amber-500" />
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                                <span className="text-amber-400 font-bold">{ winner }</span> hat{' '}
-                                <span className="text-emerald-500 font-bold">{ formatCredits(prize) } Credits</span> gewonnen!
-                            </div>
-                            <div className="text-xs text-muted-foreground/70">
-                                Nächste Ziehung: { nextDraw } Uhr
-                            </div>
+                        <div className="flex items-center justify-center gap-2 text-paragraph-xs text-text-sub-600">
+                            <span>Jackpot:</span>
+                            <AlignBadge.Root color="green" variant="lighter" size="small">{ formatCredits(jackpot) } Credits</AlignBadge.Root>
+                            <span className="text-text-soft-400">|</span>
+                            <span>{ tickets } Tickets</span>
                         </div>
-                    ) }
-
-                    { mode === 'no_winner' && (
-                        <div className="px-5 py-3 text-center space-y-1">
-                            <div className="flex items-center justify-center gap-2">
-                                <Frown className="size-4 text-muted-foreground" />
-                                <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                                    Kein Gewinner heute
-                                </span>
-                            </div>
-                            <div className="text-xs text-muted-foreground/70">
-                                Niemand hat teilgenommen. Nächste Ziehung: { nextDraw } Uhr
-                            </div>
+                        <div className="text-paragraph-xs text-text-soft-400">
+                            :lotto buy - Jetzt Ticket kaufen! ({ price } Credits)
                         </div>
-                    ) }
-                </FramePanel>
-            </Frame>
+                    </div>
+                ) }
+                { mode === 'result' && (
+                    <div className="space-y-1.5 px-5 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                            <PartyPopper className="size-4 text-warning-base" />
+                            <span className="text-label-sm font-bold uppercase tracking-normal text-warning-base">
+                                Lotto Gewinner!
+                            </span>
+                            <PartyPopper className="size-4 text-warning-base" />
+                        </div>
+                        <div className="text-paragraph-sm text-text-sub-600">
+                            <span className="font-bold text-warning-base">{ winner }</span> hat{ ' ' }
+                            <span className="font-bold text-success-base">{ formatCredits(prize) } Credits</span> gewonnen!
+                        </div>
+                        <div className="text-paragraph-xs text-text-soft-400">
+                            Nächste Ziehung: { nextDraw } Uhr
+                        </div>
+                    </div>
+                ) }
+                { mode === 'no_winner' && (
+                    <div className="space-y-1 px-5 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                            <Frown className="size-4 text-text-sub-600" />
+                            <span className="text-label-sm font-semibold uppercase tracking-normal text-text-sub-600">
+                                Kein Gewinner heute
+                            </span>
+                        </div>
+                        <div className="text-paragraph-xs text-text-soft-400">
+                            Niemand hat teilgenommen. Nächste Ziehung: { nextDraw } Uhr
+                        </div>
+                    </div>
+                ) }
+            </AlignSurface.Panel>
         </div>
     );
 }

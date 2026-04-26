@@ -2,7 +2,9 @@ import { FC, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FaTrash } from 'react-icons/fa';
 import { GroupItem } from '../../../../api';
-import { Slider } from '../../../ui/slider';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignSlider from '@/align-ui/components/ui/slider';
 
 interface InventoryDeleteDialogProps
 {
@@ -25,76 +27,95 @@ export const InventoryDeleteDialog: FC<InventoryDeleteDialogProps> = ({ groupIte
     }, [ groupItem, count, onConfirm ]);
 
     return createPortal(
-        <div className="inv-delete-overlay" onClick={ onClose }>
-            <div className="inv-delete-dialog" onClick={ e => e.stopPropagation() }>
-                <div className="inv-delete-header">
-                    <FaTrash style={{ color: '#ef4444' }} />
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-overlay backdrop-blur-sm" onClick={ onClose }>
+            <div className="w-[300px] overflow-hidden rounded-20 border border-stroke-soft-200 bg-bg-white-0 text-text-strong-950 shadow-regular-md" onClick={ e => e.stopPropagation() }>
+                <div className="flex items-center gap-2 border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-3 text-label-sm">
+                    <FaTrash className="size-3.5 text-error-base" />
                     <span>Möbel löschen</span>
                 </div>
-                <div className="inv-delete-body">
-                    <div className="inv-delete-item-name">{ groupItem.name }</div>
+                <div className="space-y-3 p-4">
+                    <div className="truncate text-label-sm text-text-strong-950">{ groupItem.name }</div>
                     { maxCount > 1 && (
                         <>
-                            <div className="inv-delete-label">
-                                Wie viele löschen? <span style={{ opacity: 0.6 }}>(du besitzt: { maxCount } Stück)</span>
+                            <div className="text-paragraph-xs text-text-sub-600">
+                                Wie viele löschen? <span className="text-text-soft-400">(du besitzt: { maxCount } Stück)</span>
                             </div>
-                            <div className="inv-delete-input-row">
-                                <button
-                                    className="inv-delete-btn"
+                            <div className="flex items-center gap-1.5">
+                                <AlignButton.Root
+                                    type="button"
+                                    variant="neutral"
+                                    mode="stroke"
+                                    size="xxsmall"
+                                    className="size-7 p-0"
                                     onClick={ () => setCount(Math.max(1, count - 1)) }
                                     disabled={ count <= 1 }
                                 >
                                     -
-                                </button>
-                                <input
-                                    type="number"
-                                    className="inv-delete-input"
-                                    value={ count }
-                                    min={ 1 }
-                                    max={ maxCount }
-                                    onChange={ e => {
-                                        const val = parseInt(e.target.value) || 1;
-                                        setCount(Math.max(1, Math.min(maxCount, val)));
-                                    } }
-                                />
-                                <button
-                                    className="inv-delete-btn"
+                                </AlignButton.Root>
+                                <AlignInput.Root size="xsmall" className="flex-1">
+                                    <AlignInput.Wrapper>
+                                        <AlignInput.Input
+                                            type="number"
+                                            className="h-7 text-center text-paragraph-xs [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                            value={ count }
+                                            min={ 1 }
+                                            max={ maxCount }
+                                            onChange={ e =>
+                                            {
+                                                const val = parseInt(e.target.value) || 1;
+                                                setCount(Math.max(1, Math.min(maxCount, val)));
+                                            } }
+                                        />
+                                    </AlignInput.Wrapper>
+                                </AlignInput.Root>
+                                <AlignButton.Root
+                                    type="button"
+                                    variant="neutral"
+                                    mode="stroke"
+                                    size="xxsmall"
+                                    className="size-7 p-0"
                                     onClick={ () => setCount(Math.min(maxCount, count + 1)) }
                                     disabled={ count >= maxCount }
                                 >
                                     +
-                                </button>
-                                <button
-                                    className="inv-delete-btn"
+                                </AlignButton.Root>
+                                <AlignButton.Root
+                                    type="button"
+                                    variant="neutral"
+                                    mode="stroke"
+                                    size="xxsmall"
                                     onClick={ () => setCount(maxCount) }
-                                    style={{ fontSize: '10px', minWidth: '36px' }}
+                                    className="min-w-9 text-[10px]"
                                 >
                                     Alle
-                                </button>
+                                </AlignButton.Root>
                             </div>
-                            <Slider
+                            <AlignSlider.Root
                                 min={ 1 }
                                 max={ maxCount }
                                 step={ 1 }
                                 value={ [ count ] }
                                 onValueChange={ (val) => setCount(val[0]) }
-                            />
-                            <div style={{ textAlign: 'center', fontSize: '11px', opacity: 0.5, marginTop: '2px' }}>
+                                className="[&_[data-radix-slider-range]]:bg-error-base"
+                            >
+                                <AlignSlider.Thumb className="bg-error-base" />
+                            </AlignSlider.Root>
+                            <div className="mt-0.5 text-center text-[11px] text-text-soft-400">
                                 { count } von { maxCount } löschen
                             </div>
                         </>
                     ) }
                     { maxCount === 1 && (
-                        <div className="inv-delete-label">
+                        <div className="text-paragraph-xs text-text-sub-600">
                             Dieses Möbelstück unwiderruflich löschen?
                         </div>
                     ) }
                 </div>
-                <div className="inv-delete-footer">
-                    <button className="inv-delete-cancel" onClick={ onClose }>Abbrechen</button>
-                    <button className="inv-delete-confirm" onClick={ onSubmit }>
+                <div className="flex justify-end gap-2 border-t border-stroke-soft-200 px-4 py-3">
+                    <AlignButton.Root type="button" variant="neutral" mode="stroke" size="xxsmall" onClick={ onClose }>Abbrechen</AlignButton.Root>
+                    <AlignButton.Root type="button" variant="error" mode="filled" size="xxsmall" onClick={ onSubmit }>
                         Löschen
-                    </button>
+                    </AlignButton.Root>
                 </div>
             </div>
         </div>,

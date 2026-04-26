@@ -199,18 +199,21 @@ export class FigureData
     {
         let figureString = '';
 
-        const setTypes: string[] = [ FigureData.FACE ];
+        const setTypes: string[] = Array.from(this._data.keys());
+
+        if(override && (setTypes.indexOf(FigureData.FACE) === -1)) setTypes.push(FigureData.FACE);
+
         const figureSets: string[] = [];
 
         for(const setType of setTypes)
         {
-            const colors = this._colors.get(setType);
-
-            if(!colors) continue;
+            const colors = this._colors.get(setType) || [];
 
             let setId = this._data.get(setType);
 
             if((setType === FigureData.FACE) && override) setId = k;
+
+            if(setId === undefined || setId === null) continue;
 
             let figureSet = ((setType + '-') + setId);
 

@@ -1,40 +1,18 @@
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { GetSessionDataManager } from '../../api';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { CustomListingCard } from './CustomListingCard';
 import { CurrencyIcon } from './marketplace-components';
-import { fmtC, CURRENCY_ICONS } from './marketplace-utils';
+import { fmtC, CURRENCY_LABELS } from './marketplace-utils';
 import { CustomListing } from './CustomMarketplaceTypes';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Search, Package, ChevronLeft, ChevronRight, AlertTriangle, Gavel, Loader2 } from 'lucide-react';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignModal from '@/align-ui/components/ui/modal';
+import * as AlignSelect from '@/align-ui/components/ui/select';
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Loader2, Package, RefreshCw, Search, X } from 'lucide-react';
 
 export const CustomMarketplaceBrowseView: FC<{}> = () =>
 {
@@ -46,10 +24,11 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
     const [ searchQuery, setSearchQuery ] = useState('');
     const [ minPrice, setMinPrice ] = useState('');
     const [ maxPrice, setMaxPrice ] = useState('');
-    const [ currency, setCurrency ] = useState('');
+    const [ currency, setCurrency ] = useState('all');
     const [ sortBy, setSortBy ] = useState('price_asc');
 
     const [ error, setError ] = useState('');
+    const [ success, setSuccess ] = useState('');
     const [ watchlist, setWatchlist ] = useState<Set<number>>(new Set());
     const myUserId = GetSessionDataManager().userId;
 
@@ -69,7 +48,7 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
             q: searchQuery || undefined,
             minPrice: parseInt(minPrice) || undefined,
             maxPrice: parseInt(maxPrice) || undefined,
-            currency: currency || undefined,
+            currency: currency && currency !== 'all' ? currency : undefined,
             sort: s || undefined,
             page: p,
         })
@@ -83,21 +62,37 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
             .finally(() => setLoading(false));
     }, [ searchQuery, minPrice, maxPrice, currency, sortBy ]);
 
-    useEffect(() => { doSearch(0); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    useEffect(() =>
+    {
+        doSearch(0);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const confirmBuy = async () =>
     {
         if(!buyTarget) return;
         setBuySubmitting(true);
         setError('');
+        setSuccess('');
         try
         {
             const res = await CustomMarketplaceApi.buy(buyTarget.id);
-            if(res.ok) { setBuyTarget(null); doSearch(page); }
+            if(res.ok)
+            {
+                const count = res.transferred_items?.length ?? buyTarget.items.length;
+                setSuccess(`${ count } ${ count === 1 ? 'Möbel wurde' : 'Möbel wurden' } in dein Inventar übertragen.`);
+                setBuyTarget(null);
+                doSearch(page);
+            }
             else setError(res.error || 'Kauf fehlgeschlagen');
         }
-        catch { setError('Netzwerkfehler — bitte erneut versuchen'); }
-        finally { setBuySubmitting(false); }
+        catch
+        {
+            setError('Netzwerkfehler - bitte erneut versuchen');
+        }
+        finally
+        {
+            setBuySubmitting(false);
+        }
     };
 
     const handleMakeOffer = async () =>
@@ -107,14 +102,27 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
         if(!p || p < 1) return;
         setOfferSubmitting(true);
         setError('');
+        setSuccess('');
         try
         {
             const res = await CustomMarketplaceApi.makeOffer(offerTarget.id, p);
-            if(res.ok) { setOfferTarget(null); setOfferPrice(''); doSearch(page); }
+            if(res.ok)
+            {
+                setSuccess('Dein Preisvorschlag wurde gesendet.');
+                setOfferTarget(null);
+                setOfferPrice('');
+                doSearch(page);
+            }
             else setError(res.error || 'Anfrage fehlgeschlagen');
         }
-        catch { setError('Netzwerkfehler — bitte erneut versuchen'); }
-        finally { setOfferSubmitting(false); }
+        catch
+        {
+            setError('Netzwerkfehler - bitte erneut versuchen');
+        }
+        finally
+        {
+            setOfferSubmitting(false);
+        }
     };
 
     const toggleWatch = (id: number) => setWatchlist(prev =>
@@ -125,109 +133,119 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
     });
 
     const totalPages = Math.ceil(total / 20);
+    const listingStats = useMemo(() =>
+    {
+        const totalValue = listings.reduce((sum, listing) => sum + listing.price, 0);
+        const offers = listings.reduce((sum, listing) => sum + (listing.offer_count ?? 0), 0);
+        const average = listings.length ? Math.round(totalValue / listings.length) : 0;
+        const bundles = listings.filter(listing => listing.is_bundle).length;
+        return { totalValue, offers, average, bundles };
+    }, [ listings ]);
 
     return (
-        <div className="flex flex-col h-full">
-            {/* Error Banner */}
+        <div className="flex h-full flex-col bg-bg-white-0">
+            <div className="shrink-0 border-b border-stroke-soft-200 bg-bg-weak-50 px-3 py-3">
+                <div className="flex items-center gap-2">
+                    <AlignInput.Root size="xsmall" className="flex-1">
+                        <AlignInput.Wrapper className="h-8">
+                            <AlignInput.Icon as={ Search } className="size-4" />
+                            <AlignInput.Input
+                                placeholder="Möbel, Rarity oder Set suchen..."
+                                value={ searchQuery }
+                                onChange={ e => setSearchQuery(e.target.value) }
+                                onKeyDown={ e => e.key === 'Enter' && doSearch(0) }
+                                className="h-8 text-paragraph-xs"
+                            />
+                            { searchQuery && (
+                                <button onClick={ () => setSearchQuery('') } className="text-text-soft-400 hover:text-text-strong-950">
+                                    <X className="size-3" />
+                                </button>
+                            ) }
+                        </AlignInput.Wrapper>
+                    </AlignInput.Root>
+                    <AlignInput.Root size="xsmall" className="w-20">
+                        <AlignInput.Wrapper className="h-8">
+                            <AlignInput.Input type="number" placeholder="Min" value={ minPrice } onChange={ e => setMinPrice(e.target.value) } className="h-8 text-paragraph-xs" />
+                        </AlignInput.Wrapper>
+                    </AlignInput.Root>
+                    <AlignInput.Root size="xsmall" className="w-20">
+                        <AlignInput.Wrapper className="h-8">
+                            <AlignInput.Input type="number" placeholder="Max" value={ maxPrice } onChange={ e => setMaxPrice(e.target.value) } className="h-8 text-paragraph-xs" />
+                        </AlignInput.Wrapper>
+                    </AlignInput.Root>
+                    <AlignSelect.Root value={ currency } onValueChange={ setCurrency } size="xsmall" variant="compact">
+                        <AlignSelect.Trigger className="w-28">
+                            <AlignSelect.Value />
+                        </AlignSelect.Trigger>
+                        <AlignSelect.Content>
+                            <AlignSelect.Item value="all">Alle</AlignSelect.Item>
+                            <AlignSelect.Item value="credits">Credits</AlignSelect.Item>
+                            <AlignSelect.Item value="pixels">Pixel</AlignSelect.Item>
+                            <AlignSelect.Item value="points">Punkte</AlignSelect.Item>
+                        </AlignSelect.Content>
+                    </AlignSelect.Root>
+                    <FancyButton.Root variant="primary" size="xsmall" onClick={ () => doSearch(0) }>
+                        <FancyButton.Icon as={ Search } className="size-4" />
+                        Suchen
+                    </FancyButton.Root>
+                    <AlignButton.Root variant="neutral" mode="ghost" size="xsmall" onClick={ () => doSearch(page) }>
+                        <AlignButton.Icon as={ RefreshCw } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    { [ { id: 'price_asc', label: 'Günstig' }, { id: 'price_desc', label: 'Teuer' }, { id: 'newest', label: 'Neu' } ].map(opt => (
+                        <AlignButton.Root
+                            key={ opt.id }
+                            variant="neutral"
+                            mode={ sortBy === opt.id ? 'lighter' : 'ghost' }
+                            size="xxsmall"
+                            className="text-label-xs"
+                            onClick={ () =>
+                            {
+                                setSortBy(opt.id); doSearch(0, opt.id);
+                            } }
+                        >
+                            { opt.label }
+                        </AlignButton.Root>
+                    )) }
+                    <AlignDivider.Root className="mx-1 h-5 w-px" />
+                    <AlignBadge.Root color="gray" variant="lighter" size="small" square>{ total || 0 } Ergebnisse</AlignBadge.Root>
+                    { listings.length > 0 && (
+                        <>
+                            <AlignBadge.Root color="yellow" variant="lighter" size="small" square>{ fmtC(listingStats.average) } Schnitt</AlignBadge.Root>
+                            <AlignBadge.Root color="blue" variant="lighter" size="small" square>{ fmtC(listingStats.totalValue) } sichtbar</AlignBadge.Root>
+                            <AlignBadge.Root color="purple" variant="lighter" size="small" square>{ listingStats.bundles } Bundles</AlignBadge.Root>
+                            { listingStats.offers > 0 && <AlignBadge.Root color="green" variant="lighter" size="small" square>{ listingStats.offers } Gebote</AlignBadge.Root> }
+                        </>
+                    ) }
+                </div>
+            </div>
             { error && (
-                <div className="flex items-center gap-2 px-3 py-2 mb-2 rounded-lg bg-destructive/10 border border-destructive/20">
-                    <AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0" />
-                    <span className="text-[11px] text-destructive">{ error }</span>
+                <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl border border-error-base/30 bg-error-lighter px-3 py-2 text-paragraph-xs text-error-base">
+                    <AlertTriangle className="size-4 shrink-0" />
+                    { error }
                 </div>
             ) }
-
-            {/* Filter Bar */}
-            <div className="shrink-0 flex items-center gap-1.5 px-2 py-1.5 border-b border-border/30">
-                <div className="relative flex-1">
-                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground/50" />
-                    <Input
-                        placeholder="Suchen..."
-                        value={ searchQuery }
-                        onChange={ e => setSearchQuery(e.target.value) }
-                        onKeyDown={ e => e.key === 'Enter' && doSearch(0) }
-                        className="pl-7 h-6 text-[11px]"
-                    />
+            { success && (
+                <div className="mx-3 mt-3 flex items-center gap-2 rounded-xl border border-success-base/30 bg-success-lighter px-3 py-2 text-paragraph-xs text-success-base">
+                    <CheckCircle2 className="size-4 shrink-0" />
+                    { success }
                 </div>
-                <Input
-                    type="number"
-                    placeholder="Min"
-                    value={ minPrice }
-                    onChange={ e => setMinPrice(e.target.value) }
-                    className="w-16 h-6 text-[11px]"
-                />
-                <Input
-                    type="number"
-                    placeholder="Max"
-                    value={ maxPrice }
-                    onChange={ e => setMaxPrice(e.target.value) }
-                    className="w-16 h-6 text-[11px]"
-                />
-                <Select value={ currency } onValueChange={ setCurrency }>
-                    <SelectTrigger className="w-24 h-6 text-[10px]">
-                        <SelectValue placeholder="Währung" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="all">Alle</SelectItem>
-                        <SelectItem value="credits">Credits</SelectItem>
-                        <SelectItem value="pixels">Pixel</SelectItem>
-                        <SelectItem value="points">Punkte</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Button variant="outline" size="sm" className="h-6 text-[10px] px-2" onClick={ () => doSearch(0) }>
-                    <Search className="w-3 h-3 mr-1" />Suchen
-                </Button>
-                <Separator orientation="vertical" className="h-3.5" />
-                { [ { id: 'price_asc', label: 'Günstig' }, { id: 'price_desc', label: 'Teuer' }, { id: 'newest', label: 'Neu' } ].map(opt => (
-                    <button
-                        key={ opt.id }
-                        onClick={ () => { setSortBy(opt.id); doSearch(0, opt.id); } }
-                        className={ `px-1.5 py-0.5 rounded text-[9px] font-medium ${ sortBy === opt.id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-accent/50' }` }
-                    >
-                        { opt.label }
-                    </button>
-                )) }
-            </div>
-
-            {/* Results Header */}
-            <div className="shrink-0 flex items-center justify-between px-2.5 py-1 border-b border-border/20">
-                <span className="text-[10px] text-muted-foreground/50">
-                    { total > 0 ? `${ total } Ergebnis${ total !== 1 ? 'se' : '' }` : 'Keine Ergebnisse' }
-                </span>
-                { totalPages > 1 && (
-                    <div className="flex items-center gap-1">
-                        <button
-                            className="p-0.5 rounded text-muted-foreground/40 hover:text-foreground disabled:opacity-30"
-                            disabled={ page === 0 }
-                            onClick={ () => doSearch(page - 1) }
-                        >
-                            <ChevronLeft className="w-3 h-3" />
-                        </button>
-                        <span className="text-[9px] text-muted-foreground/50">{ page + 1 }/{ totalPages }</span>
-                        <button
-                            className="p-0.5 rounded text-muted-foreground/40 hover:text-foreground disabled:opacity-30"
-                            disabled={ page >= totalPages - 1 }
-                            onClick={ () => doSearch(page + 1) }
-                        >
-                            <ChevronRight className="w-3 h-3" />
-                        </button>
-                    </div>
-                ) }
-            </div>
-
-            {/* Listing Rows */}
-            <ScrollArea className="flex-1 min-h-0">
+            ) }
+            <div className="min-h-0 flex-1 overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
                 { loading ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                        <Loader2 className="w-6 h-6 animate-spin opacity-30 mb-2" />
-                        <p className="text-xs">Laden...</p>
+                    <div className="flex flex-col items-center justify-center py-16 text-text-soft-400">
+                        <Loader2 className="mb-2 size-6 animate-spin" />
+                        <p className="text-paragraph-xs">Angebote werden geladen...</p>
                     </div>
                 ) : listings.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                        <Package className="w-8 h-8 opacity-20 mb-2" />
-                        <p className="text-xs">Keine Angebote</p>
+                    <div className="flex flex-col items-center justify-center py-16 text-text-soft-400">
+                        <Package className="mb-2 size-9" />
+                        <p className="text-label-sm text-text-sub-600">Keine Angebote</p>
+                        <p className="mt-1 text-paragraph-xs">Passe Suche, Preis oder Währung an.</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-border/30">
+                    <div className="space-y-1 p-2">
                         { listings.map(listing => (
                             <CustomListingCard
                                 key={ listing.id }
@@ -237,71 +255,88 @@ export const CustomMarketplaceBrowseView: FC<{}> = () =>
                                 isWatched={ watchlist.has(listing.id) }
                                 onToggleWatch={ () => toggleWatch(listing.id) }
                                 onBuy={ () => setBuyTarget(listing) }
-                                onOffer={ () => { setOfferTarget(listing); setOfferPrice(''); } }
+                                onOffer={ () =>
+                                {
+                                    setOfferTarget(listing); setOfferPrice('');
+                                } }
                             />
                         )) }
                     </div>
                 ) }
-            </ScrollArea>
-
-            {/* Buy Confirmation Dialog */}
-            <AlertDialog open={ !!buyTarget } onOpenChange={ o => !o && !buySubmitting && setBuyTarget(null) }>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle className="flex items-center gap-2">
-                            <CurrencyIcon type={ buyTarget?.currency ?? 'credits' } className="w-5 h-5" />
-                            Möbel kaufen
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Möchtest du <span className="font-semibold text-foreground">
-                                { buyTarget?.is_bundle
-                                    ? `Bundle (${ buyTarget.items.length } Items)`
-                                    : buyTarget?.items[0]?.public_name
-                                }
-                            </span> für <span className="font-bold text-amber-500">{ buyTarget ? fmtC(buyTarget.price) : 0 } { buyTarget?.currency === 'credits' ? 'Credits' : buyTarget?.currency === 'pixels' ? 'Pixel' : 'Punkte' }</span> kaufen?
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={ buySubmitting }>Abbrechen</AlertDialogCancel>
-                        <AlertDialogAction className="bg-emerald-600 hover:bg-emerald-700" onClick={ confirmBuy } disabled={ buySubmitting }>
-                            { buySubmitting ? 'Wird gekauft...' : 'Kaufen' }
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
-
-            {/* Bid Dialog */}
-            <Dialog open={ !!offerTarget } onOpenChange={ o => !o && setOfferTarget(null) }>
-                <DialogContent className="sm:max-w-[380px]">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Gavel className="w-5 h-5 text-blue-500" />
-                            Preisvorschlag
-                        </DialogTitle>
-                        <DialogDescription>
-                            Gib deinen Preisvorschlag für <span className="font-semibold text-foreground">{ offerTarget?.items[0]?.public_name }</span> ab. Aktueller Preis: <span className="font-bold text-amber-500">{ offerTarget ? fmtC(offerTarget.price) : 0 } { offerTarget?.currency === 'credits' ? 'Credits' : offerTarget?.currency ?? '' }</span>
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="relative">
-                        <CurrencyIcon type={ offerTarget?.currency ?? 'credits' } className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" />
-                        <Input
-                            type="number"
-                            placeholder="Dein Gebot"
-                            value={ offerPrice }
-                            onChange={ e => setOfferPrice(e.target.value) }
-                            className="pl-9 h-10 text-base font-bold"
-                            autoFocus
+            </div>
+            <div className="flex shrink-0 items-center justify-between border-t border-stroke-soft-200 px-3 py-2">
+                <p className="text-paragraph-xs text-text-sub-600">
+                    Seite <span className="tabular-nums">{ page + 1 }</span>{ totalPages > 0 ? <> / <span className="tabular-nums">{ totalPages }</span></> : null }
+                </p>
+                <div className="flex items-center gap-1">
+                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" disabled={ page === 0 } onClick={ () => doSearch(page - 1) }>
+                        <AlignButton.Icon as={ ChevronLeft } className="size-4" />
+                    </AlignButton.Root>
+                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" disabled={ page >= totalPages - 1 } onClick={ () => doSearch(page + 1) }>
+                        <AlignButton.Icon as={ ChevronRight } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+            </div>
+            <AlignModal.Root open={ !!buyTarget } onOpenChange={ open => !open && !buySubmitting && setBuyTarget(null) }>
+                { buyTarget && (
+                    <AlignModal.Content className="max-w-[380px]" overlayClassName="z-[1000]" showClose={ false }>
+                        <AlignModal.Header
+                            title="Möbel kaufen"
+                            description={ buyTarget.is_bundle ? `Bundle mit ${ buyTarget.items.length } Items` : buyTarget.items[0]?.public_name }
                         />
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={ () => setOfferTarget(null) }>Abbrechen</Button>
-                        <Button className="bg-blue-600 hover:bg-blue-700" disabled={ offerSubmitting || !offerPrice || Number(offerPrice) <= 0 } onClick={ handleMakeOffer }>
-                            <Gavel className="w-3.5 h-3.5 mr-1.5" />
-                            { offerSubmitting ? 'Wird gesendet...' : 'Gebot senden' }
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                        <AlignModal.Body className="space-y-4">
+                            <div className="rounded-xl border border-stroke-soft-200 bg-bg-weak-50 px-3 py-2">
+                                <p className="text-paragraph-xs text-text-sub-600">Kaufpreis</p>
+                                <div className="mt-1 flex items-center gap-2 text-label-lg text-text-strong-950">
+                                    <CurrencyIcon type={ buyTarget.currency } className="size-5" />
+                                    { fmtC(buyTarget.price) } { CURRENCY_LABELS[buyTarget.currency] ?? buyTarget.currency }
+                                </div>
+                            </div>
+                            <p className="text-paragraph-sm text-text-sub-600">Nach dem Kauf wird das Angebot geschlossen und die enthaltenen Möbel werden deinem Inventar zugeordnet.</p>
+                        </AlignModal.Body>
+                        <AlignModal.Footer className="justify-end">
+                            <AlignButton.Root variant="neutral" mode="stroke" size="small" disabled={ buySubmitting } onClick={ () => setBuyTarget(null) }>Abbrechen</AlignButton.Root>
+                            <FancyButton.Root variant="primary" size="small" disabled={ buySubmitting } onClick={ confirmBuy }>
+                                { buySubmitting ? <><Loader2 className="size-4 animate-spin" />Kaufe...</> : 'Kaufen' }
+                            </FancyButton.Root>
+                        </AlignModal.Footer>
+                    </AlignModal.Content>
+                ) }
+            </AlignModal.Root>
+            <AlignModal.Root open={ !!offerTarget } onOpenChange={ open => !open && !offerSubmitting && setOfferTarget(null) }>
+                { offerTarget && (
+                    <AlignModal.Content className="max-w-[380px]" overlayClassName="z-[1000]" showClose={ false }>
+                        <AlignModal.Header
+                            title="Preisvorschlag"
+                            description={ offerTarget.items[0]?.public_name }
+                        />
+                        <AlignModal.Body className="space-y-4">
+                            <div className="rounded-xl border border-stroke-soft-200 bg-bg-weak-50 px-3 py-2 text-paragraph-xs text-text-sub-600">
+                                Aktueller Preis: <span className="text-label-sm text-text-strong-950">{ fmtC(offerTarget.price) } { CURRENCY_LABELS[offerTarget.currency] ?? offerTarget.currency }</span>
+                            </div>
+                            <AlignInput.Root size="small">
+                                <AlignInput.Wrapper className="h-10">
+                                    <CurrencyIcon type={ offerTarget.currency } className="size-4" />
+                                    <AlignInput.Input
+                                        type="number"
+                                        placeholder="Dein Gebot"
+                                        value={ offerPrice }
+                                        onChange={ e => setOfferPrice(e.target.value) }
+                                        className="h-10 text-label-sm"
+                                        autoFocus
+                                    />
+                                </AlignInput.Wrapper>
+                            </AlignInput.Root>
+                        </AlignModal.Body>
+                        <AlignModal.Footer className="justify-end">
+                            <AlignButton.Root variant="neutral" mode="stroke" size="small" disabled={ offerSubmitting } onClick={ () => setOfferTarget(null) }>Abbrechen</AlignButton.Root>
+                            <FancyButton.Root variant="primary" size="small" disabled={ offerSubmitting || !offerPrice || Number(offerPrice) <= 0 } onClick={ handleMakeOffer }>
+                                { offerSubmitting ? <><Loader2 className="size-4 animate-spin" />Sende...</> : 'Gebot senden' }
+                            </FancyButton.Root>
+                        </AlignModal.Footer>
+                    </AlignModal.Content>
+                ) }
+            </AlignModal.Root>
         </div>
     );
 };

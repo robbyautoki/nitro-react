@@ -1,15 +1,20 @@
 import { AvatarEditorFigureCategory, FigureSetIdsMessageEvent, GetWardrobeMessageComposer, IAvatarFigureContainer, ILinkEventTracker, UserFigureComposer, UserWardrobePageEvent } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaDice, FaTimes, FaTrash, FaUndo } from 'react-icons/fa';
+import { X } from 'lucide-react';
+import { FaDice, FaTrash, FaUndo } from 'react-icons/fa';
 import { AddEventLinkTracker, AvatarEditorAction, AvatarEditorUtilities, BodyModel, FigureData, generateRandomFigure, GetAvatarRenderManager, GetClubMemberLevel, GetConfiguration, GetSessionDataManager, HeadModel, IAvatarEditorCategoryModel, LegModel, LocalizeText, RemoveLinkEventTracker, SendMessageComposer, TorsoModel } from '../../api';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
 import { useMessageEvent } from '../../hooks';
+import { cn } from '../../align-ui/utils/cn';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as Tooltip from '@/align-ui/components/ui/tooltip';
 import { AvatarEditorFigurePreviewView } from './views/AvatarEditorFigurePreviewView';
 import { AvatarEditorModelView } from './views/AvatarEditorModelView';
 import { AvatarEditorWardrobeView } from './views/AvatarEditorWardrobeView';
 
 const DEFAULT_MALE_FIGURE: string = 'hr-100.hd-180-7.ch-215-66.lg-270-79.sh-305-62.ha-1002-70.wa-2007';
 const DEFAULT_FEMALE_FIGURE: string = 'hr-515-33.hd-600-1.ch-635-70.lg-716-66-62.sh-735-68';
+const DEFAULT_EDITOR_SIZE = { width: 876, height: 660 };
 
 export const AvatarEditorView: FC<{}> = props =>
 {
@@ -26,7 +31,7 @@ export const AvatarEditorView: FC<{}> = props =>
     const [ lastGender, setLastGender ] = useState<string>(null);
     const [ needsReset, setNeedsReset ] = useState(true);
     const [ isInitalized, setIsInitalized ] = useState(false);
-    const [ editorSize, setEditorSize ] = useState({ width: 500, height: 480 });
+    const [ editorSize, setEditorSize ] = useState(DEFAULT_EDITOR_SIZE);
 
     const resizingRef = useRef(false);
     const resizeStartRef = useRef({ x: 0, y: 0, w: 0, h: 0 });
@@ -310,26 +315,28 @@ export const AvatarEditorView: FC<{}> = props =>
     return (
         <DraggableWindow uniqueKey="avatar-editor-v2" windowPosition={ DraggableWindowPosition.CENTER }>
             <div
-                className="nitro-avatar-editor relative flex flex-col rounded-2xl border border-white/[0.09] bg-[rgba(10,10,14,0.98)] shadow-[0_24px_80px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.04)] backdrop-blur-xl overflow-hidden"
+                className="nitro-avatar-editor relative flex flex-col overflow-hidden rounded-20 border border-stroke-soft-200 bg-bg-white-0 text-text-strong-950 shadow-regular-md"
                 style={ { width: `${ editorSize.width }px`, height: `${ editorSize.height }px` } }
             >
-                {/* Header */}
-                <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-white/[0.06] h-11 cursor-move select-none">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/25">
+                { /* Header */ }
+                <div className="drag-handler flex h-11 shrink-0 cursor-move select-none items-center gap-3 border-b border-stroke-soft-200 bg-bg-weak-50 px-4">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-sub-600">
                         { LocalizeText('avatareditor.title') }
                     </span>
                     <div className="flex-1" />
-                    <button
-                        className="appearance-none border-0 bg-transparent rounded-md p-1 text-white/25 hover:bg-white/[0.06] hover:text-white/70 transition-colors shrink-0"
+                    <AlignButton.Root
+                        variant="neutral"
+                        mode="ghost"
+                        size="xxsmall"
+                        className="size-7 shrink-0 p-0"
                         onMouseDown={ e => e.stopPropagation() }
                         onClick={ () => setIsVisible(false) }
                     >
-                        <FaTimes className="text-[11px]" />
-                    </button>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                    </AlignButton.Root>
                 </div>
-
-                {/* Tabs */}
-                <div className="flex gap-1 px-3 py-1.5 border-b border-white/[0.06] shrink-0">
+                { /* Tabs — Align-UI segmented style */ }
+                <div className="flex shrink-0 items-center gap-1 border-b border-stroke-soft-200 bg-bg-weak-50 px-3 py-2">
                     { categories && (categories.size > 0) && Array.from(categories.keys()).map(category =>
                     {
                         const isActive = (activeCategory && !isWardrobeVisible && (activeCategory.name === category));
@@ -337,7 +344,13 @@ export const AvatarEditorView: FC<{}> = props =>
                         return (
                             <button
                                 key={ category }
-                                className={ `appearance-none border-0 px-3 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${ isActive ? 'bg-white/[0.12] text-white/90' : 'bg-transparent text-white/50 hover:bg-white/[0.06] hover:text-white/70' }` }
+                                type="button"
+                                className={ cn(
+                                    'cursor-pointer rounded-lg px-3 py-1.5 text-label-sm font-medium transition-all',
+                                    isActive
+                                        ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs ring-1 ring-stroke-soft-200'
+                                        : 'text-text-sub-600 hover:bg-bg-white-0/60 hover:text-text-strong-950'
+                                ) }
                                 onMouseDown={ e => e.stopPropagation() }
                                 onClick={ () => selectCategory(category) }
                             >
@@ -345,51 +358,85 @@ export const AvatarEditorView: FC<{}> = props =>
                             </button>
                         );
                     }) }
+                    <div className="flex-1" />
                     <button
-                        className={ `appearance-none border-0 px-3 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer ${ isWardrobeVisible ? 'bg-white/[0.12] text-white/90' : 'bg-transparent text-white/50 hover:bg-white/[0.06] hover:text-white/70' }` }
+                        type="button"
+                        className={ cn(
+                            'cursor-pointer rounded-lg px-3 py-1.5 text-label-sm font-medium transition-all',
+                            isWardrobeVisible
+                                ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs ring-1 ring-stroke-soft-200'
+                                : 'text-text-sub-600 hover:bg-bg-white-0/60 hover:text-text-strong-950'
+                        ) }
                         onMouseDown={ e => e.stopPropagation() }
                         onClick={ () => setIsWardrobeVisible(true) }
                     >
                         { LocalizeText('avatareditor.category.wardrobe') }
                     </button>
                 </div>
-
-                {/* Content: Left Preview | Right Editor */}
+                { /* Content: Left Preview | Right Editor */ }
                 <div className="flex-1 min-h-0 flex">
-                    {/* Left Panel: Preview + Buttons */}
-                    <div className="w-[200px] min-w-[200px] flex flex-col border-r border-white/[0.06]">
+                    { /* Left Panel: Preview + Buttons */ }
+                    <div className="flex w-[200px] min-w-[200px] flex-col border-r border-stroke-soft-200">
                         <AvatarEditorFigurePreviewView figureData={ figureData } />
-                        <div className="p-2 flex flex-col gap-1.5 shrink-0 border-t border-white/[0.06]">
-                            <div className="flex gap-1">
-                                <button
-                                    className="flex-1 appearance-none border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/90 rounded-md py-1.5 text-[11px] transition-colors cursor-pointer flex items-center justify-center"
-                                    onClick={ () => processAction(AvatarEditorAction.ACTION_RESET) }
-                                >
-                                    <FaUndo className="text-[10px]" />
-                                </button>
-                                <button
-                                    className="flex-1 appearance-none border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/90 rounded-md py-1.5 text-[11px] transition-colors cursor-pointer flex items-center justify-center"
-                                    onClick={ () => processAction(AvatarEditorAction.ACTION_CLEAR) }
-                                >
-                                    <FaTrash className="text-[10px]" />
-                                </button>
-                                <button
-                                    className="flex-1 appearance-none border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.08] text-white/60 hover:text-white/90 rounded-md py-1.5 text-[11px] transition-colors cursor-pointer flex items-center justify-center"
-                                    onClick={ () => processAction(AvatarEditorAction.ACTION_RANDOMIZE) }
-                                >
-                                    <FaDice className="text-[10px]" />
-                                </button>
-                            </div>
-                            <button
-                                className="appearance-none border-0 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-md py-2 text-[12px] transition-colors cursor-pointer"
+                        <div className="flex shrink-0 flex-col gap-1.5 border-t border-stroke-soft-200 p-2">
+                            <Tooltip.Provider delayDuration={ 200 }>
+                                <div className="flex gap-1">
+                                    <Tooltip.Root>
+                                        <Tooltip.Trigger asChild>
+                                            <AlignButton.Root
+                                                variant="neutral"
+                                                mode="stroke"
+                                                size="xxsmall"
+                                                className="flex-1"
+                                                onClick={ () => processAction(AvatarEditorAction.ACTION_RESET) }
+                                            >
+                                                <FaUndo className="size-3" />
+                                            </AlignButton.Root>
+                                        </Tooltip.Trigger>
+                                        <Tooltip.Content size="xsmall">Zurücksetzen</Tooltip.Content>
+                                    </Tooltip.Root>
+                                    <Tooltip.Root>
+                                        <Tooltip.Trigger asChild>
+                                            <AlignButton.Root
+                                                variant="neutral"
+                                                mode="stroke"
+                                                size="xxsmall"
+                                                className="flex-1"
+                                                onClick={ () => processAction(AvatarEditorAction.ACTION_CLEAR) }
+                                            >
+                                                <FaTrash className="size-3" />
+                                            </AlignButton.Root>
+                                        </Tooltip.Trigger>
+                                        <Tooltip.Content size="xsmall">Leeren</Tooltip.Content>
+                                    </Tooltip.Root>
+                                    <Tooltip.Root>
+                                        <Tooltip.Trigger asChild>
+                                            <AlignButton.Root
+                                                variant="neutral"
+                                                mode="stroke"
+                                                size="xxsmall"
+                                                className="flex-1"
+                                                onClick={ () => processAction(AvatarEditorAction.ACTION_RANDOMIZE) }
+                                            >
+                                                <FaDice className="size-3" />
+                                            </AlignButton.Root>
+                                        </Tooltip.Trigger>
+                                        <Tooltip.Content size="xsmall">Zufällig</Tooltip.Content>
+                                    </Tooltip.Root>
+                                </div>
+                            </Tooltip.Provider>
+                            <AlignButton.Root
+                                variant="primary"
+                                mode="filled"
+                                size="xsmall"
+                                className="w-full"
                                 onClick={ () => processAction(AvatarEditorAction.ACTION_SAVE) }
                             >
                                 { LocalizeText('avatareditor.save') }
-                            </button>
+                            </AlignButton.Root>
                         </div>
                     </div>
-
-                    {/* Right Panel: Editor */}
+                    { /* Right Panel: Editor */ }
                     <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
                         { (activeCategory && !isWardrobeVisible) &&
                             <AvatarEditorModelView model={ activeCategory } gender={ figureData.gender } setGender={ setGender } /> }
@@ -399,7 +446,6 @@ export const AvatarEditorView: FC<{}> = props =>
                             </div> }
                     </div>
                 </div>
-
                 <div className="avatar-editor-resize-handle" onMouseDown={ onResizeStart } />
             </div>
         </DraggableWindow>

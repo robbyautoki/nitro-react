@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import { MessageSquare, Users } from 'lucide-react';
-import { Button } from '../../../../ui/button';
+import * as AlignButton from '@/align-ui/components/ui/button';
 import { useCatalog } from '../../../../../hooks';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 import { CatalogGuildSelectorWidgetView } from '../widgets/CatalogGuildSelectorWidgetView';
@@ -25,9 +25,9 @@ export const CatalogLayoutGuildForumView: FC<CatalogLayoutProps> = props =>
                     <span className="text-xs font-semibold">Gruppe auswählen</span>
                 </div>
                 <CatalogGuildSelectorWidgetView />
-                <Button className="w-full h-9 mt-3 gap-2 rounded-lg text-xs font-bold" disabled>
+                <AlignButton.Root variant="neutral" mode="stroke" size="small" className="w-full h-9 mt-3 gap-2 rounded-lg text-xs font-bold" disabled>
                     <MessageSquare className="w-3.5 h-3.5" /> Forum aktivieren
-                </Button>
+                </AlignButton.Root>
             </div>
             <p className="text-[10px] text-muted-foreground/50 text-center">Forum-Verwaltung im Spiel verfügbar</p>
         </div>

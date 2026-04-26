@@ -8,6 +8,8 @@ import { useChatHistory } from './../../chat-history';
 const avatarColorCache: Map<string, number> = new Map();
 const avatarImageCache: Map<string, string> = new Map();
 const petImageCache: Map<string, string> = new Map();
+const ADMIN_CHAT_MARKER = '[ADMCHAT]';
+const ADMIN_NAME_PREFIX_REGEX = /^\s*(?:\[\[ADM\]\]|\[ADM\])\s+/i;
 
 const useChatWidgetState = () =>
 {
@@ -240,17 +242,48 @@ const useChatWidgetState = () =>
 
         let nameColor: string = null;
         let nameGlow: boolean = false;
-        const nameColorMatch = text.match(/^\[NAMECOLOR:(#[0-9a-fA-F]{6})\]/);
-        if(nameColorMatch)
+        let adminSpecialEffect: boolean = false;
+
+        let parsedMarker = true;
+
+        while(parsedMarker)
         {
-            nameColor = nameColorMatch[1];
-            text = text.replace(nameColorMatch[0], '');
+            parsedMarker = false;
+
+            const leftTrimmedText = text.trimStart();
+            if(leftTrimmedText.length !== text.length)
+            {
+                const hasPrefixMarker = leftTrimmedText.startsWith(ADMIN_CHAT_MARKER) ||
+                    leftTrimmedText.startsWith('[NAMEGLOW]') ||
+                    !!leftTrimmedText.match(/^\[NAMECOLOR:(#[0-9a-fA-F]{6})\]/);
+
+                if(hasPrefixMarker) text = leftTrimmedText;
+            }
+
+            if(text.startsWith(ADMIN_CHAT_MARKER))
+            {
+                adminSpecialEffect = true;
+                text = text.slice(ADMIN_CHAT_MARKER.length);
+                parsedMarker = true;
+            }
+
+            const nameColorMatch = text.match(/^\[NAMECOLOR:(#[0-9a-fA-F]{6})\]/);
+            if(nameColorMatch)
+            {
+                nameColor = nameColorMatch[1];
+                text = text.slice(nameColorMatch[0].length);
+                parsedMarker = true;
+            }
+
+            if(text.startsWith('[NAMEGLOW]'))
+            {
+                nameGlow = true;
+                text = text.slice('[NAMEGLOW]'.length);
+                parsedMarker = true;
+            }
         }
-        if(text.startsWith('[NAMEGLOW]'))
-        {
-            nameGlow = true;
-            text = text.replace('[NAMEGLOW]', '');
-        }
+
+        if(ADMIN_NAME_PREFIX_REGEX.test(username)) adminSpecialEffect = true;
 
         const formattedText = RoomChatFormatter(text);
         const color = (avatarColor && (('#' + (avatarColor.toString(16).padStart(6, '0'))) || null));
@@ -268,7 +301,8 @@ const useChatWidgetState = () =>
             imageUrl,
             color,
             nameColor,
-            nameGlow);
+            nameGlow,
+            adminSpecialEffect);
 
         setChatMessages(prevValue => [ ...prevValue, chatMessage ]);
         addChatEntry({ id: -1, webId: userData.webID, entityId: userData.roomIndex, name: username, imageUrl, style: styleId, chatType: chatType, entityType: userData.type, message: formattedText, timestamp: ChatHistoryCurrentDate(), type: ChatEntryType.TYPE_CHAT, roomId: roomSession.roomId, color });

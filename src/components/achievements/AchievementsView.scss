@@ -1,6 +1,59 @@
-.nitro-achievements {
+.nitro-achievements:not(.nitro-achievements-align) {
     width: $achievement-width;
     height: $achievement-height;
+}
+
+.nitro-achievements-align {
+    width: min(860px, calc(100vw - 48px)) !important;
+    height: auto !important;
+    max-height: calc(100vh - 48px) !important;
+}
+
+.nitro-achievements-body {
+    max-height: calc(100vh - 228px);
+    overflow: hidden;
+}
+
+.nitro-achievements-category {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 16px;
+    min-height: 430px;
+}
+
+.nitro-achievements-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    align-content: start;
+    gap: 10px;
+    max-height: 430px;
+    overflow-y: auto;
+}
+
+.nitro-achievements-detail {
+    min-height: 430px;
+}
+
+@media (max-width: 760px) {
+    .nitro-achievements-align {
+        width: calc(100vw - 24px) !important;
+    }
+
+    .nitro-achievements-body {
+        max-height: calc(100vh - 188px);
+        overflow-y: auto;
+    }
+
+    .nitro-achievements-category {
+        grid-template-columns: 1fr;
+        min-height: 0;
+    }
+
+    .nitro-achievements-list,
+    .nitro-achievements-detail {
+        max-height: none;
+        min-height: 0;
+    }
 }
 
 .nitro-achievements-back-arrow {

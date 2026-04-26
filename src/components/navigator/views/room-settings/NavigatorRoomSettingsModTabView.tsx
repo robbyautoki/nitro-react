@@ -3,11 +3,16 @@ import { FC, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { UserProfileIconView } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Frame, FramePanel } from '@/components/ui/frame';
-import { cn } from '@/lib/utils';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignSelect from '@/align-ui/components/ui/select';
+import { cn } from '@/align-ui/utils/cn';
+import { NavigatorPanel, NavigatorPanelStack, NavigatorScrollViewport } from '../NavigatorPrimitives';
+
+const Select = AlignSelect.Root;
+const SelectTrigger = AlignSelect.Trigger;
+const SelectValue = AlignSelect.Value;
+const SelectContent = AlignSelect.Content;
+const SelectItem = AlignSelect.Item;
 
 interface NavigatorRoomSettingsTabViewProps
 {
@@ -48,81 +53,79 @@ export const NavigatorRoomSettingsModTabView: FC<NavigatorRoomSettingsTabViewPro
     }, [ roomData.roomId ]);
 
     return (
-        <Frame stacked spacing="sm" className="w-full">
-            <FramePanel>
+        <NavigatorPanelStack>
+            <NavigatorPanel>
                 <div className="flex gap-3">
                     <div className="flex-1 flex flex-col gap-2">
-                        <span className="text-xs font-medium">
+                        <span className="text-label-xs text-text-strong-950">
                             { LocalizeText('navigator.roomsettings.moderation.banned.users') } ({ bannedUsers.length })
                         </span>
-                        <ScrollArea className="h-[100px]">
+                        <NavigatorScrollViewport className="h-[100px]">
                             <div className="flex flex-col gap-0.5">
                                 { bannedUsers.length === 0 && (
-                                    <span className="text-[11px] text-muted-foreground text-center py-4">Keine gebannten User</span>
+                                    <span className="py-4 text-center text-paragraph-xs text-text-sub-600">Keine gebannten User</span>
                                 ) }
                                 { bannedUsers.map((user, index) => (
                                     <div
                                         key={ index }
                                         className={ cn(
                                             'flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors',
-                                            selectedUserId === user.userId ? 'bg-muted ring-1 ring-border' : 'hover:bg-muted/50'
+                                            selectedUserId === user.userId ? 'bg-primary-alpha-10 ring-1 ring-primary-base' : 'hover:bg-bg-weak-50'
                                         ) }
                                         onClick={ () => setSelectedUserId(user.userId) }
                                     >
                                         <UserProfileIconView userName={ user.userName } />
-                                        <span className="text-xs truncate flex-1">{ user.userName }</span>
+                                        <span className="flex-1 truncate text-paragraph-xs text-text-strong-950">{ user.userName }</span>
                                     </div>
                                 )) }
                             </div>
-                        </ScrollArea>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-7 text-xs"
+                        </NavigatorScrollViewport>
+                        <AlignButton.Root
+                            type="button"
+                            variant="neutral"
+                            mode="stroke"
+                            size="xsmall"
                             disabled={ (selectedUserId <= 0) }
                             onClick={ () => unBanUser(selectedUserId) }
                         >
                             { LocalizeText('navigator.roomsettings.moderation.unban') } { selectedUserId > 0 && bannedUsers.find(user => (user.userId === selectedUserId))?.userName }
-                        </Button>
+                        </AlignButton.Root>
                     </div>
-
                     <div className="flex-1 flex flex-col gap-3">
                         <div className="flex flex-col gap-1.5">
-                            <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.moderation.mute.header') }</span>
-                            <Select value={ String(roomData.moderationSettings.allowMute) } onValueChange={ val => handleChange('moderation_mute', val) }>
-                                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                            <span className="text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.moderation.mute.header') }</span>
+                            <Select size="xsmall" value={ String(roomData.moderationSettings.allowMute) } onValueChange={ val => handleChange('moderation_mute', val) }>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent className="z-[9999]">
-                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
-                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
+                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) }>{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
+                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) }>{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-
                         <div className="flex flex-col gap-1.5">
-                            <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.moderation.kick.header') }</span>
-                            <Select value={ String(roomData.moderationSettings.allowKick) } onValueChange={ val => handleChange('moderation_kick', val) }>
-                                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                            <span className="text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.moderation.kick.header') }</span>
+                            <Select size="xsmall" value={ String(roomData.moderationSettings.allowKick) } onValueChange={ val => handleChange('moderation_kick', val) }>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent className="z-[9999]">
-                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
-                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
-                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_ALL) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.all') }</SelectItem>
+                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) }>{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
+                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) }>{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
+                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_ALL) }>{ LocalizeText('navigator.roomsettings.moderation.all') }</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-
                         <div className="flex flex-col gap-1.5">
-                            <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.moderation.ban.header') }</span>
-                            <Select value={ String(roomData.moderationSettings.allowBan) } onValueChange={ val => handleChange('moderation_ban', val) }>
-                                <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                            <span className="text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.moderation.ban.header') }</span>
+                            <Select size="xsmall" value={ String(roomData.moderationSettings.allowBan) } onValueChange={ val => handleChange('moderation_ban', val) }>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent className="z-[9999]">
-                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
-                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) } className="text-xs">{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
+                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_NONE) }>{ LocalizeText('navigator.roomsettings.moderation.none') }</SelectItem>
+                                    <SelectItem value={ String(RoomModerationSettings.MODERATION_LEVEL_USER_WITH_RIGHTS) }>{ LocalizeText('navigator.roomsettings.moderation.rights') }</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                 </div>
-            </FramePanel>
-        </Frame>
+            </NavigatorPanel>
+        </NavigatorPanelStack>
     );
 }

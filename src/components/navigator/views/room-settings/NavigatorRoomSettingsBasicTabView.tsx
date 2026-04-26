@@ -2,12 +2,18 @@ import { RoomDeleteComposer, RoomSettingsSaveErrorEvent, RoomSettingsSaveErrorPa
 import { FC, useEffect, useState } from 'react';
 import { CreateLinkEvent, GetMaxVisitorsList, IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { useMessageEvent, useNavigator, useNotification } from '../../../../hooks';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Frame, FramePanel } from '@/components/ui/frame';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignCheckbox from '@/align-ui/components/ui/checkbox';
+import * as AlignSelect from '@/align-ui/components/ui/select';
 import { Trash2 } from 'lucide-react';
+import { NavigatorPanel, NavigatorPanelStack, NavigatorTextInput, NavigatorTextarea } from '../NavigatorPrimitives';
+
+const Checkbox = AlignCheckbox.Root;
+const Select = AlignSelect.Root;
+const SelectTrigger = AlignSelect.Trigger;
+const SelectValue = AlignSelect.Value;
+const SelectContent = AlignSelect.Content;
+const SelectItem = AlignSelect.Item;
 
 const ROOM_NAME_MIN_LENGTH = 3;
 const ROOM_NAME_MAX_LENGTH = 60;
@@ -95,81 +101,81 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
     }, [ roomData ]);
 
     return (
-        <Frame stacked spacing="sm" className="w-full">
-            <FramePanel>
+        <NavigatorPanelStack>
+            <NavigatorPanel>
                 <div className="flex flex-col gap-2.5">
                     <div className="flex items-center gap-2">
-                        <label className="text-xs text-muted-foreground w-[80px] shrink-0">{ LocalizeText('navigator.roomname') }</label>
+                        <label className="w-[80px] shrink-0 text-paragraph-xs text-text-sub-600">{ LocalizeText('navigator.roomname') }</label>
                         <div className="flex-1 flex flex-col gap-0.5">
-                            <Input className="h-7 text-xs" value={ roomName } maxLength={ ROOM_NAME_MAX_LENGTH } onChange={ event => setRoomName(event.target.value) } onBlur={ saveRoomName } />
+                            <NavigatorTextInput value={ roomName } maxLength={ ROOM_NAME_MAX_LENGTH } onChange={ event => setRoomName(event.target.value) } onBlur={ saveRoomName } />
                             { (roomName.length < ROOM_NAME_MIN_LENGTH) &&
-                                <span className="text-[10px] text-destructive font-medium">{ LocalizeText('navigator.roomsettings.roomnameismandatory') }</span> }
+                                <span className="text-subheading-2xs font-medium text-error-base">{ LocalizeText('navigator.roomsettings.roomnameismandatory') }</span> }
                         </div>
                     </div>
                     <div className="flex items-start gap-2">
-                        <label className="text-xs text-muted-foreground w-[80px] shrink-0 pt-1.5">{ LocalizeText('navigator.roomsettings.desc') }</label>
-                        <Textarea className="flex-1 text-xs resize-none min-h-[50px]" value={ roomDescription } maxLength={ DESC_MAX_LENGTH } onChange={ event => setRoomDescription(event.target.value) } onBlur={ saveRoomDescription } />
+                        <label className="w-[80px] shrink-0 pt-1.5 text-paragraph-xs text-text-sub-600">{ LocalizeText('navigator.roomsettings.desc') }</label>
+                        <NavigatorTextarea className="min-h-[50px] flex-1" value={ roomDescription } maxLength={ DESC_MAX_LENGTH } onChange={ event => setRoomDescription(event.target.value) } onBlur={ saveRoomDescription } />
                     </div>
                     <div className="flex items-center gap-2">
-                        <label className="text-xs text-muted-foreground w-[80px] shrink-0">{ LocalizeText('navigator.category') }</label>
-                        <Select value={ String(roomData.categoryId) } onValueChange={ val => handleChange('category', val) }>
-                            <SelectTrigger className="h-7 text-xs flex-1"><SelectValue /></SelectTrigger>
+                        <label className="w-[80px] shrink-0 text-paragraph-xs text-text-sub-600">{ LocalizeText('navigator.category') }</label>
+                        <Select size="xsmall" value={ String(roomData.categoryId) } onValueChange={ val => handleChange('category', val) }>
+                            <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
                                 { categories && categories.map(category => (
-                                    <SelectItem key={ category.id } value={ String(category.id) } className="text-xs">{ LocalizeText(category.name) }</SelectItem>
+                                    <SelectItem key={ category.id } value={ String(category.id) }>{ LocalizeText(category.name) }</SelectItem>
                                 )) }
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="flex items-center gap-2">
-                        <label className="text-xs text-muted-foreground w-[80px] shrink-0">{ LocalizeText('navigator.maxvisitors') }</label>
-                        <Select value={ String(roomData.userCount) } onValueChange={ val => handleChange('max_visitors', val) }>
-                            <SelectTrigger className="h-7 text-xs flex-1"><SelectValue /></SelectTrigger>
+                        <label className="w-[80px] shrink-0 text-paragraph-xs text-text-sub-600">{ LocalizeText('navigator.maxvisitors') }</label>
+                        <Select size="xsmall" value={ String(roomData.userCount) } onValueChange={ val => handleChange('max_visitors', val) }>
+                            <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
                                 { GetMaxVisitorsList && GetMaxVisitorsList.map(value => (
-                                    <SelectItem key={ value } value={ String(value) } className="text-xs">{ value }</SelectItem>
+                                    <SelectItem key={ value } value={ String(value) }>{ value }</SelectItem>
                                 )) }
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="flex items-center gap-2">
-                        <label className="text-xs text-muted-foreground w-[80px] shrink-0">{ LocalizeText('navigator.tradesettings') }</label>
-                        <Select value={ String(roomData.tradeState) } onValueChange={ val => handleChange('trade_state', val) }>
-                            <SelectTrigger className="h-7 text-xs flex-1"><SelectValue /></SelectTrigger>
+                        <label className="w-[80px] shrink-0 text-paragraph-xs text-text-sub-600">{ LocalizeText('navigator.tradesettings') }</label>
+                        <Select size="xsmall" value={ String(roomData.tradeState) } onValueChange={ val => handleChange('trade_state', val) }>
+                            <SelectTrigger className="flex-1"><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
-                                <SelectItem value="0" className="text-xs">{ LocalizeText('navigator.roomsettings.trade_not_allowed') }</SelectItem>
-                                <SelectItem value="1" className="text-xs">{ LocalizeText('navigator.roomsettings.trade_not_with_Controller') }</SelectItem>
-                                <SelectItem value="2" className="text-xs">{ LocalizeText('navigator.roomsettings.trade_allowed') }</SelectItem>
+                                <SelectItem value="0">{ LocalizeText('navigator.roomsettings.trade_not_allowed') }</SelectItem>
+                                <SelectItem value="1">{ LocalizeText('navigator.roomsettings.trade_not_with_Controller') }</SelectItem>
+                                <SelectItem value="2">{ LocalizeText('navigator.roomsettings.trade_allowed') }</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="flex items-center gap-2">
-                        <label className="text-xs text-muted-foreground w-[80px] shrink-0">{ LocalizeText('navigator.tags') }</label>
+                        <label className="w-[80px] shrink-0 text-paragraph-xs text-text-sub-600">{ LocalizeText('navigator.tags') }</label>
                         <div className="flex-1 flex gap-1.5">
                             <div className="flex-1 flex flex-col gap-0.5">
-                                <Input className="h-7 text-xs" value={ roomTag1 } placeholder="Tag 1" onChange={ event => setRoomTag1(event.target.value) } onBlur={ () => saveTags(0) } />
-                                { (roomTag1.length > TAGS_MAX_LENGTH) && <span className="text-[10px] text-destructive">{ LocalizeText('navigator.roomsettings.toomanycharacters') }</span> }
-                                { (tagIndex === 0 && typeError !== '') && <span className="text-[10px] text-destructive">{ LocalizeText(typeError) }</span> }
+                                <NavigatorTextInput value={ roomTag1 } placeholder="Tag 1" onChange={ event => setRoomTag1(event.target.value) } onBlur={ () => saveTags(0) } />
+                                { (roomTag1.length > TAGS_MAX_LENGTH) && <span className="text-subheading-2xs text-error-base">{ LocalizeText('navigator.roomsettings.toomanycharacters') }</span> }
+                                { (tagIndex === 0 && typeError !== '') && <span className="text-subheading-2xs text-error-base">{ LocalizeText(typeError) }</span> }
                             </div>
                             <div className="flex-1 flex flex-col gap-0.5">
-                                <Input className="h-7 text-xs" value={ roomTag2 } placeholder="Tag 2" onChange={ event => setRoomTag2(event.target.value) } onBlur={ () => saveTags(1) } />
-                                { (roomTag2.length > TAGS_MAX_LENGTH) && <span className="text-[10px] text-destructive">{ LocalizeText('navigator.roomsettings.toomanycharacters') }</span> }
-                                { (tagIndex === 1 && typeError !== '') && <span className="text-[10px] text-destructive">{ LocalizeText(typeError) }</span> }
+                                <NavigatorTextInput value={ roomTag2 } placeholder="Tag 2" onChange={ event => setRoomTag2(event.target.value) } onBlur={ () => saveTags(1) } />
+                                { (roomTag2.length > TAGS_MAX_LENGTH) && <span className="text-subheading-2xs text-error-base">{ LocalizeText('navigator.roomsettings.toomanycharacters') }</span> }
+                                { (tagIndex === 1 && typeError !== '') && <span className="text-subheading-2xs text-error-base">{ LocalizeText(typeError) }</span> }
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-2 pl-[88px]">
                         <Checkbox id="walkthrough" checked={ roomData.allowWalkthrough } onCheckedChange={ val => handleChange('allow_walkthrough', !!val) } />
-                        <label htmlFor="walkthrough" className="text-xs cursor-pointer">{ LocalizeText('navigator.roomsettings.allow_walk_through') }</label>
+                        <label htmlFor="walkthrough" className="cursor-pointer text-paragraph-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.allow_walk_through') }</label>
                     </div>
                     <div className="flex justify-center pt-1">
-                        <button className="flex items-center gap-1 text-xs text-destructive hover:text-destructive/80 transition-colors" onClick={ deleteRoom }>
-                            <Trash2 className="w-3 h-3" />
+                        <AlignButton.Root type="button" variant="error" mode="ghost" size="xsmall" onClick={ deleteRoom }>
+                            <AlignButton.Icon as={ Trash2 } className="size-3.5" />
                             { LocalizeText('navigator.roomsettings.delete') }
-                        </button>
+                        </AlignButton.Root>
                     </div>
                 </div>
-            </FramePanel>
-        </Frame>
+            </NavigatorPanel>
+        </NavigatorPanelStack>
     );
 };

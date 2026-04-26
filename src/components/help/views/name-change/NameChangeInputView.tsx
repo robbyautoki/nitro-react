@@ -3,6 +3,9 @@ import { FC, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
 import { useMessageEvent } from '../../../../hooks';
 import { NameChangeLayoutViewProps } from './NameChangeView.types';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import { cn } from '@/align-ui/utils/cn';
 
 const AVAILABLE: number = 0;
 const TOO_SHORT: number = 2;
@@ -72,25 +75,52 @@ export const NameChangeInputView:FC<NameChangeLayoutViewProps> = props =>
     });
 
     return (
-        <div className="flex flex-col gap-3 h-full">
-            <div>{ LocalizeText('tutorial.name_change.info.select') }</div>
+        <div className="flex h-full flex-col gap-3">
+            <div className="rounded-xl bg-bg-weak-50 p-3 text-paragraph-xs text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">
+                { LocalizeText('tutorial.name_change.info.select') }
+            </div>
             <div className="flex gap-2">
-                <input type="text" className="form-control form-control-sm" value={ newUsername } onChange={ event => handleUsernameChange(event.target.value) } />
-                <button className="btn btn-primary" disabled={ newUsername === '' || isChecking } onClick={ check }>{ LocalizeText('tutorial.name_change.check') }</button>
+                <AlignInput.Root size="xsmall" className="min-w-0 flex-1" hasError={ !!errorCode }>
+                    <AlignInput.Wrapper className="h-9">
+                        <AlignInput.Input
+                            className="h-9 text-paragraph-sm"
+                            value={ newUsername }
+                            onChange={ event => handleUsernameChange(event.target.value) }
+                        />
+                    </AlignInput.Wrapper>
+                </AlignInput.Root>
+                <AlignButton.Root type="button" variant="primary" mode="stroke" size="small" disabled={ newUsername === '' || isChecking } onClick={ check }>
+                    { LocalizeText('tutorial.name_change.check') }
+                </AlignButton.Root>
             </div>
             { !errorCode && !canProceed &&
-                <div className="bg-muted rounded p-2 text-center">{ LocalizeText('help.tutorial.name.info') }</div> }
+                <div className="rounded-xl bg-bg-weak-50 p-3 text-center text-paragraph-xs text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">{ LocalizeText('help.tutorial.name.info') }</div> }
             { errorCode &&
-                <div className="bg-red-500 rounded p-2 text-center text-white">{ LocalizeText(`help.tutorial.name.${ errorCode }`, [ 'name' ], [ newUsername ]) }</div> }
+                <div className="rounded-xl bg-error-lighter p-3 text-center text-paragraph-xs text-error-base ring-1 ring-inset ring-error-light">{ LocalizeText(`help.tutorial.name.${ errorCode }`, [ 'name' ], [ newUsername ]) }</div> }
             { canProceed &&
-                <div className="bg-green-500 rounded p-2 text-center text-white">{ LocalizeText('help.tutorial.name.available', [ 'name' ], [ newUsername ]) }</div> }
+                <div className="rounded-xl bg-success-lighter p-3 text-center text-paragraph-xs text-success-base ring-1 ring-inset ring-success-light">{ LocalizeText('help.tutorial.name.available', [ 'name' ], [ newUsername ]) }</div> }
             { suggestions &&
                 <div className="flex flex-col gap-2">
-                    { suggestions.map((suggestion, index) => <div key={ index } className="col bg-muted rounded p-1 cursor-pointer" onClick={ () => handleUsernameChange(suggestion) }>{ suggestion }</div>) }
+                    { suggestions.map((suggestion, index) =>
+                        <AlignButton.Root
+                            key={ index }
+                            type="button"
+                            variant="neutral"
+                            mode="stroke"
+                            size="small"
+                            className={ cn('h-9 w-full justify-start text-paragraph-sm') }
+                            onClick={ () => handleUsernameChange(suggestion) }
+                        >
+                            { suggestion }
+                        </AlignButton.Root>) }
                 </div> }
-            <div className="flex gap-2">
-                <button className="btn btn-success w-full" disabled={ !canProceed } onClick={ () => onAction('confirmation', newUsername) }>{ LocalizeText('tutorial.name_change.pick') }</button>
-                <button className="btn btn-primary w-full" onClick={ () => onAction('close') }>{ LocalizeText('cancel') }</button>
+            <div className="grid grid-cols-2 gap-2">
+                <AlignButton.Root type="button" variant="primary" mode="filled" size="small" disabled={ !canProceed } onClick={ () => onAction('confirmation', newUsername) }>
+                    { LocalizeText('tutorial.name_change.pick') }
+                </AlignButton.Root>
+                <AlignButton.Root type="button" variant="neutral" mode="stroke" size="small" onClick={ () => onAction('close') }>
+                    { LocalizeText('cancel') }
+                </AlignButton.Root>
             </div>
         </div>
     );

@@ -1,0 +1,1040 @@
+/* Align UI bridge for legacy Nitro windows that still render through SCSS classes. */
+.nitro-card,
+.nitro-inventory,
+.nitro-catalog,
+.nitro-friends,
+.nitro-user-profile,
+.nitro-room-info,
+.nitro-mod-tools,
+.nitro-guide-tool,
+.nitro-help,
+.nitro-nitropedia,
+.nitro-camera,
+.nitro-groups,
+.nitro-marketplace,
+.nitro-relationship,
+.nitro-pricelist,
+.nitro-sets,
+.nitro-workshop,
+.nitro-floor-editor,
+.nitro-floorplan-editor,
+.nitro-achievements,
+.nitro-wired,
+.nitro-avatar-editor,
+.nitro-room-settings,
+.floorplan-import-export,
+.user-settings-window,
+.nitro-use-product-confirmation,
+.furni-compact {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: var(--shadow-regular-md) !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.nitro-card-header,
+.nitro-card .card-header,
+.nitro-catalog .catalog-header,
+.nitro-inventory .inventory-header {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    border-bottom: 1px solid hsl(var(--align-stroke-soft-200)) !important;
+    box-shadow: none !important;
+}
+
+.nitro-card-header-text,
+.nitro-card .card-title,
+.nitro-catalog h1,
+.nitro-catalog h2,
+.nitro-inventory h1,
+.nitro-inventory h2 {
+    color: hsl(var(--align-text-strong-950)) !important;
+    font-size: .875rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0 !important;
+    text-shadow: none !important;
+}
+
+.nitro-card-header-close,
+.nitro-card-header-report-camera,
+.nitro-card .btn-close,
+.nitro-card .close,
+.nitro-infostand button:not([data-slot]) {
+    border-radius: .625rem !important;
+    transition: background-color .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease !important;
+}
+
+.nitro-card-header-close,
+.nitro-card-header-report-camera,
+.nitro-card .btn-close,
+.nitro-card .close {
+    color: hsl(var(--align-text-sub-600)) !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+}
+
+.nitro-card-header-close:hover,
+.nitro-card-header-report-camera:hover,
+.nitro-card .btn-close:hover,
+.nitro-card .close:hover {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-weak-50)) !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+}
+
+.nitro-card-tabs,
+.nitro-card .nav-tabs,
+.nitro-card .nav,
+.nitro-catalog .nav,
+.nitro-inventory .nav {
+    background: hsl(var(--align-bg-white-0)) !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+}
+
+.nitro-card-tabs .nav-item,
+.nitro-card .nav-link,
+.nitro-card .nav-item,
+.nitro-catalog .nav-link,
+.nitro-inventory .nav-link {
+    color: hsl(var(--align-text-sub-600)) !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: .625rem !important;
+    text-shadow: none !important;
+}
+
+.nitro-card-tabs .nav-item.active,
+.nitro-card .nav-link.active,
+.nitro-card .nav-item.active,
+.nitro-catalog .nav-link.active,
+.nitro-inventory .nav-link.active {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-weak-50)) !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    box-shadow: var(--shadow-regular-xs) !important;
+}
+
+.content-area,
+.nitro-card .card-body,
+.nitro-card .card-footer,
+.nitro-catalog .catalog-content,
+.nitro-inventory .inventory-content {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+}
+
+.nitro-card input,
+.nitro-card textarea,
+.nitro-card select,
+.nitro-catalog input,
+.nitro-catalog textarea,
+.nitro-catalog select,
+.nitro-inventory input,
+.nitro-inventory textarea,
+.nitro-inventory select,
+.nitro-infostand input,
+.nitro-infostand textarea,
+.nitro-infostand select {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    border-radius: .625rem !important;
+    box-shadow: var(--shadow-regular-xs) !important;
+}
+
+.nitro-card input::placeholder,
+.nitro-card textarea::placeholder,
+.nitro-catalog input::placeholder,
+.nitro-catalog textarea::placeholder,
+.nitro-inventory input::placeholder,
+.nitro-inventory textarea::placeholder {
+    color: hsl(var(--align-text-soft-400)) !important;
+}
+
+.nitro-card .btn,
+.nitro-catalog .btn,
+.nitro-inventory .btn,
+.nitro-infostand .btn {
+    border-radius: .625rem !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    box-shadow: var(--shadow-regular-xs) !important;
+    text-shadow: none !important;
+}
+
+.nitro-card .btn-primary,
+.nitro-catalog .btn-primary,
+.nitro-inventory .btn-primary,
+.nitro-infostand .btn-primary {
+    color: hsl(var(--align-static-white)) !important;
+    background: hsl(var(--align-primary-base)) !important;
+    border-color: hsl(var(--align-primary-base)) !important;
+}
+
+.nitro-card .btn-secondary,
+.nitro-card .btn-light,
+.nitro-catalog .btn-secondary,
+.nitro-catalog .btn-light,
+.nitro-inventory .btn-secondary,
+.nitro-inventory .btn-light,
+.nitro-infostand .btn-secondary,
+.nitro-infostand .btn-light {
+    color: hsl(var(--align-text-sub-600)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+}
+
+.nitro-card .btn:hover,
+.nitro-catalog .btn:hover,
+.nitro-inventory .btn:hover,
+.nitro-infostand .btn:hover {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-weak-50)) !important;
+}
+
+[data-slot="button"],
+[data-slot="fancy-button"],
+[data-slot="badge"],
+[data-slot="align-badge"],
+[data-slot="input"],
+[data-slot="card"] {
+    text-shadow: none !important;
+}
+
+[data-slot="button"],
+[data-slot="fancy-button"] {
+    border-radius: .625rem;
+    font-size: var(--text-label-sm) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+}
+
+[data-slot="badge"] {
+    font-size: var(--text-label-xs) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+}
+
+[data-slot="align-badge"] {
+    font-size: .6875rem !important;
+    font-weight: 500 !important;
+    line-height: .75rem !important;
+    letter-spacing: 0 !important;
+}
+
+[data-slot="input"] {
+    font-size: var(--text-paragraph-sm) !important;
+    letter-spacing: 0 !important;
+}
+
+.layout-grid-item,
+.nitro-catalog .catalog-grid-item,
+.nitro-inventory .inventory-item,
+.nitro-inventory .inv-item,
+.nitro-inventory .inv-item-tile {
+    background-color: hsl(var(--align-bg-weak-50));
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    border-radius: .625rem !important;
+}
+
+.layout-grid-item:hover,
+.nitro-catalog .catalog-grid-item:hover,
+.nitro-inventory .inventory-item:hover,
+.nitro-inventory .inv-item:hover,
+.nitro-inventory .inv-item-tile:hover {
+    background-color: hsl(var(--align-bg-white-0));
+    border-color: hsl(var(--align-stroke-sub-300)) !important;
+    box-shadow: var(--shadow-regular-xs) !important;
+}
+
+.layout-grid-item.active,
+.nitro-catalog .catalog-grid-item.active,
+.nitro-inventory .inventory-item.active,
+.nitro-inventory .inv-item.active,
+.nitro-inventory .inv-item-tile.active {
+    background-color: hsl(var(--align-primary-alpha-10));
+    border-color: hsl(var(--align-primary-base)) !important;
+}
+
+.nitro-infostand,
+.nitro-infostand-container > div,
+.avatar-info,
+.avatar-info-menu,
+.context-menu,
+.nitro-context-menu {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    border-radius: 1.25rem !important;
+    box-shadow: var(--shadow-regular-md) !important;
+}
+
+.nitro-user-infostand-align {
+    min-width: 328px !important;
+    max-width: 328px !important;
+    height: auto !important;
+    max-height: none !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    border: 0 !important;
+    border-radius: 1.25rem !important;
+    box-shadow: var(--shadow-regular-md) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.nitro-user-infostand-align.nitro-infostand-has-profile-effect {
+    isolation: isolate;
+
+    .nitro-profile-effect-overlay {
+        z-index: 30 !important;
+        opacity: 1 !important;
+    }
+
+    &:hover {
+        background: hsl(var(--align-bg-white-0) / 0.72) !important;
+        backdrop-filter: blur(2px) !important;
+        -webkit-backdrop-filter: blur(2px) !important;
+
+        .nitro-profile-effect-overlay {
+            z-index: 1 !important;
+            opacity: 0.4 !important;
+        }
+
+        .nitro-infostand-layer {
+            background-color: hsl(var(--align-bg-white-0) / 0.68) !important;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
+        .nitro-infostand-card-layer {
+            background-color: hsl(var(--align-bg-weak-50) / 0.58) !important;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
+        .nitro-infostand-control-layer {
+            background-color: hsl(var(--align-bg-white-0) / 0.62) !important;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
+        .nitro-infostand-subtle-layer {
+            background-color: hsl(var(--align-bg-weak-50) / 0.56) !important;
+        }
+    }
+}
+
+.nitro-user-infostand-align,
+.nitro-user-infostand-align * {
+    text-shadow: none !important;
+}
+
+.nitro-furni-infostand-align {
+    min-width: 320px !important;
+    max-width: 320px !important;
+    height: auto !important;
+    max-height: 620px !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    border: 0 !important;
+    border-radius: 1.25rem !important;
+    box-shadow: var(--shadow-regular-md) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+
+    .nitro-furni-preview-image img {
+        image-rendering: pixelated;
+    }
+}
+
+.nitro-furni-infostand-align,
+.nitro-furni-infostand-align * {
+    text-shadow: none !important;
+}
+
+.nitro-infostand .text-white,
+.avatar-info .text-white {
+    color: hsl(var(--align-text-strong-950)) !important;
+}
+
+.nitro-notification,
+.nitro-toast,
+.voice-toggle-btn,
+.radio-panel,
+.nitro-radio {
+    color: hsl(var(--align-text-strong-950)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    box-shadow: var(--shadow-regular-md) !important;
+}
+
+.nitro-right-side {
+    color: inherit !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.nitro-radio .text-white,
+.radio-panel .text-white,
+.nitro-radio [class*="text-purple"],
+.radio-panel [class*="text-purple"],
+.nitro-radio [class*="text-blue"],
+.radio-panel [class*="text-blue"] {
+    color: hsl(var(--align-text-sub-600)) !important;
+}
+
+.nitro-radio .bg-white,
+.radio-panel .bg-white,
+.nitro-radio .from-white,
+.radio-panel .from-white,
+.nitro-radio .to-white,
+.radio-panel .to-white {
+    background: hsl(var(--align-bg-weak-50)) !important;
+}
+
+.nitro-radio .border-white,
+.radio-panel .border-white {
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+}
+
+.nitro-card *,
+.nitro-catalog *,
+.nitro-inventory *,
+.nitro-infostand *,
+.nitro-toolbar * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--align-stroke-sub-300)) transparent;
+}
+
+/* Strict Align pass for legacy Tailwind/Bootstrap fragments inside Nitro panels. */
+.nitro-card,
+.nitro-inventory,
+.nitro-catalog,
+.nitro-friends,
+.nitro-friends-messenger,
+.nitro-user-profile,
+.nitro-room-info,
+.nitro-mod-tools,
+.nitro-mod-tools-v2,
+.nitro-guide-tool,
+.nitro-help,
+.nitro-nitropedia,
+.nitro-camera,
+.nitro-groups,
+.nitro-marketplace,
+.nitro-relationship,
+.nitro-pricelist,
+.nitro-sets,
+.nitro-workshop,
+.nitro-floor-editor,
+.nitro-floorplan-editor,
+.nitro-achievements,
+.nitro-wired,
+.nitro-avatar-editor,
+.nitro-room-settings,
+.floorplan-import-export,
+.user-settings-window,
+.nitro-use-product-confirmation,
+.furni-compact,
+.nitro-navigator,
+.navigator-drawer {
+    font-size: var(--text-paragraph-sm) !important;
+    line-height: var(--text-paragraph-sm--line-height) !important;
+    letter-spacing: 0 !important;
+}
+
+.nitro-card [class*="text-["],
+.nitro-inventory [class*="text-["],
+.nitro-catalog [class*="text-["],
+.nitro-friends [class*="text-["],
+.nitro-friends-messenger [class*="text-["],
+.nitro-user-profile [class*="text-["],
+.nitro-room-info [class*="text-["],
+.nitro-mod-tools [class*="text-["],
+.nitro-mod-tools-v2 [class*="text-["],
+.nitro-help [class*="text-["],
+.nitro-camera [class*="text-["],
+.nitro-marketplace [class*="text-["],
+.nitro-pricelist [class*="text-["],
+.nitro-sets [class*="text-["],
+.nitro-workshop [class*="text-["],
+.nitro-floorplan-editor [class*="text-["],
+.nitro-achievements [class*="text-["],
+.nitro-wired [class*="text-["],
+.nitro-avatar-editor [class*="text-["],
+.nitro-room-settings [class*="text-["],
+.floorplan-import-export [class*="text-["],
+.user-settings-window [class*="text-["],
+.nitro-use-product-confirmation [class*="text-["],
+.furni-compact [class*="text-["],
+.nitro-navigator [class*="text-["],
+.navigator-drawer [class*="text-["] {
+    font-size: var(--text-paragraph-xs) !important;
+    line-height: var(--text-paragraph-xs--line-height) !important;
+    letter-spacing: 0 !important;
+}
+
+.nitro-card .badge,
+.nitro-inventory .badge,
+.nitro-catalog .badge,
+.nitro-friends .badge,
+.nitro-friends-messenger .badge,
+.nitro-user-profile .badge,
+.nitro-room-info .badge,
+.nitro-mod-tools .badge,
+.nitro-mod-tools-v2 .badge,
+.nitro-help .badge,
+.nitro-camera .badge,
+.nitro-marketplace .badge,
+.nitro-pricelist .badge,
+.nitro-sets .badge,
+.nitro-workshop .badge,
+.nitro-floorplan-editor .badge,
+.nitro-achievements .badge,
+.nitro-wired .badge,
+.nitro-avatar-editor .badge,
+.nitro-room-settings .badge,
+.floorplan-import-export .badge,
+.user-settings-window .badge,
+.nitro-use-product-confirmation .badge,
+.furni-compact .badge,
+.nitro-navigator .badge,
+.navigator-drawer .badge,
+.nitro-card [class*="Badge"],
+.nitro-inventory [class*="Badge"],
+.nitro-catalog [class*="Badge"],
+.nitro-friends [class*="Badge"],
+.nitro-friends-messenger [class*="Badge"],
+.nitro-user-profile [class*="Badge"],
+.nitro-room-info [class*="Badge"],
+.nitro-mod-tools [class*="Badge"],
+.nitro-mod-tools-v2 [class*="Badge"],
+.nitro-help [class*="Badge"],
+.nitro-camera [class*="Badge"],
+.nitro-marketplace [class*="Badge"],
+.nitro-pricelist [class*="Badge"],
+.nitro-sets [class*="Badge"],
+.nitro-workshop [class*="Badge"],
+.nitro-floorplan-editor [class*="Badge"],
+.nitro-achievements [class*="Badge"],
+.nitro-wired [class*="Badge"],
+.nitro-avatar-editor [class*="Badge"],
+.nitro-room-settings [class*="Badge"],
+.floorplan-import-export [class*="Badge"],
+.user-settings-window [class*="Badge"],
+.nitro-use-product-confirmation [class*="Badge"],
+.furni-compact [class*="Badge"],
+.nitro-navigator [class*="Badge"],
+.navigator-drawer [class*="Badge"] {
+    min-height: 1.125rem !important;
+    border-radius: .375rem !important;
+    padding: .125rem .375rem !important;
+    font-size: .6875rem !important;
+    line-height: .75rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    text-shadow: none !important;
+}
+
+.nitro-card .text-white,
+.nitro-inventory .text-white,
+.nitro-catalog .text-white,
+.nitro-friends .text-white,
+.nitro-friends-messenger .text-white,
+.nitro-user-profile .text-white,
+.nitro-room-info .text-white,
+.nitro-mod-tools .text-white,
+.nitro-mod-tools-v2 .text-white,
+.nitro-help .text-white,
+.nitro-camera .text-white,
+.nitro-marketplace .text-white,
+.nitro-pricelist .text-white,
+.nitro-sets .text-white,
+.nitro-workshop .text-white,
+.nitro-floorplan-editor .text-white,
+.nitro-achievements .text-white,
+.nitro-wired .text-white,
+.nitro-avatar-editor .text-white,
+.nitro-room-settings .text-white,
+.floorplan-import-export .text-white,
+.user-settings-window .text-white,
+.nitro-use-product-confirmation .text-white,
+.furni-compact .text-white,
+.nitro-navigator .text-white,
+.navigator-drawer .text-white,
+.nitro-card .text-black,
+.nitro-inventory .text-black,
+.nitro-catalog .text-black,
+.nitro-friends .text-black,
+.nitro-friends-messenger .text-black,
+.nitro-user-profile .text-black,
+.nitro-room-info .text-black,
+.nitro-mod-tools .text-black,
+.nitro-mod-tools-v2 .text-black,
+.nitro-help .text-black,
+.nitro-camera .text-black,
+.nitro-marketplace .text-black,
+.nitro-pricelist .text-black,
+.nitro-sets .text-black,
+.nitro-workshop .text-black,
+.nitro-floorplan-editor .text-black,
+.nitro-achievements .text-black,
+.nitro-wired .text-black,
+.nitro-avatar-editor .text-black,
+.nitro-room-settings .text-black,
+.floorplan-import-export .text-black,
+.user-settings-window .text-black,
+.nitro-use-product-confirmation .text-black,
+.furni-compact .text-black,
+.nitro-navigator .text-black,
+.navigator-drawer .text-black {
+    color: hsl(var(--align-text-sub-600)) !important;
+}
+
+.nitro-card .bg-white,
+.nitro-inventory .bg-white,
+.nitro-catalog .bg-white,
+.nitro-friends .bg-white,
+.nitro-friends-messenger .bg-white,
+.nitro-user-profile .bg-white,
+.nitro-room-info .bg-white,
+.nitro-mod-tools .bg-white,
+.nitro-mod-tools-v2 .bg-white,
+.nitro-help .bg-white,
+.nitro-camera .bg-white,
+.nitro-marketplace .bg-white,
+.nitro-pricelist .bg-white,
+.nitro-sets .bg-white,
+.nitro-workshop .bg-white,
+.nitro-floorplan-editor .bg-white,
+.nitro-achievements .bg-white,
+.nitro-avatar-editor .bg-white,
+.nitro-room-settings .bg-white,
+.floorplan-import-export .bg-white,
+.user-settings-window .bg-white,
+.nitro-use-product-confirmation .bg-white,
+.furni-compact .bg-white,
+.nitro-navigator .bg-white,
+.navigator-drawer .bg-white,
+.nitro-card .bg-black,
+.nitro-inventory .bg-black,
+.nitro-catalog .bg-black,
+.nitro-friends .bg-black,
+.nitro-friends-messenger .bg-black,
+.nitro-user-profile .bg-black,
+.nitro-room-info .bg-black,
+.nitro-mod-tools .bg-black,
+.nitro-mod-tools-v2 .bg-black,
+.nitro-help .bg-black,
+.nitro-camera .bg-black,
+.nitro-marketplace .bg-black,
+.nitro-pricelist .bg-black,
+.nitro-sets .bg-black,
+.nitro-workshop .bg-black,
+.nitro-floorplan-editor .bg-black,
+.nitro-achievements .bg-black,
+.nitro-wired .bg-black,
+.nitro-avatar-editor .bg-black,
+.nitro-room-settings .bg-black,
+.floorplan-import-export .bg-black,
+.user-settings-window .bg-black,
+.nitro-use-product-confirmation .bg-black,
+.furni-compact .bg-black,
+.nitro-navigator .bg-black,
+.navigator-drawer .bg-black {
+    background-color: hsl(var(--align-bg-weak-50)) !important;
+}
+
+.nitro-card .border-white,
+.nitro-inventory .border-white,
+.nitro-catalog .border-white,
+.nitro-friends .border-white,
+.nitro-friends-messenger .border-white,
+.nitro-user-profile .border-white,
+.nitro-room-info .border-white,
+.nitro-mod-tools .border-white,
+.nitro-mod-tools-v2 .border-white,
+.nitro-help .border-white,
+.nitro-camera .border-white,
+.nitro-marketplace .border-white,
+.nitro-pricelist .border-white,
+.nitro-sets .border-white,
+.nitro-workshop .border-white,
+.nitro-floorplan-editor .border-white,
+.nitro-achievements .border-white,
+.nitro-avatar-editor .border-white,
+.nitro-room-settings .border-white,
+.floorplan-import-export .border-white,
+.user-settings-window .border-white,
+.nitro-use-product-confirmation .border-white,
+.furni-compact .border-white,
+.nitro-navigator .border-white,
+.navigator-drawer .border-white,
+.nitro-card .border-black,
+.nitro-inventory .border-black,
+.nitro-catalog .border-black,
+.nitro-friends .border-black,
+.nitro-friends-messenger .border-black,
+.nitro-user-profile .border-black,
+.nitro-room-info .border-black,
+.nitro-mod-tools .border-black,
+.nitro-mod-tools-v2 .border-black,
+.nitro-help .border-black,
+.nitro-camera .border-black,
+.nitro-marketplace .border-black,
+.nitro-pricelist .border-black,
+.nitro-sets .border-black,
+.nitro-workshop .border-black,
+.nitro-floorplan-editor .border-black,
+.nitro-achievements .border-black,
+.nitro-wired .border-black,
+.nitro-avatar-editor .border-black,
+.nitro-room-settings .border-black,
+.floorplan-import-export .border-black,
+.user-settings-window .border-black,
+.nitro-use-product-confirmation .border-black,
+.furni-compact .border-black,
+.nitro-navigator .border-black,
+.navigator-drawer .border-black {
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+}
+
+/* Align-scoped cleanup for remaining legacy client panels. */
+.nitro-room-info,
+.nitro-room-settings,
+.nitro-floorplan-editor,
+.floorplan-import-export,
+.nitro-achievements,
+.nitro-wired,
+.nitro-avatar-editor,
+.nitro-use-product-confirmation,
+.furni-compact {
+    font-family: inherit !important;
+}
+
+.nitro-room-info .bg-card,
+.nitro-room-settings .bg-card,
+.nitro-floorplan-editor .bg-card,
+.nitro-achievements .bg-card,
+.nitro-wired .bg-card,
+.nitro-avatar-editor .bg-card,
+.nitro-use-product-confirmation .bg-card,
+.furni-compact.bg-card,
+.furni-compact .bg-card {
+    background: hsl(var(--align-bg-white-0)) !important;
+}
+
+.nitro-room-info .bg-muted,
+.nitro-room-info .bg-muted\/20,
+.nitro-room-info .bg-muted\/30,
+.nitro-room-info .bg-muted\/50,
+.nitro-room-settings .bg-muted,
+.nitro-room-settings .bg-muted\/20,
+.nitro-room-settings .bg-muted\/30,
+.nitro-room-settings .bg-muted\/50,
+.nitro-floorplan-editor .bg-muted,
+.nitro-floorplan-editor .bg-muted\/20,
+.nitro-floorplan-editor .bg-muted\/30,
+.nitro-floorplan-editor .bg-muted\/50,
+.nitro-achievements .bg-muted,
+.nitro-wired .bg-muted,
+.nitro-avatar-editor .bg-muted,
+.furni-compact .bg-muted,
+.furni-compact .bg-muted\/30 {
+    background: hsl(var(--align-bg-weak-50)) !important;
+}
+
+.nitro-room-info .bg-accent,
+.nitro-room-info .bg-accent\/20,
+.nitro-room-info .bg-accent\/30,
+.nitro-room-info .bg-accent\/50,
+.nitro-room-settings .bg-accent,
+.nitro-room-settings .bg-accent\/20,
+.nitro-room-settings .bg-accent\/30,
+.nitro-room-settings .bg-accent\/50,
+.furni-compact .bg-accent,
+.furni-compact .bg-accent\/20,
+.furni-compact .bg-accent\/30 {
+    background: hsl(var(--align-bg-weak-50)) !important;
+}
+
+.nitro-room-info .border-border,
+.nitro-room-info .border-border\/10,
+.nitro-room-info .border-border\/20,
+.nitro-room-info .border-border\/30,
+.nitro-room-info .border-border\/40,
+.nitro-room-info .border-border\/60,
+.nitro-room-settings .border-border,
+.nitro-room-settings .border-border\/10,
+.nitro-room-settings .border-border\/20,
+.nitro-room-settings .border-border\/30,
+.nitro-room-settings .border-border\/40,
+.nitro-floorplan-editor .border-border,
+.nitro-floorplan-editor .border-border\/30,
+.furni-compact.border,
+.furni-compact .border-border,
+.furni-compact .border-border\/10,
+.furni-compact .border-border\/20,
+.furni-compact .border-border\/30 {
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+}
+
+.nitro-room-info .text-muted-foreground,
+.nitro-room-info .text-muted-foreground\/30,
+.nitro-room-info .text-muted-foreground\/40,
+.nitro-room-info .text-muted-foreground\/50,
+.nitro-room-info .text-muted-foreground\/60,
+.nitro-room-info .text-muted-foreground\/80,
+.nitro-room-settings .text-muted-foreground,
+.nitro-room-settings .text-muted-foreground\/30,
+.nitro-room-settings .text-muted-foreground\/40,
+.nitro-room-settings .text-muted-foreground\/50,
+.nitro-floorplan-editor .text-muted-foreground,
+.nitro-avatar-editor .text-muted-foreground,
+.furni-compact .text-muted-foreground,
+.furni-compact .text-muted-foreground\/30,
+.furni-compact .text-muted-foreground\/40,
+.furni-compact .text-muted-foreground\/50,
+.furni-compact .text-muted-foreground\/60 {
+    color: hsl(var(--align-text-sub-600)) !important;
+}
+
+.nitro-room-info .text-foreground,
+.nitro-room-info .text-card-foreground,
+.nitro-room-settings .text-foreground,
+.nitro-room-settings .text-card-foreground,
+.nitro-floorplan-editor .text-foreground,
+.nitro-achievements .text-foreground,
+.nitro-wired .text-foreground,
+.nitro-avatar-editor .text-foreground,
+.furni-compact .text-foreground,
+.furni-compact .text-card-foreground {
+    color: hsl(var(--align-text-strong-950)) !important;
+}
+
+.nitro-room-info .text-xs,
+.nitro-room-settings .text-xs,
+.nitro-floorplan-editor .text-xs,
+.nitro-achievements .text-xs,
+.nitro-wired .text-xs,
+.nitro-avatar-editor .text-xs,
+.furni-compact .text-xs {
+    font-size: var(--text-paragraph-xs) !important;
+    line-height: var(--text-paragraph-xs--line-height) !important;
+    letter-spacing: 0 !important;
+}
+
+.nitro-room-info .text-sm,
+.nitro-room-settings .text-sm,
+.nitro-floorplan-editor .text-sm,
+.nitro-achievements .text-sm,
+.nitro-wired .text-sm,
+.nitro-avatar-editor .text-sm,
+.furni-compact .text-sm {
+    font-size: var(--text-label-sm) !important;
+    line-height: var(--text-label-sm--line-height) !important;
+    letter-spacing: 0 !important;
+}
+
+.nitro-floorplan-editor .nitro-card-content,
+.nitro-floorplan-editor .content-area,
+.floorplan-import-export .nitro-card-content {
+    background: hsl(var(--align-bg-white-0)) !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+}
+
+.nitro-floorplan-editor .form-control,
+.floorplan-import-export .form-control,
+.nitro-room-info input,
+.nitro-room-info textarea,
+.nitro-room-settings input,
+.nitro-room-settings textarea {
+    min-height: 2rem !important;
+    border-radius: .625rem !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+    box-shadow: var(--shadow-regular-xs) !important;
+}
+
+.nitro-inventory.inv-container,
+.nitro-inventory .inv-container {
+    border-radius: 1.25rem !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+    box-shadow: var(--shadow-regular-md) !important;
+}
+
+.nitro-inventory .inv-title-bar,
+.nitro-inventory .inv-toolbar-row,
+.nitro-inventory .inv-hotbar {
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    background: hsl(var(--align-bg-weak-50)) !important;
+}
+
+.nitro-inventory .inv-title-text,
+.nitro-inventory .inv-inspector-name {
+    color: hsl(var(--align-text-strong-950)) !important;
+    font-size: var(--text-label-sm) !important;
+    font-weight: 600 !important;
+}
+
+.nitro-inventory .inv-title-count,
+.nitro-inventory .inv-count,
+.nitro-inventory .inv-inspector-desc,
+.nitro-inventory .inv-inspector-type,
+.nitro-inventory .inv-sidebar-count {
+    color: hsl(var(--align-text-sub-600)) !important;
+    font-size: var(--text-paragraph-xs) !important;
+}
+
+.nitro-inventory .inv-sidebar {
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+}
+
+.nitro-inventory .inv-sidebar-item,
+.nitro-inventory .inv-sort-btn,
+.nitro-inventory .inv-multiselect-toggle,
+.nitro-inventory .inv-action-btn,
+.nitro-inventory .inv-multi-btn,
+.nitro-inventory .inv-cat-add-btn {
+    min-height: 2rem !important;
+    border-radius: .625rem !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    background: transparent !important;
+    color: hsl(var(--align-text-sub-600)) !important;
+    font-size: var(--text-label-xs) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    box-shadow: none !important;
+}
+
+.nitro-inventory .inv-sidebar-item:hover,
+.nitro-inventory .inv-sort-btn:hover,
+.nitro-inventory .inv-multiselect-toggle:hover,
+.nitro-inventory .inv-action-btn:hover,
+.nitro-inventory .inv-multi-btn:hover {
+    background: hsl(var(--align-bg-weak-50)) !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+}
+
+.nitro-inventory .inv-sidebar-item.active,
+.nitro-inventory .inv-sort-btn.active,
+.nitro-inventory .inv-multiselect-toggle.active,
+.nitro-inventory .inv-action-btn.primary {
+    background: hsl(var(--align-primary-alpha-10)) !important;
+    border-color: hsl(var(--align-primary-base)) !important;
+    color: hsl(var(--align-primary-base)) !important;
+}
+
+.nitro-inventory .inv-sidebar-badge,
+.nitro-inventory .inv-inspector-count-label,
+.nitro-inventory .inv-multi-count {
+    min-height: 1.125rem !important;
+    border-radius: .375rem !important;
+    background: hsl(var(--align-error-lighter)) !important;
+    color: hsl(var(--align-error-base)) !important;
+    font-size: .6875rem !important;
+    line-height: .75rem !important;
+    font-weight: 500 !important;
+}
+
+.nitro-inventory .inv-tile,
+.nitro-inventory .inv-hotbar-slot,
+.nitro-inventory .inv-inspector,
+.nitro-inventory .inv-multi-dropdown,
+.nitro-inventory .inv-create-form {
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    background: hsl(var(--align-bg-weak-50)) !important;
+    border-radius: .625rem !important;
+}
+
+.nitro-inventory .inv-tile.active,
+.nitro-inventory .inv-hotbar-slot.filled {
+    border-color: hsl(var(--align-primary-base)) !important;
+    background: hsl(var(--align-primary-alpha-10)) !important;
+}
+
+.nitro-inventory .inv-search-input,
+.nitro-inventory .inv-create-input {
+    border-radius: .625rem !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+    font-size: var(--text-paragraph-xs) !important;
+    box-shadow: var(--shadow-regular-xs) !important;
+}
+
+.furni-compact {
+    border-radius: 1.25rem !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+    box-shadow: var(--shadow-regular-md) !important;
+}
+
+.furni-compact button {
+    border-radius: .625rem !important;
+    color: hsl(var(--align-text-sub-600)) !important;
+}
+
+.furni-compact button:hover {
+    background: hsl(var(--align-bg-weak-50)) !important;
+    color: hsl(var(--align-text-strong-950)) !important;
+}
+
+.nitro-wired,
+.nitro-wired * {
+    text-shadow: none !important;
+}
+
+.nitro-wired .wired-align-section .form-check-input {
+    width: 1rem !important;
+    height: 1rem !important;
+    margin: 0 !important;
+    cursor: pointer;
+    border: 1px solid hsl(var(--align-stroke-sub-300)) !important;
+    border-radius: 999px !important;
+    background: hsl(var(--align-bg-white-0)) !important;
+    box-shadow: var(--shadow-regular-xs) !important;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.nitro-wired .wired-align-section .form-check-input[type="checkbox"] {
+    border-radius: .375rem !important;
+}
+
+.nitro-wired .wired-align-section .form-check-input:checked {
+    border-color: hsl(var(--align-primary-base)) !important;
+    background: radial-gradient(circle, hsl(var(--align-primary-base)) 0 42%, transparent 47%) hsl(var(--align-bg-white-0)) !important;
+}
+
+.nitro-wired .wired-align-section .form-check-input[type="checkbox"]:checked {
+    background: hsl(var(--align-primary-base)) !important;
+}
+
+.nitro-wired .wired-align-section .form-check-input:focus-visible {
+    outline: none !important;
+    box-shadow: var(--shadow-button-primary-focus) !important;
+}
+
+.nitro-wired .wired-align-section .text-small,
+.nitro-wired .wired-align-section p,
+.nitro-wired .wired-align-section span {
+    letter-spacing: 0 !important;
+}
+
+.furni-compact [style*="rgba(255,255,255"],
+.furni-compact [style*="--color-card"] {
+    background: hsl(var(--align-bg-white-0)) !important;
+    border-color: hsl(var(--align-stroke-soft-200)) !important;
+}

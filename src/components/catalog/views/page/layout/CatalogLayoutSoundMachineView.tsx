@@ -2,7 +2,7 @@ import { GetOfficialSongIdMessageComposer, MusicPriorities, OfficialSongIdMessag
 import { FC, useEffect, useState } from 'react';
 import { Play, Music } from 'lucide-react';
 import { GetConfiguration, GetNitroInstance, LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Button } from '../../../../ui/button';
+import * as AlignButton from '@/align-ui/components/ui/button';
 import { useCatalog, useMessageEvent } from '../../../../../hooks';
 import { CatalogPageHeaderBanner } from '../../shared/CatalogPageHeaderBanner';
 import { CatalogItemGridWidgetView } from '../widgets/CatalogItemGridWidgetView';
@@ -49,12 +49,12 @@ export const CatalogLayoutSoundMachineView: FC<CatalogLayoutProps> = props =>
         <div className="flex flex-col h-full overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
             <CatalogPageHeaderBanner />
             { currentOffer && songId > -1 && (
-                <div className="shrink-0 px-4 py-2 border-b border-border/20 flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={ () => previewSong(songId) }>
+                <div className="shrink-0 border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-2 flex items-center gap-2">
+                    <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="gap-1.5 text-label-xs" onClick={ () => previewSong(songId) }>
                         <Play className="w-3 h-3" /> Vorschau
-                    </Button>
-                    <Music className="w-3.5 h-3.5 text-muted-foreground/40" />
-                    <span className="text-[11px] text-muted-foreground/50">{ currentOffer.localizationName }</span>
+                    </AlignButton.Root>
+                    <Music className="w-3.5 h-3.5 text-text-soft-400" />
+                    <span className="text-paragraph-xs text-text-soft-400">{ currentOffer.localizationName }</span>
                 </div>
             ) }
             <div className="flex-1 min-h-0 overflow-auto p-3">

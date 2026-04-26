@@ -89,7 +89,7 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = pro
     }
 
     return (
-        <div ref={ elementRef } className={ `grid grid-cols-[repeat(auto-fill,68px)] gap-1 overflow-y-auto p-2 ${ className }` } { ...rest }>
+        <div ref={ elementRef } className={ `grid grid-cols-[repeat(auto-fill,82px)] gap-2 overflow-y-auto p-3 ${ className }` } { ...rest }>
             { currentPage.offers && (currentPage.offers.length > 0) && currentPage.offers.map((offer, index) =>
                 <CatalogGridOfferView
                     key={ index }

@@ -2,7 +2,8 @@ import { PurchaseFromCatalogComposer } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CatalogPurchaseState, CreateLinkEvent, DispatchUiEvent, GetClubMemberLevel, LocalizeText, LocalStorageKeys, Offer, SendMessageComposer } from '../../../../../api';
 import { LayoutLoadingSpinnerView } from '../../../../../common';
-import { Button } from '../../../../ui/button';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import * as AlignButton from '@/align-ui/components/ui/button';
 import { CatalogEvent, CatalogInitGiftEvent, CatalogPurchasedEvent, CatalogPurchaseFailureEvent, CatalogPurchaseNotAllowedEvent, CatalogPurchaseSoldOutEvent } from '../../../../../events';
 import { useCatalog, useCatalogPlaceMultipleItems, useLocalStorage, usePurse, useUiEvent } from '../../../../../hooks';
 
@@ -173,76 +174,76 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     {
         if(GetClubMemberLevel() < currentOffer.clubLevel)
             return (
-                <Button variant="destructive" className="w-full" size="sm" disabled>
+                <FancyButton.Root variant="destructive" size="small" className="w-full" disabled>
                     { LocalizeText('catalog.alert.hc.required') }
-                </Button>
+                </FancyButton.Root>
             );
 
         if(isLimitedSoldOut)
             return (
-                <Button variant="destructive" className="w-full" size="sm" disabled>
+                <FancyButton.Root variant="destructive" size="small" className="w-full" disabled>
                     { LocalizeText('catalog.alert.limited_edition_sold_out.title') }
-                </Button>
+                </FancyButton.Root>
             );
 
         if(priceCredits > getCurrencyAmount(-1))
             return (
-                <Button variant="destructive" className="w-full" size="sm" disabled>
+                <FancyButton.Root variant="destructive" size="small" className="w-full" disabled>
                     { LocalizeText('catalog.alert.notenough.title') }
-                </Button>
+                </FancyButton.Root>
             );
 
         if(pricePoints > getCurrencyAmount(currentOffer.activityPointType))
             return (
-                <Button variant="destructive" className="w-full" size="sm" disabled>
+                <FancyButton.Root variant="destructive" size="small" className="w-full" disabled>
                     { LocalizeText('catalog.alert.notenough.activitypoints.title.' + currentOffer.activityPointType) }
-                </Button>
+                </FancyButton.Root>
             );
 
         switch(purchaseState)
         {
             case CatalogPurchaseState.CONFIRM:
                 return (
-                    <Button variant="warning" className="w-full" size="sm" onClick={ () => purchase() }>
-                        <span className="flex flex-col items-center leading-none gap-0.5">
-                            <span className="text-xs font-semibold">{ LocalizeText('catalog.marketplace.confirm_title') }</span>
-                            { priceLabel && <span className="text-[10px] opacity-70">{ priceLabel }</span> }
+                    <FancyButton.Root variant="primary" size="small" className="w-full" onClick={ () => purchase() }>
+                        <span className="flex flex-col items-center gap-0.5 leading-none">
+                            <span className="text-label-xs">{ LocalizeText('catalog.marketplace.confirm_title') }</span>
+                            { priceLabel && <span className="text-subheading-2xs opacity-70">{ priceLabel }</span> }
                         </span>
-                    </Button>
+                    </FancyButton.Root>
                 );
             case CatalogPurchaseState.PURCHASE:
                 return (
-                    <Button variant="success" className="w-full" size="sm" disabled>
+                    <FancyButton.Root variant="primary" size="small" className="w-full" disabled>
                         <LayoutLoadingSpinnerView />
-                    </Button>
+                    </FancyButton.Root>
                 );
             case CatalogPurchaseState.FAILED:
                 return (
-                    <Button variant="destructive" className="w-full" size="sm" disabled>
+                    <FancyButton.Root variant="destructive" size="small" className="w-full" disabled>
                         { LocalizeText('generic.failed') }
-                    </Button>
+                    </FancyButton.Root>
                 );
             case CatalogPurchaseState.SOLD_OUT:
                 return (
-                    <Button variant="destructive" className="w-full" size="sm" disabled>
+                    <FancyButton.Root variant="destructive" size="small" className="w-full" disabled>
                         { LocalizeText('catalog.alert.limited_edition_sold_out.title') }
-                    </Button>
+                    </FancyButton.Root>
                 );
             case CatalogPurchaseState.NONE:
             default:
                 return (
-                    <Button
-                        variant="success"
+                    <FancyButton.Root
+                        variant="primary"
+                        size="small"
                         className="w-full"
-                        size="sm"
                         disabled={ (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length)) }
                         onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }
                     >
-                        <span className="flex flex-col items-center leading-none gap-0.5">
-                            <span className="text-xs font-semibold">{ buyLabel }</span>
-                            { priceLabel && <span className="text-[10px] opacity-70">{ priceLabel }</span> }
+                        <span className="flex flex-col items-center gap-0.5 leading-none">
+                            <span className="text-label-xs">{ buyLabel }</span>
+                            { priceLabel && <span className="text-subheading-2xs opacity-70">{ priceLabel }</span> }
                         </span>
-                    </Button>
+                    </FancyButton.Root>
                 );
         }
     }
@@ -262,39 +263,41 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
 
         return (
             <div className="flex flex-col gap-1.5 w-full">
-                <Button
-                    variant="success"
+                <FancyButton.Root
+                    variant="primary"
+                    size="small"
                     className="w-full"
-                    size="sm"
                     onClick={ batchPurchase }
                     disabled={ purchaseState === CatalogPurchaseState.PURCHASE }
                 >
                     { (purchaseState === CatalogPurchaseState.PURCHASE && batchProgress) ? (
-                        <span className="flex flex-col items-center leading-none gap-0.5">
-                            <span className="text-xs font-semibold">{ batchProgress.sent }/{ batchProgress.total }</span>
-                            <span className="text-[10px] opacity-70">Kaufe...</span>
+                        <span className="flex flex-col items-center gap-0.5 leading-none">
+                            <span className="text-label-xs">{ batchProgress.sent }/{ batchProgress.total }</span>
+                            <span className="text-subheading-2xs opacity-70">Kaufe...</span>
                         </span>
                     ) : (
-                        <span className="flex flex-col items-center leading-none gap-0.5">
-                            <span className="text-xs font-semibold">{ selectedOffers.length } Items kaufen</span>
-                            { batchPriceLabel() && <span className="text-[10px] opacity-70">{ batchPriceLabel() }</span> }
+                        <span className="flex flex-col items-center gap-0.5 leading-none">
+                            <span className="text-label-xs">{ selectedOffers.length } Items kaufen</span>
+                            { batchPriceLabel() && <span className="text-subheading-2xs opacity-70">{ batchPriceLabel() }</span> }
                         </span>
                     ) }
-                </Button>
+                </FancyButton.Root>
                 <div className="flex gap-1 w-full">
                     { purchaseOptions?.multiSelectMode &&
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex-1 text-[10px] px-1 text-emerald-600 bg-emerald-500/10"
+                        <AlignButton.Root
+                            variant="neutral"
+                            mode="lighter"
+                            size="xxsmall"
+                            className="flex-1 px-1 text-label-xs text-success-base bg-success-lighter"
                             onClick={ () => setPurchaseOptions(prev => ({ ...prev, multiSelectMode: false })) }
                         >
                             ✓ Auswahl
-                        </Button> }
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className={ 'flex-1 text-[10px] px-1 ' + (catalogPlaceMultipleObjects ? 'text-blue-600 bg-blue-500/10' : 'text-muted-foreground hover:text-foreground') }
+                        </AlignButton.Root> }
+                    <AlignButton.Root
+                        variant="neutral"
+                        mode={ catalogPlaceMultipleObjects ? 'lighter' : 'ghost' }
+                        size="xxsmall"
+                        className={ 'flex-1 px-1 text-label-xs ' + (catalogPlaceMultipleObjects ? 'text-information-base bg-information-lighter' : 'text-text-sub-600 hover:text-text-strong-950') }
                         onClick={ () => {
                             const newVal = !catalogPlaceMultipleObjects;
                             setCatalogPlaceMultipleObjects(newVal);
@@ -302,7 +305,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                         } }
                     >
                         Platzieren
-                    </Button>
+                    </AlignButton.Root>
                 </div>
             </div>
         );
@@ -311,10 +314,11 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     return (
         <div className="flex flex-col gap-1.5 w-full items-center">
             <PurchaseButton />
-            <Button
-                variant="outline"
-                size="sm"
-                className={ 'w-full text-xs ' + (catalogPlaceMultipleObjects ? 'text-blue-600 border-blue-500/40 bg-blue-500/10' : '') }
+            <AlignButton.Root
+                variant="neutral"
+                mode={ catalogPlaceMultipleObjects ? 'lighter' : 'stroke' }
+                size="small"
+                className={ 'w-full text-label-xs ' + (catalogPlaceMultipleObjects ? 'text-information-base bg-information-lighter ring-information-base' : '') }
                 onClick={ () => {
                     const newVal = !catalogPlaceMultipleObjects;
                     setCatalogPlaceMultipleObjects(newVal);
@@ -322,16 +326,16 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                 } }
             >
                 Platzieren
-            </Button>
+            </AlignButton.Root>
             { (!noGiftOption && !currentOffer.isRentOffer) &&
                 <button
-                    className="text-[10px] text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors disabled:opacity-40 disabled:no-underline disabled:cursor-not-allowed"
+                    className="text-paragraph-xs text-text-sub-600 underline underline-offset-2 transition-colors hover:text-text-strong-950 disabled:cursor-not-allowed disabled:opacity-40 disabled:no-underline"
                     disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
                     onClick={ () => purchase(true) }
                 >
                     Verschenken
                 </button> }
-            <p className="text-[10px] text-muted-foreground/50 text-center">⌘/Strg + Klick = Mehrfachauswahl</p>
+            <p className="text-paragraph-xs text-text-soft-400 text-center">⌘/Strg + Klick = Mehrfachauswahl</p>
         </div>
     );
 }

@@ -1,6 +1,5 @@
 import { FC, useEffect } from 'react';
 import { AchievementCategory } from '../../../api';
-import { Column } from '../../../common';
 import { useAchievements } from '../../../hooks';
 import { AchievementListView } from './achievement-list';
 import { AchievementDetailsView } from './AchievementDetailsView';
@@ -28,10 +27,10 @@ export const AchievementCategoryView: FC<AchievementCategoryViewProps> = props =
     if(!category) return null;
 
     return (
-        <Column fullHeight justifyContent="between">
+        <div className="nitro-achievements-category">
             <AchievementListView achievements={ category.achievements } />
             { !!selectedAchievement &&
                 <AchievementDetailsView achievement={ selectedAchievement } /> }
-        </Column>
+        </div>
     );
 }

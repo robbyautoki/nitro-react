@@ -1,21 +1,27 @@
-import { FC, useRef, useState } from 'react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ComponentProps, FC, useRef, useState } from 'react';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { ItemInfo, CustomListing } from './CustomMarketplaceTypes';
 import { fmtC } from './marketplace-utils';
-import { Coins, TrendingUp, Hash, Shield, Package, BarChart3, Info } from 'lucide-react';
-
-const RARITY_LABELS: Record<string, string> = {
-    bonzenrare: 'Bonzenrare',
-    wochenrare: 'Wochenrare',
-    monatsrare: 'Monatsrare',
-    limited: 'Limited',
-    ultra: 'Ultra-Rare',
-};
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
+import { BarChart3, Coins, Hash, Info, Package, Shield, TrendingUp } from 'lucide-react';
 
 interface Props
 {
     listing: CustomListing;
+}
+
+function rarityColor(label?: string | null): ComponentProps<typeof AlignBadge.Root>['color']
+{
+    const value = (label ?? '').toLowerCase();
+    if(value.includes('og')) return 'yellow';
+    if(value.includes('woche')) return 'green';
+    if(value.includes('monat')) return 'purple';
+    if(value.includes('cash')) return 'orange';
+    if(value.includes('drachen')) return 'red';
+    if(value.includes('bonzen')) return 'blue';
+    return 'gray';
 }
 
 export const ItemInfoTooltip: FC<Props> = ({ listing }) =>
@@ -38,115 +44,88 @@ export const ItemInfoTooltip: FC<Props> = ({ listing }) =>
     };
 
     const ltd = info?.limited_data && info.limited_data !== '0:0'
-        ? (() => { const p = info.limited_data.split(':'); return { num: parseInt(p[1]), total: parseInt(p[0]) }; })()
+        ? (() =>
+        {
+            const p = info.limited_data.split(':'); return { num: parseInt(p[1]), total: parseInt(p[0]) };
+        })()
         : null;
 
     return (
-        <Tooltip delayDuration={ 150 } onOpenChange={ onOpenChange }>
-            <TooltipTrigger asChild>
+        <AlignTooltip.Root delayDuration={ 150 } onOpenChange={ onOpenChange }>
+            <AlignTooltip.Trigger asChild>
                 <button
-                    className="h-6 w-6 rounded-md bg-accent/50 text-muted-foreground/50 hover:text-foreground hover:bg-accent transition-all flex items-center justify-center"
+                    className="flex h-6 w-6 items-center justify-center rounded-md bg-bg-weak-50 text-text-sub-600 transition-all hover:text-text-strong-950"
                     title="Info"
                 >
                     <Info className="w-3 h-3" />
                 </button>
-            </TooltipTrigger>
-            <TooltipContent
-                side="left"
-                sideOffset={ 8 }
-                className="w-[280px] p-0 z-[9999]"
-            >
+            </AlignTooltip.Trigger>
+            <AlignTooltip.Content side="left" sideOffset={ 8 } className="z-[9999] w-[280px] p-0">
                 { loading && (
-                    <div className="p-4 text-center text-muted-foreground text-[11px]">Laden...</div>
+                    <div className="p-4 text-center text-paragraph-xs text-text-sub-600">Laden...</div>
                 ) }
-
                 { !loading && !info && (
-                    <div className="p-4 text-center text-muted-foreground text-[11px]">Keine Daten</div>
+                    <div className="p-4 text-center text-paragraph-xs text-text-sub-600">Keine Daten</div>
                 ) }
-
                 { !loading && info && (
                     <div className="flex flex-col gap-2.5 p-3.5">
-                        <div className="text-[13px] font-semibold leading-tight">{ info.public_name }</div>
-
+                        <div className="text-label-sm leading-tight text-text-strong-950">{ info.public_name }</div>
                         <div className="flex flex-wrap items-center gap-1.5">
                             { ltd && (
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/15 text-[10px] font-bold text-amber-500">
-                                    <Hash className="w-2.5 h-2.5" />
+                                <AlignBadge.Root color="yellow" variant="lighter" size="small" square>
+                                    <Hash className="mr-1 w-2.5 h-2.5" />
                                     LTD { ltd.num }/{ ltd.total }
-                                </span>
+                                </AlignBadge.Root>
                             ) }
                             { info.seal && (
-                                <span
-                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold"
-                                    style={ { backgroundColor: info.seal.color + '30', color: info.seal.color } }
-                                >
-                                    <Shield className="w-2.5 h-2.5" />
+                                <AlignBadge.Root color={ rarityColor(info.seal.rarity_display) } variant="lighter" size="small" square>
+                                    <Shield className="mr-1 w-2.5 h-2.5" />
                                     { info.seal.rarity_display }
-                                </span>
+                                </AlignBadge.Root>
                             ) }
                             { info.rarity_type && (
-                                <span
-                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium"
-                                    style={ { backgroundColor: (info.rarity_color ?? '#888') + '20', color: info.rarity_color ?? '#a78bfa' } }
-                                >
-                                    { RARITY_LABELS[info.rarity_type.toLowerCase()] ?? info.rarity_type }
-                                </span>
+                                <AlignBadge.Root color={ rarityColor(info.rarity_type) } variant="lighter" size="small" square>
+                                    { info.rarity_type }
+                                </AlignBadge.Root>
                             ) }
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-500/10 text-[10px] text-blue-500">
-                                <Package className="w-2.5 h-2.5" />
-                                { info.in_circulation.toLocaleString() }x
-                            </span>
+                            <AlignBadge.Root color="blue" variant="lighter" size="small" square>
+                                <Package className="mr-1 w-2.5 h-2.5" />
+                                { info.in_circulation.toLocaleString('de-DE') }x
+                            </AlignBadge.Root>
                         </div>
-
-                        <div className="h-px bg-border/40" />
-
-                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                            <div className="flex items-center gap-1.5">
-                                <Coins className="w-3 h-3 text-emerald-500/70 shrink-0" />
-                                <div className="min-w-0">
-                                    <div className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">Letzter Verkauf</div>
-                                    <div className="text-[11px] font-medium">
-                                        { info.last_sale_price != null ? fmtC(info.last_sale_price) : '—' }
+                        <AlignDivider.Root />
+                        <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                            { [
+                                { label: 'Letzter Verkauf', value: info.last_sale_price != null ? fmtC(info.last_sale_price) : '-', icon: Coins, color: 'text-success-base' },
+                                { label: 'Durchschnitt', value: info.avg_price != null ? fmtC(info.avg_price) : '-', icon: TrendingUp, color: 'text-information-base' },
+                                { label: 'Verkäufe', value: String(info.total_sales), icon: BarChart3, color: 'text-warning-base' },
+                                { label: 'Listenpreis', value: fmtC(listing.price), icon: Coins, color: 'text-warning-base' },
+                            ].map(cell =>
+                            {
+                                const Icon = cell.icon;
+                                return (
+                                    <div key={ cell.label } className="flex items-center gap-1.5">
+                                        <Icon className={ `w-3 h-3 shrink-0 ${ cell.color }` } />
+                                        <div className="min-w-0">
+                                            <div className="text-subheading-2xs uppercase text-text-soft-400">{ cell.label }</div>
+                                            <div className="text-label-xs text-text-strong-950">{ cell.value }</div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <TrendingUp className="w-3 h-3 text-blue-500/70 shrink-0" />
-                                <div className="min-w-0">
-                                    <div className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">Durchschnitt</div>
-                                    <div className="text-[11px] font-medium">
-                                        { info.avg_price != null ? fmtC(info.avg_price) : '—' }
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <BarChart3 className="w-3 h-3 text-amber-500/70 shrink-0" />
-                                <div className="min-w-0">
-                                    <div className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">Verkäufe</div>
-                                    <div className="text-[11px] font-medium">{ info.total_sales }</div>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                                <Coins className="w-3 h-3 text-amber-500/70 shrink-0" />
-                                <div className="min-w-0">
-                                    <div className="text-[9px] text-muted-foreground/50 uppercase tracking-wider">Listenpreis</div>
-                                    <div className="text-[11px] font-medium">{ fmtC(listing.price) }</div>
-                                </div>
-                            </div>
+                                );
+                            }) }
                         </div>
-
                         { listing.is_bundle && listing.items.length > 1 && (
                             <>
-                                <div className="h-px bg-border/40" />
+                                <AlignDivider.Root />
                                 <div>
-                                    <div className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-wider mb-1">Bundle-Inhalt</div>
+                                    <div className="mb-1 text-subheading-2xs uppercase text-text-soft-400">Bundle-Inhalt</div>
                                     <div className="flex flex-col gap-0.5">
                                         { listing.items.map((item, i) => (
-                                            <div key={ i } className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                                                <span className="text-muted-foreground/30">{ i + 1 }.</span>
+                                            <div key={ i } className="flex items-center gap-1.5 text-paragraph-xs text-text-sub-600">
+                                                <span className="text-text-soft-400">{ i + 1 }.</span>
                                                 <span className="truncate">{ item.public_name }</span>
                                                 { item.limited_data && item.limited_data !== '0:0' && (
-                                                    <span className="text-[9px] text-amber-500 font-bold shrink-0">LTD { item.limited_data }</span>
+                                                    <span className="shrink-0 text-subheading-2xs text-warning-base">LTD { item.limited_data }</span>
                                                 ) }
                                             </div>
                                         )) }
@@ -156,7 +135,7 @@ export const ItemInfoTooltip: FC<Props> = ({ listing }) =>
                         ) }
                     </div>
                 ) }
-            </TooltipContent>
-        </Tooltip>
+            </AlignTooltip.Content>
+        </AlignTooltip.Root>
     );
 };

@@ -1,4 +1,7 @@
 import { FC } from 'react';
+import { Home, RefreshCw, WifiOff } from 'lucide-react';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 
 export const DisconnectOverlayView: FC<{}> = () =>
 {
@@ -7,29 +10,23 @@ export const DisconnectOverlayView: FC<{}> = () =>
 
     return (
         <div className="nitro-disconnect-overlay">
-            <div className="disconnect-box">
+            <AlignSurface.Panel className="disconnect-box">
                 <div className="disconnect-icon">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="1" y1="1" x2="23" y2="23" />
-                        <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
-                        <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
-                        <path d="M10.71 5.05A16 16 0 0 1 22.56 9" />
-                        <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
-                        <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-                        <line x1="12" y1="20" x2="12.01" y2="20" />
-                    </svg>
+                    <WifiOff className="size-7" />
                 </div>
                 <div className="disconnect-title">Verbindung verloren</div>
                 <div className="disconnect-message">Der Server wurde möglicherweise neu gestartet oder ist nicht erreichbar.</div>
                 <div className="disconnect-buttons">
-                    <button className="disconnect-btn-primary" onClick={ handleReload }>
+                    <AlignButton.Root type="button" variant="primary" mode="filled" size="medium" className="w-full" onClick={ handleReload }>
+                        <AlignButton.Icon as={ RefreshCw } className="size-4" />
                         Neu laden
-                    </button>
-                    <button className="disconnect-btn-secondary" onClick={ handleHome }>
+                    </AlignButton.Root>
+                    <AlignButton.Root type="button" variant="neutral" mode="stroke" size="medium" className="w-full" onClick={ handleHome }>
+                        <AlignButton.Icon as={ Home } className="size-4" />
                         Zur Startseite
-                    </button>
+                    </AlignButton.Root>
                 </div>
-            </div>
+            </AlignSurface.Panel>
         </div>
     );
 }

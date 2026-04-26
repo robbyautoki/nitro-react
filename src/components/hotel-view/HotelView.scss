@@ -1,9 +1,11 @@
 .nitro-hotel-view {
     display: block;
 	position: fixed;
+	top: 0;
+	left: 0;
 	width: 100%;
 	height: 100%;
-	background: #000;
+	background: hsl(var(--align-bg-white-0));
 
 	.particles-bg {
 		position: absolute;

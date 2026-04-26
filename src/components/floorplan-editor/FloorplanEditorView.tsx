@@ -1,7 +1,9 @@
 import { FloorHeightMapEvent, ILinkEventTracker, NitroPoint, RoomEngineEvent, RoomVisualizationSettingsEvent, UpdateFloorPropertiesMessageComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { AddEventLinkTracker, LocalizeText, RemoveLinkEventTracker, SendMessageComposer } from '../../api';
-import { Button, ButtonGroup, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
+import { Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
 import { useMessageEvent, useRoomEngineEvent } from '../../hooks';
 import { FloorplanEditor } from './common/FloorplanEditor';
 import { IFloorplanSettings } from './common/IFloorplanSettings';
@@ -148,13 +150,13 @@ export const FloorplanEditorView: FC<{}> = props =>
                     <NitroCardContentView overflow="hidden">
                         <FloorplanOptionsView />
                         <FloorplanCanvasView overflow="hidden" />
-                        <Flex justifyContent="between">
-                            <Button onClick={ revertChanges }>{ LocalizeText('floor.plan.editor.reload') }</Button>
-                            <ButtonGroup>
-                                <Button disabled={ true }>{ LocalizeText('floor.plan.editor.preview') }</Button>
-                                <Button onClick={ event => setImportExportVisible(true) }>{ LocalizeText('floor.plan.editor.import.export') }</Button>
-                                <Button onClick={ saveFloorChanges }>{ LocalizeText('floor.plan.editor.save') }</Button>
-                            </ButtonGroup>
+                        <Flex justifyContent="between" className="items-center border-t border-stroke-soft-200 bg-bg-weak-50 px-3 py-2">
+                            <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" onClick={ revertChanges }>{ LocalizeText('floor.plan.editor.reload') }</AlignButton.Root>
+                            <div className="flex items-center gap-2">
+                                <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" disabled>{ LocalizeText('floor.plan.editor.preview') }</AlignButton.Root>
+                                <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" onClick={ () => setImportExportVisible(true) }>{ LocalizeText('floor.plan.editor.import.export') }</AlignButton.Root>
+                                <FancyButton.Root variant="primary" size="xsmall" onClick={ saveFloorChanges }>{ LocalizeText('floor.plan.editor.save') }</FancyButton.Root>
+                            </div>
                         </Flex>
                     </NitroCardContentView>
                 </NitroCardView> }

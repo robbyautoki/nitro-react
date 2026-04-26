@@ -1,6 +1,6 @@
 import { BotCommandConfigurationEvent, BotRemoveComposer, BotSkillSaveComposer, RequestBotCommandConfigurationComposer, RoomObjectCategory, RoomObjectType } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
-import { AvatarInfoRentableBot, BotSkillsEnum, DispatchUiEvent, GetConfiguration, GetNitroInstance, LocalizeText, RoomWidgetUpdateRentableBotChatEvent, SendMessageComposer } from '../../../../../api';
+import { AvatarInfoRentableBot, BotSkillsEnum, DispatchUiEvent, GetConfiguration, GetNitroInstance, GetRoomSession, LocalizeText, RoomWidgetUpdateRentableBotChatEvent, SendMessageComposer } from '../../../../../api';
 import { Button, Column, Flex, Text } from '../../../../../common';
 import { useMessageEvent } from '../../../../../hooks';
 import { ContextMenuHeaderView } from '../../context-menu/ContextMenuHeaderView';
@@ -64,6 +64,14 @@ export const AvatarInfoWidgetRentableBotView: FC<AvatarInfoWidgetRentableBotView
     });
 
     const requestBotCommandConfiguration = (skillType: number) => SendMessageComposer(new RequestBotCommandConfigurationComposer(avatarInfo.webID, skillType));
+    const openPatrolEditor = () =>
+    {
+        const roomSession = GetRoomSession();
+
+        if(!roomSession) return;
+
+        roomSession.sendChatMessage(`:patrolbot open ${ Math.abs(avatarInfo.webID) }`, 0);
+    };
 
     const processAction = (name: string) =>
     {
@@ -114,6 +122,9 @@ export const AvatarInfoWidgetRentableBotView: FC<AvatarInfoWidgetRentableBotView
                     break;
                 case 'pick':
                     SendMessageComposer(new BotRemoveComposer(avatarInfo.webID));
+                    break;
+                case 'edit_patrol':
+                    openPatrolEditor();
                     break;
                 default:
                     break;
@@ -169,6 +180,9 @@ export const AvatarInfoWidgetRentableBotView: FC<AvatarInfoWidgetRentableBotView
                         <ContextMenuListItemView onClick={ event => processAction('dance') }>
                             { LocalizeText('avatar.widget.dance') }
                         </ContextMenuListItemView> }
+                    <ContextMenuListItemView onClick={ event => processAction('edit_patrol') }>
+                        Patrouille bearbeiten
+                    </ContextMenuListItemView>
                     { (avatarInfo.botSkills.indexOf(BotSkillsEnum.NO_PICK_UP) === -1) &&
                         <ContextMenuListItemView onClick={ event => processAction('pick') }>
                             { LocalizeText('avatar.widget.pick_up') }

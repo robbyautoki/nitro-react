@@ -1,11 +1,15 @@
 .nitro-right-side {
     position: absolute;
-    top: 64px;
+    top: var(--notification-top-offset, 8px);
     right: calc(var(--drawer-width, 0px) + 10px);
     transition: right 0.3s ease-out;
     min-width: 280px;
     max-width: 280px;
-    height: calc(100% - #{$toolbar-height});
+    height: calc(100% - var(--notification-top-offset, 8px) - 8px);
     z-index: $rightside-zindex;
     pointer-events: none;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: 0 !important;
 }

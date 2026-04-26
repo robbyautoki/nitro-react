@@ -4,42 +4,42 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "relative inline-flex shrink-0 items-center justify-center w-fit border border-transparent font-medium whitespace-nowrap outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-3 rounded-sm",
+  "relative inline-flex w-fit shrink-0 items-center justify-center whitespace-nowrap rounded-full border border-transparent font-medium outline-none transition duration-200 ease-out focus-visible:shadow-button-important-focus disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-3",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground",
-        outline: "border-border bg-transparent dark:bg-input/32",
-        secondary: "bg-secondary text-secondary-foreground",
-        info: "bg-info text-white",
-        success: "bg-success text-white",
-        warning: "bg-warning text-white",
-        destructive: "bg-destructive text-white",
-        invert: "bg-invert text-invert-foreground",
+        default: "bg-primary-base text-static-white",
+        outline: "border-stroke-soft-200 bg-bg-white-0 text-text-sub-600",
+        secondary: "bg-faded-light text-faded-dark",
+        info: "bg-information-base text-static-white",
+        success: "bg-success-base text-static-white",
+        warning: "bg-warning-base text-static-white",
+        destructive: "bg-error-base text-static-white",
+        invert: "bg-bg-strong-950 text-text-white-0",
         "primary-light":
-          "bg-primary/10 border-none text-primary dark:bg-primary/20",
+          "border-none bg-primary-alpha-10 text-primary-base",
         "warning-light":
-          "bg-warning/10 border-none text-warning-foreground dark:bg-warning/20",
+          "border-none bg-warning-light text-warning-dark",
         "success-light":
-          "bg-success/10 border-none text-success-foreground dark:bg-success/20",
+          "border-none bg-success-light text-success-dark",
         "info-light":
-          "bg-info/10 border-none text-info-foreground dark:bg-info/20",
+          "border-none bg-information-light text-information-dark",
         "destructive-light":
-          "bg-destructive/10 border-none text-destructive-foreground dark:bg-destructive/20",
+          "border-none bg-error-light text-error-dark",
         "invert-light":
-          "bg-invert/10 border-none text-foreground dark:bg-invert/20",
+          "border-none bg-faded-lighter text-faded-base",
         "primary-outline":
-          "bg-background border-border text-primary dark:bg-input/30",
+          "border-primary-base bg-bg-white-0 text-primary-base",
         "warning-outline":
-          "bg-background border-border text-warning-foreground dark:bg-input/30",
+          "border-warning-base bg-bg-white-0 text-warning-base",
         "success-outline":
-          "bg-background border-border text-success-foreground dark:bg-input/30",
+          "border-success-base bg-bg-white-0 text-success-base",
         "info-outline":
-          "bg-background border-border text-info-foreground dark:bg-input/30",
+          "border-information-base bg-bg-white-0 text-information-base",
         "destructive-outline":
-          "bg-background border-border text-destructive-foreground dark:bg-input/30",
+          "border-error-base bg-bg-white-0 text-error-base",
         "invert-outline":
-          "bg-background border-border text-invert-foreground dark:bg-input/30",
+          "border-stroke-strong-950 bg-bg-white-0 text-text-strong-950",
       },
       size: {
         xs: "px-1 py-0.25 text-[0.6rem] leading-none h-4 min-w-4 gap-1",

@@ -19,16 +19,27 @@
     <title>Nitro</title>
   </head>
   <body>
-    <script>if(localStorage.getItem('nitro.theme')==='dark')document.documentElement.classList.add('dark');</script>
+    <script>if(localStorage.getItem('nitro.theme')!=='light')document.documentElement.classList.add('dark');</script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root" class="w-full h-full"></div>
     <script>
+      const nitroParams = new URLSearchParams(window.location.search);
+      const nitroSsoTicket = nitroParams.get('sso');
+
+      if (!nitroSsoTicket) {
+        const cmsUrl = window.location.hostname === 'localhost'
+          ? 'http://localhost:3030'
+          : 'https://www.bahhos.de';
+
+        window.location.replace(`${cmsUrl}/login?redirect_url=/hotel`);
+      }
+
       const NitroConfig = {
         "config.urls": [ '/renderer-config.json', '/ui-config.json' ],
-        "sso.ticket": (new URLSearchParams(window.location.search).get('sso') || null),
-        "forward.type": (new URLSearchParams(window.location.search).get('room') ? 2 : -1),
-        "forward.id": (new URLSearchParams(window.location.search).get('room') || 0),
-        "friend.id": (new URLSearchParams(window.location.search).get('friend') || 0),
+        "sso.ticket": nitroSsoTicket,
+        "forward.type": (nitroParams.get('room') ? 2 : -1),
+        "forward.id": (nitroParams.get('room') || 0),
+        "friend.id": (nitroParams.get('friend') || 0),
       };
     </script>
     <script type="module" src="./src/index.tsx"></script>

@@ -63,9 +63,8 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
 
     return (
         <div className="flex flex-col h-full overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
-            <style>{ `@keyframes rainbow-border { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }` }</style>
-
-            {/* Promo Banner */}
+            <style>{ '@keyframes rainbow-border { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }' }</style>
+            { /* Promo Banner */ }
             { !bannerDismissed && (
                 <div
                     className="shrink-0 mx-3 mt-3 relative rounded-lg overflow-hidden cursor-pointer group"
@@ -75,10 +74,10 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                         className="absolute inset-0 rounded-lg"
                         style={ {
                             padding: '1px',
-                            background: 'linear-gradient(90deg, #a855f7, #ec4899, #f59e0b, #06b6d4, #a855f7)',
+                            background: 'linear-gradient(90deg, hsl(var(--align-primary-base)), hsl(var(--align-warning-base)), hsl(var(--align-success-base)), hsl(var(--align-primary-base)))',
                             backgroundSize: '300% 100%',
                             animation: 'rainbow-border 4s linear infinite',
-                            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                            WebkitMask: 'linear-gradient(hsl(var(--align-static-white)) 0 0) content-box, linear-gradient(hsl(var(--align-static-white)) 0 0)',
                             WebkitMaskComposite: 'xor',
                             maskComposite: 'exclude',
                         } as React.CSSProperties }
@@ -90,16 +89,18 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                             <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Jetzt ansehen →</span>
                         </div>
                         <button
-                            onClick={ (e) => { e.stopPropagation(); setBannerDismissed(true); } }
-                            className="p-1 rounded-md hover:bg-black/5 text-muted-foreground hover:text-foreground transition-colors"
+                            onClick={ (e) => 
+                            {
+                                e.stopPropagation(); setBannerDismissed(true); 
+                            } }
+                            className="p-1 rounded-md hover:bg-bg-weak-50 text-text-sub-600 hover:text-text-strong-950 transition-colors"
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>
                     </div>
                 </div>
             ) }
-
-            {/* Auto-Carousel */}
+            { /* Auto-Carousel */ }
             { slides.length > 0 && (
                 <div className="shrink-0 relative">
                     <div ref={ scrollRef } className="flex overflow-hidden scroll-smooth">
@@ -114,12 +115,15 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                                         src={ `${ imageBase }${ item.itemPromoImage }` }
                                         alt={ item.itemName }
                                         className="w-full h-full object-cover"
-                                        onError={ e => { (e.target as HTMLImageElement).style.display = 'none'; } }
+                                        onError={ e => 
+                                        {
+                                            (e.target as HTMLImageElement).style.display = 'none'; 
+                                        } }
                                     />
                                 </div>
-                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-5 pt-14">
-                                    <p className="text-base font-bold text-white drop-shadow-lg">{ item.itemName }</p>
-                                    <p className="text-xs text-white/50 mt-0.5">{ item.catalogPageLocation }</p>
+                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg-strong-950/80 via-bg-strong-950/40 to-transparent p-5 pt-14">
+                                    <p className="text-base font-bold text-static-white drop-shadow-lg">{ item.itemName }</p>
+                                    <p className="text-xs text-static-white/60 mt-0.5">{ item.catalogPageLocation }</p>
                                 </div>
                             </div>
                         )) }
@@ -130,16 +134,15 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                                 <button
                                     key={ i }
                                     onClick={ () => setCurrentSlide(i) }
-                                    className={ `w-2 h-2 rounded-full transition-all duration-300 ${ i === currentSlide ? 'bg-white w-5' : 'bg-white/40 hover:bg-white/60' }` }
+                                    className={ `w-2 h-2 rounded-full transition-all duration-300 ${ i === currentSlide ? 'bg-static-white w-5' : 'bg-static-white/40 hover:bg-static-white/60' }` }
                                 />
                             )) }
                         </div>
                     ) }
                 </div>
             ) }
-
             <div className="flex-1 p-5 space-y-5">
-                {/* Meist gekauft */}
+                { /* Meist gekauft */ }
                 { frequentPurchases.length > 0 && (
                     <div>
                         <div className="flex items-center gap-2 mb-3">
@@ -171,8 +174,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                         </div>
                     </div>
                 ) }
-
-                {/* Letzte Käufe */}
+                { /* Letzte Käufe */ }
                 { recentPurchases.length > 0 && (
                     <div>
                         <div className="flex items-center gap-2 mb-3">
@@ -210,8 +212,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                         </div>
                     </div>
                 ) }
-
-                {/* CTA */}
+                { /* CTA */ }
                 <div className="text-center pt-2 space-y-2">
                     <p className="text-xs text-muted-foreground">Wähle eine Kategorie oder nutze die Suche</p>
                     <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/40">
@@ -221,8 +222,7 @@ export const CatalogLayoutFrontpage4View: FC<CatalogLayoutProps> = props =>
                     </div>
                 </div>
             </div>
-
-            {/* Voucher */}
+            { /* Voucher */ }
             <div className="shrink-0 border-t border-border/30 px-4 py-2.5">
                 <CatalogRedeemVoucherView text={ page.localization.getText(1) } />
             </div>

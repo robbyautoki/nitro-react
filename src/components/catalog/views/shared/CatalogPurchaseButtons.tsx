@@ -1,7 +1,4 @@
 import { FC } from 'react';
-import { ShoppingCart, Gift } from 'lucide-react';
-import { Button } from '../../../ui/button';
-import { useCatalog } from '../../../../hooks';
 import { CatalogPurchaseWidgetView } from '../page/widgets/CatalogPurchaseWidgetView';
 
 interface CatalogPurchaseButtonsProps

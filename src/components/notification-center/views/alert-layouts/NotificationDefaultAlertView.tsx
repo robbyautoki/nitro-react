@@ -1,11 +1,17 @@
-import { FC, useState } from 'react';
-import { LocalizeText, NotificationAlertItem, NotificationAlertType, OpenUrl } from '../../../../api';
+import { FC, useMemo, useState } from 'react';
+import { LocalizeText, NotificationAlertItem, NotificationAlertType, OpenUrl, parseNotificationMessages } from '../../../../api';
 import { LayoutAvatarImageView } from '../../../../common';
 import { DraggableWindow, DraggableWindowPosition } from '../../../../common/draggable-window';
-import { Frame, FramePanel } from '../../../ui/frame';
-import { Button } from '../../../ui/button';
-import { AlertTriangle, ShieldAlert, Server, Wrench, X, ExternalLink } from 'lucide-react';
-import { Alert, AlertTitle, AlertDescription } from '../../../ui/alert';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignCompactButton from '@/align-ui/components/ui/compact-button';
+import {
+    RiAlertFill,
+    RiCloseLine,
+    RiExternalLinkLine,
+    RiNotification3Fill,
+    RiShieldFlashFill,
+    type RemixiconComponentType,
+} from '@remixicon/react';
 
 interface NotificationDefaultAlertViewProps
 {
@@ -13,16 +19,78 @@ interface NotificationDefaultAlertViewProps
     onClose: () => void;
 }
 
+const safeLocalize = (key: string, fallback: string): string =>
+{
+    const value = LocalizeText(key);
+    return (!value || value === key) ? fallback : value;
+};
+
+interface AlertHeaderConfig
+{
+    eyebrow: string | null;
+    fallbackTitle: string;
+    placeholderIcon: RemixiconComponentType;
+    placeholderTone: 'neutral' | 'error' | 'warning' | 'information';
+    accentBar: string;
+}
+
+const TONE_TO_PLACEHOLDER: Record<AlertHeaderConfig['placeholderTone'], string> = {
+    neutral: 'bg-bg-weak-50 text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200',
+    error: 'bg-error-lighter text-error-base',
+    warning: 'bg-warning-lighter text-warning-base',
+    information: 'bg-information-lighter text-information-base',
+};
+
+const TONE_TO_ACCENT: Record<AlertHeaderConfig['placeholderTone'], string> = {
+    neutral: 'bg-stroke-soft-200',
+    error: 'bg-error-base',
+    warning: 'bg-warning-base',
+    information: 'bg-information-base',
+};
+
 export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps> = props =>
 {
     const { item = null, onClose = null } = props;
     const [ imageFailed, setImageFailed ] = useState(false);
 
-    const title = item.title || LocalizeText('notifications.broadcast.title');
-    const isModeration = (item.alertType === NotificationAlertType.MODERATION);
     const isAlert = (item.alertType === NotificationAlertType.ALERT);
-    const hasFrank = (item.alertType === NotificationAlertType.DEFAULT) && !item.figure;
-    const hasAvatar = !!item.figure;
+    const isModeration = (item.alertType === NotificationAlertType.MODERATION);
+
+    const config: AlertHeaderConfig = useMemo(() =>
+    {
+        if(isAlert)
+        {
+            return {
+                eyebrow: safeLocalize('notifications.alert.eyebrow', 'Wichtiger Hinweis'),
+                fallbackTitle: safeLocalize('notifications.alert.subtitle', 'Wichtiger Hinweis'),
+                placeholderIcon: RiAlertFill,
+                placeholderTone: 'error',
+                accentBar: TONE_TO_ACCENT.error,
+            };
+        }
+        if(isModeration)
+        {
+            return {
+                eyebrow: safeLocalize('notifications.moderation.eyebrow', 'Moderation'),
+                fallbackTitle: safeLocalize('notifications.message_from_moderator', 'Nachricht vom Moderator'),
+                placeholderIcon: RiShieldFlashFill,
+                placeholderTone: 'error',
+                accentBar: TONE_TO_ACCENT.error,
+            };
+        }
+        return {
+            // Default-Alerts: kein Eyebrow — Title trägt die Hierarchie alleine
+            eyebrow: null,
+            fallbackTitle: safeLocalize('notifications.broadcast.title', 'Nachricht vom Habbo Hotel'),
+            placeholderIcon: RiNotification3Fill,
+            placeholderTone: 'neutral',
+            accentBar: TONE_TO_ACCENT.neutral,
+        };
+    }, [ isAlert, isModeration ]);
+
+    const title = (item.title && item.title.length > 0) ? item.title : config.fallbackTitle;
+
+    const { body, sender } = useMemo(() => parseNotificationMessages(item.messages || []), [ item.messages ]);
 
     const visitUrl = () =>
     {
@@ -30,95 +98,118 @@ export const NotificationDefaultAlertView: FC<NotificationDefaultAlertViewProps>
         onClose();
     };
 
-    if (isAlert)
+    const renderBodyText = () =>
     {
+        if(body.length === 0) return null;
+
         return (
-            <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-                <div className="w-[420px]">
-                    <Frame className="relative">
-                        <div className="drag-handler absolute inset-0 cursor-move" />
-                        <FramePanel className="overflow-hidden p-0! relative z-10">
-                            <Alert variant="destructive" className="border-0 shadow-none rounded-none">
-                                <AlertTriangle className="size-4" />
-                                <AlertTitle>{ title }</AlertTitle>
-                                <AlertDescription>
-                                    { item.messages.map((message, index) =>
-                                    {
-                                        const htmlText = message.replace(/\r\n|\r|\n/g, '<br />');
-                                        return <span key={ index } dangerouslySetInnerHTML={ { __html: htmlText } } />;
-                                    }) }
-                                </AlertDescription>
-                            </Alert>
-                            <div className="px-4 pb-3">
-                                <Button variant="destructive" className="w-full" size="sm" onClick={ onClose }>{ LocalizeText('generic.close') }</Button>
-                            </div>
-                        </FramePanel>
-                    </Frame>
-                </div>
-            </DraggableWindow>
+            <div className="space-y-1.5 text-paragraph-sm leading-relaxed text-text-sub-600">
+                { body.map((line, index) =>
+                {
+                    const html = line.replace(/\r\n|\r|\n/g, '<br />');
+                    return <div key={ index } dangerouslySetInnerHTML={ { __html: html } } />;
+                }) }
+            </div>
         );
-    }
+    };
+
+    const hasFigure = !!item.figure;
+    const hasImage = !!item.imageUrl && !imageFailed;
+    const showSideColumn = hasFigure || hasImage || isAlert || isModeration;
+
+    const PlaceholderIcon = config.placeholderIcon;
 
     return (
         <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-            <div className="w-[420px]">
-                <Frame className="relative">
-                    <div className="drag-handler absolute inset-0 cursor-move" />
-                    <FramePanel className="overflow-hidden p-0! relative z-10">
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b">
-                            <div className="flex items-center gap-2">
-                                { isModeration && <ShieldAlert className="size-4 text-red-500" /> }
-                                <span className="text-sm font-semibold">{ title }</span>
+            <div className="w-[460px]">
+                <div className="relative overflow-hidden rounded-20 bg-bg-white-0 shadow-regular-md">
+                    {/* Accent bar nur bei Moderation/Alert */}
+                    { (isAlert || isModeration) && (
+                        <div className={ `absolute inset-x-0 top-0 h-0.5 ${ config.accentBar }` } aria-hidden="true" />
+                    ) }
+
+                    {/* Header */}
+                    <div className="drag-handler relative flex cursor-move select-none flex-col gap-1 px-6 pt-5 pb-4 pr-14">
+                        { config.eyebrow && (
+                            <div className="text-paragraph-xs uppercase tracking-[0.08em] text-text-soft-400">
+                                { config.eyebrow }
                             </div>
-                            <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={ onClose }>
-                                <X className="size-3.5" />
-                            </button>
-                        </div>
+                        ) }
+                        <div className="text-title-h6 font-medium leading-snug text-text-strong-950">{ title }</div>
+                        <AlignCompactButton.Root
+                            variant="ghost"
+                            size="large"
+                            className="absolute right-4 top-4"
+                            onClick={ onClose }
+                            onMouseDown={ (e) => e.stopPropagation() }
+                        >
+                            <AlignCompactButton.Icon as={ RiCloseLine } />
+                        </AlignCompactButton.Root>
+                    </div>
 
-                        <div className={ hasAvatar && !item.imageUrl ? 'flex' : '' }>
-                            { hasAvatar && !item.imageUrl && (
-                                <div className="relative w-[90px] shrink-0 flex items-center justify-center overflow-hidden pointer-events-none bg-muted/20">
-                                    <LayoutAvatarImageView figure={ item.figure } direction={ 2 } />
+                    {/* Body */}
+                    <div className="px-6 pb-5">
+                        { showSideColumn ? (
+                            <div className="grid grid-cols-[80px_minmax(0,1fr)] gap-5">
+                                <div className={ `relative flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-2xl ${ (hasFigure || hasImage) ? 'bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200' : TONE_TO_PLACEHOLDER[config.placeholderTone] }` }>
+                                    { hasImage ? (
+                                        <img
+                                            src={ item.imageUrl }
+                                            alt=""
+                                            onError={ () => setImageFailed(true) }
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : hasFigure ? (
+                                        <div className="flex h-full w-full items-end justify-center">
+                                            <LayoutAvatarImageView figure={ item.figure } direction={ 4 } scale={ 0.9 } />
+                                        </div>
+                                    ) : (
+                                        <PlaceholderIcon className="size-9" />
+                                    ) }
                                 </div>
-                            ) }
-
-                            { item.imageUrl && !imageFailed && (
-                                <div className="px-4 pt-3 flex justify-center">
-                                    <img
-                                        src={ item.imageUrl }
-                                        alt={ title }
-                                        onError={ () => setImageFailed(true) }
-                                        className="rounded-lg max-h-24 object-contain"
-                                    />
-                                </div>
-                            ) }
-
-                            <div className="px-4 py-3 flex flex-col gap-3">
-                                <div className="text-sm text-muted-foreground leading-relaxed">
-                                    { item.messages.map((message, index) =>
-                                    {
-                                        const htmlText = message.replace(/\r\n|\r|\n/g, '<br />');
-                                        return <div key={ index } dangerouslySetInnerHTML={ { __html: htmlText } } />;
-                                    }) }
+                                <div className="flex min-w-0 flex-col gap-2 pt-1">
+                                    { renderBodyText() }
                                 </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="flex flex-col gap-2">
+                                { renderBodyText() }
+                            </div>
+                        ) }
+                    </div>
 
-                        <div className="px-4 pb-3">
-                            { !item.clickUrl && (
-                                <Button className="w-full" size="sm" onClick={ onClose }>{ LocalizeText('generic.close') }</Button>
-                            ) }
-                            { item.clickUrl && item.clickUrl.length > 0 && isModeration && (
-                                <Button variant="outline" className="w-full" size="sm" onClick={ visitUrl }>
-                                    <ExternalLink className="size-3.5" /> { LocalizeText(item.clickUrlText) }
-                                </Button>
-                            ) }
-                            { item.clickUrl && item.clickUrl.length > 0 && !isModeration && (
-                                <Button className="w-full" size="sm" onClick={ visitUrl }>{ LocalizeText(item.clickUrlText) }</Button>
-                            ) }
+                    {/* Sender Signatur */}
+                    { sender && (
+                        <div className="flex items-center justify-end px-6 pb-4 text-paragraph-xs italic text-text-soft-400">
+                            — { sender }
                         </div>
-                    </FramePanel>
-                </Frame>
+                    ) }
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-end gap-2 border-t border-stroke-soft-200 px-6 py-4">
+                        { (!item.clickUrl || item.clickUrl.length === 0) ? (
+                            <AlignButton.Root variant="neutral" mode="stroke" size="small" className="min-w-[120px]" onClick={ onClose }>
+                                { LocalizeText('generic.close') }
+                            </AlignButton.Root>
+                        ) : (
+                            <>
+                                <AlignButton.Root variant="neutral" mode="stroke" size="small" className="min-w-[120px]" onClick={ onClose }>
+                                    { LocalizeText('generic.close') }
+                                </AlignButton.Root>
+                                { isModeration ? (
+                                    <AlignButton.Root variant="neutral" mode="filled" size="small" className="min-w-[120px]" onClick={ visitUrl }>
+                                        <AlignButton.Icon as={ RiExternalLinkLine } />
+                                        { LocalizeText(item.clickUrlText) }
+                                    </AlignButton.Root>
+                                ) : (
+                                    <AlignButton.Root variant="primary" mode="filled" size="small" className="min-w-[120px]" onClick={ visitUrl }>
+                                        { LocalizeText(item.clickUrlText) }
+                                    </AlignButton.Root>
+                                ) }
+                            </>
+                        ) }
+                    </div>
+                </div>
             </div>
         </DraggableWindow>
     );

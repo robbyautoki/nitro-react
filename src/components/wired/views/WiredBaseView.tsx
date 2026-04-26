@@ -1,7 +1,11 @@
 import { FC, PropsWithChildren, useEffect, useState } from 'react';
+import { Check, CircuitBoard, X } from 'lucide-react';
 import { GetSessionDataManager, LocalizeText, WiredFurniType, WiredSelectionVisualizer } from '../../../api';
-import { Button, Column, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../common';
+import { DraggableWindow } from '../../../common';
 import { useWired } from '../../../hooks';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 import { WiredFurniSelectorView } from './WiredFurniSelectorView';
 
 export interface WiredBaseViewProps
@@ -90,28 +94,57 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = props =>
     }, [ trigger, hasSpecialInput, requiresFurni, setIntParams, setStringParam, setFurniIds, setAllowsFurni ]);
 
     return (
-        <NitroCardView uniqueKey="nitro-wired" className="nitro-wired" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText('wiredfurni.title') } onCloseClick={ onClose } />
-            <NitroCardContentView>
-                <Column gap={ 1 }>
-                    <Flex alignItems="center" gap={ 1 }>
-                        <i className={ `icon icon-wired-${ wiredType }` } />
-                        <Text bold>{ wiredName }</Text>
-                    </Flex>
-                    <Text small>{ wiredDescription }</Text>
-                </Column>
-                { !!children && <hr className="m-0 bg-gray-900" /> }
-                { children }
-                { (requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE) &&
-                    <>
-                        <hr className="m-0 bg-gray-900" />
-                        <WiredFurniSelectorView />
-                    </> }
-                <Flex alignItems="center" gap={ 1 }>
-                    <Button fullWidth variant="success" onClick={ onSave }>{ LocalizeText('wiredfurni.ready') }</Button>
-                    <Button fullWidth variant="secondary" onClick={ onClose }>{ LocalizeText('cancel') }</Button>
-                </Flex>
-            </NitroCardContentView>
-        </NitroCardView>
+        <DraggableWindow uniqueKey="nitro-wired">
+            <AlignSurface.Panel className="nitro-wired w-[420px] max-w-[calc(100vw-32px)] overflow-hidden">
+                <div className="drag-handler flex cursor-grab items-center gap-3 border-b border-stroke-soft-200 px-4 py-3 active:cursor-grabbing">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-10 bg-primary-alpha-10 text-primary-base">
+                        <CircuitBoard className="size-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                        <div className="truncate text-label-md text-text-strong-950">{ LocalizeText('wiredfurni.title') }</div>
+                        <div className="truncate text-paragraph-xs text-text-sub-600">{ wiredName }</div>
+                    </div>
+                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" className="size-8 p-0" onClick={ onClose }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+
+                <div className="space-y-4 bg-bg-weak-50 p-4">
+                    <div className="rounded-2xl bg-bg-white-0 p-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                        <div className="flex items-start gap-3">
+                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200">
+                                <i className={ `icon icon-wired-${ wiredType }` } />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="text-label-sm text-text-strong-950">{ wiredName }</div>
+                                <p className="mt-1 text-paragraph-xs leading-5 text-text-sub-600">{ wiredDescription }</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    { !!children &&
+                        <div className="wired-align-section rounded-2xl bg-bg-white-0 p-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                            { children }
+                        </div> }
+
+                    { (requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE) &&
+                        <div className="rounded-2xl bg-bg-white-0 p-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                            <WiredFurniSelectorView />
+                        </div> }
+
+                    <AlignDivider.Root />
+
+                    <div className="grid grid-cols-2 gap-2">
+                        <AlignButton.Root variant="primary" mode="filled" size="small" onClick={ onSave }>
+                            <AlignButton.Icon as={ Check } className="size-4" />
+                            { LocalizeText('wiredfurni.ready') }
+                        </AlignButton.Root>
+                        <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ onClose }>
+                            { LocalizeText('cancel') }
+                        </AlignButton.Root>
+                    </div>
+                </div>
+            </AlignSurface.Panel>
+        </DraggableWindow>
     );
 }

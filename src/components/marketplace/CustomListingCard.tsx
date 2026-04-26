@@ -1,16 +1,13 @@
-import { FC } from 'react';
+import { ComponentProps, FC } from 'react';
 import { GetSessionDataManager } from '../../api';
 import { CustomListing, CustomOffer } from './CustomMarketplaceTypes';
 import { ItemInfoTooltip } from './ItemInfoTooltip';
 import { CurrencyIcon, ItemIcon, PriceDelta } from './marketplace-components';
 import { fmtC, timeLeft, timeAgo, parseLtd, CURRENCY_LABELS } from './marketplace-utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/reui-badge';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
 import {
     Star,
     Gavel,
@@ -20,7 +17,6 @@ import {
     X,
     Check,
     Hash,
-    Shield,
 } from 'lucide-react';
 
 interface Props
@@ -57,6 +53,16 @@ function getDisplayName(listing: CustomListing): string
     return mainItem.public_name;
 }
 
+function rarityBadgeColor(rarityName?: string | null): ComponentProps<typeof AlignBadge.Root>['color']
+{
+    if(rarityName === 'weekly_rare') return 'green';
+    if(rarityName === 'monthly_rare') return 'purple';
+    if(rarityName === 'cashshop_rare') return 'orange';
+    if(rarityName === 'drachen_rare') return 'red';
+    if(rarityName === 'bonzen_rare') return 'blue';
+    return 'yellow';
+}
+
 export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, isWatched, onToggleWatch, onBuy, onCancel, onOffer, onEdit }) =>
 {
     const mainItem = listing.items[0];
@@ -64,141 +70,133 @@ export const CustomListingCard: FC<Props> = ({ listing, mode, isMine, isWatched,
     const seal = mainItem?.seal;
     const rarity = mainItem?.rarity;
     const rarityDisplay = seal?.rarity_display ?? rarity?.rarity_display ?? null;
-    const rarityColor = seal?.color ?? rarity?.color ?? null;
     const displayName = getDisplayName(listing);
     const avgPrice = mainItem?.in_circulation ?? 0;
 
     return (
-        <div className="flex items-center gap-2 px-2.5 py-2 hover:bg-accent/30 transition-colors">
-            {/* Watchlist Star (browse only) */}
+        <div className="flex items-center gap-2.5 rounded-xl bg-bg-white-0 px-2.5 py-2 transition-colors hover:bg-bg-weak-50">
+            { /* Watchlist Star (browse only) */ }
             { mode === 'browse' && onToggleWatch && (
                 <button onClick={ onToggleWatch } className="shrink-0">
-                    <Star className={ `w-3.5 h-3.5 transition-colors ${ isWatched ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/20 hover:text-amber-300' }` } />
+                    <Star className={ `w-3.5 h-3.5 transition-colors ${ isWatched ? 'fill-warning-base text-warning-base' : 'text-text-soft-400 hover:text-warning-base' }` } />
                 </button>
             ) }
-
-            {/* Item Icon(s) */}
+            { /* Item Icon(s) */ }
             { listing.is_bundle && listing.items.length > 1 ? (
                 <div className="flex items-center gap-0.5 shrink-0">
                     { listing.items.slice(0, 6).map((item, i) => (
-                        <div key={ i } className="w-9 h-9 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center">
-                            <ItemIcon itemName={ item.item_name ?? '' } className="w-7 h-7" />
+                        <div key={ i } className="flex size-10 items-center justify-center rounded-lg bg-bg-weak-50">
+                            <ItemIcon itemName={ item.item_name ?? '' } className="size-8" />
                         </div>
                     )) }
                     { listing.items.length > 6 && (
-                        <span className="text-[9px] font-bold text-muted-foreground/60 ml-0.5">+{ listing.items.length - 6 }</span>
+                        <span className="ml-0.5 text-subheading-2xs text-text-sub-600">+{ listing.items.length - 6 }</span>
                     ) }
                 </div>
             ) : (
-                <div className="w-9 h-9 shrink-0 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center relative">
-                    <ItemIcon itemName={ mainItem?.item_name ?? '' } className="w-7 h-7" />
+                <div className="relative flex size-10 shrink-0 items-center justify-center rounded-lg bg-bg-weak-50">
+                    <ItemIcon itemName={ mainItem?.item_name ?? '' } className="size-8" />
                     { ltd && (
-                        <div className="absolute -top-1 -right-1 px-0.5 py-[1px] bg-amber-500/90 text-white text-[7px] font-bold leading-none rounded-sm">
+                        <div className="absolute -right-1 -top-1 rounded-md bg-warning-base px-1 py-0.5 text-subheading-2xs leading-none text-static-white">
                             { ltd.num }
                         </div>
                     ) }
                 </div>
             ) }
-
-            {/* Info */}
+            { /* Info */ }
             <div className="flex-1 min-w-0">
-                <div className="text-[12px] font-medium truncate flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 truncate text-label-sm text-text-strong-950">
                     <span>{ displayName }</span>
                     { ltd && (
-                        <Badge variant="outline" size="xs" className="text-[8px] text-amber-500 border-amber-500/30 bg-amber-500/10">
+                        <AlignBadge.Root color="yellow" variant="lighter" size="small" square>
                             <Hash className="w-2 h-2 mr-0.5" />LTD
-                        </Badge>
+                        </AlignBadge.Root>
                     ) }
                     { !ltd && rarityDisplay && (
-                        <span
-                            className="inline-flex items-center px-1 rounded text-[8px] font-bold border"
-                            style={ { backgroundColor: (rarityColor ?? '#888') + '15', color: rarityColor ?? '#a78bfa', borderColor: (rarityColor ?? '#888') + '30' } }
-                        >
+                        <AlignBadge.Root color={ rarityBadgeColor(seal?.rarity_name ?? rarity?.rarity_name) } variant="lighter" size="small" square>
                             { rarityDisplay }
-                        </span>
+                        </AlignBadge.Root>
                     ) }
                 </div>
-                <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="mt-0.5 flex items-center gap-1.5 text-paragraph-xs">
                     { mode === 'browse' && listing.seller && (
-                        <span className="text-[9px] text-muted-foreground/50">{ listing.seller.username }</span>
+                        <span className="text-text-sub-600">{ listing.seller.username }</span>
                     ) }
                     { mode === 'sold' && listing.buyer && (
-                        <span className="text-[9px] text-muted-foreground/50 flex items-center gap-0.5">
+                        <span className="flex items-center gap-0.5 text-text-sub-600">
                             <User className="w-2.5 h-2.5" />{ listing.buyer }
                         </span>
                     ) }
                     { (mode === 'browse' || mode === 'own') && (
                         <>
-                            <span className="text-[8px] text-muted-foreground/30">·</span>
-                            <span className="text-[9px] text-muted-foreground/40 flex items-center gap-0.5">
+                            <span className="text-text-soft-400">·</span>
+                            <span className="flex items-center gap-0.5 text-text-soft-400">
                                 <Clock className="w-2.5 h-2.5" />{ timeLeft(listing.expires_at) }
                             </span>
                         </>
                     ) }
                     { mode === 'sold' && listing.sold_at && (
                         <>
-                            <span className="text-[8px] text-muted-foreground/30">·</span>
-                            <span className="text-[9px] text-muted-foreground/40">{ timeAgo(listing.sold_at) }</span>
+                            <span className="text-text-soft-400">·</span>
+                            <span className="text-text-soft-400">{ timeAgo(listing.sold_at) }</span>
                         </>
                     ) }
                     { listing.note && (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <span className="text-muted-foreground/30 cursor-help"><MessageSquare className="w-2.5 h-2.5" /></span>
-                            </TooltipTrigger>
-                            <TooltipContent side="top"><p className="text-xs italic">"{ listing.note }"</p></TooltipContent>
-                        </Tooltip>
+                        <AlignTooltip.Root>
+                            <AlignTooltip.Trigger asChild>
+                                <span className="cursor-help text-text-soft-400"><MessageSquare className="w-2.5 h-2.5" /></span>
+                            </AlignTooltip.Trigger>
+                            <AlignTooltip.Content side="top"><p className="text-paragraph-xs italic">&quot;{ listing.note }&quot;</p></AlignTooltip.Content>
+                        </AlignTooltip.Root>
                     ) }
                     { mode === 'browse' && listing.offer_count != null && listing.offer_count > 0 && (
                         <>
-                            <span className="text-[8px] text-muted-foreground/30">·</span>
-                            <span className="text-[9px] text-blue-500/60">{ listing.offer_count } Gebote</span>
+                            <span className="text-text-soft-400">·</span>
+                            <span className="text-information-base">{ listing.offer_count } Gebote</span>
                         </>
                     ) }
                 </div>
             </div>
-
-            {/* Price */}
+            { /* Price */ }
             <div className="text-right shrink-0 mr-1">
                 <div className="flex items-center gap-1 justify-end">
                     <CurrencyIcon type={ listing.currency } className="w-3.5 h-3.5" />
-                    <span className={ `text-[12px] font-bold tabular-nums ${ mode === 'sold' ? 'text-emerald-500' : 'text-amber-500' }` }>
+                    <span className={ `text-label-sm tabular-nums ${ mode === 'sold' ? 'text-success-base' : 'text-warning-base' }` }>
                         { mode === 'sold' ? '+' : '' }{ fmtC(listing.price) }
                     </span>
                 </div>
-                <div className="text-[8px] text-muted-foreground/40">{ CURRENCY_LABELS[listing.currency] ?? listing.currency }</div>
+                <div className="text-subheading-2xs text-text-soft-400">{ CURRENCY_LABELS[listing.currency] ?? listing.currency }</div>
             </div>
-
-            {/* Actions */}
+            { /* Actions */ }
             <div className="flex items-center gap-1 shrink-0">
                 { mode === 'browse' && <ItemInfoTooltip listing={ listing } /> }
                 { mode === 'browse' && isMine && (
-                    <Badge variant="outline" size="xs" className="text-muted-foreground/40">Eigenes</Badge>
+                    <AlignBadge.Root color="gray" variant="lighter" size="small" square>Eigenes</AlignBadge.Root>
                 ) }
                 { mode === 'browse' && !isMine && onOffer && (
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={ onOffer }>
+                    <AlignTooltip.Root>
+                        <AlignTooltip.Trigger asChild>
+                            <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="h-6 w-6 px-0" onClick={ onOffer }>
                                 <Gavel className="w-3 h-3" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top">Gebot abgeben</TooltipContent>
-                    </Tooltip>
+                            </AlignButton.Root>
+                        </AlignTooltip.Trigger>
+                        <AlignTooltip.Content side="top">Gebot abgeben</AlignTooltip.Content>
+                    </AlignTooltip.Root>
                 ) }
                 { mode === 'browse' && !isMine && onBuy && (
-                    <Button size="sm" className="h-6 text-[10px] px-2 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={ onBuy }>
+                    <FancyButton.Root variant="primary" size="xsmall" className="h-7 px-3 text-label-xs" onClick={ onBuy }>
                         Kaufen
-                    </Button>
+                    </FancyButton.Root>
                 ) }
                 { mode === 'own' && onEdit && (
-                    <Button variant="outline" size="sm" className="h-6 text-[9px] px-1.5" onClick={ onEdit }>
+                    <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="h-7 px-2 text-label-xs" onClick={ onEdit }>
                         Bearbeiten
-                    </Button>
+                    </AlignButton.Root>
                 ) }
                 { mode === 'own' && listing.status === 'active' && onCancel && (
-                    <Button variant="outline" size="icon" className="h-6 w-6 text-red-400 hover:text-red-500" onClick={ onCancel }>
+                    <AlignButton.Root variant="error" mode="stroke" size="xxsmall" className="h-6 w-6 px-0" onClick={ onCancel }>
                         <X className="w-3 h-3" />
-                    </Button>
+                    </AlignButton.Root>
                 ) }
             </div>
         </div>
@@ -210,49 +208,49 @@ export const OfferRow: FC<OfferRowProps> = ({ offer, onAccept, onReject, isProce
     const mainItem = offer.items[0];
 
     return (
-        <div className="flex items-center gap-2 px-2.5 py-2 hover:bg-accent/30 transition-colors">
+        <div className="flex items-center gap-2.5 rounded-xl bg-bg-white-0 px-2.5 py-2 transition-colors hover:bg-bg-weak-50">
             { offer.items.length > 1 ? (
                 <div className="flex items-center gap-0.5 shrink-0">
                     { offer.items.slice(0, 6).map((item, i) => (
-                        <div key={ i } className="w-9 h-9 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center">
-                            <ItemIcon itemName={ item.item_name ?? '' } className="w-7 h-7" />
+                        <div key={ i } className="flex size-10 items-center justify-center rounded-lg bg-bg-weak-50">
+                            <ItemIcon itemName={ item.item_name ?? '' } className="size-8" />
                         </div>
                     )) }
                     { offer.items.length > 6 && (
-                        <span className="text-[9px] font-bold text-muted-foreground/60 ml-0.5">+{ offer.items.length - 6 }</span>
+                        <span className="ml-0.5 text-subheading-2xs text-text-sub-600">+{ offer.items.length - 6 }</span>
                     ) }
                 </div>
             ) : (
-                <div className="w-9 h-9 shrink-0 rounded-md border border-border/40 bg-muted/10 flex items-center justify-center">
-                    <ItemIcon itemName={ mainItem?.item_name ?? '' } className="w-7 h-7" />
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-bg-weak-50">
+                    <ItemIcon itemName={ mainItem?.item_name ?? '' } className="size-8" />
                 </div>
             ) }
             <div className="flex-1 min-w-0">
-                <div className="text-[12px] font-medium truncate">
+                <div className="truncate text-label-sm text-text-strong-950">
                     { offer.items.length > 1 ? `Bundle (${ offer.items.length } Items)` : mainItem?.public_name ?? 'Unknown' }
                 </div>
-                <div className="text-[9px] text-muted-foreground/50 flex items-center gap-0.5">
+                <div className="flex items-center gap-0.5 text-paragraph-xs text-text-sub-600">
                     <User className="w-2.5 h-2.5" />{ offer.buyer?.username ?? 'Unbekannt' } · { timeAgo(offer.created_at) }
                 </div>
             </div>
             <div className="text-right mr-1 shrink-0">
                 <div className="flex items-center gap-1.5 justify-end">
-                    <span className="text-[10px] text-muted-foreground/40 line-through tabular-nums">{ fmtC(offer.listing_price) }</span>
+                    <span className="text-paragraph-xs text-text-soft-400 line-through tabular-nums">{ fmtC(offer.listing_price) }</span>
                     <CurrencyIcon type={ offer.currency } className="w-3 h-3" />
-                    <span className="text-[12px] font-bold text-amber-500 tabular-nums">{ fmtC(offer.offer_price) }</span>
+                    <span className="text-label-sm text-warning-base tabular-nums">{ fmtC(offer.offer_price) }</span>
                 </div>
                 <PriceDelta price={ offer.offer_price } avg={ offer.listing_price } />
             </div>
             <div className="flex items-center gap-1 shrink-0">
                 { onAccept && (
-                    <Button size="sm" className="h-6 text-[9px] px-1.5 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={ onAccept } disabled={ isProcessing }>
+                    <FancyButton.Root variant="primary" size="xsmall" className="h-7 px-2 text-label-xs" onClick={ onAccept } disabled={ isProcessing }>
                         <Check className="w-2.5 h-2.5 mr-0.5" />OK
-                    </Button>
+                    </FancyButton.Root>
                 ) }
                 { onReject && (
-                    <Button variant="outline" size="icon" className="h-6 w-6 text-red-400" onClick={ onReject } disabled={ isProcessing }>
+                    <AlignButton.Root variant="error" mode="stroke" size="xxsmall" className="h-6 w-6 px-0" onClick={ onReject } disabled={ isProcessing }>
                         <X className="w-3 h-3" />
-                    </Button>
+                    </AlignButton.Root>
                 ) }
             </div>
         </div>

@@ -1,10 +1,12 @@
 import { NitroRectangle, TextureUtils } from '@nitrots/nitro-renderer';
 import { FC, useRef } from 'react';
-import { FaTimes } from 'react-icons/fa';
+import { Camera, Image as ImageIcon, Sparkles, Trash2, X } from 'lucide-react';
 import { CameraPicture, GetRoomEngine, GetRoomSession, LocalizeText, PlaySound, SoundNames } from '../../../api';
-import { Column, DraggableWindow, Flex } from '../../../common';
+import { DraggableWindow } from '../../../common';
 import { useCamera, useNotification } from '../../../hooks';
-import { IPhoneFrame } from './IPhoneFrame';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 
 export interface CameraWidgetCaptureViewProps
 {
@@ -20,7 +22,7 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = props =
     const { onClose = null, onEdit = null, onDelete = null } = props;
     const { cameraRoll = null, setCameraRoll = null, selectedPictureIndex = -1, setSelectedPictureIndex = null } = useCamera();
     const { simpleAlert = null } = useNotification();
-    const elementRef = useRef<HTMLDivElement>();
+    const elementRef = useRef<HTMLDivElement>(null);
 
     const selectedPicture = ((selectedPictureIndex > -1) ? cameraRoll[selectedPictureIndex] : null);
 
@@ -59,35 +61,62 @@ export const CameraWidgetCaptureView: FC<CameraWidgetCaptureViewProps> = props =
 
     return (
         <DraggableWindow uniqueKey="nitro-camera-capture">
-            <Column center className="nitro-camera-capture" gap={ 0 }>
-                <div className="iphone-camera drag-handler">
-                    <div className="iphone-close" onClick={ onClose }>
-                        <FaTimes className="fa-icon" />
+            <AlignSurface.Panel className="nitro-camera-window nitro-camera-capture">
+                <div className="nitro-camera-header drag-handler">
+                    <div className="nitro-camera-title">
+                        <div className="nitro-camera-title-icon">
+                            <Camera className="size-4" />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="truncate text-label-sm text-text-strong-950">Kamera</div>
+                            <div className="truncate text-paragraph-xs text-text-sub-600">{ cameraRoll.length }/{ CAMERA_ROLL_LIMIT } Fotos</div>
+                        </div>
                     </div>
-                    <div className="iphone-frame-container">
-                        <IPhoneFrame />
+                    <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ onClose }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+                <div className="nitro-camera-body">
+                    <div className="nitro-camera-viewfinder-wrap">
                         { selectedPicture
-                            ? <img alt="" className="iphone-screen-content" src={ selectedPicture.imageUrl } />
-                            : <div ref={ elementRef } className="iphone-screen-content iphone-viewfinder" />
+                            ? <img alt="" className="nitro-camera-viewfinder-image" src={ selectedPicture.imageUrl } />
+                            : <div ref={ elementRef } className="nitro-camera-viewfinder" />
                         }
+                        <div className="nitro-camera-focus-grid" />
                         { selectedPicture &&
-                            <div className="iphone-screen-content iphone-frame-actions">
-                                <button className="btn btn-sm btn-success" title={ LocalizeText('camera.editor.button.tooltip') } onClick={ onEdit }>{ LocalizeText('camera.editor.button.text') }</button>
-                                <button className="btn btn-sm btn-danger" onClick={ onDelete }>{ LocalizeText('camera.delete.button.text') }</button>
+                            <div className="nitro-camera-frame-actions">
+                                <AlignButton.Root type="button" variant="primary" mode="filled" size="small" title={ LocalizeText('camera.editor.button.tooltip') } onClick={ onEdit }>
+                                    <AlignButton.Icon as={ Sparkles } className="size-4" />
+                                    { LocalizeText('camera.editor.button.text') }
+                                </AlignButton.Root>
+                                <AlignButton.Root type="button" variant="error" mode="lighter" size="small" onClick={ onDelete }>
+                                    <AlignButton.Icon as={ Trash2 } className="size-4" />
+                                    { LocalizeText('camera.delete.button.text') }
+                                </AlignButton.Root>
                             </div> }
                     </div>
-                    <div className="iphone-shutter-area">
-                        <div className="iphone-shutter-button" title={ LocalizeText('camera.take.photo.button.tooltip') } onClick={ takePicture } />
+                    <div className="nitro-camera-footer">
+                        <div className="nitro-camera-shutter-row">
+                            <button className="nitro-camera-shutter" title={ LocalizeText('camera.take.photo.button.tooltip') } onClick={ takePicture }>
+                                <span />
+                            </button>
+                        </div>
+                        { (cameraRoll.length > 0) &&
+                            <div className="nitro-camera-roll">
+                                <AlignBadge.Root variant="lighter" color="gray" size="small">
+                                    <AlignBadge.Icon as={ ImageIcon } className="size-3" />
+                                    Film
+                                </AlignBadge.Root>
+                                <div className="nitro-camera-roll-items">
+                                    { cameraRoll.map((picture, index) =>
+                                    {
+                                        return <button type="button" key={ index } className={ selectedPictureIndex === index ? 'selected' : '' } onClick={ event => setSelectedPictureIndex(index) }><img alt="" src={ picture.imageUrl } /></button>;
+                                    }) }
+                                </div>
+                            </div> }
                     </div>
                 </div>
-                { (cameraRoll.length > 0) &&
-                    <Flex gap={ 2 } justifyContent="center" className="iphone-camera-roll">
-                        { cameraRoll.map((picture, index) =>
-                        {
-                            return <img alt="" key={ index } className={ selectedPictureIndex === index ? 'selected' : '' } src={ picture.imageUrl } onClick={ event => setSelectedPictureIndex(index) } />;
-                        }) }
-                    </Flex> }
-            </Column>
+            </AlignSurface.Panel>
         </DraggableWindow>
     );
 }

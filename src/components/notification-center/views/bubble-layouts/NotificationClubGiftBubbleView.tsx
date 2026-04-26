@@ -1,9 +1,10 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { LocalizeText, NotificationBubbleItem, OpenUrl } from '../../../../api';
-import { TransitionAnimation, TransitionAnimationTypes } from '../../../../common/transitions';
-import { Frame, FramePanel } from '../../../ui/frame';
-import { Button } from '../../../ui/button';
-import { Crown } from 'lucide-react';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignCompactButton from '@/align-ui/components/ui/compact-button';
+import { RiCloseLine, RiVipCrown2Fill } from '@remixicon/react';
+
+const BUBBLE_EXIT_MS = 180;
 
 export interface NotificationClubGiftBubbleViewProps
 {
@@ -11,39 +12,62 @@ export interface NotificationClubGiftBubbleViewProps
     onClose: () => void;
 }
 
+const safeLocalize = (key: string, fallback: string): string =>
+{
+    const value = LocalizeText(key);
+    return (!value || value === key) ? fallback : value;
+};
+
 export const NotificationClubGiftBubbleView: FC<NotificationClubGiftBubbleViewProps> = props =>
 {
     const { item = null, onClose = null } = props;
     const [ isVisible, setIsVisible ] = useState(false);
+    const isClosing = useRef(false);
+    const closeTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+
+    const closeBubble = useCallback(() =>
+    {
+        if(isClosing.current) return;
+
+        isClosing.current = true;
+        setIsVisible(false);
+        closeTimerRef.current = window.setTimeout(() => onClose?.(), BUBBLE_EXIT_MS);
+    }, [ onClose ]);
 
     useEffect(() =>
     {
-        setIsVisible(true);
-        return () => setIsVisible(false);
+        const frame = window.requestAnimationFrame(() => setIsVisible(true));
+
+        return () =>
+        {
+            window.cancelAnimationFrame(frame);
+            if(closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+            setIsVisible(false);
+        }
     }, []);
 
     return (
-        <TransitionAnimation type={ TransitionAnimationTypes.FADE_IN } inProp={ isVisible } timeout={ 300 }>
-            <div className="pointer-events-auto w-full max-w-xs">
-                <Frame>
-                    <FramePanel className="!p-0">
-                        <div className="px-3.5 py-2.5 space-y-2">
-                            <div className="flex items-center gap-2">
-                                <Crown className="size-4 text-amber-500 shrink-0" />
-                                <span className="text-xs font-semibold text-foreground">{ LocalizeText('notifications.text.club_gift') }</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button size="sm" className="flex-1 h-7 text-xs" onClick={ () => OpenUrl(item.linkUrl) }>
-                                    { LocalizeText('notifications.button.show_gift_list') }
-                                </Button>
-                                <button className="text-xs text-muted-foreground hover:text-foreground underline" onClick={ onClose }>
-                                    { LocalizeText('notifications.button.later') }
-                                </button>
-                            </div>
-                        </div>
-                    </FramePanel>
-                </Frame>
+        <div className={ `nitro-notification-bubble-card pointer-events-auto w-full max-w-sm overflow-hidden rounded-2xl bg-bg-white-0 shadow-regular-md ${ isVisible ? 'is-visible' : 'is-closing' }` }>
+            <div className="grid grid-cols-[44px_minmax(0,1fr)_28px] items-start gap-3 px-3.5 pb-2 pt-3.5">
+                <div className="flex size-11 items-center justify-center rounded-xl bg-warning-lighter text-warning-base">
+                    <RiVipCrown2Fill className="size-6" />
+                </div>
+                <div className="flex min-w-0 flex-col gap-1">
+                    <div className="text-subheading-2xs uppercase tracking-wider text-warning-base">{ safeLocalize('notifications.bubble.club_gift.eyebrow', 'VIP · Geschenk') }</div>
+                    <div className="text-paragraph-sm leading-relaxed text-text-strong-950">{ LocalizeText('notifications.text.club_gift') }</div>
+                </div>
+                <AlignCompactButton.Root variant="ghost" size="medium" onClick={ closeBubble }>
+                    <AlignCompactButton.Icon as={ RiCloseLine } />
+                </AlignCompactButton.Root>
             </div>
-        </TransitionAnimation>
+            <div className="flex items-center gap-2 px-3.5 pb-3.5">
+                <AlignButton.Root variant="primary" mode="filled" size="xsmall" className="flex-1" onClick={ () => OpenUrl(item.linkUrl) }>
+                    { LocalizeText('notifications.button.show_gift_list') }
+                </AlignButton.Root>
+                <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" className="flex-1" onClick={ closeBubble }>
+                    { LocalizeText('notifications.button.later') }
+                </AlignButton.Root>
+            </div>
+        </div>
     );
 }

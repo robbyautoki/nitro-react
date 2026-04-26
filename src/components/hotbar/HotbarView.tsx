@@ -11,7 +11,6 @@ interface HotbarSlot {
 }
 
 const STORAGE_KEY = 'habbo_hotbar';
-const VISIBILITY_KEY = 'habbo_hotbar_visible';
 const SLOT_COUNT = 9;
 
 function emptySlots(): HotbarSlot[] {
@@ -36,10 +35,7 @@ function saveSlots(slots: HotbarSlot[]) {
 export const HotbarView: FC = () =>
 {
     const [slots, setSlots] = useState<HotbarSlot[]>(loadSlots);
-    const [visible, setVisible] = useState(() => {
-        const stored = localStorage.getItem(VISIBILITY_KEY);
-        return stored === null ? true : stored === 'true';
-    });
+    const [visible, setVisible] = useState(false);
     const [hoveredSlot, setHoveredSlot] = useState<number | null>(null);
     const { groupItems = [] } = useInventoryFurni();
 
@@ -97,11 +93,7 @@ export const HotbarView: FC = () =>
     }, [updateSlots]);
 
     useEffect(() => {
-        const handler = () => setVisible(v => {
-            const next = !v;
-            localStorage.setItem(VISIBILITY_KEY, String(next));
-            return next;
-        });
+        const handler = () => setVisible(value => !value);
         window.addEventListener('hotbar:toggle', handler);
         return () => window.removeEventListener('hotbar:toggle', handler);
     }, []);

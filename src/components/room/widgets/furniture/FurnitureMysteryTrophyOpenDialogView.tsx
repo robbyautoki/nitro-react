@@ -1,7 +1,11 @@
 import { OpenMysteryTrophyMessageComposer } from '@nitrots/nitro-renderer';
 import { FC, useState } from 'react';
+import { Check, PencilLine, Trophy, X } from 'lucide-react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
-import { Button, Column, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignTextarea from '@/align-ui/components/ui/textarea';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import { FurnitureWidgetActions, FurnitureWidgetPreview, FurnitureWidgetSection, FurnitureWidgetText, FurnitureWidgetWindow } from './FurnitureWidgetLayout';
 
 interface FurnitureMysteryTrophyOpenDialogViewProps
 {
@@ -23,28 +27,41 @@ export const FurnitureMysteryTrophyOpenDialogView: FC<FurnitureMysteryTrophyOpen
     if(objectId === -1) return null;
 
     return (
-        <NitroCardView className="nitro-mysterytrophy-dialog no-resize" theme="primary-slim">
-            <NitroCardHeaderView center headerText={ LocalizeText('mysterytrophy.header.title') } onCloseClick={ onClose } />
-            <NitroCardContentView>
-                <Flex className="mysterytrophy-dialog-top p-3">
-                    <div className="mysterytrophy-image shrink-0"></div>
-                    <div className="m-2">
-                        <Text variant="white" className="mysterytrophy-text-big">{ LocalizeText('mysterytrophy.header.description') }</Text>
-                    </div>
-                </Flex>
-                <Flex className="mysterytrophy-dialog-bottom p-2">
-                    <Column gap={ 1 }>
-                        <Flex alignItems="center" className="bg-white rounded py-1 px-2 input-mysterytrophy-dialog">
-                            <textarea className="form-control form-control-sm input-mysterytrophy" value={ description } onChange={ event => setDescription(event.target.value) } />
-                            <div className="mysterytrophy-pencil-image shrink-0 small fa-icon"></div>
-                        </Flex>
-                        <Flex className="mt-2" gap={ 5 } display="flex" justifyContent="center" alignItems="center">
-                            <Text pointer className="text-decoration" onClick={ () => onClose() }>{ LocalizeText('cancel') }</Text>
-                            <Button variant="success" onClick={ () => onConfirm() }>{ LocalizeText('generic.ok') }</Button>
-                        </Flex>
-                    </Column>
-                </Flex>
-            </NitroCardContentView>
-        </NitroCardView>
+        <FurnitureWidgetWindow
+            uniqueKey="furniture-mystery-trophy"
+            title={ LocalizeText('mysterytrophy.header.title') }
+            subtitle={ LocalizeText('mysterytrophy.header.description') }
+            icon={ Trophy }
+            onClose={ onClose }
+            widthClassName="w-[440px]"
+            footer={
+                <FurnitureWidgetActions className="grid grid-cols-2">
+                    <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ onClose }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                        { LocalizeText('cancel') }
+                    </AlignButton.Root>
+                    <FancyButton.Root variant="primary" size="small" onClick={ onConfirm }>
+                        <FancyButton.Icon as={ Check } />
+                        { LocalizeText('generic.ok') }
+                    </FancyButton.Root>
+                </FurnitureWidgetActions>
+            }
+        >
+            <FurnitureWidgetSection className="grid grid-cols-[96px_1fr] gap-4">
+                <FurnitureWidgetPreview className="size-24">
+                    <div className="mysterytrophy-image shrink-0" />
+                </FurnitureWidgetPreview>
+                <div className="flex min-w-0 flex-col justify-center gap-2">
+                    <div className="text-label-sm text-text-strong-950">{ LocalizeText('mysterytrophy.header.title') }</div>
+                    <FurnitureWidgetText>{ LocalizeText('mysterytrophy.header.description') }</FurnitureWidgetText>
+                </div>
+            </FurnitureWidgetSection>
+            <FurnitureWidgetSection title={ LocalizeText('mysterytrophy.header.description') }>
+                <div className="relative">
+                    <AlignTextarea.Root simple value={ description } onChange={ event => setDescription(event.target.value) } className="min-h-[96px] pr-10" />
+                    <PencilLine className="pointer-events-none absolute right-3 top-3 size-4 text-text-soft-400" />
+                </div>
+            </FurnitureWidgetSection>
+        </FurnitureWidgetWindow>
     );
 }

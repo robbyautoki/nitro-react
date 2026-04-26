@@ -1,6 +1,7 @@
 import { Dispatch, FC, SetStateAction } from 'react';
 import { AchievementUtilities, IAchievementCategory, LocalizeText } from '../../../../api';
-import { LayoutBackgroundImage, LayoutGridItem, Text } from '../../../../common';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignProgressBar from '@/align-ui/components/ui/progress-bar';
 
 interface AchievementCategoryListItemViewProps
 {
@@ -21,11 +22,26 @@ export const AchievementsCategoryListItemView: FC<AchievementCategoryListItemVie
     const getTotalUnseen = AchievementUtilities.getAchievementCategoryTotalUnseen(category);
 
     return (
-        <LayoutGridItem itemActive={ (selectedCategoryCode === category.code) } itemCount={ getTotalUnseen } itemCountMinimum={ 0 } gap={ 1 } onClick={ event => setSelectedCategoryCode(category.code) }>
-            <Text fullWidth center small className="pt-1">{ LocalizeText(`quests.${ category.code }.name`) }</Text>
-            <LayoutBackgroundImage position="relative" imageUrl={ getCategoryImage }>
-                <Text fullWidth center position="absolute" variant="white" style={ { fontSize: 12, bottom: 9 } }>{ progress } / { maxProgress }</Text>
-            </LayoutBackgroundImage>
-        </LayoutGridItem>
+        <button
+            type="button"
+            className={ `group relative min-h-[132px] overflow-hidden rounded-2xl bg-bg-white-0 p-3 text-left shadow-regular-xs ring-1 ring-inset transition duration-200 ${ selectedCategoryCode === category.code ? 'ring-primary-base' : 'ring-stroke-soft-200 hover:bg-bg-white-0 hover:ring-primary-base' }` }
+            onClick={ () => setSelectedCategoryCode(category.code) }
+        >
+            { getTotalUnseen > 0 &&
+                <AlignBadge.Root color="red" variant="filled" size="small" className="absolute right-2 top-2 z-10">
+                    { getTotalUnseen }
+                </AlignBadge.Root> }
+
+            <div className="flex h-[74px] items-center justify-center">
+                <img src={ getCategoryImage } alt="" className="max-h-[72px] max-w-full object-contain [image-rendering:auto]" draggable={ false } />
+            </div>
+            <div className="mt-2 truncate text-center text-label-sm text-text-strong-950">
+                { LocalizeText(`quests.${ category.code }.name`) }
+            </div>
+            <div className="mt-2 flex items-center gap-2">
+                <AlignProgressBar.Root value={ progress } max={ maxProgress } color="green" className="h-1.5" />
+                <span className="shrink-0 text-paragraph-xs tabular-nums text-text-sub-600">{ progress }/{ maxProgress }</span>
+            </div>
+        </button>
     );
 }

@@ -1,12 +1,13 @@
 import { FC } from 'react';
-import { AlertTriangle, Clock, Lock, ShieldX, X } from 'lucide-react';
+import { AlertTriangle, Clock, Lock, ShieldX } from 'lucide-react';
 import { LocalizeText } from '../../../api';
 import { useHelp } from '../../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../../common/draggable-window';
-import { Frame, FramePanel } from '../../ui/frame';
-import { Button } from '../../ui/button';
-import { Alert, AlertTitle, AlertDescription } from '../../ui/alert';
-import { Separator } from '../../ui/separator';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignProgress from '@/align-ui/components/ui/progress-bar';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 
 export const SanctionSatusView: FC<{}> = () =>
 {
@@ -46,96 +47,94 @@ export const SanctionSatusView: FC<{}> = () =>
 
     return (
         <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-            <div className="w-[420px]">
-                <Frame className="relative">
-                    <div className="drag-handler absolute inset-0 cursor-move" />
-                    <FramePanel className="overflow-hidden p-0! relative z-10">
-                        <div className="flex items-center justify-between px-4 py-2.5 border-b">
-                            <div className="flex items-center gap-2">
-                                <ShieldX className="size-4 text-amber-500" />
-                                <span className="text-sm font-semibold">{ LocalizeText('help.sanction.info.title') }</span>
+            <div className="w-[420px] max-w-[calc(100vw-32px)]">
+                <AlignSurface.Panel className="overflow-hidden">
+                    <AlignSurface.Header
+                        className="drag-handler cursor-grab select-none active:cursor-grabbing"
+                        title={
+                            <div className="flex min-w-0 items-center gap-2">
+                                <span className="flex size-8 items-center justify-center rounded-lg bg-warning-lighter text-warning-base ring-1 ring-inset ring-warning-light">
+                                    <ShieldX className="size-4" />
+                                </span>
+                                <span className="truncate">{ LocalizeText('help.sanction.info.title') }</span>
                             </div>
-                            <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={ () => setSanctionInfo(null) }>
-                                <X className="size-3.5" />
-                            </button>
-                        </div>
-
-                        <div className="px-4 py-3 space-y-3">
-                            { !hasActiveSanction ? (
-                                <div className="px-4 py-5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 text-center">
-                                    <p className="text-sm font-medium text-emerald-500">{ LocalizeText('help.sanction.current.none') }</p>
-                                </div>
-                            ) : (
-                                <>
-                                    { isOnProbation && (
-                                        <Alert variant="destructive" className="border-amber-500/20 bg-amber-500/5">
-                                            <AlertTriangle className="size-4 text-amber-500" />
-                                            <AlertDescription className="text-amber-500/80">
-                                                { LocalizeText('help.sanction.probation.reminder') }
-                                            </AlertDescription>
-                                        </Alert>
-                                    ) }
-
-                                    <div className={ `px-3.5 py-3 rounded-lg border ${ sanctionInfo.isSanctionNew ? 'border-red-500/20 bg-red-500/5' : 'border-border' }` }>
-                                        <p className="text-[11px] text-muted-foreground/50 mb-1">Aktuelle Sanktion</p>
-                                        <p className={ `text-sm font-medium ${ sanctionInfo.isSanctionNew ? 'text-red-500' : 'text-foreground' }` }>
-                                            { sanctionLocalization('current', sanctionInfo.sanctionName, sanctionInfo.sanctionLengthHours) }
-                                        </p>
+                        }
+                        description="Moderationsstatus"
+                        onClose={ () => setSanctionInfo(null) }
+                    />
+                    <div className="space-y-3 p-4">
+                        { !hasActiveSanction ? (
+                            <div className="rounded-xl bg-success-lighter px-4 py-5 text-center text-success-base ring-1 ring-inset ring-success-light">
+                                <p className="text-label-sm">{ LocalizeText('help.sanction.current.none') }</p>
+                            </div>
+                        ) : (
+                            <>
+                                { isOnProbation && (
+                                    <div className="flex items-start gap-2 rounded-xl bg-warning-lighter p-3 text-warning-base ring-1 ring-inset ring-warning-light">
+                                        <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                                        <p className="text-paragraph-xs leading-relaxed">{ LocalizeText('help.sanction.probation.reminder') }</p>
                                     </div>
-
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div className="px-3.5 py-2.5 rounded-lg border">
-                                            <div className="flex items-center gap-1.5 mb-1">
-                                                <Clock className="size-3 text-muted-foreground/50" />
-                                                <p className="text-[11px] text-muted-foreground/50">Startzeit</p>
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">{ sanctionInfo.sanctionCreationTime }</p>
-                                        </div>
-                                        <div className="px-3.5 py-2.5 rounded-lg border">
-                                            <div className="flex items-center gap-1.5 mb-1">
-                                                <AlertTriangle className="size-3 text-muted-foreground/50" />
-                                                <p className="text-[11px] text-muted-foreground/50">Grund</p>
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">{ sanctionInfo.sanctionReason }</p>
-                                        </div>
+                                ) }
+                                <div className={ `rounded-xl p-3 ring-1 ring-inset ${ sanctionInfo.isSanctionNew ? 'bg-error-lighter text-error-base ring-error-light' : 'bg-bg-weak-50 text-text-strong-950 ring-stroke-soft-200' }` }>
+                                    <div className="mb-1 flex items-center justify-between gap-2">
+                                        <p className="text-subheading-2xs uppercase text-text-soft-400">Aktuelle Sanktion</p>
+                                        { sanctionInfo.isSanctionNew && <AlignBadge.Root color="red" variant="light" size="small">Neu</AlignBadge.Root> }
                                     </div>
-
-                                    <div className="px-3.5 py-2.5 rounded-lg border">
-                                        <p className="text-[11px] text-muted-foreground/50 mb-1">Bewährung verbleibend</p>
-                                        <p className="text-xs text-muted-foreground">{ Math.trunc((sanctionInfo.probationHoursLeft / 24)) + 1 } Tage</p>
-                                    </div>
-                                </>
-                            ) }
-
-                            { sanctionInfo.hasCustomMute && !sanctionInfo.isSanctionActive && (
-                                <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-red-500/20 bg-red-500/5">
-                                    <Lock className="size-4 text-red-500 shrink-0" />
-                                    <p className="text-xs text-red-500/80">{ LocalizeText('help.sanction.custom.mute') }</p>
-                                </div>
-                            ) }
-
-                            { sanctionInfo.tradeLockExpiryTime && sanctionInfo.tradeLockExpiryTime.length > 0 && (
-                                <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-amber-500/20 bg-amber-500/5">
-                                    <Lock className="size-4 text-amber-500 shrink-0" />
-                                    <p className="text-xs text-amber-500/80">{ LocalizeText('trade.locked.until') } { sanctionInfo.tradeLockExpiryTime }</p>
-                                </div>
-                            ) }
-
-                            { hasActiveSanction && (
-                                <div className="px-3.5 py-2.5 rounded-lg border">
-                                    <p className="text-[11px] text-muted-foreground/50 mb-1">Nächste Sanktion bei Verstoß</p>
-                                    <p className="text-xs text-muted-foreground">
-                                        { sanctionLocalization('next', sanctionInfo.nextSanctionName, sanctionInfo.nextSanctionLengthHours) }
+                                    <p className="text-label-sm">
+                                        { sanctionLocalization('current', sanctionInfo.sanctionName, sanctionInfo.sanctionLengthHours) }
                                     </p>
                                 </div>
-                            ) }
-
-                            <Button className="w-full" size="sm" onClick={ () => setSanctionInfo(null) }>
-                                Verstanden
-                            </Button>
-                        </div>
-                    </FramePanel>
-                </Frame>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="rounded-xl bg-bg-weak-50 px-3 py-2.5 ring-1 ring-inset ring-stroke-soft-200">
+                                        <div className="mb-1 flex items-center gap-1.5 text-text-soft-400">
+                                            <Clock className="size-3" />
+                                            <p className="text-subheading-2xs uppercase">Startzeit</p>
+                                        </div>
+                                        <p className="text-paragraph-xs text-text-sub-600">{ sanctionInfo.sanctionCreationTime }</p>
+                                    </div>
+                                    <div className="rounded-xl bg-bg-weak-50 px-3 py-2.5 ring-1 ring-inset ring-stroke-soft-200">
+                                        <div className="mb-1 flex items-center gap-1.5 text-text-soft-400">
+                                            <AlertTriangle className="size-3" />
+                                            <p className="text-subheading-2xs uppercase">Grund</p>
+                                        </div>
+                                        <p className="text-paragraph-xs text-text-sub-600">{ sanctionInfo.sanctionReason }</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-2 rounded-xl bg-bg-weak-50 px-3 py-2.5 ring-1 ring-inset ring-stroke-soft-200">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <p className="text-subheading-2xs uppercase text-text-soft-400">Bewährung verbleibend</p>
+                                        <p className="text-paragraph-xs font-medium text-text-sub-600">{ Math.trunc((sanctionInfo.probationHoursLeft / 24)) + 1 } Tage</p>
+                                    </div>
+                                    <AlignProgress.Root value={ Math.max(0, sanctionInfo.probationHoursLeft) } max={ Math.max(1, sanctionInfo.probationHoursLeft) } color="orange" />
+                                </div>
+                            </>
+                        ) }
+                        { sanctionInfo.hasCustomMute && !sanctionInfo.isSanctionActive && (
+                            <div className="flex items-center gap-2.5 rounded-xl bg-error-lighter px-3.5 py-2.5 text-error-base ring-1 ring-inset ring-error-light">
+                                <Lock className="size-4 shrink-0" />
+                                <p className="text-paragraph-xs">{ LocalizeText('help.sanction.custom.mute') }</p>
+                            </div>
+                        ) }
+                        { sanctionInfo.tradeLockExpiryTime && sanctionInfo.tradeLockExpiryTime.length > 0 && (
+                            <div className="flex items-center gap-2.5 rounded-xl bg-warning-lighter px-3.5 py-2.5 text-warning-base ring-1 ring-inset ring-warning-light">
+                                <Lock className="size-4 shrink-0" />
+                                <p className="text-paragraph-xs">{ LocalizeText('trade.locked.until') } { sanctionInfo.tradeLockExpiryTime }</p>
+                            </div>
+                        ) }
+                        { hasActiveSanction && (
+                            <div className="rounded-xl bg-bg-weak-50 px-3.5 py-2.5 ring-1 ring-inset ring-stroke-soft-200">
+                                <p className="mb-1 text-subheading-2xs uppercase text-text-soft-400">Nächste Sanktion bei Verstoß</p>
+                                <p className="text-paragraph-xs text-text-sub-600">
+                                    { sanctionLocalization('next', sanctionInfo.nextSanctionName, sanctionInfo.nextSanctionLengthHours) }
+                                </p>
+                            </div>
+                        ) }
+                        <AlignDivider.Root />
+                        <AlignButton.Root className="w-full" size="small" variant="primary" mode="filled" onClick={ () => setSanctionInfo(null) }>
+                            Verstanden
+                        </AlignButton.Root>
+                    </div>
+                </AlignSurface.Panel>
             </div>
         </DraggableWindow>
     );

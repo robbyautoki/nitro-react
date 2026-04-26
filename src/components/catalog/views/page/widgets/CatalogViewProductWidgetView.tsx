@@ -90,16 +90,16 @@ export const CatalogViewProductWidgetView: FC<CatalogViewProductWidgetViewProps>
     if(currentOffer.pricingModel === Offer.PRICING_MODEL_BUNDLE)
     {
         return (
-            <div className="w-full h-full overflow-hidden bg-muted p-2 rounded">
+            <div className="w-full h-full overflow-hidden rounded-16 bg-bg-weak-50 p-2">
                 <div className="grid grid-cols-4 gap-1.5">
                     { (currentOffer.products.length > 0) && currentOffer.products.map((product, index) =>
                     {
                         const imageUrl = product.getIconUrl(currentOffer);
 
                         return (
-                            <div key={ index } className="relative flex items-center justify-center rounded-lg border bg-card overflow-hidden aspect-square bg-center bg-no-repeat" style={ imageUrl ? { backgroundImage: `url(${ imageUrl })` } : undefined }>
+                            <div key={ index } className="relative flex items-center justify-center overflow-hidden rounded-10 bg-bg-white-0 shadow-regular-xs ring-1 ring-stroke-soft-200 aspect-square bg-center bg-no-repeat" style={ imageUrl ? { backgroundImage: `url(${ imageUrl })` } : undefined }>
                                 { (product.productCount > 1) &&
-                                    <span className="absolute top-0.5 right-0.5 text-[9px] font-bold bg-primary text-primary-foreground rounded px-1 leading-tight">
+                                    <span className="absolute top-0.5 right-0.5 rounded-md bg-primary-base px-1 text-subheading-2xs leading-tight text-static-white">
                                         { product.productCount }
                                     </span> }
                             </div>

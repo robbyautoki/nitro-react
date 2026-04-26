@@ -1,7 +1,8 @@
+import { RoomControllerLevel } from '@nitrots/nitro-renderer';
 import { FC } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { AvatarInfoUser, LocalizeText } from '../../../../../api';
-import { Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text } from '../../../../../common';
+import { AvatarInfoUser, GetRoomSession, LocalizeText } from '../../../../../api';
+import { Button, Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text } from '../../../../../common';
 
 interface InfoStandWidgetBotViewProps
 {
@@ -14,6 +15,17 @@ export const InfoStandWidgetBotView: FC<InfoStandWidgetBotViewProps> = props =>
     const { avatarInfo = null, onClose = null } = props;
 
     if(!avatarInfo) return null;
+
+    const canEditPatrol = avatarInfo.amIOwner || avatarInfo.amIAnyRoomController || (avatarInfo.roomControllerLevel >= RoomControllerLevel.GUEST);
+
+    const openPatrolEditor = () =>
+    {
+        const roomSession = GetRoomSession();
+
+        if(!roomSession) return;
+
+        roomSession.sendChatMessage(`:patrolbot open ${ Math.abs(avatarInfo.webID) }`, 0);
+    };
 
     return (
         <Column className="nitro-infostand rounded">
@@ -48,6 +60,13 @@ export const InfoStandWidgetBotView: FC<InfoStandWidgetBotViewProps> = props =>
                         <Text variant="white" small wrap>
                             { LocalizeText('infostand.text.handitem', [ 'item' ], [ LocalizeText('handitem' + avatarInfo.carryItem) ]) }
                         </Text>
+                    </Column> }
+                { canEditPatrol &&
+                    <Column gap={ 1 }>
+                        <hr className="m-0" />
+                        <Button variant="secondary" className="w-full" onClick={ openPatrolEditor }>
+                            Patrouille bearbeiten
+                        </Button>
                     </Column> }
             </Column>
         </Column>

@@ -1,12 +1,10 @@
 import { FC, useState } from 'react';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
+import { Brain, Clock, Dumbbell, Flame, Gauge, Sparkles, Target, Zap } from 'lucide-react';
 import { useMessageEvent } from '../../hooks';
-import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
-import { Frame, FramePanel } from '../ui/frame';
-import { Button } from '../ui/button';
-import { Progress } from '../ui/progress';
-import { Separator } from '../ui/separator';
-import { Dumbbell, X } from 'lucide-react';
+import { AlignGameWindow, MetricTile } from '../align-game-ui';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignProgress from '@/align-ui/components/ui/progress-bar';
 
 interface GymData {
     energy: number;
@@ -23,23 +21,23 @@ interface GymData {
     maxStatLevel: number;
 }
 
-const StatBar: FC<{ label: string; value: number; max: number; color: string; emoji: string }> = ({ label, value, max, color, emoji }) => (
-    <div className="space-y-1">
-        <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{emoji} {label}</span>
-            <span className={ `text-xs font-bold ${color}` }>{value}/{max}</span>
+const StatBar: FC<{ label: string; value: number; max: number; icon: typeof Flame; color: 'orange' | 'green' | 'blue' }> = ({ label, value, max, icon: Icon, color }) => (
+    <div className="space-y-2 rounded-xl border border-stroke-soft-200 bg-bg-white-0 p-3">
+        <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-paragraph-sm text-text-strong-950">
+                <Icon className="size-4 text-text-sub-600" />
+                { label }
+            </div>
+            <span className="text-label-xs tabular-nums text-text-sub-600">{ value }/{ max }</span>
         </div>
-        <div className="h-2 rounded-full bg-muted overflow-hidden">
-            <div className={ `h-full rounded-full transition-all duration-500 ${color.replace('text-', 'bg-')}` }
-                style={{ width: `${(value / max) * 100}%` }} />
-        </div>
+        <AlignProgress.Root value={ value } max={ max } color={ color } className="h-2" />
     </div>
 );
 
 export const GymInfoView: FC<{}> = () =>
 {
-    const [isVisible, setIsVisible] = useState(false);
-    const [data, setData] = useState<GymData | null>(null);
+    const [ isVisible, setIsVisible ] = useState(false);
+    const [ data, setData ] = useState<GymData | null>(null);
 
     useMessageEvent<NotificationDialogMessageEvent>(NotificationDialogMessageEvent, event =>
     {
@@ -68,103 +66,76 @@ export const GymInfoView: FC<{}> = () =>
 
     const tickMin = Math.floor(data.tickSeconds / 60);
     const tickSec = data.tickSeconds % 60;
-    const tickStr = tickSec > 0 ? `${tickMin}:${String(tickSec).padStart(2, '0')}` : `${tickMin}`;
+    const tickStr = tickSec > 0 ? `${ tickMin }:${ String(tickSec).padStart(2, '0') }` : `${ tickMin }`;
     const totalMin = data.totalTicks * 3;
     const hours = Math.floor(totalMin / 60);
     const mins = totalMin % 60;
-    const timeStr = hours > 0 ? `${hours}h ${mins}min` : `${mins} Min`;
+    const timeStr = hours > 0 ? `${ hours }h ${ mins }min` : `${ mins } Min`;
+    const xpPercent = Math.round((data.gymXp / data.xpPerLevel) * 100);
 
     return (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center pointer-events-auto">
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsVisible(false)} />
-            <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-                <div className="w-[460px]">
-                    <Frame className="relative">
-                        <div className="drag-handler absolute inset-0 cursor-move" />
-                        <FramePanel className="overflow-hidden p-0! relative z-10">
-                            <div className="flex items-center justify-between px-4 py-2.5 border-b">
-                                <div className="flex items-center gap-2">
-                                    <Dumbbell className="size-4 text-emerald-500" />
-                                    <span className="text-sm font-semibold">Fitness-Studio</span>
-                                </div>
-                                <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={() => setIsVisible(false)}>
-                                    <X className="size-3.5" />
-                                </button>
+        <div className="fixed inset-0 z-[250] flex items-center justify-center bg-overlay backdrop-blur-[10px] pointer-events-auto" onClick={ () => setIsVisible(false) }>
+            <div onClick={ event => event.stopPropagation() }>
+                <AlignGameWindow
+                    title="Fitness-Studio"
+                    subtitle={ `Training: ${ timeStr }` }
+                    icon={ <Dumbbell className="size-4" /> }
+                    widthClassName="w-[460px] max-w-[94vw]"
+                    onClose={ () => setIsVisible(false) }
+                >
+                    <div className="space-y-4">
+                        <div className="grid grid-cols-3 gap-2">
+                            <MetricTile icon={ <Zap className="size-4 text-warning-base" /> } value={ data.energy } label="Energie" />
+                            <MetricTile icon={ <Sparkles className="size-4 text-information-base" /> } value={ `${ data.gymXp }/${ data.xpPerLevel }` } label="XP" />
+                            <MetricTile icon={ <Target className="size-4 text-success-base" /> } value={ data.statPoints } label="Punkte" />
+                        </div>
+                        <div className="space-y-2 rounded-xl border border-stroke-soft-200 bg-bg-white-0 p-3">
+                            <div className="flex items-center justify-between gap-3 text-paragraph-xs text-text-sub-600">
+                                <span>XP-Fortschritt</span>
+                                <span className="tabular-nums">{ xpPercent }%</span>
                             </div>
-
-                            <div className="px-4 py-3 space-y-4 max-h-[70vh] overflow-auto">
-                                <div className="grid grid-cols-3 gap-2">
-                                    <div className="flex flex-col items-center p-3 rounded-lg border">
-                                        <span className="text-lg">⚡</span>
-                                        <span className="text-sm font-bold text-orange-500">{data.energy}</span>
-                                        <span className="text-[10px] text-muted-foreground">Energie</span>
-                                    </div>
-                                    <div className="flex flex-col items-center p-3 rounded-lg border">
-                                        <span className="text-lg">✨</span>
-                                        <span className="text-sm font-bold text-cyan-500">{data.gymXp}/{data.xpPerLevel}</span>
-                                        <span className="text-[10px] text-muted-foreground">XP</span>
-                                    </div>
-                                    <div className="flex flex-col items-center p-3 rounded-lg border">
-                                        <span className="text-lg">🎯</span>
-                                        <span className="text-sm font-bold text-emerald-500">{data.statPoints}</span>
-                                        <span className="text-[10px] text-muted-foreground">Punkte</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between mb-1">
-                                        <span className="text-xs text-muted-foreground">XP-Fortschritt</span>
-                                        <span className="text-[10px] text-muted-foreground">{Math.round((data.gymXp / data.xpPerLevel) * 100)}%</span>
-                                    </div>
-                                    <Progress value={(data.gymXp / data.xpPerLevel) * 100} className="h-3" />
-                                </div>
-
-                                <div className="space-y-2.5">
-                                    <div className="text-xs font-semibold text-muted-foreground">Deine Stats</div>
-                                    <StatBar label="Stärke" value={data.strength} max={data.maxStatLevel} color="text-orange-500" emoji="🔥" />
-                                    <StatBar label="Ausdauer" value={data.stamina} max={data.maxStatLevel} color="text-emerald-500" emoji="🏃" />
-                                    <StatBar label="Intelligenz" value={data.intellect} max={data.maxStatLevel} color="text-purple-500" emoji="🧠" />
-                                </div>
-
-                                <Separator />
-
-                                <div className="space-y-2 p-3 rounded-lg border">
-                                    <div className="text-xs font-semibold text-muted-foreground">So funktioniert's</div>
-                                    <div className="flex flex-col gap-1.5 text-[11px] text-muted-foreground leading-relaxed">
-                                        <p>🏋️ Stelle dich auf ein <span className="text-foreground font-medium">Trainingsgerät</span></p>
-                                        <p>⏱️ Alle <span className="font-medium text-cyan-500">{tickStr} Min</span> → <span className="font-medium text-cyan-500">+{data.xpPerTick} XP</span>, <span className="font-medium text-orange-500">-{data.energyCost} Energie</span></p>
-                                        <p>⬆️ Bei <span className="font-medium text-cyan-500">{data.xpPerLevel} XP</span> → <span className="font-medium text-emerald-500">Stat-Punkt</span></p>
-                                        <p>📊 Verteile mit <span className="font-mono text-foreground">:gym add strength/stamina/intellect</span></p>
-                                        <p>🔝 Max <span className="font-medium text-purple-500">Level {data.maxStatLevel}</span> pro Stat</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2 p-3 rounded-lg border">
-                                    <div className="text-xs font-semibold text-muted-foreground">Commands</div>
-                                    <div className="grid grid-cols-2 gap-1.5 text-[11px]">
-                                        {[
-                                            [':gym', 'Stats anzeigen'],
-                                            [':gym info', 'Dieses Fenster'],
-                                            [':gym add strength', 'Stärke +1'],
-                                            [':gym add stamina', 'Ausdauer +1'],
-                                            [':gym add intellect', 'Intelligenz +1'],
-                                        ].map(([cmd, desc]) => (
-                                            <div key={cmd} className="flex items-center gap-1.5">
-                                                <span className="font-mono text-foreground shrink-0">{cmd}</span>
-                                                <span className="text-muted-foreground">— {desc}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="text-center text-[10px] text-muted-foreground">
-                                    Trainingszeit: {timeStr}
-                                </div>
+                            <AlignProgress.Root value={ data.gymXp } max={ data.xpPerLevel } color="blue" className="h-2.5" />
+                        </div>
+                        <section className="space-y-2">
+                            <div className="text-label-xs uppercase text-text-soft-400">Deine Stats</div>
+                            <StatBar label="Stärke" value={ data.strength } max={ data.maxStatLevel } icon={ Flame } color="orange" />
+                            <StatBar label="Ausdauer" value={ data.stamina } max={ data.maxStatLevel } icon={ Gauge } color="green" />
+                            <StatBar label="Intelligenz" value={ data.intellect } max={ data.maxStatLevel } icon={ Brain } color="blue" />
+                        </section>
+                        <AlignDivider.Root />
+                        <section className="space-y-2 rounded-xl border border-stroke-soft-200 bg-bg-weak-50 p-3">
+                            <div className="text-label-xs uppercase text-text-soft-400">So funktioniert&apos;s</div>
+                            <div className="space-y-1.5 text-paragraph-xs text-text-sub-600">
+                                <p>Stelle dich auf ein <span className="font-medium text-text-strong-950">Trainingsgerät</span>.</p>
+                                <p>Alle <span className="font-medium text-information-base">{ tickStr } Min</span>: <span className="font-medium text-information-base">+{ data.xpPerTick } XP</span>, <span className="font-medium text-warning-base">-{ data.energyCost } Energie</span>.</p>
+                                <p>Bei <span className="font-medium text-information-base">{ data.xpPerLevel } XP</span> erhältst du einen <span className="font-medium text-success-base">Stat-Punkt</span>.</p>
+                                <p>Verteile Punkte mit <span className="font-mono text-text-strong-950">:gym add strength/stamina/intellect</span>.</p>
+                                <p>Maximal <span className="font-medium text-feature-base">Level { data.maxStatLevel }</span> pro Stat.</p>
                             </div>
-                        </FramePanel>
-                    </Frame>
-                </div>
-            </DraggableWindow>
+                        </section>
+                        <section className="space-y-2 rounded-xl border border-stroke-soft-200 bg-bg-white-0 p-3">
+                            <div className="flex items-center gap-2 text-label-xs uppercase text-text-soft-400">
+                                <Clock className="size-3.5" />
+                                Commands
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-paragraph-xs">
+                                { [
+                                    [ ':gym', 'Stats anzeigen' ],
+                                    [ ':gym info', 'Dieses Fenster' ],
+                                    [ ':gym add strength', 'Stärke +1' ],
+                                    [ ':gym add stamina', 'Ausdauer +1' ],
+                                    [ ':gym add intellect', 'Intelligenz +1' ],
+                                ].map(([ cmd, desc ]) => (
+                                    <div key={ cmd } className="min-w-0 rounded-lg bg-bg-weak-50 px-2.5 py-2">
+                                        <div className="truncate font-mono text-text-strong-950">{ cmd }</div>
+                                        <div className="truncate text-text-sub-600">{ desc }</div>
+                                    </div>
+                                )) }
+                            </div>
+                        </section>
+                    </div>
+                </AlignGameWindow>
+            </div>
         </div>
     );
 };

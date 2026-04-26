@@ -15,15 +15,15 @@ export const CatalogSubcategoryChipsView: FC<{}> = () =>
     if(visibleChildren.length < 2) return null;
 
     return (
-        <div className="flex items-center gap-1.5 px-4 py-1.5 overflow-x-auto catalog-chip-scroll shrink-0 border-b border-border/20">
+        <div className="catalog-chip-scroll flex shrink-0 items-center gap-1.5 overflow-x-auto border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-2">
             { visibleChildren.map((child: ICatalogNode, i: number) =>
             (
                 <button
                     key={ i }
-                    className={ `shrink-0 px-3 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer select-none ${
+                    className={ `shrink-0 cursor-pointer select-none rounded-lg px-3 py-1 text-label-xs transition-colors ${
                         child.isActive
-                            ? 'bg-primary/10 text-primary'
-                            : 'text-muted-foreground hover:bg-accent/50'
+                            ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs'
+                            : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950'
                     }` }
                     onClick={ () => activateNode(child) }
                 >

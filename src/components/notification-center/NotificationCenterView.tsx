@@ -1,9 +1,11 @@
 import { FC, ReactNode, useMemo } from 'react';
-import { NotificationBubbleType } from '../../api';
+import { NotificationAlertType, NotificationBubbleType } from '../../api';
 import { useNotification } from '../../hooks';
 import { GetAlertLayout } from './views/alert-layouts/GetAlertLayout';
 import { GetBubbleLayout } from './views/bubble-layouts/GetBubbleLayout';
 import { GetConfirmLayout } from './views/confirm-layouts/GetConfirmLayout';
+
+const MAX_VISIBLE_BUBBLES = 3;
 
 export const NotificationCenterView: FC<{}> = props =>
 {
@@ -17,33 +19,48 @@ export const NotificationCenterView: FC<{}> = props =>
 
         for(const alert of alerts)
         {
+            if(alert.alertType === NotificationAlertType.MOTD) continue;
+
             const element = GetAlertLayout(alert, () => closeAlert(alert));
 
             elements.push(element);
         }
 
-        return elements;
+        return elements.length ? elements : null;
+    }, [ alerts, closeAlert ]);
+
+    const getMotdAlerts = useMemo(() =>
+    {
+        if(!alerts || !alerts.length) return null;
+
+        const elements: ReactNode[] = [];
+
+        for(const alert of alerts)
+        {
+            if(alert.alertType !== NotificationAlertType.MOTD) continue;
+
+            const element = GetAlertLayout(alert, () => closeAlert(alert));
+
+            elements.push(element);
+        }
+
+        return elements.length ? elements : null;
     }, [ alerts, closeAlert ]);
 
     const getBubbleAlerts = useMemo(() =>
     {
         if(!bubbleAlerts || !bubbleAlerts.length) return null;
 
-        const elements: ReactNode[] = [];
-
-        for(const alert of bubbleAlerts)
+        // CLUBGIFT immer zuerst, max MAX_VISIBLE_BUBBLES sichtbar
+        const sorted = [ ...bubbleAlerts ].sort((a, b) =>
         {
-            const element = GetBubbleLayout(alert, () => closeBubbleAlert(alert));
+            const aClub = a.notificationType === NotificationBubbleType.CLUBGIFT ? -1 : 0;
+            const bClub = b.notificationType === NotificationBubbleType.CLUBGIFT ? -1 : 0;
+            return aClub - bClub;
+        });
 
-            if(alert.notificationType === NotificationBubbleType.CLUBGIFT)
-            {
-                elements.unshift(element);
-
-                continue;
-            }
-
-            elements.push(element);
-        }
+        const visible = sorted.slice(0, MAX_VISIBLE_BUBBLES);
+        const elements: ReactNode[] = visible.map(alert => GetBubbleLayout(alert, () => closeBubbleAlert(alert)));
 
         return elements;
     }, [ bubbleAlerts, closeBubbleAlert ]);
@@ -66,9 +83,14 @@ export const NotificationCenterView: FC<{}> = props =>
 
     return (
         <>
-            <div className="flex flex-col gap-1 pointer-events-none">
+            <div className="nitro-toast-stack pointer-events-none">
                 { getBubbleAlerts }
             </div>
+            { getMotdAlerts &&
+                <div className="nitro-motd-toast-stack">
+                    { getMotdAlerts }
+                </div>
+            }
             { getConfirms }
             { getAlerts }
         </>

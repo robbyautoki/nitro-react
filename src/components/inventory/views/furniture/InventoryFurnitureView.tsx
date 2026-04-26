@@ -1,12 +1,18 @@
 import { IRoomSession, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { ArrowUp, CheckSquare, Package, Plus, Store, Tag, Trash2, Wrench, X } from 'lucide-react';
 import { attemptItemPlacement, CreateLinkEvent, FurniCategory, GetConfiguration, GetRoomEngine, GetSessionDataManager, GroupItem, LocalizeText, UnseenItemCategory } from '../../../../api';
 import { getAuthHeaders } from '../../../../api/utils/SessionTokenManager';
 import { LayoutRoomPreviewerView } from '../../../../common';
 import { useInventoryFurni, useInventoryUnseenTracker } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
-import { FaWrench, FaTrash, FaCheckSquare, FaTimes, FaBolt, FaStore, FaArrowUp, FaPlus, FaTag } from 'react-icons/fa';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignProgress from '@/align-ui/components/ui/progress-bar';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import { cn } from '@/align-ui/utils/cn';
 import { InventoryDeleteDialog } from './InventoryDeleteDialog';
 import { InventoryCategoryEmptyView } from '../InventoryCategoryEmptyView';
 import { InventoryFurnitureItemView } from './InventoryFurnitureItemView';
@@ -17,6 +23,13 @@ interface InventoryFurnitureViewProps
     roomSession: IRoomSession;
     roomPreviewer: RoomPreviewer;
 }
+
+const SORT_OPTIONS = [
+    { id: 'recent' as const, label: 'Neueste' },
+    { id: 'name' as const, label: 'A-Z' },
+    { id: 'count' as const, label: 'Menge' },
+    { id: 'rarity' as const, label: 'Rarität' },
+];
 
 export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 {
@@ -39,7 +52,6 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 
     const categoryFilteredItems = filterByCategory(groupItems, activeCategory);
 
-    // Sort the filtered items
     const sortedItems = useMemo(() =>
     {
         const items = [ ...filteredGroupItems ];
@@ -61,7 +73,6 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
         }
     }, [ filteredGroupItems, sortMode ]);
 
-    // Inspector data for selected item
     const inspectorData = useMemo(() =>
     {
         if(!selectedItem) return null;
@@ -133,7 +144,10 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                 }
             }
         }
-        catch(err) { console.error('[Inventory] Delete failed:', err); }
+        catch(err)
+        {
+            console.error('[Inventory] Delete failed:', err);
+        }
     }, [ selectedItem, setSelectedItem, setGroupItems ]);
 
     const handleBatchAssign = useCallback(async (categoryId: number) =>
@@ -151,7 +165,10 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             });
             for(const type of types) assignItem(type, categoryId);
         }
-        catch(err) { console.error('[Inventory] Batch assign failed:', err); }
+        catch(err)
+        {
+            console.error('[Inventory] Batch assign failed:', err);
+        }
         setShowCategoryDropdown(false);
     }, [ selectedGroups, assignItem ]);
 
@@ -166,7 +183,13 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
 
     const batchDeleteItemCount = Array.from(selectedGroups).reduce((sum, g) => sum + g.items.length, 0);
 
-    // Room previewer
+    const durabilityColor: 'red' | 'orange' | 'green' = durabilityInfo
+        ? durabilityInfo.remaining < 30 ? 'red' : durabilityInfo.remaining < 60 ? 'orange' : 'green'
+        : 'green';
+    const durabilityToneClass = durabilityInfo
+        ? durabilityInfo.remaining < 30 ? 'text-error-base' : durabilityInfo.remaining < 60 ? 'text-warning-base' : 'text-success-base'
+        : 'text-text-soft-400';
+
     useEffect(() =>
     {
         if(!selectedItem || !roomPreviewer) return;
@@ -201,22 +224,32 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
         }
     }, [ roomPreviewer, selectedItem ]);
 
-    // Durability
     useEffect(() =>
     {
-        if(!selectedItem) { setDurabilityInfo(null); return; }
+        if(!selectedItem)
+        {
+            setDurabilityInfo(null); return;
+        }
         const lastItem = selectedItem.getLastItem();
         if(!lastItem) return;
         let cancelled = false;
         const cmsUrl = GetConfiguration<string>('url.prefix', '');
         fetch(`${ cmsUrl }/api/furniture/durability?itemId=${ lastItem.id }`)
             .then(res => res.json())
-            .then(data => { if(!cancelled && data?.durabilityRemaining !== undefined) setDurabilityInfo({ remaining: data.durabilityRemaining, status: data.status, repairCost: data.repairCost }); else if(!cancelled) setDurabilityInfo(null); })
-            .catch(() => { if(!cancelled) setDurabilityInfo(null); });
-        return () => { cancelled = true; };
+            .then(data =>
+            {
+                if(!cancelled && data?.durabilityRemaining !== undefined) setDurabilityInfo({ remaining: data.durabilityRemaining, status: data.status, repairCost: data.repairCost }); else if(!cancelled) setDurabilityInfo(null);
+            })
+            .catch(() =>
+            {
+                if(!cancelled) setDurabilityInfo(null);
+            });
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ selectedItem ]);
 
-    // Unseen
     useEffect(() =>
     {
         if(!selectedItem || !selectedItem.hasUnseenItems) return;
@@ -237,84 +270,120 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
         return () => setIsVisible(false);
     }, []);
 
-    const addToHotbar = useCallback(() =>
+    useEffect(() =>
     {
-        if(!selectedItem) return;
-        const sessionData = GetSessionDataManager();
-        const floorData = sessionData.getFloorItemData(selectedItem.type);
-        const wallData = !floorData ? sessionData.getWallItemData(selectedItem.type) : null;
-        const data = floorData || wallData;
-        if(!data) return;
-        let slots: any[] = [];
-        try { slots = JSON.parse(localStorage.getItem('habbo_hotbar') || '[]'); } catch {}
-        const emptyIndex = slots.findIndex((s: any) => !s || s.item_base_id === null);
-        const targetSlot = emptyIndex >= 0 ? emptyIndex : undefined;
-        window.dispatchEvent(new CustomEvent('hotbar:set-slot', {
-            detail: { slot: targetSlot, item_base_id: data.id, public_name: data.name, item_name: data.className, sprite_id: selectedItem.type },
-        }));
+        setShowInspectorCatPicker(false);
     }, [ selectedItem ]);
 
-    // Close inspector cat picker when selectedItem changes
-    useEffect(() => { setShowInspectorCatPicker(false); }, [ selectedItem ]);
+    if(!groupItems || !groupItems.length) return <InventoryCategoryEmptyView title={ LocalizeText('inventory.empty.title') } desc={ LocalizeText('inventory.empty.desc') } icon={ Package } showImage />;
 
-    if(!groupItems || !groupItems.length) return <InventoryCategoryEmptyView title={ LocalizeText('inventory.empty.title') } desc={ LocalizeText('inventory.empty.desc') } />;
-
-    // Inspector category data
     const selectedAssignmentKey = inspectorData?.assignmentKey ?? 0;
     const selectedItemCategories = inspectorData ? getItemCategories(selectedAssignmentKey) : [];
     const assignedCats = categories.filter(c => selectedItemCategories.includes(c.id));
     const unassignedCats = categories.filter(c => !selectedItemCategories.includes(c.id));
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-            {/* Toolbar */}
-            <div className="inv-toolbar-row">
+        <div className="flex min-h-0 flex-1 flex-col">
+            { /* Toolbar */ }
+            <div className="flex shrink-0 items-center gap-1.5 border-b border-stroke-soft-200 bg-bg-weak-50 px-2 py-1.5">
                 <InventoryFurnitureSearchView groupItems={ categoryFilteredItems } setGroupItems={ setFilteredGroupItems } />
-                <div className="inv-toolbar-sep" />
-                { (['recent', 'name', 'count', 'rarity'] as const).map(mode => (
-                    <div key={ mode } className={ 'inv-sort-btn' + (sortMode === mode ? ' active' : '') } onClick={ () => setSortMode(mode) }>
-                        { mode === 'recent' ? 'Neueste' : mode === 'name' ? 'A-Z' : mode === 'count' ? 'Menge' : 'Rarität' }
-                    </div>
-                )) }
-                <div className="inv-toolbar-sep" />
-                <div
-                    className={ 'inv-multiselect-toggle' + (multiSelectMode ? ' active' : '') }
-                    onClick={ () => { if(multiSelectMode) clearMultiSelect(); else setMultiSelectMode(true); } }
-                >
-                    <FaCheckSquare style={{ fontSize: '10px' }} />
-                    <span>Multi</span>
+                <div className="flex items-center gap-0.5">
+                    { SORT_OPTIONS.map(opt => (
+                        <AlignButton.Root
+                            key={ opt.id }
+                            type="button"
+                            variant={ sortMode === opt.id ? 'primary' : 'neutral' }
+                            mode={ sortMode === opt.id ? 'lighter' : 'ghost' }
+                            size="xxsmall"
+                            className="h-7 px-2 text-[10px]"
+                            onClick={ () => setSortMode(opt.id) }
+                        >
+                            { opt.label }
+                        </AlignButton.Root>
+                    )) }
                 </div>
-                <span className="inv-count">{ sortedItems.length }/{ groupItems.length }</span>
+                <AlignButton.Root
+                    type="button"
+                    variant={ multiSelectMode ? 'primary' : 'neutral' }
+                    mode={ multiSelectMode ? 'lighter' : 'stroke' }
+                    size="xxsmall"
+                    className="h-7 gap-1 text-[10px]"
+                    onClick={ () =>
+                    {
+                        if(multiSelectMode) clearMultiSelect(); else setMultiSelectMode(true);
+                    } }
+                >
+                    <CheckSquare className="size-3" />
+                    Multi
+                </AlignButton.Root>
+                <AlignBadge.Root color="gray" variant="lighter" size="small" className="ml-auto h-6">
+                    { sortedItems.length }/{ groupItems.length }
+                </AlignBadge.Root>
             </div>
-
-            {/* Multi toolbar */}
-            { multiSelectMode && selectedGroups.size > 0 &&
-                <div className="inv-multi-toolbar">
-                    <span className="inv-multi-count">{ selectedGroups.size } ausgewählt</span>
-                    <div className="inv-multi-actions">
-                        { categories.length > 0 &&
-                            <div className="inv-multi-dropdown-wrap">
-                                <button className="inv-multi-btn" onClick={ () => setShowCategoryDropdown(!showCategoryDropdown) }>Kategorie</button>
-                                { showCategoryDropdown &&
-                                    <div className="inv-multi-dropdown">
+            { /* Multi toolbar */ }
+            { multiSelectMode && selectedGroups.size > 0 && (
+                <div className="flex shrink-0 items-center justify-between border-b border-stroke-soft-200 bg-primary-alpha-10 px-3 py-1.5">
+                    <AlignBadge.Root color="blue" variant="lighter" size="small">
+                        { selectedGroups.size } ausgewählt
+                    </AlignBadge.Root>
+                    <div className="flex items-center gap-1.5">
+                        { categories.length > 0 && (
+                            <div className="relative">
+                                <AlignButton.Root
+                                    type="button"
+                                    variant="neutral"
+                                    mode="stroke"
+                                    size="xxsmall"
+                                    className="h-7 gap-1 text-[10px]"
+                                    onClick={ () => setShowCategoryDropdown(!showCategoryDropdown) }
+                                >
+                                    <Tag className="size-3" />
+                                    Kategorie
+                                </AlignButton.Root>
+                                { showCategoryDropdown && (
+                                    <div className="absolute bottom-full left-0 z-50 mb-1 min-w-[160px] overflow-hidden rounded-xl bg-bg-white-0 py-1 shadow-regular-md ring-1 ring-inset ring-stroke-soft-200">
                                         { categories.map(cat => (
-                                            <div key={ cat.id } className="inv-multi-dropdown-item" onClick={ () => handleBatchAssign(cat.id) }>
-                                                <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: cat.color, flexShrink: 0 }} />
+                                            <button
+                                                key={ cat.id }
+                                                type="button"
+                                                className="flex w-full items-center gap-2 px-3 py-1.5 text-paragraph-xs text-text-sub-600 transition-colors hover:bg-bg-weak-50"
+                                                onClick={ () => handleBatchAssign(cat.id) }
+                                            >
+                                                <span className="size-2 shrink-0 rounded-full" style={ { backgroundColor: cat.color } } />
                                                 { cat.name }
-                                            </div>
+                                            </button>
                                         )) }
-                                    </div> }
-                            </div> }
-                        <button className="inv-multi-btn danger" onClick={ () => setShowBatchDeleteDialog(true) }>
-                            <FaTrash style={{ fontSize: 9, marginRight: 3 }} />Löschen
-                        </button>
-                        <button className="inv-multi-btn ghost" onClick={ clearMultiSelect }>Abbrechen</button>
+                                    </div>
+                                ) }
+                            </div>
+                        ) }
+                        <AlignButton.Root
+                            type="button"
+                            variant="error"
+                            mode="filled"
+                            size="xxsmall"
+                            className="h-7 gap-1 text-[10px]"
+                            onClick={ () => setShowBatchDeleteDialog(true) }
+                        >
+                            <Trash2 className="size-3" />
+                            Löschen
+                        </AlignButton.Root>
+                        <AlignButton.Root
+                            type="button"
+                            variant="neutral"
+                            mode="ghost"
+                            size="xxsmall"
+                            className="h-7 text-[10px]"
+                            onClick={ clearMultiSelect }
+                        >
+                            Abbrechen
+                        </AlignButton.Root>
                     </div>
-                </div> }
-
-            {/* Item Grid — uses sorted items */}
-            <div className="inv-items-scroll">
-                <div className="inv-items-wrap">
+                </div>
+            ) }
+            { /* Item Grid */ }
+            <div className="flex-1 overflow-y-auto overflow-x-hidden bg-bg-white-0">
+                <div className="flex flex-wrap p-px">
                     { sortedItems.length > 0
                         ? sortedItems.map((item, index) =>
                             <InventoryFurnitureItemView
@@ -324,141 +393,212 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
                                 isMultiSelected={ selectedGroups.has(item) }
                                 onMultiToggle={ toggleMultiSelect }
                             />)
-                        : <div className="inv-empty">
-                            <span className="inv-empty-icon">📦</span>
-                            <span className="inv-empty-text">Keine Möbel gefunden</span>
-                        </div>
+                        : (
+                            <InventoryCategoryEmptyView
+                                title="Keine Möbel gefunden"
+                                desc="Passe deine Suche oder Filter an"
+                                icon={ Package }
+                                className="w-full"
+                            />
+                        )
                     }
                 </div>
             </div>
-
-            {/* Inspector Panel */}
-            { !multiSelectMode && selectedItem && inspectorData &&
-                <div className="inv-inspector">
-                    <div className="inv-inspector-frame">
-                        <div className="inv-inspector-detail">
-                            <div className="inv-inspector-preview">
+            { /* Inspector Panel */ }
+            { !multiSelectMode && selectedItem && inspectorData && (
+                <div className="shrink-0 border-t border-stroke-soft-200 bg-bg-weak-50 p-2">
+                    <div className="overflow-hidden rounded-xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                        <div className="flex gap-3 p-3">
+                            <div className="relative flex size-[72px] shrink-0 items-center justify-center overflow-hidden rounded-lg bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200">
                                 <LayoutRoomPreviewerView roomPreviewer={ roomPreviewer } height={ 72 } />
-                                { inspectorData.isLtd &&
-                                    <span className="inv-inspector-ltd-corner">LTD</span> }
+                                { inspectorData.isLtd && (
+                                    <span className="absolute right-0 top-0 rounded-bl-md bg-warning-base px-1.5 text-[8px] font-bold text-static-white">LTD</span>
+                                ) }
                             </div>
-                            <div className="inv-inspector-info">
-                                <div className="inv-inspector-title-row">
-                                    <span className="inv-inspector-name">{ selectedItem.name }</span>
-                                    <span className="inv-inspector-count-label">{ selectedItem.getUnlockedCount() }×</span>
-                                    <button className="inv-inspector-close" onClick={ () => setSelectedItem(null) }>
-                                        <FaTimes />
-                                    </button>
+                            <div className="flex min-w-0 flex-1 flex-col gap-1">
+                                <div className="flex items-baseline gap-1.5">
+                                    <span className="truncate text-label-sm font-semibold text-text-strong-950">{ selectedItem.name }</span>
+                                    <span className="text-label-md font-bold tabular-nums text-text-soft-400">{ selectedItem.getUnlockedCount() }×</span>
+                                    <AlignButton.Root
+                                        type="button"
+                                        variant="neutral"
+                                        mode="ghost"
+                                        size="xxsmall"
+                                        className="ml-auto size-6 shrink-0 px-0"
+                                        onClick={ () => setSelectedItem(null) }
+                                    >
+                                        <X className="size-3.5" />
+                                    </AlignButton.Root>
                                 </div>
-                                <div className="inv-inspector-meta">
-                                    <span className="inv-inspector-code">{ inspectorData.className }</span>
-                                    { inspectorData.isLtd &&
-                                        <span className="inv-inspector-ltd">#{ selectedItem.stuffData.uniqueNumber }/{ selectedItem.stuffData.uniqueSeries }</span> }
+                                <div className="flex items-center gap-1 flex-wrap">
+                                    <span className="rounded bg-bg-weak-50 px-1.5 py-0.5 font-mono text-[9px] text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">{ inspectorData.className }</span>
+                                    { inspectorData.isLtd && (
+                                        <AlignBadge.Root color="orange" variant="lighter" size="small" className="h-4 px-1.5 text-[9px]">
+                                            #{ selectedItem.stuffData.uniqueNumber }/{ selectedItem.stuffData.uniqueSeries }
+                                        </AlignBadge.Root>
+                                    ) }
                                 </div>
-                                <div className="inv-inspector-meta">
-                                    <span className="inv-inspector-pill">{ inspectorData.isWall ? 'Wand' : 'Boden' }</span>
-                                    { !inspectorData.isWall && inspectorData.furniData &&
-                                        <span className="inv-inspector-pill">{ (inspectorData.furniData as any).dimX || 1 }×{ (inspectorData.furniData as any).dimY || 1 }</span> }
+                                <div className="flex items-center gap-1 flex-wrap">
+                                    <AlignBadge.Root color="gray" variant="lighter" size="small" className="h-4 px-1.5 text-[9px]">
+                                        { inspectorData.isWall ? 'Wand' : 'Boden' }
+                                    </AlignBadge.Root>
+                                    { !inspectorData.isWall && inspectorData.furniData && (
+                                        <AlignBadge.Root color="gray" variant="lighter" size="small" className="h-4 px-1.5 text-[9px]">
+                                            { (inspectorData.furniData as any).dimX || 1 }×{ (inspectorData.furniData as any).dimY || 1 }
+                                        </AlignBadge.Root>
+                                    ) }
                                 </div>
-                                {/* Category Chips */}
-                                <div className="inv-inspector-categories">
+                                { /* Category Chips */ }
+                                <div className="flex items-center gap-1 flex-wrap">
                                     { assignedCats.map(cat => (
-                                        <span key={ cat.id } className="inv-cat-chip">
-                                            <span className="cat-chip-dot" style={{ backgroundColor: cat.color }} />
+                                        <span
+                                            key={ cat.id }
+                                            className="inline-flex items-center gap-1 rounded-full bg-bg-weak-50 py-0.5 pl-1.5 pr-1 text-[9px] text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200"
+                                        >
+                                            <span className="size-1.5 rounded-full" style={ { backgroundColor: cat.color } } />
                                             { cat.name }
-                                            <span className="cat-chip-remove" onClick={ () => toggleAssignment(selectedAssignmentKey, cat.id) }>×</span>
+                                            <button
+                                                type="button"
+                                                className="flex size-3 items-center justify-center rounded-full text-text-soft-400 transition-colors hover:bg-error-lighter hover:text-error-base"
+                                                onClick={ () => toggleAssignment(selectedAssignmentKey, cat.id) }
+                                            >
+                                                <X className="size-2" />
+                                            </button>
                                         </span>
                                     )) }
                                     { unassignedCats.length > 0 && (
-                                        <div style={{ position: 'relative', display: 'inline-flex' }}>
-                                            <button className="inv-cat-add-btn" onClick={ () => setShowInspectorCatPicker(!showInspectorCatPicker) }>
-                                                <FaPlus style={{ fontSize: 7 }} />
-                                                <FaTag style={{ fontSize: 7 }} />
+                                        <div className="relative inline-flex">
+                                            <button
+                                                type="button"
+                                                className="inline-flex items-center gap-0.5 rounded-full border border-dashed border-stroke-soft-200 px-1.5 py-0.5 text-text-soft-400 transition-colors hover:border-stroke-sub-300 hover:text-text-sub-600"
+                                                onClick={ () => setShowInspectorCatPicker(!showInspectorCatPicker) }
+                                            >
+                                                <Plus className="size-2" />
+                                                <Tag className="size-2" />
                                             </button>
-                                            { showInspectorCatPicker &&
-                                                <div className="inv-cat-picker">
+                                            { showInspectorCatPicker && (
+                                                <div className="absolute bottom-full left-0 z-50 mb-1 min-w-[140px] overflow-hidden rounded-xl bg-bg-white-0 py-1 shadow-regular-md ring-1 ring-inset ring-stroke-soft-200">
                                                     { unassignedCats.map(cat => (
-                                                        <div key={ cat.id } className="inv-cat-picker-item" onClick={ () => { toggleAssignment(selectedAssignmentKey, cat.id); setShowInspectorCatPicker(false); } }>
-                                                            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: cat.color, flexShrink: 0 }} />
+                                                        <button
+                                                            key={ cat.id }
+                                                            type="button"
+                                                            className="flex w-full items-center gap-2 px-3 py-1.5 text-paragraph-xs text-text-sub-600 transition-colors hover:bg-bg-weak-50"
+                                                            onClick={ () =>
+                                                            {
+                                                                toggleAssignment(selectedAssignmentKey, cat.id); setShowInspectorCatPicker(false);
+                                                            } }
+                                                        >
+                                                            <span className="size-2 shrink-0 rounded-full" style={ { backgroundColor: cat.color } } />
                                                             { cat.name }
-                                                        </div>
+                                                        </button>
                                                     )) }
-                                                </div> }
+                                                </div>
+                                            ) }
                                         </div>
                                     ) }
                                 </div>
-                                { durabilityInfo &&
-                                    <div className="inv-durability">
-                                        <FaWrench className="inv-durability-icon" style={{ color: durabilityInfo.remaining < 30 ? '#ef4444' : 'rgba(var(--inv-fg-rgb, 0,0,0),0.25)' }} />
-                                        <div className="inv-durability-bar">
-                                            <div className="inv-durability-fill" style={{
-                                                width: `${ durabilityInfo.remaining }%`,
-                                                background: durabilityInfo.remaining < 30 ? '#ef4444'
-                                                    : durabilityInfo.remaining < 60 ? '#eab308'
-                                                    : '#22c55e',
-                                            }} />
-                                        </div>
-                                        <span className="inv-durability-text" style={{
-                                            color: durabilityInfo.remaining < 30 ? '#ef4444'
-                                                : durabilityInfo.remaining < 60 ? '#d97706'
-                                                : '#16a34a',
-                                        }}>
+                                { durabilityInfo && (
+                                    <div className="flex items-center gap-2 pt-0.5">
+                                        <Wrench className={ cn('size-3 shrink-0', durabilityToneClass) } />
+                                        <AlignProgress.Root value={ durabilityInfo.remaining } max={ 100 } color={ durabilityColor } className="flex-1" />
+                                        <span className={ cn('shrink-0 text-[10px] font-semibold tabular-nums', durabilityToneClass) }>
                                             { durabilityInfo.remaining }%
                                         </span>
-                                    </div> }
+                                    </div>
+                                ) }
                             </div>
                         </div>
-                        <div className="inv-inspector-actions">
-                            { !!roomSession && (!durabilityInfo || durabilityInfo.status !== 'broken') &&
-                                <button className="inv-action-btn primary" onClick={ () => attemptItemPlacement(selectedItem) }>
-                                    <FaArrowUp className="action-icon" /> Platzieren
-                                </button> }
-                            <button className="inv-action-btn" onClick={ addToHotbar }>
-                                <FaBolt className="action-icon" /> Hotbar
-                            </button>
-                            { selectedItem.isSellable &&
-                                <button className="inv-action-btn" onClick={ () => CreateLinkEvent(`marketplace/sell/${ selectedItem.type }`) }>
-                                    <FaStore className="action-icon" /> Markt
-                                </button> }
-                            { durabilityInfo && durabilityInfo.remaining < 30 &&
-                                <button className="inv-action-btn warning" onClick={ () => CreateLinkEvent('workshop/toggle') }>
-                                    <FaWrench className="action-icon" /> Reparieren
-                                </button> }
-                            <div className="inv-action-spacer" />
-                            { selectedItem.getUnlockedCount() > 0 &&
-                                <button className="inv-action-btn danger" onClick={ () => {
-                                    setDeleteTarget({ groupItem: selectedItem, maxCount: selectedItem.getUnlockedCount() });
-                                    setShowDeleteDialog(true);
-                                } }>
-                                    <FaTrash className="action-icon" />
-                                </button> }
+                        <AlignDivider.Root />
+                        <div className="flex items-center gap-1.5 px-3 py-2">
+                            { !!roomSession && (!durabilityInfo || durabilityInfo.status !== 'broken') && (
+                                <FancyButton.Root
+                                    type="button"
+                                    variant="primary"
+                                    size="xsmall"
+                                    className="h-7 gap-1.5 px-2.5 text-[11px]"
+                                    onClick={ () => attemptItemPlacement(selectedItem) }
+                                >
+                                    <FancyButton.Icon as={ ArrowUp } className="size-3.5" />
+                                    Platzieren
+                                </FancyButton.Root>
+                            ) }
+                            { selectedItem.isSellable && (
+                                <AlignButton.Root
+                                    type="button"
+                                    variant="neutral"
+                                    mode="stroke"
+                                    size="xxsmall"
+                                    className="h-7 gap-1.5 text-[11px]"
+                                    onClick={ () => CreateLinkEvent(`marketplace/sell/${ selectedItem.type }`) }
+                                >
+                                    <Store className="size-3.5" />
+                                    Markt
+                                </AlignButton.Root>
+                            ) }
+                            { durabilityInfo && durabilityInfo.remaining < 30 && (
+                                <AlignButton.Root
+                                    type="button"
+                                    variant="neutral"
+                                    mode="stroke"
+                                    size="xxsmall"
+                                    className="h-7 gap-1.5 text-[11px] text-warning-base ring-warning-base"
+                                    onClick={ () => CreateLinkEvent('workshop/toggle') }
+                                >
+                                    <Wrench className="size-3.5" />
+                                    Reparieren
+                                </AlignButton.Root>
+                            ) }
+                            <div className="flex-1" />
+                            { selectedItem.getUnlockedCount() > 0 && (
+                                <AlignButton.Root
+                                    type="button"
+                                    variant="error"
+                                    mode="lighter"
+                                    size="xxsmall"
+                                    className="size-7 shrink-0 px-0"
+                                    onClick={ () =>
+                                    {
+                                        setDeleteTarget({ groupItem: selectedItem, maxCount: selectedItem.getUnlockedCount() });
+                                        setShowDeleteDialog(true);
+                                    } }
+                                >
+                                    <Trash2 className="size-3.5" />
+                                </AlignButton.Root>
+                            ) }
                         </div>
                     </div>
-                </div> }
-
-            {/* Delete dialogs */}
-            { showDeleteDialog && deleteTarget &&
+                </div>
+            ) }
+            { /* Delete dialogs */ }
+            { showDeleteDialog && deleteTarget && (
                 <InventoryDeleteDialog
                     groupItem={ deleteTarget.groupItem }
                     maxCount={ deleteTarget.maxCount }
-                    onConfirm={ (itemIds) => { handleDeleteItems(itemIds); setShowDeleteDialog(false); setDeleteTarget(null); } }
-                    onClose={ () => { setShowDeleteDialog(false); setDeleteTarget(null); } }
-                /> }
+                    onConfirm={ (itemIds) =>
+                    {
+                        handleDeleteItems(itemIds); setShowDeleteDialog(false); setDeleteTarget(null);
+                    } }
+                    onClose={ () =>
+                    {
+                        setShowDeleteDialog(false); setDeleteTarget(null);
+                    } }
+                />
+            ) }
             { showBatchDeleteDialog && createPortal(
-                <div className="inv-delete-overlay" onClick={ () => setShowBatchDeleteDialog(false) }>
-                    <div className="inv-delete-dialog" onClick={ e => e.stopPropagation() }>
-                        <div className="inv-delete-header">
-                            <FaTrash style={{ color: '#ef4444' }} />
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-overlay backdrop-blur-sm" onClick={ () => setShowBatchDeleteDialog(false) }>
+                    <div className="w-[300px] overflow-hidden rounded-20 border border-stroke-soft-200 bg-bg-white-0 text-text-strong-950 shadow-regular-md" onClick={ e => e.stopPropagation() }>
+                        <div className="flex items-center gap-2 border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-3 text-label-sm">
+                            <Trash2 className="size-3.5 text-error-base" />
                             <span>Möbel löschen</span>
                         </div>
-                        <div className="inv-delete-body">
-                            <div className="inv-delete-label">
+                        <div className="p-4">
+                            <div className="text-paragraph-xs text-text-sub-600">
                                 { batchDeleteItemCount } Möbelstück(e) aus { selectedGroups.size } Auswahl unwiderruflich löschen?
                             </div>
                         </div>
-                        <div className="inv-delete-footer">
-                            <button className="inv-delete-cancel" onClick={ () => setShowBatchDeleteDialog(false) }>Abbrechen</button>
-                            <button className="inv-delete-confirm" onClick={ confirmBatchDelete }>Löschen</button>
+                        <div className="flex justify-end gap-2 border-t border-stroke-soft-200 px-4 py-3">
+                            <AlignButton.Root type="button" variant="neutral" mode="stroke" size="xxsmall" onClick={ () => setShowBatchDeleteDialog(false) }>Abbrechen</AlignButton.Root>
+                            <AlignButton.Root type="button" variant="error" mode="filled" size="xxsmall" onClick={ confirmBatchDelete }>Löschen</AlignButton.Root>
                         </div>
                     </div>
                 </div>,

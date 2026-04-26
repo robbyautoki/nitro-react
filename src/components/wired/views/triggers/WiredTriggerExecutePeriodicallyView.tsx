@@ -23,7 +23,7 @@ export const WiredTriggeExecutePeriodicallyView: FC<{}> = props =>
                 <Text bold>{ LocalizeText('wiredfurni.params.settime', [ 'seconds' ], [ GetWiredTimeLocale(time) ]) }</Text>
                 <ReactSlider
                     className={ 'nitro-slider' }
-                    min={ 1 }
+                    min={ 0 }
                     max={ 60 }
                     value={ time }
                     onChange={ event => setTime(event) } />

@@ -2,12 +2,12 @@ import { GiftReceiverNotFoundEvent, PurchaseFromCatalogAsGiftComposer } from '@n
 import { ChangeEvent, FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { ColorUtils, GetSessionDataManager, LocalizeText, MessengerFriend, ProductTypeEnum, SendMessageComposer } from '../../../../api';
-import { Base, ButtonGroup, classNames, Column, Flex, FormGroup, LayoutCurrencyIcon, LayoutFurniImageView, LayoutGiftTagView, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
+import { Base, ButtonGroup, Column, Flex, FormGroup, LayoutCurrencyIcon, LayoutFurniImageView, LayoutGiftTagView, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
 import { CatalogEvent, CatalogInitGiftEvent, CatalogPurchasedEvent } from '../../../../events';
 import { useCatalog, useFriends, useMessageEvent, useUiEvent } from '../../../../hooks';
-import { Button } from '../../../ui/button';
-import { Checkbox } from '../../../ui/checkbox';
-import { Input } from '../../../ui/input';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as Checkbox from '@/align-ui/components/ui/checkbox';
+import * as Input from '@/align-ui/components/ui/input';
 
 export const CatalogGiftView: FC<{}> = props =>
 {
@@ -215,10 +215,14 @@ export const CatalogGiftView: FC<{}> = props =>
     return (
         <NitroCardView uniqueKey="catalog-gift" className="nitro-catalog-gift" theme="primary-slim">
             <NitroCardHeaderView headerText={ LocalizeText('catalog.gift_wrapping.title') } onCloseClick={ onClose } />
-            <NitroCardContentView className="text-black/85">
+            <NitroCardContentView className="text-text-strong-950">
                 <FormGroup column>
                     <Text>{ LocalizeText('catalog.gift_wrapping.receiver') }</Text>
-                    <Input type="text" className={ classNames('h-8 text-xs', receiverNotFound && 'border-red-500') } value={ receiverName } onChange={ (e) => onTextChanged(e) } />
+                    <Input.Root size="xsmall" hasError={ receiverNotFound }>
+                        <Input.Wrapper className="h-8">
+                            <Input.Input type="text" className="text-xs" value={ receiverName } onChange={ (e) => onTextChanged(e) } />
+                        </Input.Wrapper>
+                    </Input.Root>
                     { (suggestions.length > 0 && isAutocompleteVisible) &&
                         <Column className="autocomplete-gift-container">
                             { suggestions.map((friend: MessengerFriend) => (
@@ -227,11 +231,11 @@ export const CatalogGiftView: FC<{}> = props =>
                         </Column>
                     }
                     { receiverNotFound &&
-                        <div className="text-xs text-red-500">{ LocalizeText('catalog.gift_wrapping.receiver_not_found.title') }</div> }
+                        <div className="text-xs text-error-base">{ LocalizeText('catalog.gift_wrapping.receiver_not_found.title') }</div> }
                 </FormGroup>
                 <LayoutGiftTagView figure={ GetSessionDataManager().figure } userName={ GetSessionDataManager().userName } message={ message } editable={ true } onChange={ (value) => setMessage(value) } />
                 <div className="flex items-center gap-2">
-                    <Checkbox id="showMyFace" checked={ showMyFace } onCheckedChange={ () => setShowMyFace(value => !value) } />
+                    <Checkbox.Root id="showMyFace" checked={ showMyFace } onCheckedChange={ () => setShowMyFace(value => !value) } />
                     <label htmlFor="showMyFace" className="text-sm cursor-pointer select-none">{ LocalizeText('catalog.gift_wrapping.show_face.title') }</label>
                 </div>
                 <Flex alignItems="center" gap={ 2 }>
@@ -242,12 +246,12 @@ export const CatalogGiftView: FC<{}> = props =>
                     <Column gap={ 1 }>
                         <Flex gap={ 2 }>
                             <ButtonGroup>
-                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={ () => handleAction('prev_box') }>
+                                <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="h-7 w-7 px-0" onClick={ () => handleAction('prev_box') }>
                                     <FaChevronLeft className="fa-icon" />
-                                </Button>
-                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={ () => handleAction('next_box') }>
+                                </AlignButton.Root>
+                                <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="h-7 w-7 px-0" onClick={ () => handleAction('next_box') }>
                                     <FaChevronRight className="fa-icon" />
-                                </Button>
+                                </AlignButton.Root>
                             </ButtonGroup>
                             <Column gap={ 1 }>
                                 <Text fontWeight="bold">{ LocalizeText(boxName) }</Text>
@@ -259,12 +263,12 @@ export const CatalogGiftView: FC<{}> = props =>
                         </Flex>
                         <Flex alignItems="center" gap={ 2 } className={ isColorable ? '' : 'opacity-50 pointer-events-none' }>
                             <ButtonGroup>
-                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={ () => handleAction('prev_ribbon') }>
+                                <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="h-7 w-7 px-0" onClick={ () => handleAction('prev_ribbon') }>
                                     <FaChevronLeft className="fa-icon" />
-                                </Button>
-                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={ () => handleAction('next_ribbon') }>
+                                </AlignButton.Root>
+                                <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="h-7 w-7 px-0" onClick={ () => handleAction('next_ribbon') }>
                                     <FaChevronRight className="fa-icon" />
-                                </Button>
+                                </AlignButton.Root>
                             </ButtonGroup>
                             <Text fontWeight="bold">{ LocalizeText(ribbonName) }</Text>
                         </Flex>
@@ -275,16 +279,16 @@ export const CatalogGiftView: FC<{}> = props =>
                         { LocalizeText('catalog.gift_wrapping.pick_color') }
                     </Text>
                     <ButtonGroup fullWidth>
-                        { colors.map(color => <Button key={ color.id } size="icon" className={ `h-6 w-6 rounded-full border-2 ${ color.id === selectedColorId ? 'border-white/80 ring-2 ring-black/15' : 'border-transparent' }` } disabled={ !isColorable } style={ { backgroundColor: color.color } } onClick={ () => setSelectedColorId(color.id) } />) }
+                        { colors.map(color => <AlignButton.Root key={ color.id } variant="neutral" mode="ghost" size="xxsmall" className={ `h-6 w-6 rounded-full border-2 p-0 ${ color.id === selectedColorId ? 'border-bg-white-0 ring-2 ring-primary-base' : 'border-transparent' }` } disabled={ !isColorable } style={ { backgroundColor: color.color } } onClick={ () => setSelectedColorId(color.id) } />) }
                     </ButtonGroup>
                 </Column>
                 <Flex justifyContent="between" alignItems="center">
-                    <Button variant="ghost" size="sm" onClick={ onClose }>
+                    <AlignButton.Root variant="neutral" mode="ghost" size="small" onClick={ onClose }>
                         { LocalizeText('cancel') }
-                    </Button>
-                    <Button size="sm" onClick={ () => handleAction('buy') }>
+                    </AlignButton.Root>
+                    <AlignButton.Root variant="primary" mode="filled" size="small" onClick={ () => handleAction('buy') }>
                         { LocalizeText('catalog.gift_wrapping.give_gift') }
-                    </Button>
+                    </AlignButton.Root>
                 </Flex>
             </NitroCardContentView>
         </NitroCardView>

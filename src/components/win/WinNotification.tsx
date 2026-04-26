@@ -1,7 +1,8 @@
-import { FC, useCallback, useState } from 'react';
+import { FC, useState } from 'react';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { useMessageEvent } from '../../hooks';
-import { Frame, FramePanel } from '../ui/frame';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 import { Trophy } from 'lucide-react';
 
 interface WinToast {
@@ -38,24 +39,22 @@ export const WinNotification: FC<{}> = () =>
     if(toasts.length === 0) return null;
 
     return (
-        <div className="fixed top-4 right-4 z-[300] flex flex-col gap-2 pointer-events-none" style={{ maxWidth: 320 }}>
+        <div className="pointer-events-none fixed right-4 top-4 z-[300] flex max-w-[320px] flex-col gap-2">
             { toasts.map(toast => (
                 <div key={ toast.id } className="pointer-events-auto animate-in slide-in-from-right fade-in duration-300">
-                    <Frame>
-                        <FramePanel className="!p-0">
-                            <div className="flex items-center gap-2.5 px-3.5 py-2.5">
-                                <Trophy className="size-5 text-amber-500 shrink-0" />
-                                <div>
-                                    <div className="text-xs font-semibold text-foreground">
-                                        { toast.username } hat einen Win erhalten!
-                                    </div>
-                                    <div className="text-[10px] text-amber-500/80 mt-0.5">
-                                        Level { toast.level }
-                                    </div>
+                    <AlignSurface.Panel className="overflow-hidden">
+                        <div className="flex items-center gap-2.5 px-3.5 py-2.5">
+                            <Trophy className="size-5 shrink-0 text-warning-base" />
+                            <div className="min-w-0">
+                                <div className="truncate text-label-xs font-semibold text-text-strong-950">
+                                    { toast.username } hat einen Win erhalten!
                                 </div>
+                                <AlignBadge.Root color="orange" variant="lighter" size="small" className="mt-0.5">
+                                    Level { toast.level }
+                                </AlignBadge.Root>
                             </div>
-                        </FramePanel>
-                    </Frame>
+                        </div>
+                    </AlignSurface.Panel>
                 </div>
             )) }
         </div>

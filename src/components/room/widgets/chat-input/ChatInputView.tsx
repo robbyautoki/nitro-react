@@ -60,6 +60,12 @@ const CHAT_COMMANDS: ChatCommand[] = [
     { command: ':companion', description: 'Begleiter-Status', minRank: 0, category: 'Allgemein' },
     { command: ':companion room off', description: 'Begleiter im Raum aus', minRank: 0, category: 'Allgemein' },
     { command: ':companion room on', description: 'Begleiter im Raum an', minRank: 0, category: 'Allgemein' },
+    { command: ':patrolbot open', description: 'Patrouillen-Bot Editor öffnen', minRank: 0, category: 'Allgemein', params: [{ name: 'bot_id', type: 'id' }] },
+    { command: ':patrolbot save', description: 'Patrouillen-Bot speichern', minRank: 0, category: 'Allgemein', params: [{ name: 'bot_id', type: 'id' }, { name: 'config', type: 'text' }] },
+    { command: ':patrolbot start', description: 'Patrouille starten', minRank: 0, category: 'Allgemein', params: [{ name: 'bot_id', type: 'id' }] },
+    { command: ':patrolbot stop', description: 'Patrouille stoppen', minRank: 0, category: 'Allgemein', params: [{ name: 'bot_id', type: 'id' }] },
+    { command: ':patrolbot reset', description: 'Patrouillen-Bot zurücksetzen', minRank: 0, category: 'Allgemein', params: [{ name: 'bot_id', type: 'id' }] },
+    { command: ':patrolbot status', description: 'Patrouillen-Status anzeigen', minRank: 0, category: 'Allgemein', params: [{ name: 'bot_id', type: 'id' }] },
     { command: ':send', description: 'Währung senden', minRank: 0, category: 'Allgemein', params: [{ name: 'name', type: 'user' }, { name: 'typ', type: 'text' }, { name: 'anzahl', type: 'number' }] },
     { command: '@', description: 'Person markieren / Nachricht', minRank: 0, category: 'Allgemein', params: [{ name: 'name', type: 'user' }, { name: 'text', type: 'text' }] },
     { command: ':win', description: 'Event-Win vergeben', minRank: 13, category: 'GameX', params: [{ name: 'name', type: 'user' }] },
@@ -109,8 +115,15 @@ const CHAT_COMMANDS: ChatCommand[] = [
     { command: ':mute_pets', description: 'Pets stummschalten', minRank: 14, category: 'Moderator' },
     { command: ':connect_camera', description: 'Kamera verbinden', minRank: 14, category: 'Moderator' },
     { command: ':jail', description: 'Spieler verhaften', minRank: 14, category: 'Moderator', params: [{ name: 'username', type: 'user' }, { name: 'minuten', type: 'number' }] },
+    { command: ':jail panel', description: 'Jail Control öffnen/aktualisieren', minRank: 14, category: 'Moderator' },
     { command: ':jail free', description: 'Spieler freilassen', minRank: 14, category: 'Moderator', params: [{ name: 'username', type: 'user' }] },
     { command: ':jail list', description: 'Inhaftierte anzeigen', minRank: 14, category: 'Moderator' },
+    { command: ':jail extend', description: 'Haftzeit verlängern', minRank: 14, category: 'Moderator', params: [{ name: 'username', type: 'user' }, { name: 'minuten', type: 'number' }] },
+    { command: ':jail reduce', description: 'Haftzeit reduzieren', minRank: 14, category: 'Moderator', params: [{ name: 'username', type: 'user' }, { name: 'minuten', type: 'number' }] },
+    { command: ':jail reason', description: 'Haftgrund ändern', minRank: 14, category: 'Moderator', params: [{ name: 'username', type: 'user' }, { name: 'grund', type: 'text' }] },
+    { command: ':jail setup room', description: 'Aktuellen Raum als Knast setzen', minRank: 14, category: 'Moderator' },
+    { command: ':jail zone add', description: 'Jail-Zone an aktueller Position speichern', minRank: 14, category: 'Moderator', params: [{ name: 'typ', type: 'text' }, { name: 'key', type: 'text' }, { name: 'radius', type: 'number' }] },
+    { command: ':jail zone list', description: 'Jail-Zonen anzeigen', minRank: 14, category: 'Moderator' },
     { command: ':radio', description: 'Radio-Hilfe', minRank: 14, category: 'Moderator' },
     { command: ':radio add', description: 'Track hinzufügen', minRank: 14, category: 'Moderator', params: [{ name: 'url', type: 'text' }, { name: 'titel', type: 'text' }, { name: 'artist', type: 'text' }] },
     { command: ':radio play', description: 'Radio starten', minRank: 14, category: 'Moderator' },
@@ -133,6 +146,9 @@ const CHAT_COMMANDS: ChatCommand[] = [
     { command: ':radio playlist remove', description: 'Track aus Playlist', minRank: 14, category: 'Moderator', params: [{ name: 'playlist', type: 'text' }, { name: 'nr', type: 'number' }] },
     { command: ':radio playlist load', description: 'Playlist laden', minRank: 14, category: 'Moderator', params: [{ name: 'name', type: 'text' }] },
     { command: ':radio playlist show', description: 'Playlist-Tracks', minRank: 14, category: 'Moderator', params: [{ name: 'name', type: 'text' }] },
+    { command: ':backup', description: 'Erstellt sofort ein Backup des aktuellen Raums (optional mit Beschreibung)', minRank: 15, category: 'Admin', params: [{ name: 'beschreibung', type: 'text' }] },
+    { command: ':backups', description: 'Zeigt die letzten 10 Backups dieses Raums', minRank: 15, category: 'Admin' },
+    { command: ':restore', description: 'Öffnet das CMS zum Wiederherstellen eines Backups (Argument: backup_id)', minRank: 15, category: 'Admin', params: [{ name: 'backup_id', type: 'id' }] },
     { command: ':daynight on', description: 'Echtzeit Tag/Nacht aktivieren', minRank: 15, category: 'Admin' },
     { command: ':daynight off', description: 'Tag/Nacht ausschalten', minRank: 15, category: 'Admin' },
     { command: ':daynight set', description: 'Uhrzeit setzen (0-23)', minRank: 15, category: 'Admin', params: [{ name: 'stunde', type: 'number' }] },
@@ -317,9 +333,12 @@ function shouldShowUserAutocomplete(input: string, commands: ChatCommand[]): { s
 export const ChatInputView: FC<{}> = props =>
 {
     const [ chatValue, setChatValue ] = useState<string>('');
-    const [ showCommands, setShowCommands ] = useState(false);
+    const [ commandsDismissed, setCommandsDismissed ] = useState(false);
     const [ selectedCmdIndex, setSelectedCmdIndex ] = useState(0);
     const [ selectedUserIndex, setSelectedUserIndex ] = useState(0);
+
+    const wantsCommands = chatValue.startsWith(':') || chatValue.startsWith('@');
+    useEffect(() => { setCommandsDismissed(false); }, [ chatValue ]);
     const { chatStyleId = 0, updateChatStyleId = null } = useSessionInfo();
     const { selectedUsername = '', floodBlocked = false, floodBlockedSeconds = 0, setIsTyping = null, setIsIdle = null, sendChat = null } = useChatInputWidget();
     const { roomSession = null } = useRoom();
@@ -339,12 +358,6 @@ export const ChatInputView: FC<{}> = props =>
             .filter(cmd => cmd.minRank === 0 || GetSessionDataManager().hasSecurity(cmd.minRank)),
     [ roomSession?.roomId ]);
 
-    const filteredCommands = useMemo(() => {
-        if (!showCommands) return [];
-        const q = chatValue.toLowerCase();
-        return availableCommands.filter(cmd => cmd.command.toLowerCase().includes(q) || cmd.description.toLowerCase().includes(q));
-    }, [ showCommands, chatValue, availableCommands ]);
-
     const ghostText = useMemo(() => getGhostText(chatValue, availableCommands), [ chatValue, availableCommands ]);
 
     const userAutoState = useMemo(() => shouldShowUserAutocomplete(chatValue, availableCommands), [ chatValue, availableCommands ]);
@@ -356,7 +369,14 @@ export const ChatInputView: FC<{}> = props =>
         return users.filter(u => u.name.toLowerCase().includes(q));
     }, [ userAutoState.show, userAutoState.filter, roomSession ]);
 
-    const showUserAuto = userAutoState.show && !showCommands && roomUsers.length > 0;
+    const showUserAuto = userAutoState.show && roomUsers.length > 0;
+    const showCommands = wantsCommands && chatValue.length > 0 && !commandsDismissed && !showUserAuto;
+
+    const filteredCommands = useMemo(() => {
+        if (!showCommands) return [];
+        const q = chatValue.toLowerCase();
+        return availableCommands.filter(cmd => cmd.command.toLowerCase().includes(q) || cmd.description.toLowerCase().includes(q));
+    }, [ showCommands, chatValue, availableCommands ]);
 
     const chatStyleIds = useMemo(() =>
     {
@@ -453,22 +473,14 @@ export const ChatInputView: FC<{}> = props =>
         if(!value || !value.length) { setIsTyping(false); }
         else { setIsTyping(true); setIsIdle(true); }
 
-        if(value.startsWith(':') || value.startsWith('@'))
-        {
-            setShowCommands(true);
-            setSelectedCmdIndex(0);
-        }
-        else
-        {
-            setShowCommands(false);
-        }
+        setSelectedCmdIndex(0);
         setSelectedUserIndex(0);
         setChatValue(value);
     }, [ setIsTyping, setIsIdle ]);
 
     const handleCommandSelect = useCallback((cmd: string) => {
         setChatValue(cmd);
-        setShowCommands(false);
+        setCommandsDismissed(true);
         setSelectedCmdIndex(0);
         inputRef.current?.focus();
     }, []);
@@ -504,7 +516,7 @@ export const ChatInputView: FC<{}> = props =>
             if(event.key === 'ArrowDown') { event.preventDefault(); setSelectedCmdIndex(prev => (prev + 1) % filteredCommands.length); return; }
             if(event.key === 'ArrowUp') { event.preventDefault(); setSelectedCmdIndex(prev => (prev - 1 + filteredCommands.length) % filteredCommands.length); return; }
             if(event.key === 'Enter') { event.preventDefault(); if(filteredCommands[selectedCmdIndex]) handleCommandSelect(filteredCommands[selectedCmdIndex].command + ' '); return; }
-            if(event.key === 'Escape') { event.preventDefault(); setChatValue(''); setShowCommands(false); return; }
+            if(event.key === 'Escape') { event.preventDefault(); setCommandsDismissed(true); return; }
         }
 
         if(showUserAuto && roomUsers.length > 0) {
@@ -571,7 +583,7 @@ export const ChatInputView: FC<{}> = props =>
             if(!showCommands && !showUserAuto) return;
             if(autocompleteRef.current?.contains(e.target as Node)) return;
             if(inputRef.current?.contains(e.target as Node)) return;
-            setShowCommands(false);
+            setCommandsDismissed(true);
         };
         document.addEventListener('mousedown', onMouseDown);
         return () => document.removeEventListener('mousedown', onMouseDown);

@@ -31,10 +31,12 @@ import { ToolbarView } from '../toolbar/ToolbarView';
 import { UserProfileView } from '../user-profile/UserProfileView';
 import { UserSettingsView } from '../user-settings/UserSettingsView';
 import { LotteryView } from '../lottery/LotteryView';
-import { WelcomeToastView } from '../welcome/WelcomeToastView';
-import { ArrestToastView } from '../welcome/ArrestToastView';
+import { WelcomeDialogView } from '../welcome/WelcomeDialogView';
+import { JailStaffDrawerView } from '../jail/JailStaffDrawerView';
+import { NotificationTrayView } from '../notification-tray/NotificationTrayView';
 import { RadioView } from '../radio/RadioView';
 import { PriceListView } from '../pricelist/PriceListView';
+import { PatrolBotEditorView } from '../patrol/PatrolBotEditorView';
 import { WiredView } from '../wired/WiredView';
 import { RelationshipView } from '../relationship/RelationshipView';
 import { SetsView } from '../sets/SetsView';
@@ -103,8 +105,9 @@ export const MainView: FC<{}> = props =>
             </TransitionAnimation>
             <ToolbarView isInRoom={ !landingViewVisible } />
             <PurseView />
-            <WelcomeToastView />
-            <ArrestToastView />
+            <WelcomeDialogView />
+            <JailStaffDrawerView />
+            <NotificationTrayView />
             <RadioView />
             <LotteryView />
             <WinRewardView />
@@ -115,6 +118,7 @@ export const MainView: FC<{}> = props =>
             <ModToolsView />
             <RoomView />
             <ChatHistoryView />
+            <PatrolBotEditorView />
             <WiredView />
             <AvatarEditorView />
             <AchievementsView />

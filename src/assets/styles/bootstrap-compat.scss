@@ -259,16 +259,11 @@
     }
 }
 
-// ─── Texture Panel (reusable gradient border for floating UI chrome) ─────────
+// ─── Texture Panel (AlignUI-aligned floating surface) ────────────────────────
 .texture-panel {
-    background:
-        linear-gradient(rgba(12, 12, 16, 0.85), rgba(12, 12, 16, 0.85)) padding-box,
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)) border-box;
-    border: 1px solid transparent;
-    box-shadow:
-        0 24px 80px rgba(0, 0, 0, 0.35),
-        0 8px 24px rgba(0, 0, 0, 0.20),
-        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    background: hsl(var(--align-bg-white-0));
+    border-radius: 1rem;
+    box-shadow: var(--shadow-regular-md);
 }
 
 // ─── Search input compat ──────────────────────────────────────────────────────
@@ -284,5 +279,103 @@
 
     &:focus {
         border-color: rgba(56, 189, 248, 0.40);
+    }
+}
+
+// Align UI hardening for legacy Bootstrap class names that are still rendered
+// by upstream Nitro views. These rules deliberately use Align tokens so old
+// `.btn`, `.badge` and form classes do not visually override the new system.
+.btn {
+    min-height: 2rem;
+    gap: .5rem;
+    padding: .375rem .75rem;
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+    border-radius: .625rem;
+    background: hsl(var(--align-bg-white-0));
+    color: hsl(var(--align-text-sub-600));
+    box-shadow: var(--shadow-regular-xs);
+    font-size: var(--text-label-sm);
+    font-weight: 500;
+    line-height: 1.25rem;
+    letter-spacing: 0;
+    text-shadow: none;
+
+    &:hover {
+        border-color: transparent;
+        background: hsl(var(--align-bg-weak-50));
+        color: hsl(var(--align-text-strong-950));
+        box-shadow: none;
+    }
+}
+
+.btn-primary {
+    border-color: hsl(var(--align-primary-base));
+    background: hsl(var(--align-primary-base));
+    color: hsl(var(--align-static-white));
+
+    &:hover {
+        background: hsl(var(--align-primary-darker));
+        color: hsl(var(--align-static-white));
+    }
+}
+
+.btn-success {
+    border-color: hsl(var(--align-success-base));
+    background: hsl(var(--align-success-base));
+    color: hsl(var(--align-static-white));
+}
+
+.btn-danger {
+    border-color: hsl(var(--align-error-base));
+    background: hsl(var(--align-error-base));
+    color: hsl(var(--align-static-white));
+}
+
+.btn-warning {
+    border-color: hsl(var(--align-warning-base));
+    background: hsl(var(--align-warning-base));
+    color: hsl(var(--align-static-white));
+}
+
+.btn-link {
+    min-height: 0;
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+    color: hsl(var(--align-primary-base));
+    box-shadow: none;
+}
+
+.badge {
+    min-height: 1.25rem;
+    gap: .375rem;
+    padding: 0 .5rem;
+    border-radius: 999px;
+    background: hsl(var(--align-faded-light));
+    color: hsl(var(--align-faded-dark));
+    font-size: var(--text-label-xs);
+    font-weight: 500;
+    line-height: 1rem;
+    letter-spacing: 0;
+}
+
+.form-control,
+.form-select,
+.search-input {
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+    border-radius: .625rem;
+    background: hsl(var(--align-bg-white-0));
+    color: hsl(var(--align-text-strong-950));
+    box-shadow: var(--shadow-regular-xs);
+    font-size: var(--text-paragraph-sm);
+    letter-spacing: 0;
+
+    &::placeholder {
+        color: hsl(var(--align-text-soft-400));
+    }
+
+    &:focus {
+        border-color: hsl(var(--align-stroke-strong-950));
+        box-shadow: var(--shadow-button-important-focus);
     }
 }

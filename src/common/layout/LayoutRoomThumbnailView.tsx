@@ -25,7 +25,19 @@ export const LayoutRoomThumbnailView: FC<LayoutRoomThumbnailViewProps> = props =
     {
         if(customUrl && customUrl.length) return (GetConfiguration<string>('image.library.url') + customUrl);
 
-        return (GetConfiguration<string>('thumbnails.url').replace('%thumbnail%', roomId.toString()));
+        const baseUrl = GetConfiguration<string>('thumbnails.url').replace('%thumbnail%', roomId.toString());
+
+        let cacheBuster: string | null = null;
+        try
+        {
+            cacheBuster = window.localStorage.getItem(`room-thumbnail-v:${ roomId }`);
+        }
+        catch(_e)
+        {
+            cacheBuster = null;
+        }
+
+        return cacheBuster ? `${ baseUrl }?v=${ cacheBuster }` : baseUrl;
     }, [ customUrl, roomId ]);
 
     return (

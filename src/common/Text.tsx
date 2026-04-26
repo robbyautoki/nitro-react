@@ -3,26 +3,26 @@ import { Base, BaseProps } from './Base';
 import { ColorVariantType, FontSizeType, FontWeightType, TextAlignType } from './types';
 
 const COLOR_MAP: Record<string, string> = {
-    'white': 'text-white',
-    'black': 'text-black',
-    'primary': 'text-primary',
-    'secondary': 'text-secondary-foreground',
-    'success': 'text-green-500',
-    'danger': 'text-red-500',
-    'warning': 'text-yellow-1/20',
-    'muted': 'text-muted-foreground',
-    'dark': 'text-white/90',
-    'light': 'text-white/60',
-    'link': 'text-blue-400',
+    'white': 'text-text-white-0',
+    'black': 'text-text-strong-950',
+    'primary': 'text-primary-base',
+    'secondary': 'text-text-sub-600',
+    'success': 'text-success-base',
+    'danger': 'text-error-base',
+    'warning': 'text-warning-base',
+    'muted': 'text-text-sub-600',
+    'dark': 'text-text-strong-950',
+    'light': 'text-text-sub-600',
+    'link': 'text-primary-base',
 };
 
 const FONT_SIZE_MAP: Record<number, string> = {
-    1: 'text-4xl',
-    2: 'text-3xl',
-    3: 'text-2xl',
-    4: 'text-xl',
-    5: 'text-lg',
-    6: 'text-base',
+    1: 'text-title-h6',
+    2: 'text-label-lg',
+    3: 'text-label-md',
+    4: 'text-label-sm',
+    5: 'text-paragraph-sm',
+    6: 'text-paragraph-xs',
 };
 
 const FONT_WEIGHT_MAP: Record<string, string> = {
@@ -53,7 +53,7 @@ export interface TextProps extends BaseProps<HTMLDivElement>
 
 export const Text: FC<TextProps> = props =>
 {
-    const { variant = 'white', fontWeight = null, fontSize = 0, align = null, bold = false, underline = false, italics = false, truncate = false, center = false, textEnd = false, small = false, wrap = false, noWrap = false, textBreak = false, ...rest } = props;
+    const { variant = 'secondary', fontWeight = null, fontSize = 0, align = null, bold = false, underline = false, italics = false, truncate = false, center = false, textEnd = false, small = false, wrap = false, noWrap = false, textBreak = false, ...rest } = props;
 
     const getClassNames = useMemo(() =>
     {
@@ -79,7 +79,7 @@ export const Text: FC<TextProps> = props =>
 
         if(textEnd) newClassNames.push('text-right');
 
-        if(small) newClassNames.push('text-sm');
+        if(small) newClassNames.push('text-paragraph-xs');
 
         if(wrap) newClassNames.push('text-wrap');
 

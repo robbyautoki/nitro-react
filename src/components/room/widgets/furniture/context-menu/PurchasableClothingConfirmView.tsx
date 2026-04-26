@@ -1,8 +1,12 @@
 import { RedeemItemClothingComposer, RoomObjectCategory, UserFigureComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
+import { Check, Shirt, X } from 'lucide-react';
 import { FigureData, FurniCategory, GetAvatarRenderManager, GetConnection, GetFurnitureDataForRoomObject, GetSessionDataManager, LocalizeText } from '../../../../../api';
-import { Base, Button, Column, Flex, LayoutAvatarImageView, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../../common';
+import { Base, LayoutAvatarImageView } from '../../../../../common';
 import { useRoom } from '../../../../../hooks';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import { FurnitureWidgetActions, FurnitureWidgetPreview, FurnitureWidgetSection, FurnitureWidgetText, FurnitureWidgetWindow } from '../FurnitureWidgetLayout';
 
 interface PurchasableClothingConfirmViewProps
 {
@@ -78,27 +82,37 @@ export const PurchasableClothingConfirmView: FC<PurchasableClothingConfirmViewPr
     if(mode === MODE_DEFAULT) return null;
     
     return (
-        <NitroCardView className="nitro-use-product-confirmation">
-            <NitroCardHeaderView headerText={ LocalizeText('useproduct.widget.title.bind_clothing') } onCloseClick={ onClose } />
-            <NitroCardContentView center>
-                <Flex gap={ 2 } overflow="hidden">
-                    <Column>
-                        <Base className="mannequin-preview">
-                            <LayoutAvatarImageView figure={ newFigure } direction={ 2 } />
-                        </Base>
-                    </Column>
-                    <Column justifyContent="between" overflow="auto">
-                        <Column gap={ 2 }>
-                            <Text>{ LocalizeText('useproduct.widget.text.bind_clothing') }</Text>
-                            <Text>{ LocalizeText('useproduct.widget.info.bind_clothing') }</Text>
-                        </Column>
-                        <Flex alignItems="center" justifyContent="between">
-                            <Button variant="danger" onClick={ onClose }>{ LocalizeText('useproduct.widget.cancel') }</Button>
-                            <Button variant="success" onClick={ useProduct }>{ LocalizeText('useproduct.widget.bind_clothing') }</Button>
-                        </Flex>
-                    </Column>
-                </Flex>
-            </NitroCardContentView>
-        </NitroCardView>
+        <FurnitureWidgetWindow
+            uniqueKey="clothing-confirm"
+            title={ LocalizeText('useproduct.widget.title.bind_clothing') }
+            subtitle={ LocalizeText('useproduct.widget.info.bind_clothing') }
+            icon={ Shirt }
+            onClose={ onClose }
+            widthClassName="w-[440px]"
+            footer={
+                <FurnitureWidgetActions className="grid grid-cols-2">
+                    <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ onClose }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                        { LocalizeText('useproduct.widget.cancel') }
+                    </AlignButton.Root>
+                    <FancyButton.Root variant="primary" size="small" onClick={ useProduct }>
+                        <FancyButton.Icon as={ Check } />
+                        { LocalizeText('useproduct.widget.bind_clothing') }
+                    </FancyButton.Root>
+                </FurnitureWidgetActions>
+            }
+        >
+            <FurnitureWidgetSection className="grid grid-cols-[120px_1fr] gap-4">
+                <FurnitureWidgetPreview className="min-h-[140px]">
+                    <Base className="mannequin-preview !bg-transparent">
+                        <LayoutAvatarImageView figure={ newFigure } direction={ 2 } />
+                    </Base>
+                </FurnitureWidgetPreview>
+                <div className="flex min-w-0 flex-col justify-center gap-2">
+                    <FurnitureWidgetText className="text-text-strong-950">{ LocalizeText('useproduct.widget.text.bind_clothing') }</FurnitureWidgetText>
+                    <FurnitureWidgetText>{ LocalizeText('useproduct.widget.info.bind_clothing') }</FurnitureWidgetText>
+                </div>
+            </FurnitureWidgetSection>
+        </FurnitureWidgetWindow>
     );
 }

@@ -4,7 +4,7 @@ import { Palette } from 'lucide-react';
 import { IPurchasableOffer } from '../../../../../api';
 import { cn } from '../../../../../lib/utils';
 import { useCatalog } from '../../../../../hooks';
-import { Button } from '../../../../ui/button';
+import * as AlignButton from '@/align-ui/components/ui/button';
 import { CatalogPageHeaderBanner } from '../../shared/CatalogPageHeaderBanner';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
 import { CatalogLayoutProps } from './CatalogLayout.types';
@@ -95,14 +95,14 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutProps> = props =>
         <div className="flex flex-col h-full overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
             <CatalogPageHeaderBanner />
             { currentOffer && currentOffer.product.furnitureData.hasIndexedColor && (
-                <div className="shrink-0 px-4 py-2 border-b border-border/20 flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="h-7 gap-1.5 text-[11px]" onClick={ () => setColorsShowing(prev => !prev) }>
+                <div className="shrink-0 border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-2 flex items-center gap-2">
+                    <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="gap-1.5 text-label-xs" onClick={ () => setColorsShowing(prev => !prev) }>
                         <Palette className="w-3 h-3" /> { colorsShowing ? 'Möbel anzeigen' : 'Farben anzeigen' }
-                    </Button>
+                    </AlignButton.Root>
                     { colorsShowing && colorableItems.has(currentOffer.product.furnitureData.className) && (
                         <div className="flex gap-1 ml-auto">
                             { colorableItems.get(currentOffer.product.furnitureData.className).map((color, i) => (
-                                <div key={ i } className="w-4 h-4 rounded-full border border-border/40 cursor-pointer hover:ring-2 ring-primary/30 transition-all"
+                                <div key={ i } className="w-4 h-4 rounded-full cursor-pointer ring-1 ring-stroke-soft-200 hover:ring-2 hover:ring-primary-base transition-all"
                                     style={ { backgroundColor: ColorConverter.int2rgb(color) } }
                                     onClick={ () => selectColor(i, currentOffer.product.furnitureData.className) }
                                 />
@@ -112,7 +112,7 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutProps> = props =>
                 </div>
             ) }
             <div className="flex-1 p-3 min-h-0 overflow-auto">
-                <div className="grid grid-cols-[repeat(auto-fill,68px)] gap-1.5">
+                <div className="grid grid-cols-[repeat(auto-fill,82px)] gap-2">
                     { (!colorsShowing || !currentOffer || !colorableItems.has(currentOffer.product.furnitureData.className)) &&
                         offers.map((offer, index) => <CatalogGridOfferView key={ index } itemActive={ (currentOffer && (currentOffer.product.furnitureData.hasIndexedColor ? currentOffer.product.furnitureData.className === offer.product.furnitureData.className : currentOffer.offerId === offer.offerId)) } offer={ offer } selectOffer={ selectOffer } />) }
                     { (colorsShowing && currentOffer && colorableItems.has(currentOffer.product.furnitureData.className)) &&
@@ -120,8 +120,8 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutProps> = props =>
                             <div
                                 key={ index }
                                 className={ cn(
-                                    'aspect-square rounded-xl border-2 cursor-pointer transition-all',
-                                    currentOffer.product.furnitureData.colorIndex === index ? 'border-primary ring-2 ring-primary/20 scale-105' : 'border-border/30 hover:border-primary/40'
+                                    'aspect-square cursor-pointer rounded-12 ring-2 transition-all',
+                                    currentOffer.product.furnitureData.colorIndex === index ? 'scale-105 ring-primary-base' : 'ring-stroke-soft-200 hover:ring-primary-base'
                                 ) }
                                 style={ { backgroundColor: ColorConverter.int2rgb(color) } }
                                 onClick={ () => selectColor(index, currentOffer.product.furnitureData.className) }

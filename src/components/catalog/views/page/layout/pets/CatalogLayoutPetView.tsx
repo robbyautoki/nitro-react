@@ -5,7 +5,7 @@ import { DispatchUiEvent, GetPetAvailableColors, GetPetIndexFromLocalization, Lo
 import { LayoutPetImageView } from '../../../../../../common';
 import { CatalogPurchaseFailureEvent } from '../../../../../../events';
 import { useCatalog, useMessageEvent } from '../../../../../../hooks';
-import { Input } from '../../../../../ui/input';
+import * as Input from '@/align-ui/components/ui/input';
 import { CatalogAddOnBadgeWidgetView } from '../../widgets/CatalogAddOnBadgeWidgetView';
 import { CatalogPurchaseWidgetView } from '../../widgets/CatalogPurchaseWidgetView';
 import { CatalogTotalPriceWidget } from '../../widgets/CatalogTotalPriceWidget';
@@ -204,32 +204,36 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
 
     return (
         <div className="flex flex-col h-full gap-2">
-            <div className="grid grid-cols-[repeat(auto-fill,68px)] gap-1 flex-1 min-h-0 overflow-y-auto p-1">
+            <div className="grid grid-cols-[repeat(auto-fill,82px)] gap-2 flex-1 min-h-0 overflow-y-auto p-2">
                 { !colorsShowing && (sellablePalettes.length > 0) && sellablePalettes.map((palette, index) =>
                 {
                     return (
-                        <div key={ index } className={ `flex items-center justify-center p-1 rounded-lg border cursor-pointer transition-colors ${ selectedPaletteIndex === index ? 'border-indigo-400/80 bg-indigo-500/10 shadow-sm' : 'border-black/[0.06] bg-black/[0.03] hover:border-black/[0.10]' }` } onClick={ event => setSelectedPaletteIndex(index) }>
+                        <div key={ index } className={ `flex cursor-pointer items-center justify-center rounded-10 p-1 ring-1 transition-colors ${ selectedPaletteIndex === index ? 'bg-primary-alpha-10 shadow-regular-xs ring-primary-base' : 'bg-bg-weak-50 ring-stroke-soft-200 hover:bg-bg-white-0' }` } onClick={ event => setSelectedPaletteIndex(index) }>
                             <LayoutPetImageView typeId={ petIndex } paletteId={ palette.paletteId } direction={ 2 } headOnly={ true } />
                         </div>
                     );
                 }) }
-                { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <div key={ index } className={ `w-full aspect-square rounded-lg border-2 cursor-pointer transition-all ${ selectedColorIndex === index ? 'border-primary shadow-sm scale-105' : 'border-border hover:border-border' }` } style={ { backgroundColor: ColorConverter.int2rgb(colorSet[0]) } } onClick={ event => setSelectedColorIndex(index) } />) }
+                { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <div key={ index } className={ `w-full aspect-square cursor-pointer rounded-10 ring-2 transition-all ${ selectedColorIndex === index ? 'scale-105 ring-primary-base' : 'ring-stroke-soft-200 hover:ring-primary-base' }` } style={ { backgroundColor: ColorConverter.int2rgb(colorSet[0]) } } onClick={ event => setSelectedColorIndex(index) } />) }
             </div>
-            <div className="flex flex-col gap-2 p-2.5 bg-black/[0.03] rounded-lg border border-black/[0.06] shrink-0">
+            <div className="flex flex-col gap-2 rounded-12 bg-bg-weak-50 p-2.5 shadow-regular-xs ring-1 ring-stroke-soft-200 shrink-0">
                 <div className="relative overflow-hidden">
                     <CatalogViewProductWidgetView />
-                    <CatalogAddOnBadgeWidgetView position="absolute" className="bg-black/[0.03] rounded bottom-1 right-1" />
+                    <CatalogAddOnBadgeWidgetView position="absolute" className="rounded bg-bg-weak-50 bottom-1 right-1" />
                     { ((petIndex > -1) && (petIndex <= 7)) &&
-                        <button className="appearance-none border-0 absolute bottom-1 left-1 p-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors" onClick={ event => setColorsShowing(!colorsShowing) }>
+                        <button className="absolute bottom-1 left-1 appearance-none border-0 rounded-md bg-primary-base p-1.5 text-static-white transition-colors hover:bg-primary-darker" onClick={ event => setColorsShowing(!colorsShowing) }>
                             <FaFillDrip className="text-xs" />
                         </button> }
                 </div>
                 <div className="flex flex-col flex-1 gap-1">
-                    <span className="truncate">{ petBreedName }</span>
+                    <span className="truncate text-label-xs text-text-strong-950">{ petBreedName }</span>
                     <div className="flex flex-col flex-1 gap-1">
-                        <Input type="text" className="h-8 w-full text-xs" placeholder={ LocalizeText('widgets.petpackage.name.title') } value={ petName } onChange={ event => setPetName(event.target.value) } />
+                        <Input.Root size="xsmall">
+                            <Input.Wrapper className="h-8">
+                                <Input.Input type="text" className="text-paragraph-xs" placeholder={ LocalizeText('widgets.petpackage.name.title') } value={ petName } onChange={ event => setPetName(event.target.value) } />
+                            </Input.Wrapper>
+                        </Input.Root>
                         { (approvalResult > 0) &&
-                            <div className="text-xs text-red-400">{ validationErrorMessage }</div> }
+                            <div className="text-paragraph-xs text-error-base">{ validationErrorMessage }</div> }
                     </div>
                     <div className="flex justify-end">
                         <CatalogTotalPriceWidget justifyContent="end" alignItems="end" />

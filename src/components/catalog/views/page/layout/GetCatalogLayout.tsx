@@ -3,6 +3,7 @@ import { CatalogLayoutProps } from './CatalogLayout.types';
 import { CatalogLayoutBadgeDisplayView } from './CatalogLayoutBadgeDisplayView';
 import { CatalogLayoutColorGroupingView } from './CatalogLayoutColorGroupingView';
 import { CatalogLayoutDefaultView } from './CatalogLayoutDefaultView';
+import { CatalogLayoutDiscordAssetsView, isDiscordAssetCatalogPage } from './CatalogLayoutDiscordAssetsView';
 import { CatalogLayoutGuildCustomFurniView } from './CatalogLayoutGuildCustomFurniView';
 import { CatalogLayoutGuildForumView } from './CatalogLayoutGuildForumView';
 import { CatalogLayoutGuildFrontpageView } from './CatalogLayoutGuildFrontpageView';
@@ -31,6 +32,8 @@ export const GetCatalogLayout = (page: ICatalogPage, hideNavigation: () => void)
 
     // Sets overview page (ID 9998) - first child, auto-selected
     if(page.pageId === 9998) return <CatalogLayoutSetsStartView { ...layoutProps } />;
+
+    if(isDiscordAssetCatalogPage(page.pageId)) return <CatalogLayoutDiscordAssetsView { ...layoutProps } />;
 
     // Sets detail pages (ID >= 10000) require explicit marker in page_text2
     if(page.pageId >= 10000)

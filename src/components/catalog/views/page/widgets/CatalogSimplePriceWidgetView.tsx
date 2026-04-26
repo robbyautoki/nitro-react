@@ -13,7 +13,7 @@ export const CatalogSimplePriceWidgetView: FC<CatalogSimplePriceWidgetViewProps>
     const { currentOffer = null } = useCatalog();
 
     return (
-        <div className={ `flex items-center gap-1 py-0.5 px-2 rounded text-xs font-semibold bg-black/[0.03] text-black/50 border border-black/[0.06] ${ className }` } { ...rest }>
+        <div className={ `flex items-center gap-1 rounded-md bg-bg-weak-50 px-2 py-0.5 text-label-xs text-text-sub-600 ring-1 ring-stroke-soft-200 ${ className }` } { ...rest }>
             <CatalogPriceDisplayWidgetView separator={ true } offer={ currentOffer } />
         </div>
     );

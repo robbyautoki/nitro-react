@@ -1,6 +1,7 @@
 import { FC, useMemo, useState } from 'react';
+import { UserRound } from 'lucide-react';
 import { LocalizeText } from '../../../../api';
-import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
+import { AlignGameWindow } from '../../../align-game-ui';
 import { HelpNameChangeEvent } from '../../../../events';
 import { useUiEvent } from '../../../../hooks';
 import { NameChangeConfirmationView } from './NameChangeConfirmationView';
@@ -54,13 +55,18 @@ export const NameChangeView:FC<{}> = props =>
     if(!isVisible) return null;
 
     return (
-        <NitroCardView className="nitro-change-username" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText(titleKey) } onCloseClick={ () => onAction('close') } />
-            <NitroCardContentView className="text-white/90">
-                { layout === INIT && <NameChangeInitView onAction={ onAction } /> }
-                { layout === INPUT && <NameChangeInputView onAction={ onAction } /> }
-                { layout === CONFIRMATION && <NameChangeConfirmationView username={ newUsername } onAction={ onAction } /> }
-            </NitroCardContentView>
-        </NitroCardView>
+        <AlignGameWindow
+            uniqueKey="help-name-change"
+            title={ LocalizeText(titleKey) }
+            subtitle={ LocalizeText('tutorial.name_change.title.main') }
+            icon={ <UserRound className="size-4" /> }
+            onClose={ () => onAction('close') }
+            widthClassName="w-[380px] max-w-[calc(100vw-32px)]"
+            bodyClassName="p-4"
+        >
+            { layout === INIT && <NameChangeInitView onAction={ onAction } /> }
+            { layout === INPUT && <NameChangeInputView onAction={ onAction } /> }
+            { layout === CONFIRMATION && <NameChangeConfirmationView username={ newUsername } onAction={ onAction } /> }
+        </AlignGameWindow>
     )
 }

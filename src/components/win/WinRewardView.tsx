@@ -1,12 +1,12 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
+import { Coins, Gem, Gift, Package, Sparkles, Star, Trophy } from 'lucide-react';
 import { GetConfiguration, GetRoomSession, GetSessionDataManager } from '../../api';
 import { getAuthHeaders } from '../../api/utils/SessionTokenManager';
 import { useMessageEvent } from '../../hooks';
-import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
-import { Frame, FramePanel } from '../ui/frame';
-import { Button } from '../ui/button';
-import { Trophy, X } from 'lucide-react';
+import { AlignGameWindow, EmptyState, MetricTile, SelectableCard } from '../align-game-ui';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
 
 interface WinItem {
     id: number;
@@ -51,9 +51,13 @@ export const WinRewardView: FC<{}> = () =>
             headers: getAuthHeaders(),
         })
             .then(r => r.json())
-            .then(data => { if(data.items) setItems(data.items); setItemsLoaded(true); })
-            .catch(() => {});
-    }, [itemsLoaded]);
+            .then(data =>
+            {
+                if(data.items) setItems(data.items); setItemsLoaded(true);
+            })
+            .catch(() =>
+            {});
+    }, [ itemsLoaded ]);
 
     const addReward = useCallback((reward: WinReward) =>
     {
@@ -111,7 +115,8 @@ export const WinRewardView: FC<{}> = () =>
                 }
                 if(data.length > 0) loadItems();
             })
-            .catch(() => {});
+            .catch(() =>
+            {});
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const dismissCurrent = useCallback(() =>
@@ -137,135 +142,142 @@ export const WinRewardView: FC<{}> = () =>
                 setClaimed(true);
             }
         }
-        catch(e) {}
-        finally { setClaiming(false); }
-    }, [selectedCurrency, selectedItem, current, claiming]);
+        catch(e)
+        {}
+        finally
+        {
+            setClaiming(false);
+        }
+    }, [ selectedCurrency, selectedItem, current, claiming ]);
 
     if(!current) return null;
 
     const currencies = [
-        { key: 'credits', label: 'Credits', amount: current.credits, color: 'text-amber-500', bgActive: 'border-amber-500/40 bg-amber-500/5', emoji: '💰' },
-        { key: 'pixels', label: 'Pixels', amount: current.pixels, color: 'text-blue-500', bgActive: 'border-blue-500/40 bg-blue-500/5', emoji: '💎' },
-        { key: 'points', label: 'Punkte', amount: current.points, color: 'text-emerald-500', bgActive: 'border-emerald-500/40 bg-emerald-500/5', emoji: '⭐' },
+        { key: 'credits', label: 'Credits', amount: current.credits, color: 'orange' as const, icon: Coins, iconClassName: 'text-warning-base' },
+        { key: 'pixels', label: 'Pixels', amount: current.pixels, color: 'blue' as const, icon: Gem, iconClassName: 'text-information-base' },
+        { key: 'points', label: 'Punkte', amount: current.points, color: 'green' as const, icon: Star, iconClassName: 'text-success-base' },
     ];
 
     const queueCount = rewards.length;
+    const selectedCurrencyMeta = currencies.find(c => c.key === selectedCurrency);
 
     return (
-        <div className="fixed inset-0 z-[250] flex items-center justify-center pointer-events-auto">
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-            <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-                <div className="w-[520px]">
-                    <Frame className="relative">
-                        <div className="drag-handler absolute inset-0 cursor-move" />
-                        <FramePanel className="overflow-hidden p-0! relative z-10">
-                            <div className="flex items-center justify-between px-4 py-2.5 border-b">
-                                <div className="flex items-center gap-2">
-                                    <Trophy className="size-4 text-amber-500" />
-                                    <span className="text-sm font-semibold">Event-Win erhalten!</span>
-                                    { queueCount > 1 && (
-                                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 font-medium">
-                                            +{ queueCount - 1 } weitere
-                                        </span>
-                                    )}
+        <div className="fixed inset-0 z-[250] flex items-center justify-center bg-overlay backdrop-blur-[10px] pointer-events-auto">
+            <AlignGameWindow
+                title="Event-Win erhalten"
+                subtitle={ `Level ${ current.winLevel } von ${ current.giver }` }
+                icon={ <Trophy className="size-4" /> }
+                widthClassName="w-[520px] max-w-[94vw]"
+                onClose={ claimed ? dismissCurrent : undefined }
+            >
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-2">
+                        <MetricTile icon={ <Trophy className="size-4 text-warning-base" /> } value={ `Level ${ current.winLevel }` } label="Win-Level" />
+                        <MetricTile icon={ <Gift className="size-4 text-feature-base" /> } value={ queueCount > 1 ? `${ queueCount - 1 } weitere` : 'Aktuell' } label="Queue" />
+                    </div>
+                    { current.bonusPercent > 0 && (
+                        <div className="flex justify-center">
+                            <AlignBadge.Root color="purple" variant="lighter" size="medium">
+                                <AlignBadge.Icon as={ Sparkles } className="size-3.5" />
+                                +{ current.bonusPercent }% Rang-Bonus
+                            </AlignBadge.Root>
+                        </div>
+                    ) }
+                    { !claimed ? (
+                        <>
+                            <section className="space-y-2">
+                                <div className="text-label-xs uppercase text-text-soft-400">Wähle eine Währung</div>
+                                <div className="grid grid-cols-3 gap-2">
+                                    { currencies.map(currency =>
+                                    {
+                                        const Icon = currency.icon;
+
+                                        return (
+                                            <SelectableCard
+                                                key={ currency.key }
+                                                selected={ selectedCurrency === currency.key }
+                                                className="flex-col justify-center text-center"
+                                                onClick={ () => setSelectedCurrency(currency.key) }
+                                            >
+                                                <Icon className={ `size-5 ${ currency.iconClassName }` } />
+                                                <span className="text-label-sm tabular-nums text-text-strong-950">{ currency.amount.toLocaleString() }</span>
+                                                <span className="text-paragraph-xs text-text-sub-600">{ currency.label }</span>
+                                            </SelectableCard>
+                                        );
+                                    }) }
                                 </div>
-                                { claimed && (
-                                    <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={ dismissCurrent }>
-                                        <X className="size-3.5" />
-                                    </button>
-                                )}
-                            </div>
-
-                            <div className="px-4 py-3 space-y-4 max-h-[70vh] overflow-auto">
-                                <div className="text-center">
-                                    <div className="text-2xl font-bold text-orange-500">Level { current.winLevel }</div>
-                                    <div className="text-xs text-muted-foreground mt-1">Win von <span className="text-foreground font-medium">{ current.giver }</span></div>
-                                    { current.bonusPercent > 0 && (
-                                        <div className="mt-2 inline-block px-3 py-1 rounded-full text-[11px] font-medium border border-purple-500/20 bg-purple-500/5 text-purple-500">
-                                            +{ current.bonusPercent }% Rang-Bonus
-                                        </div>
-                                    )}
-                                </div>
-
-                                { !claimed ? (
-                                    <>
-                                        <div>
-                                            <div className="text-xs font-semibold text-muted-foreground mb-2">Wähle eine Währung:</div>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                { currencies.map(c => (
-                                                    <button
-                                                        key={ c.key }
-                                                        className={ `flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-all ${ selectedCurrency === c.key ? c.bgActive : 'border-border' }` }
-                                                        onClick={ () => setSelectedCurrency(c.key) }>
-                                                        <span className="text-lg">{ c.emoji }</span>
-                                                        <span className={ `text-sm font-bold ${ c.color }` }>{ c.amount.toLocaleString() }</span>
-                                                        <span className="text-[10px] text-muted-foreground">{ c.label }</span>
-                                                    </button>
-                                                )) }
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <div className="text-xs font-semibold text-muted-foreground mb-2">Wähle ein Item:</div>
-                                            { items.length === 0 ? (
-                                                <div className="text-center py-4 text-muted-foreground/50 text-xs">Keine Items verfügbar</div>
-                                            ) : (
-                                                <div className="grid grid-cols-3 gap-2 max-h-[200px] overflow-auto">
-                                                    { items.map(item => (
-                                                        <button
-                                                            key={ item.id }
-                                                            className={ `flex flex-col items-center gap-1.5 p-2.5 rounded-lg border transition-all ${ selectedItem?.id === item.id ? 'border-amber-500/40 bg-amber-500/5' : 'border-border' }` }
-                                                            onClick={ () => setSelectedItem(item) }>
-                                                            <img
-                                                                src={ `${ getImageUrl() }${ item.item_name.split('*')[0] }_icon.png` }
-                                                                alt={ item.public_name }
-                                                                className="w-8 h-8 object-contain"
-                                                                style={{ imageRendering: 'pixelated' }}
-                                                                onError={ (e) => { (e.target as HTMLImageElement).style.opacity = '0.3'; } }
-                                                            />
-                                                            <span className="text-[10px] text-muted-foreground text-center leading-tight truncate w-full">
-                                                                { item.public_name }
-                                                            </span>
-                                                        </button>
-                                                    )) }
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <Button
-                                            className="w-full"
-                                            size="sm"
-                                            disabled={ !selectedCurrency || claiming }
-                                            onClick={ handleClaim }>
-                                            { claiming ? 'Wird eingelöst...' : '🎁 Belohnung einlösen' }
-                                        </Button>
-                                    </>
+                            </section>
+                            <section className="space-y-2">
+                                <div className="text-label-xs uppercase text-text-soft-400">Wähle ein Item</div>
+                                { items.length === 0 ? (
+                                    <EmptyState icon={ <Package className="size-8" /> } title="Keine Items verfügbar" className="py-5" />
                                 ) : (
-                                    <div className="flex flex-col items-center gap-3 py-6">
-                                        <div className="text-4xl">🎉</div>
-                                        <div className="text-sm font-semibold text-foreground">Belohnung erfolgreich eingelöst!</div>
-                                        <div className="flex gap-3">
-                                            { selectedCurrency && (
-                                                <div className="px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/20 bg-emerald-500/5 text-emerald-500">
-                                                    +{ currencies.find(c => c.key === selectedCurrency)?.amount.toLocaleString() } { currencies.find(c => c.key === selectedCurrency)?.label }
-                                                </div>
-                                            )}
-                                            { selectedItem && (
-                                                <div className="px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-500/20 bg-amber-500/5 text-amber-500">
-                                                    +1 { selectedItem.public_name }
-                                                </div>
-                                            )}
-                                        </div>
-                                        <Button variant="outline" size="sm" onClick={ dismissCurrent }>
-                                            { queueCount > 1 ? `Weiter (${ queueCount - 1 } übrig)` : 'Schließen' }
-                                        </Button>
+                                    <div className="grid max-h-[200px] grid-cols-3 gap-2 overflow-auto pr-1">
+                                        { items.map(item => (
+                                            <SelectableCard
+                                                key={ item.id }
+                                                selected={ selectedItem?.id === item.id }
+                                                className="flex-col justify-center p-2.5 text-center"
+                                                onClick={ () => setSelectedItem(item) }
+                                            >
+                                                <img
+                                                    src={ `${ getImageUrl() }${ item.item_name.split('*')[0] }_icon.png` }
+                                                    alt={ item.public_name }
+                                                    className="size-8 object-contain"
+                                                    style={ { imageRendering: 'pixelated' } }
+                                                    onError={ (e) =>
+                                                    {
+                                                        (e.target as HTMLImageElement).style.opacity = '0.35';
+                                                    } }
+                                                />
+                                                <span className="w-full truncate text-paragraph-xs text-text-sub-600">
+                                                    { item.public_name }
+                                                </span>
+                                            </SelectableCard>
+                                        )) }
                                     </div>
-                                )}
+                                ) }
+                            </section>
+                            <FancyButton.Root
+                                type="button"
+                                className="w-full"
+                                size="small"
+                                variant="primary"
+                                disabled={ !selectedCurrency || claiming }
+                                onClick={ handleClaim }
+                            >
+                                <FancyButton.Icon as={ Gift } />
+                                { claiming ? 'Wird eingelöst...' : 'Belohnung einlösen' }
+                            </FancyButton.Root>
+                        </>
+                    ) : (
+                        <div className="flex flex-col items-center gap-3 rounded-xl border border-stroke-soft-200 bg-bg-white-0 px-4 py-6 text-center">
+                            <div className="flex size-12 items-center justify-center rounded-full bg-success-lighter text-success-base">
+                                <Gift className="size-6" />
                             </div>
-                        </FramePanel>
-                    </Frame>
+                            <div>
+                                <div className="text-label-sm text-text-strong-950">Belohnung erfolgreich eingelöst</div>
+                                <div className="mt-1 text-paragraph-xs text-text-sub-600">Die Auswahl wurde per :winclaim an den Client gesendet.</div>
+                            </div>
+                            <div className="flex flex-wrap justify-center gap-2">
+                                { selectedCurrencyMeta && (
+                                    <AlignBadge.Root color={ selectedCurrencyMeta.color } variant="lighter">
+                                        +{ selectedCurrencyMeta.amount.toLocaleString() } { selectedCurrencyMeta.label }
+                                    </AlignBadge.Root>
+                                ) }
+                                { selectedItem && (
+                                    <AlignBadge.Root color="orange" variant="lighter">
+                                        +1 { selectedItem.public_name }
+                                    </AlignBadge.Root>
+                                ) }
+                            </div>
+                            <FancyButton.Root type="button" variant="basic" size="small" onClick={ dismissCurrent }>
+                                { queueCount > 1 ? `Weiter (${ queueCount - 1 } übrig)` : 'Schließen' }
+                            </FancyButton.Root>
+                        </div>
+                    ) }
                 </div>
-            </DraggableWindow>
+            </AlignGameWindow>
         </div>
     );
 };

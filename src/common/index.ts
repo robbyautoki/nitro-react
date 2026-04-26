@@ -14,6 +14,7 @@ export * from './Grid';
 export * from './GridContext';
 export * from './HorizontalRule';
 export * from './InfiniteScroll';
+export * from './InlineFeedback';
 export * from './layout';
 export * from './layout/limited-edition';
 export * from './Text';

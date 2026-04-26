@@ -4,6 +4,7 @@ import { LocalizeText, MarketplaceOfferData, MarketPlaceOfferState, Notification
 import { useMessageEvent, useNotification } from '../../../../../../hooks';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
 import { CatalogLayoutMarketplaceItemView, OWN_OFFER } from './CatalogLayoutMarketplaceItemView';
+import * as AlignButton from '@/align-ui/components/ui/button';
 
 export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = props =>
 {
@@ -74,36 +75,34 @@ export const CatalogLayoutMarketplaceOwnItemsView: FC<CatalogLayoutProps> = prop
     }, []);
 
     return (
-        <div className="flex flex-col h-full gap-3 overflow-hidden bg-white rounded-xl p-3 border border-black/[0.04]">
+        <div className="flex flex-col h-full gap-3 overflow-hidden bg-bg-white-0 rounded-xl p-3 border border-stroke-soft-200">
             { (creditsWaiting <= 0) &&
-                <div className="text-center text-[11px] font-mono bg-black/[0.02] border border-black/[0.05] rounded-lg p-3 text-black/30 uppercase tracking-widest">
+                <div className="text-center text-[11px] font-mono bg-bg-weak-50 border border-stroke-soft-200 rounded-lg p-3 text-text-soft-400 uppercase tracking-widest">
                     { LocalizeText('catalog.marketplace.redeem.no_sold_items') }
                 </div> }
             { (creditsWaiting > 0) &&
-                <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
-                    <span className="text-[11px] font-bold font-mono text-amber-600 uppercase">
+                <div className="flex items-center justify-between gap-3 bg-warning-lighter border border-warning-base/20 rounded-lg p-3">
+                    <span className="text-[11px] font-bold font-mono text-warning-base uppercase">
                         { LocalizeText('catalog.marketplace.redeem.get_credits', [ 'count', 'credits' ], [ soldOffers.length.toString(), creditsWaiting.toString() ]) }
                     </span>
-                    <button className="appearance-none border border-amber-500/30 h-8 px-4 text-[11px] font-bold font-mono rounded bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 transition-colors uppercase" onClick={ redeemSoldOffers }>
+                    <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" className="h-8 px-4 text-[11px] font-bold font-mono uppercase" onClick={ redeemSoldOffers }>
                         { LocalizeText('catalog.marketplace.offer.redeem') }
-                    </button>
+                    </AlignButton.Root>
                 </div> }
-            
             <div className="flex flex-col flex-1 min-h-0 mt-2">
-                <div className="flex items-center justify-between shrink-0 px-2 border-b border-black/[0.06] pb-2">
-                    <span className="text-[10px] font-bold text-black/30 uppercase tracking-[0.1em]">
+                <div className="flex items-center justify-between shrink-0 px-2 border-b border-stroke-soft-200 pb-2">
+                    <span className="text-[10px] font-bold text-text-soft-400 uppercase tracking-[0.1em]">
                         { LocalizeText('catalog.marketplace.items_found', [ 'count' ], [ offers.length.toString() ]) }
                     </span>
-                    <div className="flex items-center text-[10px] font-bold text-black/30 uppercase tracking-[0.1em] gap-8 pr-[70px]">
+                    <div className="flex items-center text-[10px] font-bold text-text-soft-400 uppercase tracking-[0.1em] gap-8 pr-[70px]">
                         <span className="w-16 text-right">Price</span>
                     </div>
                 </div>
-                
-                <div className="flex flex-col overflow-auto h-full rounded border border-black/[0.04] bg-white">
+                <div className="flex flex-col overflow-auto h-full rounded border border-stroke-soft-200 bg-bg-white-0">
                     { offers.length > 0 ? (
                         offers.map(offer => <CatalogLayoutMarketplaceItemView key={ offer.offerId } offerData={ offer } type={ OWN_OFFER } onClick={ takeItemBack } />)
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-black/15 text-xs gap-2 py-8">
+                        <div className="flex-1 flex flex-col items-center justify-center text-text-disabled-300 text-xs gap-2 py-8">
                             <span className="text-2xl font-mono opacity-50">¯\_(ツ)_/¯</span>
                             No active listings.
                         </div>

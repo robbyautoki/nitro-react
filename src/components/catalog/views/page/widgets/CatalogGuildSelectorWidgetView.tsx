@@ -1,9 +1,10 @@
 import { CatalogGroupsComposer, StringDataType } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
-import { Base, Button, Flex } from '../../../../../common';
+import { Base, Flex } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
 import { CatalogNativeSelect } from '../../CatalogNativeSelect';
+import * as AlignButton from '@/align-ui/components/ui/button';
 
 export const CatalogGuildSelectorWidgetView: FC<{}> = props =>
 {
@@ -50,11 +51,11 @@ export const CatalogGuildSelectorWidgetView: FC<{}> = props =>
     if(!groups || !groups.length)
     {
         return (
-            <Base className="bg-muted rounded p-1 text-black/85 text-center">
+            <Base className="rounded-10 bg-bg-weak-50 p-2 text-center text-paragraph-xs text-text-sub-600">
                 { LocalizeText('catalog.guild_selector.members_only') }
-                <Button className="mt-1">
+                <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="mt-1">
                     { LocalizeText('catalog.guild_selector.find_groups') }
-                </Button>
+                </AlignButton.Root>
             </Base>
         );
     }

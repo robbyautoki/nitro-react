@@ -1,7 +1,7 @@
 import { BotRemoveComposer } from '@nitrots/nitro-renderer';
 import { FC, useMemo } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import { AvatarInfoRentableBot, BotSkillsEnum, LocalizeText, SendMessageComposer } from '../../../../../api';
+import { AvatarInfoRentableBot, BotSkillsEnum, GetRoomSession, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { Button, Column, Flex, LayoutAvatarImageView, LayoutBadgeImageView, Text, UserProfileIconView } from '../../../../../common';
 
 interface InfoStandWidgetRentableBotViewProps
@@ -24,6 +24,14 @@ export const InfoStandWidgetRentableBotView: FC<InfoStandWidgetRentableBotViewPr
     }, [ avatarInfo ]);
 
     const pickupBot = () => SendMessageComposer(new BotRemoveComposer(avatarInfo.webID));
+    const openPatrolEditor = () =>
+    {
+        const roomSession = GetRoomSession();
+
+        if(!roomSession) return;
+
+        roomSession.sendChatMessage(`:patrolbot open ${ Math.abs(avatarInfo.webID) }`, 0);
+    };
     
     if(!avatarInfo) return;
 
@@ -75,10 +83,14 @@ export const InfoStandWidgetRentableBotView: FC<InfoStandWidgetRentableBotViewPr
                     </Column>
                 </Column>
             </Column>
-            { canPickup &&
-                <Flex justifyContent="end">
+            <Flex justifyContent="end" gap={ 1 }>
+                <Button variant="secondary" onClick={ openPatrolEditor }>
+                    Patrouille bearbeiten
+                </Button>
+                { canPickup &&
                     <Button variant="dark" onClick={ pickupBot }>{ LocalizeText('infostand.button.pickup') }</Button>
-                </Flex> }
+                }
+            </Flex>
         </Column>
     );
 }

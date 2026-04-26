@@ -3,7 +3,7 @@ import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import { GetConfiguration, LocalizeText, SendMessageComposer } from '../../../../api';
 import { Base, Button, Column, Flex, LayoutCurrencyIcon, NitroCardContentView, NitroCardHeaderView, NitroCardSubHeaderView, NitroCardView, Text } from '../../../../common';
 import { usePurse } from '../../../../hooks';
-import { Input } from '../../../ui/input';
+import * as Input from '@/align-ui/components/ui/input';
 
 export const OfferWindowView = (props: { offer: TargetedOfferData, setOpen: Dispatch<SetStateAction<boolean>> }) =>
 {
@@ -51,8 +51,8 @@ export const OfferWindowView = (props: { offer: TargetedOfferData, setOpen: Disp
         </NitroCardSubHeaderView>
         <NitroCardContentView gap={ 1 }>
             <Flex gap={ 1 } fullHeight>
-                <Flex gap={ 1 } column className="w-3/4 text-black/85">
-                    <Column className="bg-yellow-500 p-2" fullHeight>
+                <Flex gap={ 1 } column className="w-3/4 text-text-strong-950">
+                    <Column className="bg-warning-lighter p-2 text-warning-base" fullHeight>
                         <h4>
                             { LocalizeText(offer.title) }
                         </h4>
@@ -61,7 +61,11 @@ export const OfferWindowView = (props: { offer: TargetedOfferData, setOpen: Disp
                     <Flex alignSelf="center" alignItems="center" justifyContent="center" gap={ 2 }>
                         { offer.purchaseLimit > 1 && <Flex gap={ 1 }>
                             <Text variant="muted">{ LocalizeText('catalog.bundlewidget.quantity') }</Text>
-                            <Input type="number" className="h-8 w-20 text-xs" value={ amount } onChange={ evt => setAmount(parseInt(evt.target.value)) } min={ 1 } max={ offer.purchaseLimit } />
+                            <Input.Root size="xsmall" className="w-20">
+                                <Input.Wrapper className="h-8">
+                                    <Input.Input type="number" className="text-xs" value={ amount } onChange={ evt => setAmount(parseInt(evt.target.value)) } min={ 1 } max={ offer.purchaseLimit } />
+                                </Input.Wrapper>
+                            </Input.Root>
                         </Flex> }
                         <Button variant="primary" disabled={ !canPurchase } onClick={ () => buyOffer() }>{ LocalizeText('targeted.offer.button.buy') }</Button>
                     </Flex>

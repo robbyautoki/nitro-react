@@ -1,9 +1,13 @@
 import { ILinkEventTracker, NitroSettingsEvent, UserSettingsCameraFollowComposer, UserSettingsEvent, UserSettingsOldChatComposer, UserSettingsRoomInvitesComposer, UserSettingsSoundComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
-import { FaVolumeDown, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
+import { Settings, Volume2, VolumeX } from 'lucide-react';
 import { AddEventLinkTracker, DispatchMainEvent, DispatchUiEvent, LocalizeText, RemoveLinkEventTracker, SendMessageComposer } from '../../api';
-import { classNames, Column, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../common';
+import { DraggableWindow } from '../../common';
 import { useCatalogPlaceMultipleItems, useCatalogSkipPurchaseConfirmation, useMessageEvent } from '../../hooks';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignSlider from '@/align-ui/components/ui/slider';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import * as AlignSwitch from '@/align-ui/components/ui/switch';
 
 export const UserSettingsView: FC<{}> = props =>
 {
@@ -125,63 +129,76 @@ export const UserSettingsView: FC<{}> = props =>
 
     if(!isVisible || !userSettings) return null;
 
+    const toggles = [
+        { key: 'oldchat', label: LocalizeText('memenu.settings.chat.prefer.old.chat'), value: userSettings.oldChat, onChange: (value: boolean) => processAction('oldchat', value) },
+        { key: 'room_invites', label: LocalizeText('memenu.settings.other.ignore.room.invites'), value: userSettings.roomInvites, onChange: (value: boolean) => processAction('room_invites', value) },
+        { key: 'camera_follow', label: LocalizeText('memenu.settings.other.disable.room.camera.follow'), value: userSettings.cameraFollow, onChange: (value: boolean) => processAction('camera_follow', value) },
+        { key: 'place_multiple', label: LocalizeText('memenu.settings.other.place.multiple.objects'), value: catalogPlaceMultipleObjects, onChange: setCatalogPlaceMultipleObjects },
+        { key: 'skip_purchase', label: LocalizeText('memenu.settings.other.skip.purchase.confirmation'), value: catalogSkipPurchaseConfirmation, onChange: setCatalogSkipPurchaseConfirmation },
+    ];
+
+    const volumeRows = [
+        { key: 'system_volume', label: LocalizeText('widget.memenu.settings.volume.ui'), value: userSettings.volumeSystem },
+        { key: 'furni_volume', label: LocalizeText('widget.memenu.settings.volume.furni'), value: userSettings.volumeFurni },
+        { key: 'trax_volume', label: LocalizeText('widget.memenu.settings.volume.trax'), value: userSettings.volumeTrax },
+    ];
+
     return (
-        <NitroCardView uniqueKey="user-settings" className="user-settings-window" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText('widget.memenu.settings.title') } onCloseClick={ event => processAction('close_view') } />
-            <NitroCardContentView className="text-white/90">
-                <Column gap={ 1 }>
-                    <Flex alignItems="center" gap={ 1 }>
-                        <input className="form-check-input" type="checkbox" checked={ userSettings.oldChat } onChange={ event => processAction('oldchat', event.target.checked) } />
-                        <Text>{ LocalizeText('memenu.settings.chat.prefer.old.chat') }</Text>
-                    </Flex>
-                    <Flex alignItems="center" gap={ 1 }>
-                        <input className="form-check-input" type="checkbox" checked={ userSettings.roomInvites } onChange={ event => processAction('room_invites', event.target.checked) } />
-                        <Text>{ LocalizeText('memenu.settings.other.ignore.room.invites') }</Text>
-                    </Flex>
-                    <Flex alignItems="center" gap={ 1 }>
-                        <input className="form-check-input" type="checkbox" checked={ userSettings.cameraFollow } onChange={ event => processAction('camera_follow', event.target.checked) } />
-                        <Text>{ LocalizeText('memenu.settings.other.disable.room.camera.follow') }</Text>
-                    </Flex>
-                    <Flex alignItems="center" gap={ 1 }>
-                        <input className="form-check-input" type="checkbox" checked={ catalogPlaceMultipleObjects } onChange={ event => setCatalogPlaceMultipleObjects(event.target.checked) } />
-                        <Text>{ LocalizeText('memenu.settings.other.place.multiple.objects') }</Text>
-                    </Flex>
-                    <Flex alignItems="center" gap={ 1 }>
-                        <input className="form-check-input" type="checkbox" checked={ catalogSkipPurchaseConfirmation } onChange={ event => setCatalogSkipPurchaseConfirmation(event.target.checked) } />
-                        <Text>{ LocalizeText('memenu.settings.other.skip.purchase.confirmation') }</Text>
-                    </Flex>
-                </Column>
-                <Column>
-                    <Text bold>{ LocalizeText('widget.memenu.settings.volume') }</Text>
-                    <Column gap={ 1 }>
-                        <Text>{ LocalizeText('widget.memenu.settings.volume.ui') }</Text>
-                        <Flex alignItems="center" gap={ 1 }>
-                            { (userSettings.volumeSystem === 0) && <FaVolumeMute className={ classNames((userSettings.volumeSystem >= 50) && 'text-muted', 'fa-icon') } /> }
-                            { (userSettings.volumeSystem > 0) && <FaVolumeDown className={ classNames((userSettings.volumeSystem >= 50) && 'text-muted', 'fa-icon') } /> }
-                            <input type="range" className="custom-range w-full" min="0" max="100" step="1" id="volumeSystem" value={ userSettings.volumeSystem } onChange={ event => processAction('system_volume', event.target.value) } onMouseUp={ () => saveRangeSlider('volume') }/>
-                            <FaVolumeUp className={ classNames((userSettings.volumeSystem < 50) && 'text-muted', 'fa-icon') } />
-                        </Flex>
-                    </Column>
-                    <Column gap={ 1 }>
-                        <Text>{ LocalizeText('widget.memenu.settings.volume.furni') }</Text>
-                        <Flex alignItems="center" gap={ 1 }>
-                            { (userSettings.volumeFurni === 0) && <FaVolumeMute className={ classNames((userSettings.volumeFurni >= 50) && 'text-muted', 'fa-icon') } /> }
-                            { (userSettings.volumeFurni > 0) && <FaVolumeDown className={ classNames((userSettings.volumeFurni >= 50) && 'text-muted', 'fa-icon') } /> }
-                            <input type="range" className="custom-range w-full" min="0" max="100" step="1" id="volumeFurni" value={ userSettings.volumeFurni } onChange={ event => processAction('furni_volume', event.target.value) } onMouseUp={ () => saveRangeSlider('volume') }/>
-                            <FaVolumeUp className={ classNames((userSettings.volumeFurni < 50) && 'text-muted', 'fa-icon') } />
-                        </Flex>
-                    </Column>
-                    <Column gap={ 1 }>
-                        <Text>{ LocalizeText('widget.memenu.settings.volume.trax') }</Text>
-                        <Flex alignItems="center" gap={ 1 }>
-                            { (userSettings.volumeTrax === 0) && <FaVolumeMute className={ classNames((userSettings.volumeTrax >= 50) && 'text-muted', 'fa-icon') } /> }
-                            { (userSettings.volumeTrax > 0) && <FaVolumeDown className={ classNames((userSettings.volumeTrax >= 50) && 'text-muted', 'fa-icon') } /> }
-                            <input type="range" className="custom-range w-full" min="0" max="100" step="1" id="volumeTrax" value={ userSettings.volumeTrax } onChange={ event => processAction('trax_volume', event.target.value) } onMouseUp={ () => saveRangeSlider('volume') }/>
-                            <FaVolumeUp className={ classNames((userSettings.volumeTrax < 50) && 'text-muted', 'fa-icon') } />
-                        </Flex>
-                    </Column>
-                </Column>
-            </NitroCardContentView>
-        </NitroCardView>
+        <DraggableWindow uniqueKey="user-settings" handleSelector=".settings-drag-handler">
+            <AlignSurface.Panel className="user-settings-window w-[360px] overflow-hidden">
+                <AlignSurface.Header
+                    className="settings-drag-handler cursor-grab select-none active:cursor-grabbing"
+                    title={
+                        <div className="flex min-w-0 items-center gap-2">
+                            <span className="flex size-8 items-center justify-center rounded-full bg-bg-weak-50 text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">
+                                <Settings className="size-4" />
+                            </span>
+                            <span className="truncate">{ LocalizeText('widget.memenu.settings.title') }</span>
+                        </div>
+                    }
+                    description="Client, Chat und Audio"
+                    onClose={ () => processAction('close_view') }
+                />
+                <div className="space-y-5 p-4">
+                    <section className="space-y-3">
+                        <div className="text-label-xs uppercase text-text-soft-400">{ LocalizeText('navigator.roomsettings.tab.basic') }</div>
+                        <div className="space-y-2">
+                            { toggles.map(toggle => (
+                                <div key={ toggle.key } className="flex items-center justify-between gap-3 rounded-xl bg-bg-weak-50 px-3 py-2">
+                                    <span className="text-paragraph-sm text-text-strong-950">{ toggle.label }</span>
+                                    <AlignSwitch.Root checked={ toggle.value } onCheckedChange={ toggle.onChange } />
+                                </div>
+                            )) }
+                        </div>
+                    </section>
+                    <AlignDivider.Root />
+                    <section className="space-y-3">
+                        <div className="text-label-xs uppercase text-text-soft-400">{ LocalizeText('widget.memenu.settings.volume') }</div>
+                        <div className="space-y-4">
+                            { volumeRows.map(row => (
+                                <div key={ row.key } className="space-y-2">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-2 text-paragraph-sm text-text-strong-950">
+                                            { row.value === 0 ? <VolumeX className="size-4 text-text-soft-400" /> : <Volume2 className="size-4 text-text-sub-600" /> }
+                                            { row.label }
+                                        </div>
+                                        <span className="text-label-xs tabular-nums text-text-sub-600">{ Math.round(row.value) }%</span>
+                                    </div>
+                                    <AlignSlider.Root
+                                        value={ [ row.value ] }
+                                        max={ 100 }
+                                        step={ 1 }
+                                        onValueChange={ ([ value ]) => processAction(row.key, value) }
+                                        onValueCommit={ () => saveRangeSlider('volume') }
+                                    >
+                                        <AlignSlider.Thumb />
+                                    </AlignSlider.Root>
+                                </div>
+                            )) }
+                        </div>
+                    </section>
+                </div>
+            </AlignSurface.Panel>
+        </DraggableWindow>
     );
 }

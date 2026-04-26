@@ -1,190 +1,593 @@
+.nitro-camera-window {
+    overflow: hidden;
+    width: min(92vw, 420px);
+    user-select: none;
+}
+
 .nitro-camera-capture {
-    position: relative;
+    background: transparent !important;
+    box-shadow: none;
 
-    .iphone-camera {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 8px;
+    .nitro-camera-header {
+        background: hsl(var(--align-bg-white-0));
+        border-radius: 19px 19px 0 0;
     }
 
-    .iphone-close {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        z-index: 10;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(0, 0, 0, 0.6);
-        color: white;
-        cursor: pointer;
-        font-size: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-
-        &:hover {
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        &:active {
-            background: rgba(0, 0, 0, 1);
-        }
+    .nitro-camera-body {
+        background: transparent;
+        padding-bottom: 0;
+        gap: 0;
     }
 
-    .iphone-frame-container {
-        position: relative;
-        width: 250px;
-        height: 504px;
+    .nitro-camera-viewfinder-wrap {
+        background: transparent;
+        border: 1px solid hsl(var(--align-stroke-soft-200));
+        box-shadow:
+            inset 0 0 0 1px hsl(var(--align-bg-white-0) / 0.42),
+            0 14px 36px hsl(var(--align-bg-strong-950) / 0.18);
+        margin-bottom: 12px;
     }
 
-    .iphone-frame-svg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 3;
-        pointer-events: none;
-    }
-
-    .iphone-screen-content {
-        position: absolute;
-        top: 14px;
-        left: 14px;
-        width: 222px;
-        height: 476px;
-        border-radius: 20px;
-        z-index: 1;
-        object-fit: cover;
-        image-rendering: auto;
-    }
-
-    .iphone-viewfinder {
+    .nitro-camera-viewfinder {
         background: transparent;
     }
 
-    .iphone-frame-actions {
-        z-index: 4;
+    .nitro-camera-footer {
+        margin: 0 -14px;
+        padding: 12px 14px 14px;
+        background: hsl(var(--align-bg-white-0));
+        border-top: 1px solid hsl(var(--align-stroke-soft-200));
+        border-radius: 0 0 19px 19px;
         display: flex;
-        align-items: flex-end;
-        justify-content: center;
-        gap: 8px;
-        padding-bottom: 12px;
-        background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.6) 100%);
+        flex-direction: column;
+        gap: 10px;
     }
 
-    .iphone-shutter-area {
-        display: flex;
-        justify-content: center;
-        padding: 12px 0 4px 0;
+    .nitro-camera-shutter-row {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
     }
 
-    .iphone-shutter-button {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        border: 4px solid white;
-        background: rgba(255, 255, 255, 0.25);
-        cursor: pointer;
-        transition: transform 0.1s ease, background 0.1s ease;
+    .nitro-camera-roll {
+        background: transparent;
+        padding: 10px 0 0;
+        border-top: 1px solid hsl(var(--align-stroke-soft-200));
+        box-shadow: none;
+    }
+}
 
+.nitro-camera-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid hsl(var(--align-stroke-soft-200));
+    background: hsl(var(--align-bg-white-0));
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.nitro-camera-title {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+}
+
+.nitro-camera-title-icon {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: hsl(var(--align-primary-base));
+    background: hsl(var(--align-primary-alpha-10));
+}
+
+.nitro-camera-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    background: hsl(var(--align-bg-weak-50));
+}
+
+.nitro-camera-viewfinder-wrap {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 1;
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+    border-radius: 16px;
+    background: hsl(var(--align-bg-weak-50));
+    box-shadow:
+        inset 0 0 0 1px hsl(var(--align-bg-white-0) / 0.42),
+        var(--shadow-regular-xs);
+}
+
+.nitro-camera-viewfinder,
+.nitro-camera-viewfinder-image {
+    width: 100%;
+    height: 100%;
+}
+
+.nitro-camera-viewfinder {
+    background: transparent;
+}
+
+.nitro-camera-viewfinder-image {
+    display: block;
+    object-fit: cover;
+    image-rendering: auto;
+}
+
+.nitro-camera-focus-grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(to right, transparent calc(33.333% - 1px), hsl(var(--align-stroke-white-0) / 0.35) 33.333%, transparent calc(33.333% + 1px)),
+        linear-gradient(to right, transparent calc(66.666% - 1px), hsl(var(--align-stroke-white-0) / 0.35) 66.666%, transparent calc(66.666% + 1px)),
+        linear-gradient(to bottom, transparent calc(33.333% - 1px), hsl(var(--align-stroke-white-0) / 0.35) 33.333%, transparent calc(33.333% + 1px)),
+        linear-gradient(to bottom, transparent calc(66.666% - 1px), hsl(var(--align-stroke-white-0) / 0.35) 66.666%, transparent calc(66.666% + 1px));
+}
+
+.nitro-camera-frame-actions {
+    position: absolute;
+    inset: auto 12px 12px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+}
+
+.nitro-camera-shutter-row {
+    display: flex;
+    justify-content: center;
+}
+
+.nitro-camera-shutter {
+    display: inline-flex;
+    width: 56px;
+    height: 56px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+    border-radius: 999px;
+    background: hsl(var(--align-bg-white-0));
+    box-shadow: var(--shadow-regular-xs);
+    transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+
+    span {
+        display: block;
+        width: 42px;
+        height: 42px;
+        border-radius: inherit;
+        background: hsl(var(--align-primary-base));
+    }
+
+    &:hover {
+        border-color: hsl(var(--align-primary-base));
+        box-shadow: var(--shadow-regular-md);
+        transform: translateY(-1px);
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+}
+
+.nitro-camera-roll {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.nitro-camera-roll-items {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+
+    button {
+        width: 48px;
+        height: 48px;
+        flex: 0 0 auto;
+        overflow: hidden;
+        border: 1px solid hsl(var(--align-stroke-soft-200));
+        border-radius: 10px;
+        background: hsl(var(--align-bg-white-0));
+        padding: 2px;
+        transition: border-color 140ms ease, background 140ms ease;
+
+        &.selected,
         &:hover {
-            background: rgba(255, 255, 255, 0.4);
-            transform: scale(1.05);
-        }
-
-        &:active {
-            background: rgba(255, 255, 255, 0.6);
-            transform: scale(0.92);
+            border-color: hsl(var(--align-primary-base));
+            background: hsl(var(--align-primary-alpha-10));
         }
     }
 
-    .iphone-camera-roll {
-        width: 250px;
-        background: rgba(0, 0, 0, 0.7);
-        border-radius: 0 0 12px 12px;
-        padding: 8px;
-        backdrop-filter: blur(8px);
-
-        img {
-            width: 48px;
-            height: 48px;
-            border-radius: 6px;
-            border: 2px solid transparent;
-            object-fit: cover;
-            image-rendering: auto;
-            cursor: pointer;
-            transition: border-color 0.15s ease;
-
-            &:hover {
-                border-color: rgba(255, 255, 255, 0.6);
-            }
-
-            &.selected {
-                border-color: white;
-            }
-        }
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+        object-fit: cover;
+        image-rendering: auto;
     }
 }
 
 .nitro-camera-editor {
-    width: $camera-editor-width;
-    height: $camera-editor-height;
+    width: min(94vw, 760px);
+}
 
-    .picture-preview-container {
-        width: 320px;
-        height: 320px;
-        overflow: hidden;
-        border-radius: 4px;
-        position: relative;
-        user-select: none;
-        flex-shrink: 0;
-    }
+.nitro-camera-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 8px;
+    border-bottom: 1px solid hsl(var(--align-stroke-soft-200));
+    background: hsl(var(--align-bg-weak-50));
 
-    .picture-preview {
-        width: 320px;
-        height: 320px;
-        display: block;
-        image-rendering: auto;
-    }
+    button {
+        display: inline-flex;
+        flex: 1;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 34px;
+        border-radius: 10px;
+        color: hsl(var(--align-text-sub-600));
+        font-size: 12px;
+        font-weight: 600;
+        transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
 
-    .camera-footer {
-        flex-shrink: 0;
-    }
-
-    .layout-grid-item {
-        height: 60px !important;
-        max-height: 60px !important;
-    }
-
-    .effect-thumbnail-image {
-        img {
-            width: 50px;
-            height: 50px;
-            image-rendering: auto;
-            object-fit: contain;
+        &.active {
+            color: hsl(var(--align-text-strong-950));
+            background: hsl(var(--align-bg-white-0));
+            box-shadow: var(--shadow-regular-xs);
         }
+
+        &:hover:not(.active) {
+            color: hsl(var(--align-text-strong-950));
+            background: hsl(var(--align-bg-white-0) / 0.72);
+        }
+    }
+}
+
+.nitro-camera-editor-body {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px;
+    background: hsl(var(--align-bg-weak-50));
+}
+
+.nitro-camera-effect-panel {
+    min-height: 0;
+    max-height: 456px;
+    overflow: auto;
+    border-radius: 14px;
+    background: hsl(var(--align-bg-white-0));
+    padding: 10px;
+    box-shadow: inset 0 0 0 1px hsl(var(--align-stroke-soft-200));
+}
+
+.nitro-camera-effect-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.nitro-camera-effect-empty {
+    display: flex;
+    min-height: 180px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 12px;
+    background: hsl(var(--align-bg-weak-50));
+    color: hsl(var(--align-text-sub-600));
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px hsl(var(--align-stroke-soft-200));
+}
+
+.nitro-camera-effect-item {
+    position: relative;
+    display: flex;
+    width: 100%;
+    aspect-ratio: 1;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+    border-radius: 12px;
+    background: hsl(var(--align-bg-weak-50));
+    color: hsl(var(--align-text-sub-600));
+    transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+
+    &:hover:not(.locked),
+    &.active {
+        border-color: hsl(var(--align-primary-base));
+        background: hsl(var(--align-primary-alpha-10));
+    }
+
+    &.active {
+        box-shadow: inset 0 0 0 1px hsl(var(--align-primary-base));
+    }
+
+    &.locked {
+        cursor: not-allowed;
+        opacity: 0.72;
     }
 
     .remove-effect {
         position: absolute;
-        top: 1px;
-        right: 1px;
-        padding: 2px;
-        font-size: 10px;
-        min-height: unset;
+        top: 4px;
+        right: 4px;
+        z-index: 2;
+        display: inline-flex;
+        width: 20px;
+        height: 20px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 999px;
+        color: hsl(var(--align-static-white));
+        background: hsl(var(--align-error-base));
     }
 }
 
-.nitro-camera-checkout {
-    width: $camera-checkout-width;
+.effect-thumbnail-image,
+.effect-thumbnail-image img {
+    width: 100%;
+    height: 100%;
+}
 
-    .picture-preview {
-        width: 320px;
-        height: 320px;
+.effect-thumbnail-image img {
+    display: block;
+    object-fit: cover;
+    image-rendering: auto;
+}
+
+.nitro-camera-effect-lock {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.nitro-camera-effect-fallback {
+    display: inline-flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: hsl(var(--align-text-sub-600));
+
+    span {
+        display: -webkit-box;
+        max-width: 100%;
+        overflow: hidden;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+}
+
+.nitro-camera-editor-stage {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.picture-preview-container {
+    position: relative;
+    width: min(100%, 360px);
+    aspect-ratio: 1;
+    align-self: center;
+    overflow: hidden;
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+    border-radius: 16px;
+    background: hsl(var(--align-bg-white-0));
+    box-shadow:
+        inset 0 0 0 1px hsl(var(--align-bg-white-0) / 0.42),
+        var(--shadow-regular-xs);
+}
+
+.picture-preview {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: auto;
+}
+
+.nitro-camera-adjust-row {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    border-radius: 12px;
+    background: hsl(var(--align-bg-white-0));
+    padding: 9px 10px;
+    box-shadow: inset 0 0 0 1px hsl(var(--align-stroke-soft-200));
+}
+
+.nitro-camera-slider {
+    height: 22px;
+
+    .track {
+        top: 9px;
+        height: 4px;
+        border-radius: 999px;
+        background: hsl(var(--align-bg-strong-950) / 0.12);
+    }
+
+    .track-0 {
+        background: hsl(var(--align-primary-base));
+    }
+
+    .thumb {
+        top: 2px;
+        display: flex;
+        min-width: 18px;
+        height: 18px;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid hsl(var(--align-bg-white-0));
+        border-radius: 999px;
+        background: hsl(var(--align-primary-base));
+        color: hsl(var(--align-static-white));
+        font-size: 9px;
+        font-weight: 700;
+        box-shadow: var(--shadow-regular-xs);
+        outline: none;
+        padding: 0 4px;
+    }
+}
+
+.nitro-camera-editor-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.nitro-camera-checkout {
+    width: min(92vw, 520px);
+}
+
+.nitro-camera-checkout-body {
+    gap: 12px;
+}
+
+.nitro-camera-checkout-preview {
+    display: flex;
+    width: min(100%, 360px);
+    aspect-ratio: 1;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+    border-radius: 16px;
+    background: hsl(var(--align-bg-white-0));
+    box-shadow:
+        inset 0 0 0 1px hsl(var(--align-bg-white-0) / 0.42),
+        var(--shadow-regular-xs);
+
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        image-rendering: auto;
+    }
+}
+
+.nitro-camera-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: hsl(var(--align-text-sub-600));
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.nitro-camera-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border-radius: 14px;
+    background: hsl(var(--align-bg-white-0));
+    padding: 12px;
+    box-shadow: inset 0 0 0 1px hsl(var(--align-stroke-soft-200));
+}
+
+.nitro-photo-viewer {
+    width: min(92vw, 440px);
+}
+
+.nitro-photo-viewer-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    background: hsl(var(--align-bg-weak-50));
+}
+
+.nitro-photo-frame {
+    display: flex;
+    width: 100%;
+    aspect-ratio: 1;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+    border-radius: 16px;
+    background-color: hsl(var(--align-bg-white-0));
+    background-position: center;
+    background-size: cover;
+    box-shadow:
+        inset 0 0 0 1px hsl(var(--align-bg-white-0) / 0.42),
+        var(--shadow-regular-xs);
+}
+
+.nitro-photo-meta,
+.nitro-photo-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.nitro-photo-meta {
+    min-width: 0;
+}
+
+.nitro-photo-nav {
+    justify-content: center;
+}
+
+@media (max-width: 720px) {
+    .nitro-camera-editor-body {
+        grid-template-columns: 1fr;
+    }
+
+    .nitro-camera-effect-panel {
+        max-height: 180px;
+    }
+
+    .nitro-camera-card,
+    .nitro-camera-editor-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .nitro-camera-card > button,
+    .nitro-camera-editor-footer > div {
+        width: 100%;
     }
 }

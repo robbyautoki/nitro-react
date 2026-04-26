@@ -1,6 +1,5 @@
 import { Dispatch, FC, SetStateAction } from 'react';
 import { IAchievementCategory } from '../../../../api';
-import { AutoGrid } from '../../../../common';
 import { AchievementsCategoryListItemView } from './AchievementsCategoryListItemView';
 
 interface AchievementsCategoryListViewProps
@@ -15,8 +14,8 @@ export const AchievementsCategoryListView: FC<AchievementsCategoryListViewProps>
     const { categories = null, selectedCategoryCode = null, setSelectedCategoryCode = null } = props;
     
     return (
-        <AutoGrid columnCount={ 3 } columnMinWidth={ 90 } columnMinHeight={ 100 }>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             { categories && (categories.length > 0) && categories.map((category, index) => <AchievementsCategoryListItemView key={ index } category={ category } selectedCategoryCode={ selectedCategoryCode } setSelectedCategoryCode={ setSelectedCategoryCode } /> ) }
-        </AutoGrid>
+        </div>
     );
 };

@@ -1,9 +1,12 @@
 import { FurnitureStackHeightComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
-import ReactSlider from 'react-slider';
+import { ArrowDownToLine, Layers, Ruler } from 'lucide-react';
 import { LocalizeText, SendMessageComposer } from '../../../../api';
-import { Button, Column, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
 import { useFurnitureStackHeightWidget } from '../../../../hooks';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignSlider from '@/align-ui/components/ui/slider';
+import { FurnitureWidgetActions, FurnitureWidgetSection, FurnitureWidgetText, FurnitureWidgetWindow } from './FurnitureWidgetLayout';
 
 export const FurnitureStackHeightView: FC<{}> = props =>
 {
@@ -29,30 +32,39 @@ export const FurnitureStackHeightView: FC<{}> = props =>
     if(objectId === -1) return null;
 
     return (
-        <NitroCardView className="nitro-widget-custom-stack-height" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText('widget.custom.stack.height.title') } onCloseClick={ onClose } />
-            <NitroCardContentView justifyContent="between">
-                <Text>{ LocalizeText('widget.custom.stack.height.text') }</Text>
-                <Flex gap={ 2 }>
-                    <ReactSlider
-                        className="nitro-slider"
-                        min={ 0 }
-                        max={ maxHeight }
-                        step={ 0.01 }
-                        value={ height }
-                        onChange={ event => updateHeight(event) }
-                        renderThumb={ (props, state) => <div { ...props }>{ state.valueNow }</div> } />
-                    <input className="show-number-arrows" style={ { width: 50 } } type="number" min={ 0 } max={ maxHeight } value={ tempHeight } onChange={ event => updateTempHeight(event.target.value) } />
-                </Flex>
-                <Column gap={ 1 }>
-                    <Button onClick={ event => SendMessageComposer(new FurnitureStackHeightComposer(objectId, -100)) }>
+        <FurnitureWidgetWindow
+            uniqueKey="furniture-stack-height"
+            title={ LocalizeText('widget.custom.stack.height.title') }
+            subtitle={ `${ height.toFixed(2) } / ${ maxHeight }` }
+            icon={ Ruler }
+            onClose={ onClose }
+            widthClassName="w-[400px]"
+            footer={
+                <FurnitureWidgetActions className="grid grid-cols-2">
+                    <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ event => SendMessageComposer(new FurnitureStackHeightComposer(objectId, -100)) }>
+                        <AlignButton.Icon as={ Layers } className="size-4" />
                         { LocalizeText('furniture.above.stack') }
-                    </Button>
-                    <Button onClick={ event => SendMessageComposer(new FurnitureStackHeightComposer(objectId, 0)) }>
+                    </AlignButton.Root>
+                    <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ event => SendMessageComposer(new FurnitureStackHeightComposer(objectId, 0)) }>
+                        <AlignButton.Icon as={ ArrowDownToLine } className="size-4" />
                         { LocalizeText('furniture.floor.level') }
-                    </Button>
-                </Column>
-            </NitroCardContentView>
-        </NitroCardView>
+                    </AlignButton.Root>
+                </FurnitureWidgetActions>
+            }
+        >
+            <FurnitureWidgetSection>
+                <FurnitureWidgetText className="mb-4">{ LocalizeText('widget.custom.stack.height.text') }</FurnitureWidgetText>
+                <div className="grid grid-cols-[1fr_82px] items-center gap-3">
+                    <AlignSlider.Root min={ 0 } max={ maxHeight } step={ 0.01 } value={ [ height ] } onValueChange={ value => updateHeight(value[0]) }>
+                        <AlignSlider.Thumb />
+                    </AlignSlider.Root>
+                    <AlignInput.Root>
+                        <AlignInput.Wrapper>
+                            <AlignInput.Input className="text-center" type="number" min={ 0 } max={ maxHeight } step={ 0.01 } value={ tempHeight } onChange={ event => updateTempHeight(event.target.value) } />
+                        </AlignInput.Wrapper>
+                    </AlignInput.Root>
+                </div>
+            </FurnitureWidgetSection>
+        </FurnitureWidgetWindow>
     );
 }

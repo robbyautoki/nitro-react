@@ -1,18 +1,16 @@
 import { GetCustomRoomFilterMessageComposer, NavigatorSearchComposer, RoomBannedUsersComposer, RoomDataParser, RoomMuteComposer, RoomSettingsComposer, RoomSettingsDataEvent, SaveRoomSettingsComposer, SecurityLevel, ToggleStaffPickMessageComposer, UpdateHomeRoomMessageComposer } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { CreateLinkEvent, DispatchUiEvent, GetGroupInformation, GetSessionDataManager, IRoomData, LocalizeText, ReportType, SendMessageComposer } from '../../../api';
-import { LayoutBadgeImageView, LayoutRoomThumbnailView, UserProfileIconView } from '../../../common';
+import { DraggableWindow, DraggableWindowPosition, LayoutRoomThumbnailView, UserProfileIconView } from '../../../common';
 import { RoomWidgetThumbnailEvent } from '../../../events';
-import { DraggableWindow, DraggableWindowPosition } from '../../../common';
 import { useHelp, useMessageEvent, useNavigator } from '../../../hooks';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/reui-badge';
-import { Input } from '@/components/ui/input';
-import { Frame, FramePanel } from '@/components/ui/frame';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
+import { cn } from '@/align-ui/utils/cn';
 import { Home, Star, Settings, Link2, Camera, Users, Copy, Check, MessageCircle, Flag, VolumeX, Volume2, Filter, LayoutGrid, Shield, ArrowLeft, X } from 'lucide-react';
+import { NavigatorPanel, NavigatorPanelStack, NavigatorScrollViewport, NavigatorTabButton, NavigatorTextInput } from './NavigatorPrimitives';
 import { NavigatorRoomSettingsBasicTabView } from './room-settings/NavigatorRoomSettingsBasicTabView';
 import { NavigatorRoomSettingsAccessTabView } from './room-settings/NavigatorRoomSettingsAccessTabView';
 import { NavigatorRoomSettingsRightsTabView } from './room-settings/NavigatorRoomSettingsRightsTabView';
@@ -22,20 +20,23 @@ import { NavigatorRoomSettingsModTabView } from './room-settings/NavigatorRoomSe
 export class NavigatorRoomInfoViewProps
 {
     onCloseClick: () => void;
+    openSettingsRequest?: number;
 }
+
+type SettingsTabId = 'basic' | 'access' | 'rights' | 'chat' | 'mod';
 
 function ActivityBar({ userCount, maxUsers }: { userCount: number; maxUsers: number })
 {
     const pct = maxUsers > 0 ? Math.min(100, Math.round((userCount / maxUsers) * 100)) : 0;
-    let barColor = 'bg-emerald-500';
-    if(pct >= 90) barColor = 'bg-red-500';
-    else if(pct >= 50) barColor = 'bg-amber-500';
-    else if(userCount <= 0) barColor = 'bg-muted-foreground/20';
+    let barColor = 'bg-success-base';
+    if(pct >= 90) barColor = 'bg-error-base';
+    else if(pct >= 50) barColor = 'bg-warning-base';
+    else if(userCount <= 0) barColor = 'bg-bg-soft-200';
 
     return (
         <div className="flex items-center gap-1.5 w-full">
-            <MessageCircle className="w-3 h-3 text-muted-foreground/30 shrink-0" />
-            <div className="flex-1 h-1.5 rounded-full bg-muted/50 overflow-hidden">
+            <MessageCircle className="size-3 shrink-0 text-text-soft-400" />
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-bg-weak-50">
                 <div className={ `h-full rounded-full transition-all ${ barColor }` } style={ { width: `${ Math.max(pct, 2) }%` } } />
             </div>
         </div>
@@ -44,13 +45,15 @@ function ActivityBar({ userCount, maxUsers }: { userCount: number; maxUsers: num
 
 export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
 {
-    const { onCloseClick = null } = props;
+    const { onCloseClick = null, openSettingsRequest = 0 } = props;
     const [ view, setView ] = useState<'info' | 'settings'>('info');
     const [ isRoomPicked, setIsRoomPicked ] = useState(false);
     const [ isRoomMuted, setIsRoomMuted ] = useState(false);
     const [ showLink, setShowLink ] = useState(false);
     const [ linkCopied, setLinkCopied ] = useState(false);
+    const [ settingsTab, setSettingsTab ] = useState<SettingsTabId>('basic');
     const [ roomSettingsData, setRoomSettingsData ] = useState<IRoomData>(null);
+    const handledOpenSettingsRequest = useRef(0);
     const { report = null } = useHelp();
     const { navigatorData = null } = useNavigator();
 
@@ -106,6 +109,17 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
 
         SendMessageComposer(new RoomBannedUsersComposer(data.roomId));
     });
+
+    useEffect(() =>
+    {
+        if(!openSettingsRequest || (openSettingsRequest === handledOpenSettingsRequest.current)) return;
+        if(!navigatorData?.enteredGuestRoom) return;
+
+        handledOpenSettingsRequest.current = openSettingsRequest;
+        setSettingsTab('basic');
+        setView('settings');
+        SendMessageComposer(new RoomSettingsComposer(navigatorData.enteredGuestRoom.roomId));
+    }, [ openSettingsRequest, navigatorData ]);
 
     const handleSettingsChange = useCallback((field: string, value: string | number | boolean | string[]) =>
     {
@@ -186,6 +200,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                 return;
             case 'open_room_settings':
                 SendMessageComposer(new RoomSettingsComposer(navigatorData.enteredGuestRoom.roomId));
+                setSettingsTab('basic');
                 setView('settings');
                 return;
             case 'toggle_pick':
@@ -207,6 +222,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                 return;
             case 'close':
                 setView('info');
+                setSettingsTab('basic');
                 setRoomSettingsData(null);
                 onCloseClick();
                 return;
@@ -227,6 +243,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
     const handleSettingsClose = useCallback(() =>
     {
         setView('info');
+        setSettingsTab('basic');
         setRoomSettingsData(null);
     }, []);
 
@@ -242,235 +259,222 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
     const room = navigatorData.enteredGuestRoom;
     const isHome = navigatorData.homeRoomId === room.roomId;
     const roomLink = `https://play.bahhos.de/room/${ room.roomId }`;
+    const occupancyColor: 'red' | 'orange' | 'gray' | 'green' = room.userCount >= room.maxUsers * 0.9 ? 'red' : room.userCount >= room.maxUsers * 0.5 ? 'orange' : room.userCount <= 0 ? 'gray' : 'green';
+    const settingsTabs: { id: SettingsTabId; label: string }[] = [
+        { id: 'basic', label: 'Allgemein' },
+        { id: 'access', label: 'Zugang' },
+        { id: 'rights', label: 'Rechte' },
+        { id: 'chat', label: 'Chat & VIP' },
+        { id: 'mod', label: 'Moderation' },
+    ];
 
     return (
-        <TooltipProvider delayDuration={ 200 }>
+        <AlignTooltip.Provider delayDuration={ 200 }>
             <DraggableWindow uniqueKey="room-info" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
-                <div className="rounded-xl border border-border/60 bg-card shadow-2xl overflow-hidden flex flex-col" style={ { width: 420 } }>
-                    {/* Title Bar */}
-                    <div className="drag-handler shrink-0 flex items-center justify-between px-3 py-2 border-b border-border/40 bg-muted/20 cursor-grab active:cursor-grabbing select-none">
-                        <span className="text-[13px] font-semibold">
+                <AlignSurface.Panel className={ cn('nitro-room-info flex flex-col overflow-hidden', view === 'settings' && 'nitro-room-info--settings') }>
+                    <div className="drag-handler flex shrink-0 cursor-grab select-none items-center justify-between border-b border-stroke-soft-200 bg-bg-white-0 px-3 py-2 active:cursor-grabbing">
+                        <span className="text-label-sm text-text-strong-950">
                             { view === 'info' ? 'Rauminformationen' : 'Raumeinstellungen' }
                         </span>
-                        <button className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/50 transition-colors" onClick={ () => processAction('close') }>
-                            <X className="w-3 h-3" />
-                        </button>
+                        <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ () => processAction('close') }>
+                            <AlignButton.Icon as={ X } className="size-4" />
+                        </AlignButton.Root>
                     </div>
-
-                    {/* Content */}
-                    <div className="p-2.5 overflow-auto max-h-[500px]">
+                    <NavigatorScrollViewport className="max-h-[500px] p-2.5">
                         { view === 'info' ? (
-                            <Frame stacked spacing="sm" className="w-full">
-                                {/* Panel 1: Room Info */}
-                                <FramePanel>
+                            <NavigatorPanelStack>
+                                <NavigatorPanel>
                                     <div className="flex gap-3">
                                         <div className="relative shrink-0">
-                                            <div className="w-[110px] h-[110px] rounded-lg overflow-hidden border border-border/30">
+                                            <div className="h-[110px] w-[110px] overflow-hidden rounded-lg border border-stroke-soft-200">
                                                 <LayoutRoomThumbnailView roomId={ room.roomId } customUrl={ room.officialRoomPicRef }>
                                                     { hasPermission('settings') && (
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <button
-                                                                    className="absolute top-1.5 left-1.5 p-1 rounded-md bg-black/40 hover:bg-black/60 transition-colors"
+                                                        <AlignTooltip.Root>
+                                                            <AlignTooltip.Trigger asChild>
+                                                                <AlignButton.Root
+                                                                    type="button"
+                                                                    variant="neutral"
+                                                                    mode="lighter"
+                                                                    size="xxsmall"
+                                                                    className="absolute left-1.5 top-1.5 size-6 p-0 bg-bg-white-0/90"
                                                                     onClick={ () => processAction('open_room_thumbnail_camera') }
                                                                 >
-                                                                    <Camera className="w-3 h-3 text-white/70" />
-                                                                </button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent side="bottom" className="text-xs">Thumbnail ändern</TooltipContent>
-                                                        </Tooltip>
+                                                                    <AlignButton.Icon as={ Camera } className="size-3" />
+                                                                </AlignButton.Root>
+                                                            </AlignTooltip.Trigger>
+                                                            <AlignTooltip.Content side="bottom" size="xsmall">Thumbnail ändern</AlignTooltip.Content>
+                                                        </AlignTooltip.Root>
                                                     ) }
                                                 </LayoutRoomThumbnailView>
                                             </div>
                                         </div>
-
-                                        <div className="flex-1 min-w-0 flex flex-col gap-1">
+                                        <div className="flex min-w-0 flex-1 flex-col gap-1">
                                             <div className="flex items-start justify-between gap-2">
-                                                <div className="flex items-center gap-1.5 min-w-0">
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <button onClick={ () => processAction('set_home_room') } className="shrink-0">
-                                                                <Home className={ `w-3.5 h-3.5 transition-colors ${ isHome ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground/40 hover:text-muted-foreground' }` } />
+                                                <div className="flex min-w-0 items-center gap-1.5">
+                                                    <AlignTooltip.Root>
+                                                        <AlignTooltip.Trigger asChild>
+                                                            <button type="button" onClick={ () => processAction('set_home_room') } className="shrink-0">
+                                                                <Home className={ cn('size-3.5 transition-colors', isHome ? 'fill-warning-base text-warning-base' : 'text-text-soft-400 hover:text-text-sub-600') } />
                                                             </button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="bottom" className="text-xs">
+                                                        </AlignTooltip.Trigger>
+                                                        <AlignTooltip.Content side="bottom" size="xsmall">
                                                             { isHome ? 'Heimraum entfernen' : 'Als Heimraum setzen' }
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                    <span className="text-sm font-semibold truncate">{ room.roomName }</span>
+                                                        </AlignTooltip.Content>
+                                                    </AlignTooltip.Root>
+                                                    <span className="truncate text-label-sm text-text-strong-950">{ room.roomName }</span>
                                                 </div>
-                                                <div className="flex items-center gap-1 shrink-0">
+                                                <div className="flex shrink-0 items-center gap-1">
                                                     { hasPermission('settings') && (
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <button className="p-1 rounded-md hover:bg-muted transition-colors" onClick={ () => processAction('open_room_settings') }>
-                                                                    <Settings className="w-3.5 h-3.5 text-muted-foreground" />
-                                                                </button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent side="bottom" className="text-xs">Raumeinstellungen</TooltipContent>
-                                                        </Tooltip>
+                                                        <AlignTooltip.Root>
+                                                            <AlignTooltip.Trigger asChild>
+                                                                <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ () => processAction('open_room_settings') }>
+                                                                    <AlignButton.Icon as={ Settings } className="size-3.5" />
+                                                                </AlignButton.Root>
+                                                            </AlignTooltip.Trigger>
+                                                            <AlignTooltip.Content side="bottom" size="xsmall">Raumeinstellungen</AlignTooltip.Content>
+                                                        </AlignTooltip.Root>
                                                     ) }
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <button className="p-1 rounded-md hover:bg-muted transition-colors" onClick={ () => setShowLink(prev => !prev) }>
-                                                                <Link2 className="w-3.5 h-3.5 text-muted-foreground" />
-                                                            </button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="bottom" className="text-xs">Raum-Link</TooltipContent>
-                                                    </Tooltip>
+                                                    <AlignTooltip.Root>
+                                                        <AlignTooltip.Trigger asChild>
+                                                            <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ () => setShowLink(prev => !prev) }>
+                                                                <AlignButton.Icon as={ Link2 } className="size-3.5" />
+                                                            </AlignButton.Root>
+                                                        </AlignTooltip.Trigger>
+                                                        <AlignTooltip.Content side="bottom" size="xsmall">Raum-Link</AlignTooltip.Content>
+                                                    </AlignTooltip.Root>
                                                 </div>
                                             </div>
-
                                             { room.showOwner && (
-                                                <div className="flex items-center gap-1">
-                                                    <span className="text-[11px] text-muted-foreground">Besitzer:</span>
+                                                <div className="flex items-center gap-1 text-subheading-2xs">
+                                                    <span className="text-text-sub-600">Besitzer:</span>
                                                     <UserProfileIconView userId={ room.ownerId } />
-                                                    <span className="text-[11px] font-medium">{ room.ownerName }</span>
+                                                    <span className="font-medium text-text-strong-950">{ room.ownerName }</span>
                                                 </div>
                                             ) }
-
-                                            <div className="flex items-center gap-1">
-                                                <span className="text-[11px] text-muted-foreground">Bewertung:</span>
-                                                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                                                <span className="text-[11px] font-medium">{ navigatorData.currentRoomRating }</span>
+                                            <div className="flex items-center gap-1 text-subheading-2xs">
+                                                <span className="text-text-sub-600">Bewertung:</span>
+                                                <Star className="size-3 fill-warning-base text-warning-base" />
+                                                <span className="font-medium text-text-strong-950">{ navigatorData.currentRoomRating }</span>
                                             </div>
-
                                             { room.tags.length > 0 && (
-                                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                                <div className="mt-0.5 flex flex-wrap gap-1">
                                                     { room.tags.map(tag => (
-                                                        <Badge key={ tag } variant="outline" size="xs" className="text-[10px] cursor-pointer hover:bg-muted" onClick={ () => processAction('navigator_search_tag', tag) }>
+                                                        <AlignBadge.Root key={ tag } color="gray" variant="stroke" size="small" className="cursor-pointer text-[10px]" onClick={ () => processAction('navigator_search_tag', tag) }>
                                                             #{ tag }
-                                                        </Badge>
+                                                        </AlignBadge.Root>
                                                     )) }
                                                 </div>
                                             ) }
-
                                             { room.description && (
-                                                <ScrollArea className="max-h-[40px] mt-0.5">
-                                                    <p className="text-[11px] text-muted-foreground/80 leading-relaxed">{ room.description }</p>
-                                                </ScrollArea>
+                                                <NavigatorScrollViewport className="mt-0.5 max-h-[40px]">
+                                                    <p className="text-paragraph-xs leading-relaxed text-text-sub-600">{ room.description }</p>
+                                                </NavigatorScrollViewport>
                                             ) }
-
                                             { room.habboGroupId > 0 && (
                                                 <button
-                                                    className="flex items-center gap-1 mt-0.5 text-[11px] text-blue-500 hover:text-blue-400 hover:underline transition-colors"
+                                                    type="button"
+                                                    className="mt-0.5 flex items-center gap-1 text-subheading-2xs text-primary-base transition-colors hover:text-primary-darker hover:underline"
                                                     onClick={ () => processAction('open_group_info') }
                                                 >
-                                                    <Shield className="w-3 h-3" />
+                                                    <Shield className="size-3" />
                                                     { LocalizeText('navigator.guildbase', [ 'groupName' ], [ room.groupName ]) }
                                                 </button>
                                             ) }
                                         </div>
                                     </div>
-                                </FramePanel>
-
+                                </NavigatorPanel>
                                 { showLink && (
-                                    <FramePanel>
+                                    <NavigatorPanel>
                                         <div className="flex items-center gap-2">
-                                            <Input readOnly value={ roomLink } className="h-7 text-xs font-mono bg-muted/30" onClick={ e => (e.target as HTMLInputElement).select() } />
-                                            <Button size="sm" variant="outline" className="h-7 px-2 shrink-0" onClick={ handleCopyLink }>
-                                                { linkCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" /> }
-                                            </Button>
+                                            <NavigatorTextInput readOnly value={ roomLink } rootClassName="flex-1" className="font-mono" onClick={ e => (e.target as HTMLInputElement).select() } />
+                                            <AlignButton.Root type="button" variant="neutral" mode="stroke" size="xsmall" className="size-8 shrink-0 p-0" onClick={ handleCopyLink }>
+                                                <AlignButton.Icon as={ linkCopied ? Check : Copy } className={ cn('size-3.5', linkCopied && 'text-success-base') } />
+                                            </AlignButton.Root>
                                         </div>
-                                    </FramePanel>
+                                    </NavigatorPanel>
                                 ) }
-
-                                <FramePanel>
-                                    <div className="flex flex-col gap-0.5">
+                                <NavigatorPanel>
+                                    <div className="flex flex-col gap-1">
                                         { hasPermission('staff_pick') && (
-                                            <Button variant="ghost" size="sm" className="w-full justify-center h-8 text-xs" onClick={ () => processAction('toggle_pick') }>
-                                                <Star className={ `w-3.5 h-3.5 mr-1.5 ${ isRoomPicked ? 'text-amber-400 fill-amber-400' : '' }` } />
+                                            <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" className="w-full justify-center" onClick={ () => processAction('toggle_pick') }>
+                                                <AlignButton.Icon as={ Star } className={ cn('size-3.5', isRoomPicked && 'fill-warning-base text-warning-base') } />
                                                 { isRoomPicked ? 'Staff-Pick entfernen' : 'Als Staff-Pick markieren' }
-                                            </Button>
+                                            </AlignButton.Root>
                                         ) }
-                                        <Button variant="ghost" size="sm" className="w-full justify-center h-8 text-xs text-destructive hover:text-destructive" onClick={ () => processAction('report_room') }>
-                                            <Flag className="w-3.5 h-3.5 mr-1.5" />
+                                        <AlignButton.Root type="button" variant="error" mode="ghost" size="xsmall" className="w-full justify-center" onClick={ () => processAction('report_room') }>
+                                            <AlignButton.Icon as={ Flag } className="size-3.5" />
                                             Diesen Raum melden
-                                        </Button>
+                                        </AlignButton.Root>
                                         { hasPermission('settings') && (
                                             <>
-                                                <Button variant="ghost" size="sm" className="w-full justify-center h-8 text-xs" onClick={ () => processAction('toggle_mute') }>
+                                                <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" className="w-full justify-center" onClick={ () => processAction('toggle_mute') }>
                                                     { isRoomMuted
-                                                        ? <><Volume2 className="w-3.5 h-3.5 mr-1.5" />Stummschaltung aufheben</>
-                                                        : <><VolumeX className="w-3.5 h-3.5 mr-1.5" />Alle stumm schalten</>
+                                                        ? <><AlignButton.Icon as={ Volume2 } className="size-3.5" />Stummschaltung aufheben</>
+                                                        : <><AlignButton.Icon as={ VolumeX } className="size-3.5" />Alle stumm schalten</>
                                                     }
-                                                </Button>
-                                                <Button variant="ghost" size="sm" className="w-full justify-center h-8 text-xs" onClick={ () => processAction('room_filter') }>
-                                                    <Filter className="w-3.5 h-3.5 mr-1.5" />
+                                                </AlignButton.Root>
+                                                <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" className="w-full justify-center" onClick={ () => processAction('room_filter') }>
+                                                    <AlignButton.Icon as={ Filter } className="size-3.5" />
                                                     Raumfilter
-                                                </Button>
-                                                <Button variant="ghost" size="sm" className="w-full justify-center h-8 text-xs" onClick={ () => processAction('open_floorplan_editor') }>
-                                                    <LayoutGrid className="w-3.5 h-3.5 mr-1.5" />
+                                                </AlignButton.Root>
+                                                <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" className="w-full justify-center" onClick={ () => processAction('open_floorplan_editor') }>
+                                                    <AlignButton.Icon as={ LayoutGrid } className="size-3.5" />
                                                     Open Floor Plan Editor
-                                                </Button>
+                                                </AlignButton.Root>
                                             </>
                                         ) }
                                     </div>
-                                </FramePanel>
-
-                                <FramePanel>
+                                </NavigatorPanel>
+                                <NavigatorPanel className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-1.5">
-                                            <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                                            <span className="text-[11px] text-muted-foreground">
+                                            <Users className="size-3.5 text-text-sub-600" />
+                                            <span className="text-subheading-2xs text-text-sub-600">
                                                 { room.userCount }/{ room.maxUsers } Besucher
                                             </span>
                                         </div>
-                                        <Badge
-                                            variant={ room.userCount >= room.maxUsers * 0.9 ? 'destructive-light' : room.userCount >= room.maxUsers * 0.5 ? 'warning-light' : 'success-light' }
-                                            size="xs"
-                                        >
+                                        <AlignBadge.Root color={ occupancyColor } variant="light" size="small">
                                             { room.userCount <= 0 ? 'Leer' : room.userCount >= room.maxUsers ? 'Voll' : 'Offen' }
-                                        </Badge>
+                                        </AlignBadge.Root>
                                     </div>
                                     <ActivityBar userCount={ room.userCount } maxUsers={ room.maxUsers } />
-                                </FramePanel>
-                            </Frame>
+                                </NavigatorPanel>
+                            </NavigatorPanelStack>
                         ) : (
-                            /* Settings View */
-                            <div className="flex flex-col gap-3 w-full">
+                            <div className="flex w-full flex-col gap-3">
                                 <div className="flex items-center gap-2">
-                                    <button onClick={ () => setView('info') } className="p-1 rounded-md hover:bg-muted transition-colors">
-                                        <ArrowLeft className="w-4 h-4" />
-                                    </button>
-                                    <span className="text-sm font-semibold">Raumeinstellungen</span>
+                                    <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ () => setView('info') }>
+                                        <AlignButton.Icon as={ ArrowLeft } className="size-4" />
+                                    </AlignButton.Root>
+                                    <span className="text-label-sm text-text-strong-950">Raumeinstellungen</span>
                                 </div>
-
                                 { roomSettingsData ? (
-                                    <Tabs defaultValue="basic" className="w-full">
-                                        <TabsList className="w-full justify-start overflow-x-auto h-8">
-                                            <TabsTrigger value="basic" className="text-xs px-2.5">Allgemein</TabsTrigger>
-                                            <TabsTrigger value="access" className="text-xs px-2.5">Zugang</TabsTrigger>
-                                            <TabsTrigger value="rights" className="text-xs px-2.5">Rechte</TabsTrigger>
-                                            <TabsTrigger value="chat" className="text-xs px-2.5">Chat & VIP</TabsTrigger>
-                                            <TabsTrigger value="mod" className="text-xs px-2.5">Moderation</TabsTrigger>
-                                        </TabsList>
-                                        <TabsContent value="basic">
-                                            <NavigatorRoomSettingsBasicTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } onClose={ handleSettingsClose } />
-                                        </TabsContent>
-                                        <TabsContent value="access">
-                                            <NavigatorRoomSettingsAccessTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } />
-                                        </TabsContent>
-                                        <TabsContent value="rights">
-                                            <NavigatorRoomSettingsRightsTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } />
-                                        </TabsContent>
-                                        <TabsContent value="chat">
-                                            <NavigatorRoomSettingsVipChatTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } />
-                                        </TabsContent>
-                                        <TabsContent value="mod">
-                                            <NavigatorRoomSettingsModTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } />
-                                        </TabsContent>
-                                    </Tabs>
+                                    <div className="w-full">
+                                        <NavigatorPanel className="mb-2 p-1.5">
+                                            <div className="flex w-full gap-1 overflow-x-auto">
+                                                { settingsTabs.map(tab => (
+                                                    <NavigatorTabButton key={ tab.id } active={ settingsTab === tab.id } onClick={ () => setSettingsTab(tab.id) }>
+                                                        { tab.label }
+                                                    </NavigatorTabButton>
+                                                )) }
+                                            </div>
+                                        </NavigatorPanel>
+                                        { settingsTab === 'basic' && <NavigatorRoomSettingsBasicTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } onClose={ handleSettingsClose } /> }
+                                        { settingsTab === 'access' && <NavigatorRoomSettingsAccessTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } /> }
+                                        { settingsTab === 'rights' && <NavigatorRoomSettingsRightsTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } /> }
+                                        { settingsTab === 'chat' && <NavigatorRoomSettingsVipChatTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } /> }
+                                        { settingsTab === 'mod' && <NavigatorRoomSettingsModTabView roomData={ roomSettingsData } handleChange={ handleSettingsChange } /> }
+                                    </div>
                                 ) : (
                                     <div className="flex items-center justify-center py-8">
-                                        <span className="text-xs text-muted-foreground">Lade Einstellungen...</span>
+                                        <span className="text-paragraph-xs text-text-sub-600">Lade Einstellungen...</span>
                                     </div>
                                 ) }
                             </div>
                         ) }
-                    </div>
-                </div>
+                    </NavigatorScrollViewport>
+                </AlignSurface.Panel>
             </DraggableWindow>
-        </TooltipProvider>
+        </AlignTooltip.Provider>
     );
 };

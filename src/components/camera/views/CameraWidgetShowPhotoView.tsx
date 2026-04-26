@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
-import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
+import { CalendarDays, ChevronLeft, ChevronRight, UserRound } from 'lucide-react';
 import { GetUserProfile, IPhotoData, LocalizeText } from '../../../api';
-import { Flex, Grid, Text } from '../../../common';
+import * as AlignButton from '@/align-ui/components/ui/button';
 
 export interface CameraWidgetShowPhotoViewProps
 {
@@ -48,24 +48,34 @@ export const CameraWidgetShowPhotoView: FC<CameraWidgetShowPhotoViewProps> = pro
     if(!currentImage) return null;
 
     return (
-        <Grid style={ { display: 'flex', flexDirection: 'column' } }>
-            <Flex center className="picture-preview border border-black" style={ currentImage.w ? { backgroundImage: 'url(' + currentImage.w + ')' } : {} }>
+        <div className="nitro-photo-viewer-body">
+            <div className="nitro-photo-frame" style={ currentImage.w ? { backgroundImage: 'url(' + currentImage.w + ')' } : {} }>
                 { !currentImage.w &&
-                    <Text bold>{ LocalizeText('camera.loading') }</Text> }
-            </Flex>
+                    <div className="text-label-sm text-text-sub-600">{ LocalizeText('camera.loading') }</div> }
+            </div>
             { currentImage.m && currentImage.m.length &&
-                <Text center>{ currentImage.m }</Text> }
-            <Flex alignItems="center" justifyContent="between">
-                <Text>{ (currentImage.n || '') }</Text>
-                <Text>{ new Date(currentImage.t * 1000).toLocaleDateString() }</Text>
-            </Flex>
+                <div className="text-center text-paragraph-sm text-text-strong-950">{ currentImage.m }</div> }
+            <div className="nitro-photo-meta">
+                <button type="button" className="inline-flex min-w-0 items-center gap-2 text-label-xs text-primary-base hover:underline" onClick={ event => GetUserProfile(currentImage.oi) }>
+                    <UserRound className="size-3.5 shrink-0" />
+                    <span className="truncate">{ currentImage.o || currentImage.n || '' }</span>
+                </button>
+                <span className="inline-flex items-center gap-2 text-label-xs text-text-sub-600">
+                    <CalendarDays className="size-3.5" />
+                    { new Date(currentImage.t * 1000).toLocaleDateString('de-DE') }
+                </span>
+            </div>
             { (currentPhotos.length > 1) &&
-                <Flex className="picture-preview-buttons">
-                    <FaArrowLeft className="cursor-pointer picture-preview-buttons-previous fa-icon" onClick={ previous } />
-                    <Text underline className="cursor-pointer" onClick={ event => GetUserProfile(currentImage.oi) }>{ currentImage.o }</Text>
-                    <FaArrowRight className="cursor-pointer picture-preview-buttons-next fa-icon" onClick={ next } />
-                </Flex>
+                <div className="nitro-photo-nav">
+                    <AlignButton.Root type="button" variant="neutral" mode="stroke" size="xxsmall" className="size-8 p-0" onClick={ previous }>
+                        <AlignButton.Icon as={ ChevronLeft } className="size-4" />
+                    </AlignButton.Root>
+                    <span className="text-label-xs text-text-sub-600">{ imageIndex + 1 }/{ currentPhotos.length }</span>
+                    <AlignButton.Root type="button" variant="neutral" mode="stroke" size="xxsmall" className="size-8 p-0" onClick={ next }>
+                        <AlignButton.Icon as={ ChevronRight } className="size-4" />
+                    </AlignButton.Root>
+                </div>
             }
-        </Grid>
+        </div>
     );
 }

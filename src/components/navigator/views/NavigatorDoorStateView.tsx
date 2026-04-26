@@ -1,10 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import { FaBell, FaKey } from 'react-icons/fa';
+import { X } from 'lucide-react';
 import { CreateRoomSession, DoorStateType, GoToDesktop, LocalizeText } from '../../../api';
-import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../common';
+import { DraggableWindow, DraggableWindowPosition } from '../../../common';
 import { useNavigator } from '../../../hooks';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import { NavigatorTextInput } from './NavigatorPrimitives';
 
 const VISIBLE_STATES = [ DoorStateType.START_DOORBELL, DoorStateType.STATE_WAITING, DoorStateType.STATE_NO_ANSWER, DoorStateType.START_PASSWORD, DoorStateType.STATE_WRONG_PASSWORD ];
 const DOORBELL_STATES = [ DoorStateType.START_DOORBELL, DoorStateType.STATE_WAITING, DoorStateType.STATE_NO_ANSWER ];
@@ -66,68 +68,71 @@ export const NavigatorDoorStateView: FC<{}> = props =>
     const isDoorbell = (DOORBELL_STATES.indexOf(doorData.state) >= 0);
 
     return (
-        <NitroCardView className="nitro-navigator-doorbell" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText(isDoorbell ? 'navigator.doorbell.title' : 'navigator.password.title') } onCloseClick={ onClose } />
-            <NitroCardContentView>
-                <div className="flex flex-col gap-3 p-1">
+        <DraggableWindow uniqueKey="nitro-navigator-door" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
+            <AlignSurface.Panel className="nitro-navigator-doorbell flex w-[260px] flex-col overflow-hidden">
+                <div className="drag-handler flex h-9 shrink-0 cursor-grab items-center justify-between border-b border-stroke-soft-200 px-3 active:cursor-grabbing">
+                    <span className="truncate text-label-xs text-text-strong-950">
+                        { LocalizeText(isDoorbell ? 'navigator.doorbell.title' : 'navigator.password.title') }
+                    </span>
+                    <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onMouseDown={ event => event.stopPropagation() } onClick={ onClose }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+                <div className="flex flex-col gap-3 p-3">
                     <div className="flex items-center gap-2">
                         { isDoorbell
-                            ? <FaBell className="size-4 text-amber-400 shrink-0" />
-                            : <FaKey className="size-4 text-sky-400 shrink-0" /> }
-                        <span className="text-sm font-medium text-white truncate">
+                            ? <FaBell className="size-4 shrink-0 text-warning-base" />
+                            : <FaKey className="size-4 shrink-0 text-information-base" /> }
+                        <span className="truncate text-label-sm text-text-strong-950">
                             { doorData && doorData.roomInfo && doorData.roomInfo.roomName }
                         </span>
                     </div>
-
-                    <p className="text-xs text-zinc-400 leading-relaxed">
+                    <p className="text-paragraph-xs leading-relaxed text-text-sub-600">
                         { (doorData.state === DoorStateType.START_DOORBELL) && LocalizeText('navigator.doorbell.info') }
                         { (doorData.state === DoorStateType.STATE_WAITING) && (
                             <span className="inline-flex items-center gap-1.5">
-                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span className="inline-block size-1.5 animate-pulse rounded-full bg-warning-base" />
                                 { LocalizeText('navigator.doorbell.waiting') }
                             </span>
                         ) }
                         { (doorData.state === DoorStateType.STATE_NO_ANSWER) && LocalizeText('navigator.doorbell.no.answer') }
                         { (doorData.state === DoorStateType.START_PASSWORD) && LocalizeText('navigator.password.info') }
                         { (doorData.state === DoorStateType.STATE_WRONG_PASSWORD) && (
-                            <span className="text-red-400">{ LocalizeText('navigator.password.retryinfo') }</span>
+                            <span className="text-error-base">{ LocalizeText('navigator.password.retryinfo') }</span>
                         ) }
                     </p>
-
                     { isDoorbell && (
                         <div className="flex flex-col gap-1.5">
                             { (doorData.state === DoorStateType.START_DOORBELL) &&
-                                <Button className="w-full h-8 text-xs bg-sky-500 hover:bg-sky-400 text-white" onClick={ ring }>
+                                <AlignButton.Root type="button" variant="primary" mode="filled" size="xsmall" className="w-full" onClick={ ring }>
                                     { LocalizeText('navigator.doorbell.button.ring') }
-                                </Button> }
-                            <Button variant="ghost" className="w-full h-8 text-xs text-zinc-400 hover:text-white hover:bg-white/10" onClick={ onClose }>
+                                </AlignButton.Root> }
+                            <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" className="w-full" onClick={ onClose }>
                                 { LocalizeText('generic.cancel') }
-                            </Button>
+                            </AlignButton.Root>
                         </div>
                     ) }
-
                     { !isDoorbell && (
                         <div className="flex flex-col gap-2">
                             <div className="flex flex-col gap-1">
-                                <label className="text-xs text-zinc-400">{ LocalizeText('navigator.password.enter') }</label>
-                                <Input
+                                <label className="text-paragraph-xs text-text-sub-600">{ LocalizeText('navigator.password.enter') }</label>
+                                <NavigatorTextInput
                                     type="password"
-                                    className="h-8 text-xs rounded-lg bg-white/10 border-0 text-white placeholder:text-zinc-500 focus-visible:bg-white/15"
                                     onChange={ event => setPassword(event.target.value) }
                                 />
                             </div>
                             <div className="flex flex-col gap-1.5">
-                                <Button className="w-full h-8 text-xs bg-sky-500 hover:bg-sky-400 text-white" onClick={ tryEntering }>
+                                <AlignButton.Root type="button" variant="primary" mode="filled" size="xsmall" className="w-full" onClick={ tryEntering }>
                                     { LocalizeText('navigator.password.button.try') }
-                                </Button>
-                                <Button variant="ghost" className="w-full h-8 text-xs text-zinc-400 hover:text-white hover:bg-white/10" onClick={ onClose }>
+                                </AlignButton.Root>
+                                <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" className="w-full" onClick={ onClose }>
                                     { LocalizeText('generic.cancel') }
-                                </Button>
+                                </AlignButton.Root>
                             </div>
                         </div>
                     ) }
                 </div>
-            </NitroCardContentView>
-        </NitroCardView>
+            </AlignSurface.Panel>
+        </DraggableWindow>
     );
 }

@@ -20,15 +20,15 @@ export const CatalogBundleGridWidgetView: FC<CatalogBundleGridWidgetViewProps> =
     if(!currentOffer) return null;
 
     return (
-        <div ref={ elementRef } className={ `grid grid-cols-[repeat(auto-fill,68px)] gap-1 ${ className }` } { ...rest }>
+        <div ref={ elementRef } className={ `grid grid-cols-[repeat(auto-fill,82px)] gap-2 ${ className }` } { ...rest }>
             { currentOffer.products && (currentOffer.products.length > 0) && currentOffer.products.map((product, index) =>
             {
                 const imageUrl = product.getIconUrl();
 
                 return (
-                    <div key={ index } className="relative flex items-center justify-center rounded-lg border border-black/[0.06] bg-card overflow-hidden aspect-square bg-center bg-no-repeat bg-contain" style={ imageUrl ? { backgroundImage: `url(${ imageUrl })` } : undefined }>
+                    <div key={ index } className="relative flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-bg-weak-50 bg-contain bg-center bg-no-repeat" style={ imageUrl ? { backgroundImage: `url(${ imageUrl })` } : undefined }>
                         { (product.productCount > 1) &&
-                            <span className="absolute top-0.5 right-0.5 text-[9px] font-bold bg-primary text-primary-foreground rounded px-1 leading-tight">
+                            <span className="absolute right-1 top-1 rounded-md bg-primary-base px-1 text-subheading-2xs leading-tight text-static-white">
                                 { product.productCount }
                             </span> }
                     </div>

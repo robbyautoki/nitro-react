@@ -4,8 +4,8 @@ import { FurnitureItem, LocalizeText, ProductTypeEnum, SendMessageComposer } fro
 import { LayoutFurniImageView, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../../../common';
 import { CatalogPostMarketplaceOfferEvent } from '../../../../../../events';
 import { useCatalog, useMessageEvent, useNotification, useUiEvent } from '../../../../../../hooks';
-import { Button } from '../../../../../ui/button';
-import { Input } from '../../../../../ui/input';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as Input from '@/align-ui/components/ui/input';
 
 export const MarketplacePostOfferView : FC<{}> = props =>
 {
@@ -84,36 +84,40 @@ export const MarketplacePostOfferView : FC<{}> = props =>
             <NitroCardHeaderView headerText={ LocalizeText('inventory.marketplace.make_offer.title') } onCloseClick={ event => setItem(null) } />
             <NitroCardContentView overflow="hidden">
                 <div className="flex gap-3 h-full">
-                    <div className="flex items-center justify-center w-1/3 shrink-0 bg-black/[0.03] rounded-lg p-3">
+                    <div className="flex items-center justify-center w-1/3 shrink-0 bg-bg-weak-50 rounded-lg p-3">
                         <LayoutFurniImageView productType={ item.isWallItem ? ProductTypeEnum.WALL : ProductTypeEnum.FLOOR } productClassId={ item.type } extraData={ item.extra.toString() } />
                     </div>
                     <div className="flex-1 flex flex-col justify-between min-w-0">
                         <div className="flex flex-col gap-1 flex-1">
-                            <span className="text-sm font-semibold text-black/85">{ getFurniTitle }</span>
-                            <span className="text-xs text-black/50 truncate">{ getFurniDescription }</span>
+                            <span className="text-sm font-semibold text-text-strong-950">{ getFurniTitle }</span>
+                            <span className="text-xs text-text-sub-600 truncate">{ getFurniDescription }</span>
                         </div>
                         <div className="flex flex-col gap-2">
-                            <span className="text-[11px] text-black/40 italic">
+                            <span className="text-[11px] text-text-soft-400 italic">
                                 { LocalizeText('inventory.marketplace.make_offer.expiration_info', [ 'time' ], [ marketplaceConfiguration.offerTime.toString() ]) }
                             </span>
                             <div className="flex flex-col gap-1">
-                                <Input className="h-8 text-xs" type="number" min={ 0 } value={ tempAskingPrice } onChange={ event => updateAskingPrice(event.target.value) } placeholder={ LocalizeText('inventory.marketplace.make_offer.price_request') } />
+                                <Input.Root size="xsmall">
+                                    <Input.Wrapper className="h-8">
+                                        <Input.Input className="text-xs" type="number" min={ 0 } value={ tempAskingPrice } onChange={ event => updateAskingPrice(event.target.value) } placeholder={ LocalizeText('inventory.marketplace.make_offer.price_request') } />
+                                    </Input.Wrapper>
+                                </Input.Root>
                                 { ((askingPrice < marketplaceConfiguration.minimumPrice) || isNaN(askingPrice)) &&
-                                    <div className="text-[11px] text-red-500 mt-0.5">
+                                    <div className="text-[11px] text-error-base mt-0.5">
                                         { LocalizeText('inventory.marketplace.make_offer.min_price', [ 'minprice' ], [ marketplaceConfiguration.minimumPrice.toString() ]) }
                                     </div> }
                                 { ((askingPrice > marketplaceConfiguration.maximumPrice) && !isNaN(askingPrice)) &&
-                                    <div className="text-[11px] text-red-500 mt-0.5">
+                                    <div className="text-[11px] text-error-base mt-0.5">
                                         { LocalizeText('inventory.marketplace.make_offer.max_price', [ 'maxprice' ], [ marketplaceConfiguration.maximumPrice.toString() ]) }
                                     </div> }
                                 { (!((askingPrice < marketplaceConfiguration.minimumPrice) || (askingPrice > marketplaceConfiguration.maximumPrice) || isNaN(askingPrice))) &&
-                                    <div className="text-[11px] text-black/50 mt-0.5">
+                                    <div className="text-[11px] text-text-sub-600 mt-0.5">
                                         { LocalizeText('inventory.marketplace.make_offer.final_price', [ 'commission', 'finalprice' ], [ getCommission().toString(), (askingPrice + getCommission()).toString() ]) }
                                     </div> }
                             </div>
-                            <Button className="w-full h-8 text-xs" disabled={ ((askingPrice < marketplaceConfiguration.minimumPrice) || (askingPrice > marketplaceConfiguration.maximumPrice) || isNaN(askingPrice)) } onClick={ postItem }>
+                            <AlignButton.Root variant="primary" mode="filled" size="xsmall" className="w-full h-8 text-xs" disabled={ ((askingPrice < marketplaceConfiguration.minimumPrice) || (askingPrice > marketplaceConfiguration.maximumPrice) || isNaN(askingPrice)) } onClick={ postItem }>
                                 { LocalizeText('inventory.marketplace.make_offer.post') }
-                            </Button>
+                            </AlignButton.Root>
                         </div>
                     </div>
                 </div>

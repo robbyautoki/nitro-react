@@ -1,8 +1,14 @@
 import { HabboClubLevelEnum, RoomControllerLevel } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
+import { Save, Shirt, Undo2, UserCheck } from 'lucide-react';
 import { GetAvatarRenderManager, GetClubMemberLevel, GetRoomSession, GetSessionDataManager, LocalizeText, MannequinUtilities } from '../../../../api';
-import { Base, Button, Column, Flex, LayoutAvatarImageView, LayoutCurrencyIcon, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../common';
+import { Base, LayoutAvatarImageView, LayoutCurrencyIcon } from '../../../../common';
 import { useFurnitureMannequinWidget } from '../../../../hooks';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import { FurnitureWidgetPreview, FurnitureWidgetSection, FurnitureWidgetText, FurnitureWidgetWindow } from './FurnitureWidgetLayout';
 
 const MODE_NONE: number = -1;
 const MODE_CONTROLLER: number = 0;
@@ -81,64 +87,77 @@ export const FurnitureMannequinView: FC<{}> = props =>
     if(objectId === -1) return null;
 
     return (
-        <NitroCardView className="nitro-mannequin no-resize" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText('mannequin.widget.title') } onCloseClick={ onClose } />
-            <NitroCardContentView center>
-                <Flex fullWidth gap={ 2 } overflow="hidden">
-                    <Column>
-                        <Base position="relative" className="mannequin-preview">
-                            <LayoutAvatarImageView position="absolute" figure={ renderedFigure } direction={ 2 } />
-                            { (clubLevel > 0) &&
-                                <LayoutCurrencyIcon className="absolute right-2 bottom-2" type="hc" /> }
-                        </Base>
-                    </Column>
-                    <Column grow justifyContent="between" overflow="auto">
-                        { (mode === MODE_CONTROLLER) &&
-                            <>
-                                <input type="text" className="form-control form-control-sm" value={ name } onChange={ event => setName(event.target.value) } onBlur={ saveName } />
-                                <Column gap={ 1 }>
-                                    <Button variant="success" onClick={ event => setMode(MODE_UPDATE) }>
-                                        { LocalizeText('mannequin.widget.style') }
-                                    </Button>
-                                    <Button variant="success" onClick={ wearFigure }>
-                                        { LocalizeText('mannequin.widget.wear') }
-                                    </Button>
-                                </Column>
-                            </> }
-                        { (mode === MODE_UPDATE) &&
-                            <>
-                                <Column gap={ 1 }>
-                                    <Text bold>{ name }</Text>
-                                    <Text wrap>{ LocalizeText('mannequin.widget.savetext') }</Text>
-                                </Column>
-                                <Flex alignItems="center" justifyContent="between">
-                                    <Text underline pointer onClick={ event => setMode(MODE_CONTROLLER) }>
-                                        { LocalizeText('mannequin.widget.back') }
-                                    </Text>
-                                    <Button variant="success" onClick={ saveFigure }>
-                                        { LocalizeText('mannequin.widget.save') }
-                                    </Button>
-                                </Flex>
-                            </> }
-                        { (mode === MODE_PEER) &&
-                            <>
-                                <Column gap={ 1 }>
-                                    <Text bold>{ name }</Text>
-                                    <Text>{ LocalizeText('mannequin.widget.weartext') }</Text>
-                                </Column>
-                                <Button variant="success" onClick={ wearFigure }>
+        <FurnitureWidgetWindow
+            uniqueKey="furniture-mannequin"
+            title={ LocalizeText('mannequin.widget.title') }
+            subtitle={ name }
+            icon={ Shirt }
+            onClose={ onClose }
+            widthClassName="w-[420px]"
+        >
+            <FurnitureWidgetSection className="grid grid-cols-[112px_1fr] gap-4">
+                <FurnitureWidgetPreview className="min-h-[156px]">
+                    <Base position="relative" className="mannequin-preview">
+                        <LayoutAvatarImageView position="absolute" figure={ renderedFigure } direction={ 2 } />
+                        { (clubLevel > 0) &&
+                            <LayoutCurrencyIcon className="absolute bottom-2 right-2" type="hc" /> }
+                    </Base>
+                </FurnitureWidgetPreview>
+                <div className="flex min-w-0 flex-col justify-between gap-3">
+                    { (clubLevel > 0) &&
+                        <AlignBadge.Root color="yellow" variant="light" size="small" className="w-fit">HC</AlignBadge.Root> }
+                    { (mode === MODE_CONTROLLER) &&
+                        <>
+                            <AlignInput.Root>
+                                <AlignInput.Wrapper>
+                                    <AlignInput.Input value={ name || '' } onChange={ event => setName(event.target.value) } onBlur={ saveName } />
+                                </AlignInput.Wrapper>
+                            </AlignInput.Root>
+                            <div className="grid gap-2">
+                                <FancyButton.Root variant="primary" size="small" onClick={ event => setMode(MODE_UPDATE) }>
+                                    <FancyButton.Icon as={ Save } />
+                                    { LocalizeText('mannequin.widget.style') }
+                                </FancyButton.Root>
+                                <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ wearFigure }>
+                                    <AlignButton.Icon as={ UserCheck } className="size-4" />
                                     { LocalizeText('mannequin.widget.wear') }
-                                </Button>
-                            </> }
-                        { (mode === MODE_NO_CLUB) &&
-                            <Flex center grow>
-                                <Text>{ LocalizeText('mannequin.widget.clubnotification') }</Text>
-                            </Flex> }
-                        { (mode === MODE_WRONG_GENDER) &&
-                            <Text>{ LocalizeText('mannequin.widget.wronggender') }</Text> }
-                    </Column>
-                </Flex>
-            </NitroCardContentView>
-        </NitroCardView>
+                                </AlignButton.Root>
+                            </div>
+                        </> }
+                    { (mode === MODE_UPDATE) &&
+                        <>
+                            <div className="space-y-2">
+                                <div className="text-label-sm text-text-strong-950">{ name }</div>
+                                <FurnitureWidgetText>{ LocalizeText('mannequin.widget.savetext') }</FurnitureWidgetText>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ event => setMode(MODE_CONTROLLER) }>
+                                    <AlignButton.Icon as={ Undo2 } className="size-4" />
+                                    { LocalizeText('mannequin.widget.back') }
+                                </AlignButton.Root>
+                                <FancyButton.Root variant="primary" size="small" onClick={ saveFigure }>
+                                    <FancyButton.Icon as={ Save } />
+                                    { LocalizeText('mannequin.widget.save') }
+                                </FancyButton.Root>
+                            </div>
+                        </> }
+                    { (mode === MODE_PEER) &&
+                        <>
+                            <div className="space-y-2">
+                                <div className="text-label-sm text-text-strong-950">{ name }</div>
+                                <FurnitureWidgetText>{ LocalizeText('mannequin.widget.weartext') }</FurnitureWidgetText>
+                            </div>
+                            <FancyButton.Root variant="primary" size="small" onClick={ wearFigure }>
+                                <FancyButton.Icon as={ UserCheck } />
+                                { LocalizeText('mannequin.widget.wear') }
+                            </FancyButton.Root>
+                        </> }
+                    { (mode === MODE_NO_CLUB) &&
+                        <FurnitureWidgetText className="self-center text-text-strong-950">{ LocalizeText('mannequin.widget.clubnotification') }</FurnitureWidgetText> }
+                    { (mode === MODE_WRONG_GENDER) &&
+                        <FurnitureWidgetText className="self-center text-text-strong-950">{ LocalizeText('mannequin.widget.wronggender') }</FurnitureWidgetText> }
+                </div>
+            </FurnitureWidgetSection>
+        </FurnitureWidgetWindow>
     );
 }

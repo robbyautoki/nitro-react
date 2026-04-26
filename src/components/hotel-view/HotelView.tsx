@@ -26,7 +26,7 @@ export const HotelView: FC<{}> = props =>
     if(!isVisible) return null;
 
     return (
-        <div className="nitro-hotel-view" style={ { backgroundColor: '#000000' } }>
+        <div className="nitro-hotel-view">
             <Grainient
                 color1="#d856bf"
                 color2="#0e5ea5"

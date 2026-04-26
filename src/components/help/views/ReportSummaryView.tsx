@@ -3,6 +3,8 @@ import { FC } from 'react';
 import { Send } from 'lucide-react';
 import { ReportType, SendMessageComposer } from '../../../api';
 import { useHelp } from '../../../hooks';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
 
 export const ReportSummaryView: FC<{}> = () =>
 {
@@ -45,34 +47,40 @@ export const ReportSummaryView: FC<{}> = () =>
 
     return (
         <div className="space-y-4">
-            <div>
-                <p className="text-xs text-white/40 mb-3">Pruefe deine Meldung und sende sie ab</p>
+            <div className="rounded-xl bg-bg-weak-50 px-4 py-3 ring-1 ring-inset ring-stroke-soft-200">
+                <p className="text-label-sm text-text-strong-950">Meldung pruefen</p>
+                <p className="mt-1 text-paragraph-xs text-text-sub-600">Pruefe deine Meldung und sende sie ab.</p>
             </div>
-
             <div className="space-y-2">
                 { activeReport?.message && (
-                    <div className="px-3.5 py-3 rounded-xl border border-white/[0.06] bg-white/[0.03]">
-                        <p className="text-[11px] text-white/30 mb-1">Deine Beschreibung</p>
-                        <p className="text-sm text-white/70">{ activeReport.message }</p>
+                    <div className="rounded-xl bg-bg-white-0 px-3.5 py-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                        <p className="mb-1 text-subheading-2xs uppercase text-text-soft-400">Deine Beschreibung</p>
+                        <p className="text-paragraph-sm text-text-sub-600">{ activeReport.message }</p>
                     </div>
                 ) }
-
                 { activeReport?.reportedChats?.length > 0 && (
-                    <div className="px-3.5 py-3 rounded-xl border border-white/[0.06] bg-white/[0.03]">
-                        <p className="text-[11px] text-white/30 mb-1">Gemeldete Nachrichten</p>
-                        <p className="text-sm text-white/70">{ activeReport.reportedChats.length } Nachricht(en) ausgewaehlt</p>
+                    <div className="flex items-center justify-between gap-3 rounded-xl bg-bg-white-0 px-3.5 py-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                        <div>
+                            <p className="mb-1 text-subheading-2xs uppercase text-text-soft-400">Gemeldete Nachrichten</p>
+                            <p className="text-paragraph-sm text-text-sub-600">Nachricht(en) ausgewaehlt</p>
+                        </div>
+                        <AlignBadge.Root color="blue" variant="lighter" size="medium">
+                            { activeReport.reportedChats.length }
+                        </AlignBadge.Root>
                     </div>
                 ) }
             </div>
-
             <div className="flex justify-end pt-2">
-                <button
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all bg-green-500/20 text-green-400 border border-green-500/20 hover:bg-green-500/30"
+                <AlignButton.Root
+                    type="button"
+                    variant="primary"
+                    mode="filled"
+                    size="small"
                     onClick={ submitReport }
                 >
-                    <Send className="size-3.5" />
+                    <AlignButton.Icon as={ Send } className="size-3.5" />
                     Meldung absenden
-                </button>
+                </AlignButton.Root>
             </div>
         </div>
     );

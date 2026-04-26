@@ -16,12 +16,16 @@
     width: $room-info-width;
 }
 
+.nitro-room-info--settings {
+    width: min(520px, calc(100vw - 32px));
+}
+
 .nitro-room-link {
     width: 400px;
 }
 
 .nitro-room-settings {
-    width: 400px;
+    width: min(520px, calc(100vw - 32px));
 
     .list-container {
         height: 100px;

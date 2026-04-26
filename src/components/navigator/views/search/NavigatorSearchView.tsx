@@ -2,7 +2,7 @@ import { FC, KeyboardEvent, useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
 import { LocalizeText } from '../../../../api';
 import { useNavigator } from '../../../../hooks';
-import { Input } from '@/components/ui/input';
+import { NavigatorTextInput } from '../NavigatorPrimitives';
 
 export interface NavigatorSearchViewProps
 {
@@ -37,16 +37,13 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
     }, [ searchResult ]);
 
     return (
-        <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/40" />
-            <Input
-                type="text"
-                placeholder={ LocalizeText('navigator.filter.input.placeholder') }
-                value={ searchValue }
-                onChange={ event => setSearchValue(event.target.value) }
-                onKeyDown={ event => handleKeyDown(event) }
-                className="h-8 text-xs pl-8 rounded-lg"
-            />
-        </div>
+        <NavigatorTextInput
+            icon={ Search }
+            type="text"
+            placeholder={ LocalizeText('navigator.filter.input.placeholder') }
+            value={ searchValue }
+            onChange={ event => setSearchValue(event.target.value) }
+            onKeyDown={ event => handleKeyDown(event) }
+        />
     );
 }

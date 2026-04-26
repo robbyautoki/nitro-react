@@ -6,21 +6,10 @@ import { InventoryGroup } from './CustomMarketplaceTypes';
 import { useMarketplace } from '../../hooks/marketplace/useMarketplace';
 import { ItemIcon } from './marketplace-components';
 import { fmtC } from './marketplace-utils';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import * as AlignSelect from '@/align-ui/components/ui/select';
+import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
 import {
     ShoppingBag, Search, X, Plus, Package, Check, AlertTriangle, Tag, Loader2,
 } from 'lucide-react';
@@ -39,6 +28,12 @@ const CURRENCIES = [
     { value: 'pixels', label: 'Pixel' },
     { value: 'points', label: 'Punkte' },
 ];
+
+const Select = AlignSelect.Root;
+const SelectContent = AlignSelect.Content;
+const SelectItem = AlignSelect.Item;
+const SelectTrigger = AlignSelect.Trigger;
+const SelectValue = AlignSelect.Value;
 
 interface SelectedItem
 {
@@ -77,7 +72,10 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
             .finally(() => setLoading(false));
     }, []);
 
-    useEffect(() => { loadInventory(); }, [ loadInventory ]);
+    useEffect(() =>
+    {
+        loadInventory();
+    }, [ loadInventory ]);
 
     useEffect(() =>
     {
@@ -141,8 +139,14 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
     const handleSubmit = async () =>
     {
         const p = parseInt(price);
-        if(!p || p < 1) { setError('Bitte gib einen gültigen Preis ein'); return; }
-        if(selected.length === 0) { setError('Bitte wähle mindestens ein Item aus'); return; }
+        if(!p || p < 1)
+        {
+            setError('Bitte gib einen gültigen Preis ein'); return;
+        }
+        if(selected.length === 0)
+        {
+            setError('Bitte wähle mindestens ein Item aus'); return;
+        }
 
         setSubmitting(true);
         setError('');
@@ -190,51 +194,56 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
     {
         return (
             <div className="flex flex-col h-full">
-                <div className="shrink-0 px-2.5 py-1.5 border-b border-border/30 flex items-center gap-2">
-                    <button onClick={ () => setShowInventory(false) } className="text-[10px] text-muted-foreground hover:text-foreground transition-colors">&larr; Zurück</button>
-                    <div className="w-px h-3 bg-border/40" />
-                    <div className="relative flex-1">
-                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground/50" />
-                        <Input placeholder="Inventar durchsuchen..." value={ searchQuery } onChange={ e => setSearchQuery(e.target.value) } className="pl-7 h-6 text-[11px]" />
-                    </div>
+                <div className="shrink-0 px-2.5 py-1.5 border-b border-stroke-soft-200 bg-bg-weak-50 flex items-center gap-2">
+                    <button onClick={ () => setShowInventory(false) } className="text-paragraph-xs text-text-sub-600 transition-colors hover:text-text-strong-950">&larr; Zurück</button>
+                    <div className="w-px h-3 bg-stroke-soft-200" />
+                    <AlignInput.Root size="xsmall" className="flex-1">
+                        <AlignInput.Wrapper className="h-8">
+                            <AlignInput.Icon as={ Search } className="size-4" />
+                            <AlignInput.Input placeholder="Inventar durchsuchen..." value={ searchQuery } onChange={ e => setSearchQuery(e.target.value) } className="h-8 text-paragraph-xs" />
+                        </AlignInput.Wrapper>
+                    </AlignInput.Root>
                 </div>
-                <ScrollArea className="flex-1 min-h-0">
+                <div className="min-h-0 flex-1 overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
                     { loading ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                            <Loader2 className="w-6 h-6 animate-spin opacity-30 mb-1" /><p className="text-[10px]">Laden...</p>
+                        <div className="flex flex-col items-center justify-center py-8 text-text-sub-600">
+                            <Loader2 className="w-6 h-6 animate-spin opacity-30 mb-1" /><p className="text-paragraph-xs">Laden...</p>
                         </div>
                     ) : filteredInventory.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-muted-foreground px-6 text-center">
+                        <div className="flex flex-col items-center justify-center py-8 text-text-sub-600 px-6 text-center">
                             <Package className="w-6 h-6 opacity-20 mb-1" />
-                            <p className="text-[10px] font-medium">{ searchQuery ? 'Keine Rares gefunden' : 'Keine Rares verfügbar' }</p>
-                            { !searchQuery && <p className="text-[9px] text-muted-foreground/50 mt-1">Items müssen im Inventar (nicht platziert) und für den Marktplatz freigegeben sein.</p> }
+                            <p className="text-label-xs">{ searchQuery ? 'Keine Rares gefunden' : 'Keine Rares verfügbar' }</p>
+                            { !searchQuery && <p className="mt-1 text-paragraph-xs text-text-soft-400">Items müssen im Inventar (nicht platziert) und für den Marktplatz freigegeben sein.</p> }
                         </div>
                     ) : (
                         <div className="p-2 grid grid-cols-6 gap-1.5">
                             { filteredInventory.map(item => (
-                                <Tooltip key={ item.item_base_id }>
-                                    <TooltipTrigger asChild>
+                                <AlignTooltip.Root key={ item.item_base_id }>
+                                    <AlignTooltip.Trigger asChild>
                                         <button
-                                            onClick={ () => { addItem(item); setShowInventory(false); setSearchQuery(''); } }
-                                            className="relative w-full aspect-square rounded-md border border-border/40 bg-muted/10 hover:border-primary/40 hover:bg-primary/5 flex items-center justify-center transition-all"
+                                            onClick={ () =>
+                                            {
+                                                addItem(item); setShowInventory(false); setSearchQuery('');
+                                            } }
+                                            className="relative flex aspect-square w-full items-center justify-center rounded-xl bg-bg-weak-50 transition-all hover:bg-bg-white-0 hover:shadow-regular-xs hover:ring-1 hover:ring-inset hover:ring-stroke-soft-200"
                                         >
                                             <ItemIcon itemName={ item.item_name } className="w-20 h-20" />
                                             { item.count > 1 && (
-                                                <span className="absolute top-0.5 right-0.5 min-w-[14px] h-[14px] rounded-full bg-foreground/80 text-background text-[8px] font-bold flex items-center justify-center px-0.5">
+                                                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-bg-strong-950 px-1 text-subheading-2xs text-static-white">
                                                     x{ item.count }
                                                 </span>
                                             ) }
                                         </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top" sideOffset={ 4 }>
+                                    </AlignTooltip.Trigger>
+                                    <AlignTooltip.Content side="top" sideOffset={ 4 } variant="light">
                                         <p className="font-semibold text-xs">{ item.public_name }</p>
-                                        <p className="text-[9px] text-muted-foreground">x{ item.count } verfügbar</p>
-                                    </TooltipContent>
-                                </Tooltip>
+                                        <p className="text-paragraph-xs text-text-sub-600">x{ item.count } verfügbar</p>
+                                    </AlignTooltip.Content>
+                                </AlignTooltip.Root>
                             )) }
                         </div>
                     ) }
-                </ScrollArea>
+                </div>
             </div>
         );
     }
@@ -242,55 +251,52 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
     // Main Sell View
     return (
         <div className="flex flex-col items-center justify-center h-full px-6 gap-3">
-            {/* Success Banner */}
+            { /* Success Banner */ }
             { success && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <Check className="w-4 h-4 text-emerald-500" />
-                    <span className="text-xs text-emerald-600">Angebot erfolgreich erstellt!</span>
+                <div className="flex items-center gap-2 rounded-lg bg-success-lighter px-3 py-2 ring-1 ring-success-base/20">
+                    <Check className="w-4 h-4 text-success-base" />
+                    <span className="text-paragraph-xs text-success-base">Angebot erfolgreich erstellt!</span>
                 </div>
             ) }
-
-            {/* Error Banner */}
+            { /* Error Banner */ }
             { error && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/20">
-                    <AlertTriangle className="w-4 h-4 text-destructive" />
-                    <span className="text-xs text-destructive">{ error }</span>
+                <div className="flex items-center gap-2 rounded-lg bg-error-lighter px-3 py-2 ring-1 ring-error-base/20">
+                    <AlertTriangle className="w-4 h-4 text-error-base" />
+                    <span className="text-paragraph-xs text-error-base">{ error }</span>
                 </div>
             ) }
-
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-amber-500" />
+            <div className="flex size-10 items-center justify-center rounded-xl bg-warning-lighter">
+                <ShoppingBag className="w-5 h-5 text-warning-base" />
             </div>
             <div className="text-center">
-                <p className="text-[12px] font-semibold">Möbel verkaufen</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Wähle Möbelstücke aus deinem Inventar</p>
+                <p className="text-label-sm">Möbel verkaufen</p>
+                <p className="mt-0.5 text-paragraph-xs text-text-sub-600">Wähle Möbelstücke aus deinem Inventar</p>
             </div>
-
             <div className="w-full max-w-[320px] space-y-2">
-                {/* Selected Items */}
+                { /* Selected Items */ }
                 { selected.length > 0 ? (
                     <div className="flex flex-col gap-1.5">
                         { selected.map(sel => (
-                            <div key={ sel.item_base_id } className="flex items-center gap-2 p-2.5 rounded-lg border border-primary/20 bg-primary/5">
-                                <div className="w-10 h-10 rounded-md border border-border/40 bg-card flex items-center justify-center">
+                            <div key={ sel.item_base_id } className="flex items-center gap-2 rounded-xl bg-primary-alpha-10 p-2.5">
+                                <div className="flex size-10 items-center justify-center rounded-lg bg-bg-white-0">
                                     <ItemIcon itemName={ sel.item_name } className="w-8 h-8" />
                                 </div>
                                 <div className="flex-1">
-                                    <p className="text-[11px] font-medium">{ sel.public_name }</p>
+                                    <p className="text-label-xs">{ sel.public_name }</p>
                                     { sel.available > 1 && (
                                         <div className="flex items-center gap-1 mt-0.5">
-                                            <button className="w-4 h-4 rounded text-[10px] bg-accent/50 text-muted-foreground hover:bg-accent" onClick={ () => updateQuantity(sel.item_base_id, sel.quantity - 1) }>-</button>
-                                            <span className="text-[10px] text-muted-foreground w-4 text-center">{ sel.quantity }</span>
-                                            <button className="w-4 h-4 rounded text-[10px] bg-accent/50 text-muted-foreground hover:bg-accent" onClick={ () => updateQuantity(sel.item_base_id, sel.quantity + 1) }>+</button>
-                                            <span className="text-[9px] text-muted-foreground/50 ml-1">von { sel.available }</span>
+                                            <button className="size-4 rounded bg-bg-white-0 text-subheading-2xs text-text-sub-600 hover:bg-bg-weak-50" onClick={ () => updateQuantity(sel.item_base_id, sel.quantity - 1) }>-</button>
+                                            <span className="w-4 text-center text-paragraph-xs text-text-sub-600">{ sel.quantity }</span>
+                                            <button className="size-4 rounded bg-bg-white-0 text-subheading-2xs text-text-sub-600 hover:bg-bg-weak-50" onClick={ () => updateQuantity(sel.item_base_id, sel.quantity + 1) }>+</button>
+                                            <span className="ml-1 text-subheading-2xs text-text-soft-400">von { sel.available }</span>
                                         </div>
                                     ) }
                                 </div>
-                                <button onClick={ () => removeItem(sel.item_base_id) }><X className="w-3.5 h-3.5 text-muted-foreground/40 hover:text-foreground" /></button>
+                                <button onClick={ () => removeItem(sel.item_base_id) }><X className="w-3.5 h-3.5 text-text-soft-400 hover:text-text-strong-950" /></button>
                             </div>
                         )) }
                         <button
-                            className="flex items-center justify-center gap-1 p-1.5 rounded-lg border border-dashed border-border/50 bg-muted/10 text-[10px] text-muted-foreground hover:border-primary/30 transition-colors"
+                            className="flex items-center justify-center gap-1 rounded-lg bg-bg-weak-50 p-1.5 text-paragraph-xs text-text-sub-600 transition-colors hover:text-text-strong-950"
                             onClick={ () => setShowInventory(true) }
                         >
                             <Plus className="w-3 h-3" />Weiteres Item hinzufügen
@@ -298,40 +304,43 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
                     </div>
                 ) : (
                     <div
-                        className="flex items-center gap-2 p-2.5 rounded-lg border border-dashed border-border/50 bg-muted/10 cursor-pointer hover:border-primary/30 transition-colors"
+                        className="flex cursor-pointer items-center gap-2 rounded-xl bg-bg-weak-50 p-2.5 transition-colors hover:bg-bg-white-0 hover:shadow-regular-xs"
                         onClick={ () => setShowInventory(true) }
                     >
-                        <div className="w-10 h-10 rounded-md bg-muted/30 flex items-center justify-center">
-                            <Plus className="w-4 h-4 text-muted-foreground/40" />
+                        <div className="w-10 h-10 rounded-lg bg-bg-white-0 shadow-regular-xs flex items-center justify-center">
+                            <Plus className="w-4 h-4 text-text-soft-400" />
                         </div>
                         <div>
-                            <p className="text-[11px] font-medium">Aus Inventar wählen</p>
-                            <p className="text-[9px] text-muted-foreground/50">Klicke zum Auswählen</p>
+                            <p className="text-label-xs">Aus Inventar wählen</p>
+                            <p className="text-paragraph-xs text-text-soft-400">Klicke zum Auswählen</p>
                         </div>
                     </div>
                 ) }
-
-                {/* Listing Settings */}
+                { /* Listing Settings */ }
                 { selected.length > 0 && (
-                    <div className="flex flex-col gap-2 p-3 rounded-lg border border-border/40 bg-card">
+                    <div className="flex flex-col gap-2 rounded-xl bg-bg-weak-50 p-3">
                         <div className="grid grid-cols-3 gap-2">
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] text-muted-foreground">Preis</span>
-                                <Input type="number" min={ 1 } placeholder="0" value={ price } onChange={ e => setPrice(e.target.value) } className="h-7 text-[11px]" />
+                                <span className="text-paragraph-xs text-text-sub-600">Preis</span>
+                                <AlignInput.Root size="xsmall">
+                                    <AlignInput.Wrapper className="h-8">
+                                        <AlignInput.Input type="number" min={ 1 } placeholder="0" value={ price } onChange={ e => setPrice(e.target.value) } className="h-8 text-paragraph-xs" />
+                                    </AlignInput.Wrapper>
+                                </AlignInput.Root>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] text-muted-foreground">Währung</span>
+                                <span className="text-paragraph-xs text-text-sub-600">Währung</span>
                                 <Select value={ currency } onValueChange={ setCurrency }>
-                                    <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+                                    <SelectTrigger className="h-8 text-paragraph-xs"><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         { CURRENCIES.map(c => <SelectItem key={ c.value } value={ c.value }>{ c.label }</SelectItem>) }
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <span className="text-[10px] text-muted-foreground">Dauer</span>
+                                <span className="text-paragraph-xs text-text-sub-600">Dauer</span>
                                 <Select value={ duration } onValueChange={ setDuration }>
-                                    <SelectTrigger className="h-7 text-[11px]"><SelectValue /></SelectTrigger>
+                                    <SelectTrigger className="h-8 text-paragraph-xs"><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         { DURATIONS.map(d => <SelectItem key={ d.value } value={ d.value }>{ d.label }</SelectItem>) }
                                     </SelectContent>
@@ -339,22 +348,28 @@ export const CustomMarketplaceSellView: FC<{}> = () =>
                             </div>
                         </div>
                         <div className="flex flex-col gap-1">
-                            <span className="text-[10px] text-muted-foreground">Notiz (optional)</span>
-                            <Input type="text" maxLength={ 255 } placeholder="z.B. Preisverhandlung möglich..." value={ note } onChange={ e => setNote(e.target.value) } className="h-7 text-[11px]" />
+                            <span className="text-paragraph-xs text-text-sub-600">Notiz (optional)</span>
+                            <AlignInput.Root size="xsmall">
+                                <AlignInput.Wrapper className="h-8">
+                                    <AlignInput.Input type="text" maxLength={ 255 } placeholder="z.B. Preisverhandlung möglich..." value={ note } onChange={ e => setNote(e.target.value) } className="h-8 text-paragraph-xs" />
+                                </AlignInput.Wrapper>
+                            </AlignInput.Root>
                         </div>
                         { price && parseInt(price) > 0 && (
-                            <div className="text-[10px] text-muted-foreground/50 text-center">
+                            <div className="text-center text-paragraph-xs text-text-soft-400">
                                 2% Marktplatz-Gebühr · Du erhältst: { fmtC(Math.floor(parseInt(price) * 0.98)) } { CURRENCIES.find(c => c.value === currency)?.label ?? currency }
                             </div>
                         ) }
-                        <Button
-                            className="w-full h-7 text-[11px] bg-amber-600 hover:bg-amber-700 text-white"
+                        <FancyButton.Root
+                            className="w-full"
+                            size="xsmall"
+                            variant="primary"
                             disabled={ submitting || !price || selected.length === 0 }
                             onClick={ handleSubmit }
                         >
-                            <Tag className="w-3 h-3 mr-1" />
+                            <FancyButton.Icon as={ Tag } className="size-3" />
                             { submitting ? 'Wird erstellt...' : `Angebot erstellen (${ totalItemCount } Item${ totalItemCount !== 1 ? 's' : '' })` }
-                        </Button>
+                        </FancyButton.Root>
                     </div>
                 ) }
             </div>

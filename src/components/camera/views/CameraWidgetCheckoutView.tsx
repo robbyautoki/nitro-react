@@ -1,8 +1,12 @@
-import { CameraPublishStatusMessageEvent, CameraPurchaseOKMessageEvent, CameraStorageUrlMessageEvent, PublishPhotoMessageComposer, PurchasePhotoMessageComposer } from '@nitrots/nitro-renderer';
+import { CameraPublishStatusMessageEvent, CameraPurchaseOKMessageEvent, CameraStorageUrlMessageEvent, FurnitureListComposer, PublishPhotoMessageComposer, PurchasePhotoMessageComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
+import { CheckCircle2, ExternalLink, Image as ImageIcon, Loader2, Lock, RotateCcw, ShoppingBag, UploadCloud, X } from 'lucide-react';
 import { CreateLinkEvent, GetConfiguration, GetRoomEngine, LocalizeText, SendMessageComposer } from '../../../api';
-import { Button, Column, Flex, LayoutCurrencyIcon, LayoutImage, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../common';
+import { DraggableWindow, LayoutCurrencyIcon } from '../../../common';
 import { useMessageEvent } from '../../../hooks';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 
 export interface CameraWidgetCheckoutViewProps
 {
@@ -29,6 +33,7 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = props
     {
         setPicturesBought(value => (value + 1));
         setIsWaiting(false);
+        SendMessageComposer(new FurnitureListComposer());
     });
 
     useMessageEvent<CameraPublishStatusMessageEvent>(CameraPublishStatusMessageEvent, event =>
@@ -44,8 +49,11 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = props
     useMessageEvent<CameraStorageUrlMessageEvent>(CameraStorageUrlMessageEvent, event =>
     {
         const parser = event.getParser();
+        const cameraBaseUrl = GetConfiguration<string>('camera.url', '').replace(/\/+$/, '');
+        const fileName = (parser.url || '').replace(/^\/+/, '');
+        const nextUrl = /^https?:\/\//i.test(parser.url) ? parser.url : `${ cameraBaseUrl }/${ fileName }`;
 
-        setPictureUrl(GetConfiguration<string>('camera.url') + '/' + parser.url);
+        setPictureUrl(nextUrl);
     });
 
     const processAction = (type: string, value: string | number = null) =>
@@ -83,83 +91,102 @@ export const CameraWidgetCheckoutView: FC<CameraWidgetCheckoutViewProps> = props
     if(!price) return null;
 
     return (
-        <NitroCardView className="nitro-camera-checkout" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText('camera.confirm_phase.title') } onCloseClick={ event => processAction('close') } />
-            <NitroCardContentView>
-                <Flex center>
-                    { (pictureUrl && pictureUrl.length) &&
-                        <LayoutImage className="picture-preview border" imageUrl={ pictureUrl } /> }
-                    { (!pictureUrl || !pictureUrl.length) &&
-                        <Flex center className="picture-preview border">
-                            <Text bold>{ LocalizeText('camera.loading') }</Text>
-                        </Flex> }
-                </Flex>
-                <Flex justifyContent="between" alignItems="center" className="bg-muted rounded p-2">
-                    <Column size={ publishDisabled ? 10 : 6 } gap={ 1 }>
-                        <Text bold>
-                            { LocalizeText('camera.purchase.header') }
-                        </Text>
-                        { ((price.credits > 0) || (price.duckets > 0)) &&
-                            <Flex gap={ 1 }>
-                                <Text>{ LocalizeText('catalog.purchase.confirmation.dialog.cost') }</Text>
-                                { (price.credits > 0) &&
-                                    <Flex gap={ 1 }>
-                                        <Text bold>{ price.credits }</Text>
-                                        <LayoutCurrencyIcon type={ -1 } />
-                                    </Flex> }
-                                { (price.duckets > 0) &&
-                                    <Flex gap={ 1 }>
-                                        <Text bold>{ price.duckets }</Text>
-                                        <LayoutCurrencyIcon type={ 5 } />
-                                    </Flex> }
-                            </Flex> }
-                        { (picturesBought > 0) &&
-                            <Text>
-                                <Text bold>{ LocalizeText('camera.purchase.count.info') }</Text> { picturesBought }
-                                <u className="ml-1 cursor-pointer" onClick={ () => CreateLinkEvent('inventory/toggle') }>{ LocalizeText('camera.open.inventory') }</u>
-                            </Text> }
-                    </Column>
-                    <Flex alignItems="center">
-                        <Button variant="success" disabled={ isWaiting } onClick={ event => processAction('buy') }>{ LocalizeText(!picturesBought ? 'buy' : 'camera.buy.another.button.text') }</Button>
-                    </Flex>
-                </Flex>
-                { !publishDisabled &&
-                <Flex justifyContent="between" alignItems="center" className="bg-muted rounded p-2">
-                    <Column gap={ 1 }>
-                        <Text bold>
-                            { LocalizeText(wasPicturePublished ? 'camera.publish.successful' : 'camera.publish.explanation') }
-                        </Text>
-                        { !wasPicturePublished &&
-                            <Flex alignItems="center" gap={ 1 } className="mt-1">
-                                <input type="checkbox" checked={ isPublic } onChange={ e => setIsPublic(e.target.checked) } className="form-check-input" />
-                                <Text className="text-xs">{ isPublic ? 'Öffentlich (in Galerie sichtbar)' : 'Privat (nur für dich sichtbar)' }</Text>
-                            </Flex> }
-                        <Text>
-                            { LocalizeText(wasPicturePublished ? 'camera.publish.success.short.info' : 'camera.publish.detailed.explanation') }
-                        </Text>
-                        { wasPicturePublished && <a href={ publishUrl } rel="noreferrer" target="_blank">{ LocalizeText('camera.link.to.published') }</a> }
-                        { !wasPicturePublished && (price.publishDucketPrice > 0) &&
-                            <Flex gap={ 1 }>
-                                <Text>{ LocalizeText('catalog.purchase.confirmation.dialog.cost') }</Text>
-                                <Flex gap={ 1 }>
-                                    <Text bold>{ price.publishDucketPrice }</Text>
-                                    <LayoutCurrencyIcon type={ 5 } />
-                                </Flex>
-                            </Flex> }
-                        { (publishCooldown > 0) && <div className="mt-1 text-center font-bold">{ LocalizeText('camera.publish.wait', [ 'minutes' ], [ Math.ceil( publishCooldown / 60).toString() ]) }</div> }
-                    </Column>
-                    { !wasPicturePublished &&
-                        <Flex className="flex items-end">
-                            <Button variant="success" disabled={ (isWaiting || (publishCooldown > 0)) } onClick={ event => processAction('publish') }>
-                                { LocalizeText('camera.publish.button.text') }
-                            </Button>
-                        </Flex> }
-                </Flex> }
-                <Text center>{ LocalizeText('camera.warning.disclaimer') }</Text>
-                <Flex justifyContent="end">
-                    <Button onClick={ event => processAction('cancel') }>{ LocalizeText('generic.cancel') }</Button>
-                </Flex>
-            </NitroCardContentView>
-        </NitroCardView>
+        <DraggableWindow uniqueKey="nitro-camera-checkout">
+            <AlignSurface.Panel className="nitro-camera-window nitro-camera-checkout">
+                <div className="nitro-camera-header drag-handler">
+                    <div className="nitro-camera-title">
+                        <div className="nitro-camera-title-icon">
+                            <ShoppingBag className="size-4" />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="truncate text-label-sm text-text-strong-950">{ LocalizeText('camera.confirm_phase.title') }</div>
+                            <div className="truncate text-paragraph-xs text-text-sub-600">Foto kaufen oder veröffentlichen</div>
+                        </div>
+                    </div>
+                    <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ event => processAction('close') }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+                <div className="nitro-camera-body nitro-camera-checkout-body">
+                    <div className="nitro-camera-checkout-preview">
+                        { (pictureUrl && pictureUrl.length) ?
+                            <img alt="" src={ pictureUrl } /> :
+                            <div className="nitro-camera-loading">
+                                <Loader2 className="size-5 animate-spin text-primary-base" />
+                                <span>{ LocalizeText('camera.loading') }</span>
+                            </div> }
+                    </div>
+                    <div className="nitro-camera-card">
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2 text-label-sm text-text-strong-950">
+                                <ImageIcon className="size-4 text-primary-base" />
+                                { LocalizeText('camera.purchase.header') }
+                            </div>
+                            { ((price.credits > 0) || (price.duckets > 0)) &&
+                                <div className="mt-2 flex flex-wrap items-center gap-2 text-paragraph-xs text-text-sub-600">
+                                    <span>{ LocalizeText('catalog.purchase.confirmation.dialog.cost') }</span>
+                                    { (price.credits > 0) &&
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-bg-weak-50 px-2 py-1 text-label-xs text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200">
+                                            { price.credits } <LayoutCurrencyIcon type={ -1 } />
+                                        </span> }
+                                    { (price.duckets > 0) &&
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-bg-weak-50 px-2 py-1 text-label-xs text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200">
+                                            { price.duckets } <LayoutCurrencyIcon type={ 5 } />
+                                        </span> }
+                                </div> }
+                            { (picturesBought > 0) &&
+                                <div className="mt-2 flex flex-wrap items-center gap-2 text-paragraph-xs text-success-base">
+                                    <CheckCircle2 className="size-3.5" />
+                                    <span>{ LocalizeText('camera.purchase.count.info') } { picturesBought }</span>
+                                    <button type="button" className="text-primary-base underline-offset-2 hover:underline" onClick={ () => CreateLinkEvent('inventory/toggle') }>{ LocalizeText('camera.open.inventory') }</button>
+                                </div> }
+                        </div>
+                        <AlignButton.Root type="button" variant="primary" mode="filled" size="small" disabled={ isWaiting || !pictureUrl } onClick={ event => processAction('buy') }>
+                            { isWaiting ? <AlignButton.Icon as={ Loader2 } className="size-4 animate-spin" /> : <AlignButton.Icon as={ ShoppingBag } className="size-4" /> }
+                            { LocalizeText(!picturesBought ? 'buy' : 'camera.buy.another.button.text') }
+                        </AlignButton.Root>
+                    </div>
+                    { !publishDisabled &&
+                        <div className="nitro-camera-card">
+                            <div className="min-w-0">
+                                <div className="flex items-center gap-2 text-label-sm text-text-strong-950">
+                                    <UploadCloud className="size-4 text-verified-base" />
+                                    { LocalizeText(wasPicturePublished ? 'camera.publish.successful' : 'camera.publish.explanation') }
+                                </div>
+                                { !wasPicturePublished &&
+                                    <label className="mt-2 flex cursor-pointer items-center gap-2 text-paragraph-xs text-text-sub-600">
+                                        <input type="checkbox" checked={ isPublic } onChange={ e => setIsPublic(e.target.checked) } className="size-4 rounded border-stroke-soft-200 accent-primary-base" />
+                                        <span>{ isPublic ? 'Öffentlich in der Galerie' : 'Privat speichern' }</span>
+                                    </label> }
+                                <div className="mt-2 text-paragraph-xs text-text-sub-600">
+                                    { LocalizeText(wasPicturePublished ? 'camera.publish.success.short.info' : 'camera.publish.detailed.explanation') }
+                                </div>
+                                { wasPicturePublished && <a className="mt-2 inline-flex items-center gap-1 text-label-xs text-primary-base hover:underline" href={ publishUrl } rel="noreferrer" target="_blank">{ LocalizeText('camera.link.to.published') } <ExternalLink className="size-3" /></a> }
+                                { !wasPicturePublished && (price.publishDucketPrice > 0) &&
+                                    <div className="mt-2 inline-flex items-center gap-1 rounded-full bg-bg-weak-50 px-2 py-1 text-label-xs text-text-strong-950 ring-1 ring-inset ring-stroke-soft-200">
+                                        { price.publishDucketPrice } <LayoutCurrencyIcon type={ 5 } />
+                                    </div> }
+                                { (publishCooldown > 0) &&
+                                    <AlignBadge.Root className="mt-2" variant="lighter" color="orange" size="small">
+                                        <AlignBadge.Icon as={ Lock } className="size-3" />
+                                        { LocalizeText('camera.publish.wait', [ 'minutes' ], [ Math.ceil(publishCooldown / 60).toString() ]) }
+                                    </AlignBadge.Root> }
+                            </div>
+                            { !wasPicturePublished &&
+                                <AlignButton.Root type="button" variant="neutral" mode="stroke" size="small" disabled={ (isWaiting || (publishCooldown > 0) || !pictureUrl) } onClick={ event => processAction('publish') }>
+                                    <AlignButton.Icon as={ UploadCloud } className="size-4" />
+                                    { LocalizeText('camera.publish.button.text') }
+                                </AlignButton.Root> }
+                        </div> }
+                    <div className="text-center text-paragraph-xs text-text-sub-600">{ LocalizeText('camera.warning.disclaimer') }</div>
+                    <div className="flex justify-end">
+                        <AlignButton.Root type="button" variant="neutral" mode="stroke" size="small" onClick={ event => processAction('cancel') }>
+                            <AlignButton.Icon as={ RotateCcw } className="size-4" />
+                            { LocalizeText('generic.cancel') }
+                        </AlignButton.Root>
+                    </div>
+                </div>
+            </AlignSurface.Panel>
+        </DraggableWindow>
     );
 }

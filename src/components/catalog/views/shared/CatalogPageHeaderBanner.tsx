@@ -26,7 +26,7 @@ export const CatalogPageHeaderBanner: FC<{}> = () =>
     if(!imageUrl && !pageText) return null;
 
     return (
-        <div className="border-b border-border/30 bg-gradient-to-r from-primary/5 to-transparent">
+        <div className="border-b border-stroke-soft-200 bg-bg-weak-50">
             <div className="flex items-center gap-4 px-4 py-3">
                 { imageUrl && (
                     <img
@@ -37,9 +37,9 @@ export const CatalogPageHeaderBanner: FC<{}> = () =>
                     />
                 ) }
                 <div className="flex-1 min-w-0">
-                    { pageText && <p className="text-xs text-muted-foreground line-clamp-2 catalog-page-text" dangerouslySetInnerHTML={ { __html: pageText } } /> }
+                    { pageText && <p className="text-paragraph-sm text-text-sub-600 line-clamp-2 catalog-page-text" dangerouslySetInnerHTML={ { __html: pageText } } /> }
                 </div>
-                <span className="shrink-0 text-[10px] font-medium text-muted-foreground/50 border border-border/40 rounded-md px-2 py-0.5">
+                <span className="shrink-0 rounded-md bg-bg-white-0 px-2 py-0.5 text-subheading-2xs text-text-soft-400 shadow-regular-xs ring-1 ring-stroke-soft-200">
                     { currentPage?.layoutCode }
                 </span>
             </div>

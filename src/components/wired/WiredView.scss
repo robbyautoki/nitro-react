@@ -57,16 +57,17 @@
 	}
 
 	.nitro-wired-header {
-		color: #000;
+		color: hsl(var(--align-text-strong-950));
 		margin-bottom:3px;
 
 		.nitro-wired-title, .nitro-wired-close {
-			border:1px solid rgba($black,.8);
+			border:1px solid hsl(var(--align-stroke-strong-950) / 0.8);
 			background-image: linear-gradient(45deg, #00d9cb 25%, #00bdb0 25%, #00bdb0 50%, #00d9cb 50%, #00d9cb 75%, #00bdb0 75%, #00bdb0 100%);
 			background-size: 197.99px 197.99px;
 			animation: wiredSlider 3s linear infinite;
 			text-align: center;
-			box-shadow:inset 0 0 0 2px rgba($white,.6), 0 2px rgba($black,.4);
+			color: hsl(var(--align-static-white));
+			box-shadow:inset 0 0 0 2px hsl(var(--align-bg-white-0) / 0.6), 0 2px hsl(var(--align-bg-strong-950) / 0.4);
 		}
 
 		.nitro-wired-title {
@@ -80,37 +81,37 @@
 
 	&.nitro-wired-trigger {
 		background-color: #3b2516 !important;
-		border: 1px solid #000 !important;
+		border: 1px solid hsl(var(--align-stroke-strong-950)) !important;
 		box-shadow: inset 0px -2px #50321f,
 					inset 0px -3px #86583b,
 					inset 0 0 0 1px #86583b,
 					inset 0 0 0 3px #644029,
-					inset 0 0 0 4px rgba($black,.4) !important;
+					inset 0 0 0 4px hsl(var(--align-bg-strong-950) / 0.4) !important;
 
 		.bg-light,.bg-primary {
 			background-color: transparent !important;
 		}
 
 		.bg-dark {
-			background-color: #000 !important;
+			background-color: hsl(var(--align-bg-strong-950)) !important;
 		}
 	}
 
 	&.nitro-wired-action {
 		background-color: #686868 !important;
-		border: 1px solid #000 !important;
+		border: 1px solid hsl(var(--align-stroke-strong-950)) !important;
 		box-shadow: inset 0px -2px #9d9d9d,
 					inset 0px -3px #c5c5c5,
 					inset 0 0 0 1px #c5c5c5,
 					inset 0 0 0 3px #9d9d9d,
-					inset 0 0 0 4px rgba($black,.4) !important;
+					inset 0 0 0 4px hsl(var(--align-bg-strong-950) / 0.4) !important;
 
 		.bg-light,.bg-primary {
 			background-color: transparent !important;
 		}
 
 		.bg-dark {
-			background-color: #000 !important;
+			background-color: hsl(var(--align-bg-strong-950)) !important;
 		}
 
 		&::before,
@@ -153,16 +154,16 @@
 
 	&.nitro-wired-condition {
 		background-color: #cfd2dd !important;
-		border: 1px solid #000 !important;
+		border: 1px solid hsl(var(--align-stroke-strong-950)) !important;
 		box-shadow: inset 0 0 0 3px #efefef, inset 4px 4px #abaeb9 !important;
-		color: #000;
+		color: hsl(var(--align-bg-strong-950));
 
 		.bg-light,.bg-primary {
 			background-color: transparent !important;
 		}
 
 		.bg-dark {
-			background-color: #000 !important;
+			background-color: hsl(var(--align-bg-strong-950)) !important;
 		}
 	}
 }

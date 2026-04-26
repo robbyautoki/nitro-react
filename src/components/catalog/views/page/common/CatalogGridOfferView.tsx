@@ -6,7 +6,7 @@ import { LayoutAvatarImageView } from '../../../../../common';
 import { LayoutLimitedEditionStyledNumberView } from '../../../../../common/layout/limited-edition';
 import { cn } from '../../../../../lib/utils';
 import { useCatalog, useInventoryFurni } from '../../../../../hooks';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../../../ui/tooltip';
+import { Content as TooltipContent, Provider as TooltipProvider, Root as Tooltip, Trigger as TooltipTrigger } from '@/align-ui/components/ui/tooltip';
 import { INTERACTION_LABELS } from '../../shared/CatalogInteractionFilter';
 import { CatalogCurrencyIcon } from '../../shared/CatalogCurrencyIcon';
 
@@ -66,13 +66,13 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                 <TooltipTrigger asChild>
                     <button
                         className={ cn(
-                            'group relative aspect-square rounded-xl border p-1.5 transition-all duration-150 cursor-pointer overflow-hidden',
-                            'hover:border-primary/30 hover:bg-accent/30 hover:shadow-sm hover:z-10',
+                            'group relative aspect-square cursor-pointer overflow-hidden rounded-xl bg-bg-weak-50 p-2 transition-all duration-150',
+                            'hover:bg-bg-white-0 hover:shadow-regular-xs hover:ring-1 hover:ring-inset hover:ring-stroke-soft-200 hover:z-10',
                             isMultiSelected
-                                ? 'border-emerald-400/80 shadow-[0_0_14px_rgba(52,211,153,0.3)] bg-emerald-500/10 z-10'
+                                ? 'bg-success-lighter ring-1 ring-inset ring-success-base z-10'
                                 : itemActive
-                                    ? 'border-primary bg-primary/10 ring-2 ring-primary/20 shadow-[0_0_12px_rgba(var(--primary),0.15)] z-10'
-                                    : 'border-border/50 bg-card',
+                                    ? 'bg-primary-alpha-10 ring-1 ring-inset ring-primary-base z-10'
+                                    : '',
                             isSoldOut && 'opacity-40 grayscale'
                         ) }
                         onMouseDown={ onMouseEvent }
@@ -91,13 +91,13 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                         ) }
                         { (iconUrl && !isUnique && iconFailed) && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <ImageOff className="w-5 h-5 text-muted-foreground/25" />
+                                <ImageOff className="w-5 h-5 text-text-soft-400/50" />
                             </div>
                         ) }
                         { isMultiSelected &&
-                            <span className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] font-bold z-20 shadow-sm">✓</span> }
+                            <span className="absolute left-1 top-1 z-20 flex size-4 items-center justify-center rounded-full bg-success-base text-subheading-2xs text-static-white shadow-regular-xs">✓</span> }
                         { (itemCount > 1) &&
-                            <span className="absolute -top-0.5 -right-0.5 text-[9px] font-bold bg-primary text-primary-foreground rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1 leading-none z-10 shadow-sm">
+                            <span className="absolute right-1 top-1 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-base px-1 text-subheading-2xs leading-none text-static-white shadow-regular-xs">
                                 { itemCount }
                             </span> }
                         { isUnique && (
@@ -105,10 +105,10 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                                 { (iconUrl && !iconFailed) ? (
                                     <img src={ iconUrl } alt="" draggable={ false } className="absolute inset-0 w-full h-full object-contain pointer-events-none" style={ { imageRendering: 'pixelated' } } onError={ () => setIconFailed(true) } />
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground/25" /></div>
+                                    <div className="absolute inset-0 flex items-center justify-center"><ImageOff className="w-5 h-5 text-text-soft-400/50" /></div>
                                 ) }
                                 <div className="absolute top-1 right-1">
-                                    <span className="text-[8px] font-bold text-amber-600 bg-amber-500/10 border border-amber-500/20 rounded px-1">LTD</span>
+                                    <span className="rounded-md bg-warning-lighter px-1 text-subheading-2xs text-warning-base">LTD</span>
                                 </div>
                                 <div className="absolute bottom-0 left-0 right-0 z-10">
                                     <LayoutLimitedEditionStyledNumberView value={ product.uniqueLimitedItemSeriesSize } />
@@ -117,17 +117,17 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                         ) }
                         { isFree && !isUnique && (
                             <div className="absolute bottom-1 left-1">
-                                <span className="text-[8px] font-bold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded px-1">GRATIS</span>
+                                <span className="rounded-md bg-success-lighter px-1 text-subheading-2xs text-success-base">GRATIS</span>
                             </div>
                         ) }
                         { (offer.product.productType === ProductTypeEnum.ROBOT) &&
                             <LayoutAvatarImageView figure={ offer.product.extraParam } headOnly={ true } direction={ 3 } /> }
                     </button>
                 </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={ 6 } className="max-w-[220px] shadow-lg">
+                <TooltipContent side="top" sideOffset={ 6 } variant="light" className="max-w-[220px] shadow-lg">
                     <div className="flex flex-col gap-0.5">
-                        <span className="font-semibold text-xs">{ offer.localizationName }</span>
-                        <div className="flex items-center gap-1.5 text-[10px] opacity-80">
+                        <span className="text-label-xs text-text-strong-950">{ offer.localizationName }</span>
+                        <div className="flex items-center gap-1.5 text-paragraph-xs opacity-80">
                             { offer.priceInCredits > 0 && (
                                 <span className="flex items-center gap-0.5">
                                     <CatalogCurrencyIcon type={ -1 } className="w-3.5 h-3.5" />{ offer.priceInCredits }
@@ -138,11 +138,11 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                                     <CatalogCurrencyIcon type={ offer.activityPointType } className="w-3.5 h-3.5" />{ offer.priceInActivityPoints }
                                 </span>
                             ) }
-                            { isFree && <span className="text-emerald-500">Kostenlos</span> }
+                            { isFree && <span className="text-success-base">Kostenlos</span> }
                         </div>
-                        { interactionInfo && <span className={ `text-[10px] ${ interactionInfo.color }` }>{ interactionInfo.label }</span> }
-                        { isUnique && <span className="text-[10px] text-amber-500">Limited: { product.uniqueLimitedItemsLeft }/{ product.uniqueLimitedItemSeriesSize }</span> }
-                        <span className="text-[9px] opacity-40 font-mono">{ furniData?.className }</span>
+                        { interactionInfo && <span className={ `text-paragraph-xs ${ interactionInfo.color }` }>{ interactionInfo.label }</span> }
+                        { isUnique && <span className="text-paragraph-xs text-warning-base">Limited: { product.uniqueLimitedItemsLeft }/{ product.uniqueLimitedItemSeriesSize }</span> }
+                        <span className="font-mono text-subheading-2xs opacity-40">{ furniData?.className }</span>
                     </div>
                 </TooltipContent>
             </Tooltip>

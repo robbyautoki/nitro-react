@@ -1,10 +1,16 @@
 import { BadgePointLimitsEvent, ILinkEventTracker, IRoomSession, RoomEngineObjectEvent, RoomEngineObjectPlacedEvent, RoomPreviewer, RoomSessionEvent } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FaTimes, FaBox, FaRobot, FaPaw, FaMedal, FaPlus, FaCheck } from 'react-icons/fa';
-import { AddEventLinkTracker, GetConfiguration, GetLocalization, GetRoomEngine, isObjectMoverRequested, LocalizeText, RemoveLinkEventTracker, setObjectMoverRequested, UnseenItemCategory } from '../../api';
+import { ComponentType, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Award, Bot, Check, PawPrint, Plus, Sofa, X } from 'lucide-react';
+import { AddEventLinkTracker, GetLocalization, GetRoomEngine, isObjectMoverRequested, LocalizeText, RemoveLinkEventTracker, setObjectMoverRequested, UnseenItemCategory } from '../../api';
 import { DraggableWindow, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent } from '../../hooks';
 import { useInventoryCategories } from '../../hooks/inventory/useInventoryCategories';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import { cn } from '@/align-ui/utils/cn';
 import { InventoryBadgeView } from './views/badge/InventoryBadgeView';
 import { InventoryBotView } from './views/bot/InventoryBotView';
 import { InventoryFurnitureView } from './views/furniture/InventoryFurnitureView';
@@ -18,11 +24,11 @@ const TAB_BADGES: string = 'inventory.badges';
 const TABS = [ TAB_FURNITURE, TAB_BOTS, TAB_PETS, TAB_BADGES ];
 const UNSEEN_CATEGORIES = [ UnseenItemCategory.FURNI, UnseenItemCategory.BOT, UnseenItemCategory.PET, UnseenItemCategory.BADGE ];
 
-const TAB_ICONS: Record<string, FC<any>> = {
-    [TAB_FURNITURE]: FaBox,
-    [TAB_BOTS]: FaRobot,
-    [TAB_PETS]: FaPaw,
-    [TAB_BADGES]: FaMedal,
+const TAB_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+    [TAB_FURNITURE]: Sofa,
+    [TAB_BOTS]: Bot,
+    [TAB_PETS]: PawPrint,
+    [TAB_BADGES]: Award,
 };
 
 const TAB_LABELS: Record<string, string> = {
@@ -31,6 +37,17 @@ const TAB_LABELS: Record<string, string> = {
     [TAB_PETS]: 'Haustiere',
     [TAB_BADGES]: 'Abzeichen',
 };
+
+const CAT_COLORS = [
+    'hsl(var(--align-information-base))',
+    'hsl(var(--align-away-base))',
+    'hsl(var(--align-success-base))',
+    'hsl(var(--align-feature-base))',
+    'hsl(var(--align-error-base))',
+    'hsl(var(--align-warning-base))',
+    'hsl(var(--align-verified-base))',
+    'hsl(var(--align-highlighted-base))',
+];
 
 export const InventoryView: FC<{}> = props =>
 {
@@ -78,7 +95,6 @@ export const InventoryView: FC<{}> = props =>
     // Category create inline
     const [ creatingCategory, setCreatingCategory ] = useState(false);
     const [ newCatName, setNewCatName ] = useState('');
-    const CAT_COLORS = ['#3b82f6', '#eab308', '#22c55e', '#a855f7', '#ef4444', '#f97316', '#06b6d4', '#ec4899'];
     const [ newCatColor, setNewCatColor ] = useState(CAT_COLORS[0]);
 
     const handleCreateCategory = useCallback(() =>
@@ -89,52 +105,6 @@ export const InventoryView: FC<{}> = props =>
         setNewCatColor(CAT_COLORS[0]);
         setCreatingCategory(false);
     }, [ newCatName, newCatColor, createCategory ]);
-
-    const ASSETS_URL = GetConfiguration<string>('asset.url', 'http://localhost:8080');
-
-    // Hotbar
-    interface HotbarSlot { item_base_id: number | null; public_name: string | null; item_name: string | null; sprite_id: number | null; }
-    const EMPTY_SLOT: HotbarSlot = { item_base_id: null, public_name: null, item_name: null, sprite_id: null };
-
-    const [ hotbarSlots, setHotbarSlots ] = useState<HotbarSlot[]>(() =>
-    {
-        try { const stored = JSON.parse(localStorage.getItem('habbo_hotbar') || '[]'); return Array.from({ length: 9 }, (_, i) => stored[i] || { ...EMPTY_SLOT }); }
-        catch { return Array.from({ length: 9 }, () => ({ ...EMPTY_SLOT })); }
-    });
-    const [ hotbarHovered, setHotbarHovered ] = useState<number | null>(null);
-
-    const saveHotbar = useCallback((slots: HotbarSlot[]) =>
-    {
-        setHotbarSlots(slots);
-        localStorage.setItem('habbo_hotbar', JSON.stringify(slots));
-    }, []);
-
-    const removeHotbarSlot = useCallback((index: number) =>
-    {
-        const next = [ ...hotbarSlots ];
-        next[index] = { ...EMPTY_SLOT };
-        saveHotbar(next);
-    }, [ hotbarSlots, saveHotbar ]);
-
-    // Listen for hotbar:set-slot events from InventoryFurnitureView
-    useEffect(() =>
-    {
-        const handler = (e: CustomEvent) =>
-        {
-            const { slot, ...data } = e.detail;
-            const next = [ ...hotbarSlots ];
-            const targetSlot = slot !== undefined ? slot : next.findIndex(s => !s || s.item_base_id === null);
-            if(targetSlot >= 0 && targetSlot < 9)
-            {
-                next[targetSlot] = data;
-                saveHotbar(next);
-            }
-        };
-        window.addEventListener('hotbar:set-slot', handler as EventListener);
-        return () => window.removeEventListener('hotbar:set-slot', handler as EventListener);
-    }, [ hotbarSlots, saveHotbar ]);
-
-    const getFurniIcon = (cn: string) => `${ ASSETS_URL }/c_images/${ cn.split('*')[0] }_icon.png`;
 
     const onClose = () =>
     {
@@ -220,102 +190,180 @@ export const InventoryView: FC<{}> = props =>
         );
     }
 
-    const getCatCount = (catId: number) => groupItems.filter(g =>
-    {
-        const key = g.stuffData.uniqueNumber > 0 ? -(g.getLastItem()?.id || 0) : g.type;
-        return true; // simplified — category filtering is in useInventoryCategories
-    }).length;
-
     return (
-        <DraggableWindow uniqueKey="inventory" handleSelector=".inv-title-bar">
-            <div className="nitro-inventory inv-container" style={{ width: size.w, height: size.h }}>
-                {/* Title bar */}
-                <div className="inv-title-bar drag-handler">
-                    <div className="inv-title-left">
-                        <FaBox className="inv-title-icon" />
-                        <span className="inv-title-text">Inventar</span>
-                        <span className="inv-title-count">{ totalItems } Möbel</span>
-                    </div>
-                    <button className="inv-title-close" onClick={ onClose }>
-                        <FaTimes />
-                    </button>
+        <DraggableWindow uniqueKey="inventory" handleSelector=".inv-drag-handle">
+            <AlignSurface.Panel
+                className="nitro-inventory relative flex flex-col overflow-hidden rounded-2xl"
+                style={ { width: size.w, height: size.h } }
+            >
+                { /* Header */ }
+                <div className="inv-drag-handle flex shrink-0 cursor-grab select-none items-center gap-2 px-3 py-2 active:cursor-grabbing">
+                    <Sofa className="size-4 shrink-0 text-text-sub-600" />
+                    <span className="text-label-sm font-semibold text-text-strong-950">Inventar</span>
+                    <AlignBadge.Root color="gray" variant="lighter" size="small" className="ml-1 h-5">
+                        { totalItems } Möbel
+                    </AlignBadge.Root>
+                    <AlignButton.Root
+                        type="button"
+                        variant="neutral"
+                        mode="ghost"
+                        size="xxsmall"
+                        className="ml-auto size-7 px-0"
+                        onClick={ onClose }
+                    >
+                        <X className="size-4" />
+                    </AlignButton.Root>
                 </div>
+                <AlignDivider.Root />
 
-                <div className="inv-main">
-                    {/* Sidebar */}
-                    <div className="inv-sidebar">
-                        <div className="inv-sidebar-section">
+                <div className="flex min-h-0 flex-1 overflow-hidden">
+                    { /* Sidebar */ }
+                    <div className="flex w-[140px] shrink-0 flex-col overflow-y-auto border-r border-stroke-soft-200 bg-bg-weak-50">
+                        <div className="flex flex-col gap-0.5 p-1.5">
                             { TABS.map((name, index) =>
                             {
                                 const Icon = TAB_ICONS[name];
                                 const unseenCount = getCount(UNSEEN_CATEGORIES[index]);
+                                const isActive = currentTab === name;
                                 return (
-                                    <div key={ index } className={ 'inv-sidebar-item' + (currentTab === name ? ' active' : '') } onClick={ () => setCurrentTab(name) }>
-                                        <Icon className="inv-sidebar-icon" />
-                                        <span className="inv-sidebar-label">{ TAB_LABELS[name] }</span>
-                                        { unseenCount > 0 && <span className="inv-sidebar-badge">{ unseenCount }</span> }
-                                    </div>
+                                    <button
+                                        key={ index }
+                                        type="button"
+                                        className={ cn(
+                                            'flex items-center gap-2 rounded-lg border-l-2 border-transparent px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
+                                            isActive
+                                                ? 'border-l-primary-base bg-primary-alpha-10 font-semibold text-primary-base'
+                                                : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950',
+                                        ) }
+                                        onClick={ () => setCurrentTab(name) }
+                                    >
+                                        <Icon className={ cn('size-3.5 shrink-0', isActive ? 'text-primary-base' : 'text-text-soft-400') } />
+                                        <span className="flex-1 truncate">{ TAB_LABELS[name] }</span>
+                                        { unseenCount > 0 && (
+                                            <AlignBadge.Root color="red" variant="filled" size="small" className="h-4 min-w-4 px-1 text-[9px]">
+                                                { unseenCount }
+                                            </AlignBadge.Root>
+                                        ) }
+                                    </button>
                                 );
                             }) }
                         </div>
 
-                        {/* Categories (only for furniture tab) */}
+                        { /* Categories (only for furniture tab) */ }
                         { currentTab === TAB_FURNITURE && categories.length > 0 && (
-                            <div className="inv-sidebar-categories">
-                                <div className="inv-sidebar-divider" />
-                                <div className={ 'inv-sidebar-item' + (activeCategory === null ? ' active' : '') } onClick={ () => setActiveCategory(null) }>
-                                    <span className="inv-cat-dot" style={{ background: '#6b7280' }} />
-                                    <span className="inv-sidebar-label">Alle</span>
-                                    <span className="inv-sidebar-count">{ groupItems.length }</span>
+                            <div className="flex flex-col gap-0.5 px-1.5 pb-1.5">
+                                <div className="my-1 px-1">
+                                    <AlignDivider.Root />
                                 </div>
-                                { categories.map(cat => (
-                                    <div key={ cat.id } className={ 'inv-sidebar-item' + (activeCategory === cat.id ? ' active' : '') } onClick={ () => setActiveCategory(activeCategory === cat.id ? null : cat.id) }>
-                                        <span className="inv-cat-dot" style={{ background: cat.color }} />
-                                        <span className="inv-sidebar-label">{ cat.name }</span>
-                                    </div>
-                                )) }
-                                <div className="inv-sidebar-divider" />
+                                <button
+                                    type="button"
+                                    className={ cn(
+                                        'flex items-center gap-2 rounded-lg border-l-2 border-transparent px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
+                                        activeCategory === null
+                                            ? 'border-l-primary-base bg-primary-alpha-10 font-semibold text-primary-base'
+                                            : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950',
+                                    ) }
+                                    onClick={ () => setActiveCategory(null) }
+                                >
+                                    <span className="size-2 shrink-0 rounded-full bg-faded-base" />
+                                    <span className="flex-1 truncate">Alle</span>
+                                    <span className="text-[10px] tabular-nums text-text-soft-400">{ groupItems.length }</span>
+                                </button>
+                                { categories.map(cat =>
+                                {
+                                    const isActive = activeCategory === cat.id;
+                                    return (
+                                        <button
+                                            key={ cat.id }
+                                            type="button"
+                                            className={ cn(
+                                                'flex items-center gap-2 rounded-lg border-l-2 border-transparent px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
+                                                isActive
+                                                    ? 'border-l-primary-base bg-primary-alpha-10 font-semibold text-primary-base'
+                                                    : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950',
+                                            ) }
+                                            onClick={ () => setActiveCategory(isActive ? null : cat.id) }
+                                        >
+                                            <span className="size-2 shrink-0 rounded-full" style={ { backgroundColor: cat.color } } />
+                                            <span className="flex-1 truncate">{ cat.name }</span>
+                                        </button>
+                                    );
+                                }) }
+                                <div className="my-1 px-1">
+                                    <AlignDivider.Root />
+                                </div>
                                 { creatingCategory ? (
-                                    <div className="inv-create-form">
-                                        <input
-                                            className="inv-create-input"
-                                            placeholder="Name..."
-                                            value={ newCatName }
-                                            onChange={ e => setNewCatName(e.target.value) }
-                                            autoFocus
-                                            onKeyDown={ e => { if(e.key === 'Enter') handleCreateCategory(); if(e.key === 'Escape') setCreatingCategory(false); } }
-                                        />
-                                        <div className="inv-create-colors">
+                                    <div className="flex flex-col gap-1.5 px-1 py-1">
+                                        <AlignInput.Root size="xsmall">
+                                            <AlignInput.Wrapper className="h-7">
+                                                <AlignInput.Input
+                                                    className="h-7 text-[11px]"
+                                                    placeholder="Name..."
+                                                    value={ newCatName }
+                                                    onChange={ e => setNewCatName(e.target.value) }
+                                                    autoFocus
+                                                    onKeyDown={ e =>
+                                                    {
+                                                        if(e.key === 'Enter') handleCreateCategory();
+                                                        if(e.key === 'Escape') setCreatingCategory(false);
+                                                    } }
+                                                />
+                                            </AlignInput.Wrapper>
+                                        </AlignInput.Root>
+                                        <div className="flex flex-wrap items-center gap-1">
                                             { CAT_COLORS.map(c => (
                                                 <button
                                                     key={ c }
-                                                    className={ 'inv-color-swatch' + (newCatColor === c ? ' active' : '') }
-                                                    style={{ backgroundColor: c }}
+                                                    type="button"
+                                                    className={ cn(
+                                                        'size-3.5 rounded-full border-2 transition-transform',
+                                                        newCatColor === c ? 'scale-110 border-stroke-strong-950' : 'border-transparent hover:border-stroke-sub-300',
+                                                    ) }
+                                                    style={ { backgroundColor: c } }
                                                     onClick={ () => setNewCatColor(c) }
                                                 />
                                             )) }
                                         </div>
-                                        <div className="inv-create-actions">
-                                            <button className="inv-create-ok" onClick={ handleCreateCategory }>
-                                                <FaCheck style={{ fontSize: 8 }} /> OK
-                                            </button>
-                                            <button className="inv-create-cancel" onClick={ () => setCreatingCategory(false) }>
-                                                <FaTimes style={{ fontSize: 8 }} />
-                                            </button>
+                                        <div className="flex gap-1">
+                                            <AlignButton.Root
+                                                type="button"
+                                                variant="primary"
+                                                mode="filled"
+                                                size="xxsmall"
+                                                className="h-6 flex-1 gap-1 text-[10px]"
+                                                onClick={ handleCreateCategory }
+                                            >
+                                                <Check className="size-2.5" />
+                                                OK
+                                            </AlignButton.Root>
+                                            <AlignButton.Root
+                                                type="button"
+                                                variant="neutral"
+                                                mode="stroke"
+                                                size="xxsmall"
+                                                className="size-6 px-0"
+                                                onClick={ () => setCreatingCategory(false) }
+                                            >
+                                                <X className="size-2.5" />
+                                            </AlignButton.Root>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="inv-sidebar-item inv-sidebar-create" onClick={ () => setCreatingCategory(true) }>
-                                        <FaPlus style={{ fontSize: 10, opacity: 0.4 }} />
-                                        <span className="inv-sidebar-label">Erstellen</span>
-                                    </div>
+                                    <button
+                                        type="button"
+                                        className="flex items-center gap-2 rounded-lg border-l-2 border-transparent px-2.5 py-1.5 text-left text-paragraph-xs text-text-soft-400 transition-colors hover:bg-bg-white-0 hover:text-text-sub-600"
+                                        onClick={ () => setCreatingCategory(true) }
+                                    >
+                                        <Plus className="size-3 shrink-0" />
+                                        <span className="flex-1 truncate">Erstellen</span>
+                                    </button>
                                 ) }
                             </div>
                         ) }
                     </div>
 
-                    {/* Content */}
-                    <div className="inv-content">
+                    { /* Content */ }
+                    <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-bg-white-0">
                         { currentTab === TAB_FURNITURE &&
                             <InventoryFurnitureView roomSession={ roomSession } roomPreviewer={ roomPreviewer } /> }
                         { currentTab === TAB_BOTS &&
@@ -327,43 +375,16 @@ export const InventoryView: FC<{}> = props =>
                     </div>
                 </div>
 
-                {/* Hotbar */}
-                <div className="inv-hotbar">
-                    { hotbarSlots.map((slot, i) =>
-                    {
-                        const filled = slot && slot.item_base_id !== null;
-                        return (
-                            <div
-                                key={ i }
-                                className={ 'inv-hotbar-slot' + (filled ? ' filled' : ' empty') }
-                                onMouseEnter={ () => setHotbarHovered(i) }
-                                onMouseLeave={ () => setHotbarHovered(null) }
-                                title={ filled ? `${ slot.public_name }` : `Slot ${ i + 1 }` }
-                            >
-                                <span className="inv-hotbar-number">{ i + 1 }</span>
-                                { filled && slot.item_name && (
-                                    <img
-                                        className="inv-hotbar-icon"
-                                        src={ getFurniIcon(slot.item_name) }
-                                        alt=""
-                                        onError={ e => { (e.target as HTMLImageElement).style.opacity = '0.2'; } }
-                                    />
-                                ) }
-                                { filled && hotbarHovered === i && (
-                                    <button className="inv-hotbar-remove" onClick={ e => { e.stopPropagation(); removeHotbarSlot(i); } }>×</button>
-                                ) }
-                            </div>
-                        );
-                    }) }
-                </div>
-
-                {/* Resize Handle */}
-                <div className="inv-resize-handle" onPointerDown={ onResizeStart }>
+                { /* Resize Handle */ }
+                <div
+                    className="absolute bottom-0 right-0 z-20 flex size-4 cursor-nwse-resize items-end justify-end p-0.5 text-text-soft-400 transition-colors hover:text-text-sub-600"
+                    onPointerDown={ onResizeStart }
+                >
                     <svg width="10" height="10" viewBox="0 0 10 10">
                         <path d="M9 1L1 9M9 5L5 9M9 8L8 9" stroke="currentColor" strokeWidth="1.2" fill="none" />
                     </svg>
                 </div>
-            </div>
+            </AlignSurface.Panel>
         </DraggableWindow>
     );
 }

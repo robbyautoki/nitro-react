@@ -1,56 +1,29 @@
 import { RelationshipStatusEnum, RelationshipStatusInfoEvent, RelationshipStatusInfoMessageParser, RoomSessionFavoriteGroupUpdateEvent, RoomSessionUserBadgesEvent, RoomSessionUserFigureUpdateEvent, UserRelationshipsComposer } from '@nitrots/nitro-renderer';
 import { Dispatch, FC, FocusEvent, KeyboardEvent, SetStateAction, useEffect, useMemo, useState } from 'react';
 import { Heart, Smile, Shield, X, Pen, Star, Users, Calendar, Hand } from 'lucide-react';
-import { AvatarInfoUser, CloneObject, GetConfiguration, GetGroupInformation, GetLocalStorage, GetSessionDataManager, GetUserProfile, LocalizeText, SendMessageComposer } from '../../../../../api';
+import { AvatarInfoUser, CloneObject, GetConfiguration, GetGroupInformation, GetSessionDataManager, GetUserProfile, LocalizeText, SendMessageComposer } from '../../../../../api';
 import { getPrestigeFromBadges, getPrestigeInfo } from '../../../../../api/utils/PrestigeUtils';
 import { LayoutAvatarImageView, LayoutBadgeImageView } from '../../../../../common';
 import { useMessageEvent, useRoom, useRoomSessionManagerEvent } from '../../../../../hooks';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/reui-badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { PROFILE_EFFECTS, ProfileEffectData, ROLE_PRESETS } from '../../../../user-profile/ProfileEffects';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignProgressBar from '@/align-ui/components/ui/progress-bar';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
+import { resolveProfileEffect, ROLE_PRESETS } from '../../../../user-profile/ProfileEffects';
+import { ProfileEffectOverlay } from '../../../../user-profile/ProfileEffectRenderer';
+import { useEquippedAssets } from '../../../../discord-shop/useEquippedAssets';
 
-const DEFAULT_EFFECT_ID = 'sakura-dreams';
-const EFFECT_STORAGE_KEY = 'nitro.infostand.effect';
-
-function SpriteLayer({ src, startDelay = 0 }: { src: string; startDelay?: number })
-{
-    const [ visible, setVisible ] = useState(startDelay === 0);
-
-    useEffect(() =>
-    {
-        if(startDelay > 0)
-        {
-            const t = setTimeout(() => setVisible(true), startDelay);
-            return () => clearTimeout(t);
-        }
-    }, [ startDelay ]);
-
-    if(!visible) return null;
-
-    return (
-        <img src={ src } alt="" draggable={ false } decoding="async" className="absolute inset-0 w-full h-full object-cover object-top" style={ { willChange: 'transform', transform: 'translateZ(0)' } } />
-    );
-}
-
-function ProfileEffectRenderer({ effect }: { effect: ProfileEffectData })
-{
-    const sorted = useMemo(() => [ ...effect.effects ].sort((a, b) => a.zIndex - b.zIndex), [ effect ]);
-
-    return (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-[1] opacity-100 group-hover:opacity-20 transition-opacity duration-500" style={ { willChange: 'transform, opacity', transform: 'translateZ(0)' } }>
-            { sorted.map((layer, i) => (
-                <div key={ `${ effect.id }-${ i }` } className="absolute inset-0" style={ { zIndex: layer.zIndex } }>
-                    <SpriteLayer src={ layer.src } startDelay={ layer.start } />
-                </div>
-            )) }
-        </div>
-    );
-}
+const Tooltip = AlignTooltip.Root;
+const TooltipContent = AlignTooltip.Content;
+const TooltipProvider = AlignTooltip.Provider;
+const TooltipTrigger = AlignTooltip.Trigger;
 
 function SectionHeader({ children }: { children: React.ReactNode })
 {
-    return <div className="text-[10px] uppercase tracking-wider font-semibold text-white/25 mb-1.5">{ children }</div>;
+    return <div className="mb-1.5 text-subheading-2xs uppercase tracking-normal text-text-soft-400">{ children }</div>;
 }
 
 function getRolesFromBadges(badges: string[]): string[]
@@ -63,9 +36,18 @@ function getRolesFromBadges(badges: string[]): string[]
 }
 
 const REL_CONFIG: Record<number, { icon: typeof Heart; color: string; bg: string; label: string }> = {
-    [RelationshipStatusEnum.HEART]: { icon: Heart, color: 'text-red-400', bg: 'bg-red-500/10', label: 'Herz' },
-    [RelationshipStatusEnum.SMILE]: { icon: Smile, color: 'text-yellow-400', bg: 'bg-yellow-500/10', label: 'Smiley' },
-    [RelationshipStatusEnum.BOBBA]: { icon: Shield, color: 'text-blue-400', bg: 'bg-blue-500/10', label: 'Bobba' },
+    [RelationshipStatusEnum.HEART]: { icon: Heart, color: 'text-error-base', bg: 'bg-error-lighter', label: 'Herz' },
+    [RelationshipStatusEnum.SMILE]: { icon: Smile, color: 'text-warning-base', bg: 'bg-warning-lighter', label: 'Smiley' },
+    [RelationshipStatusEnum.BOBBA]: { icon: Shield, color: 'text-information-base', bg: 'bg-information-lighter', label: 'Bobba' },
+};
+
+const ROLE_BADGE_COLOR: Record<string, 'gray' | 'blue' | 'orange' | 'red' | 'green' | 'yellow' | 'purple' | 'sky' | 'pink' | 'teal'> = {
+    founder: 'yellow',
+    admin: 'red',
+    mod: 'blue',
+    vip: 'purple',
+    trader: 'green',
+    builder: 'sky',
 };
 
 interface InfoStandWidgetUserViewProps
@@ -83,17 +65,14 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
     const [ relationships, setRelationships ] = useState<RelationshipStatusInfoMessageParser>(null);
     const { roomSession = null } = useRoom();
 
-    const [ effectId ] = useState<string | null>(() =>
-    {
-        const stored = GetLocalStorage<string>(EFFECT_STORAGE_KEY);
-        return stored || DEFAULT_EFFECT_ID;
-    });
-
-    const activeEffect = PROFILE_EFFECTS.find(e => e.id === effectId);
     const roles = useMemo(() => getRolesFromBadges(avatarInfo?.badges || []), [ avatarInfo?.badges ]);
     const prestige = useMemo(() => getPrestigeFromBadges(avatarInfo?.badges || []), [ avatarInfo?.badges ]);
     const levelInfo = avatarInfo ? getPrestigeInfo(avatarInfo.achievementScore, prestige) : null;
     const isOwnUser = avatarInfo?.type === AvatarInfoUser.OWN_USER;
+    const equippedAssets = useEquippedAssets(avatarInfo?.webID ?? 0, !!avatarInfo?.webID);
+    const nameplateUrl = equippedAssets.nameplate?.staticUrl || null;
+    const decorationUrl = equippedAssets.avatarDecoration?.animatedUrl || equippedAssets.avatarDecoration?.staticUrl || null;
+    const activeEffect = useMemo(() => resolveProfileEffect(equippedAssets.profileEffect), [ equippedAssets.profileEffect ]);
 
     const saveMotto = (motto: string) =>
     {
@@ -172,192 +151,226 @@ export const InfoStandWidgetUserView: FC<InfoStandWidgetUserViewProps> = props =
 
     if(!avatarInfo) return null;
 
+    const visibleBadges = avatarInfo.badges.slice(0, 3);
+    const remainingBadges = Math.max(0, avatarInfo.badges.length - visibleBadges.length);
+
     return (
         <TooltipProvider delayDuration={ 200 }>
-            <div className="group nitro-infostand relative rounded-xl overflow-hidden flex flex-col">
-
-                {/* ── Header ── */}
-                <div className="relative z-10 flex items-center justify-between px-3 pt-2.5 pb-1.5 shrink-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                        <button className="shrink-0 hover:opacity-80 transition-opacity" onClick={ () => GetUserProfile(avatarInfo.webID) }>
-                            <div className="relative w-7 h-7 rounded-full overflow-hidden ring-1 ring-white/10">
-                                <LayoutAvatarImageView figure={ avatarInfo.figure } headOnly direction={ 2 } className="!absolute -top-1" />
-                            </div>
-                        </button>
-                        <div className="min-w-0">
-                            <span className="text-[13px] font-bold truncate text-white block leading-tight">{ avatarInfo.name }</span>
-                            <span className="text-[9px] text-white/25 font-mono">#{ avatarInfo.webID }</span>
-                        </div>
-                        { roles.length > 0 && (
-                            <div className="flex gap-1 shrink-0">
-                                { roles.map(r =>
-                                {
-                                    const cfg = ROLE_PRESETS[r];
-                                    if(!cfg) return null;
-                                    return (
-                                        <span key={ r } className={ `inline-flex items-center text-[8px] font-bold px-1.5 py-0.5 rounded-full border ${ cfg.bg } ${ cfg.border } ${ cfg.color }` }>
-                                            { cfg.label }
-                                        </span>
-                                    );
-                                }) }
-                            </div>
-                        ) }
-                    </div>
-                    <button className="shrink-0 w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors" onClick={ onClose }>
-                        <X className="w-3 h-3 text-white/40" />
+            <AlignSurface.Panel className={ `group nitro-infostand nitro-user-infostand-align relative !h-auto !min-w-[328px] !max-w-[328px] !max-h-none overflow-hidden !rounded-20 !border-0 !bg-bg-white-0 !text-text-strong-950 ${ activeEffect ? 'nitro-infostand-has-profile-effect' : '' }` }>
+                <ProfileEffectOverlay
+                    key={ activeEffect?.key ?? 'no-infostand-profile-effect' }
+                    resolution={ activeEffect }
+                    fit="contain"
+                    className="nitro-profile-effect-overlay z-[30] opacity-100"
+                />
+                <div className="nitro-infostand-layer relative z-10 flex items-center gap-3 bg-bg-white-0 px-4 py-3">
+                    <button className="min-w-0 flex-1 truncate text-left text-label-md text-text-strong-950 hover:underline" onClick={ () => GetUserProfile(avatarInfo.webID) }>
+                        { avatarInfo.name }
                     </button>
+                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ onClose }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                    </AlignButton.Root>
                 </div>
 
-                <div className="relative z-10 h-px shrink-0" style={ { background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent)' } } />
+                <AlignDivider.Root />
 
-                {/* ── Scrollable Content ── */}
-                <ScrollArea className="flex-1 min-h-0 relative z-10">
-                    <div className="px-3 py-2 space-y-2.5">
+                <div className="nitro-infostand-layer relative z-10 bg-bg-white-0 p-2.5">
+                    <div className="space-y-2.5">
+                        <div className="nitro-infostand-card-layer rounded-2xl bg-bg-weak-50 p-2.5">
+                            <div className="flex gap-3">
+                                <button className="nitro-infostand-control-layer relative flex h-[104px] w-[82px] shrink-0 items-end justify-center overflow-hidden rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 transition hover:bg-bg-weak-50" onClick={ () => GetUserProfile(avatarInfo.webID) }>
+                                    <LayoutAvatarImageView figure={ avatarInfo.figure } direction={ 4 } style={ { minHeight: 100 } } />
+                                    { decorationUrl && <img src={ decorationUrl } alt="" className="pointer-events-none absolute inset-0 z-10 h-full w-full object-contain" draggable={ false } /> }
+                                </button>
 
-                        {/* ── Avatar + Badge Grid ── */}
-                        <div className="flex gap-2.5">
-                            <div className="shrink-0 w-[80px] rounded-lg overflow-hidden flex items-center justify-center cursor-pointer hover:ring-1 hover:ring-white/10 transition-all" style={ { background: 'linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0.02))' } } onClick={ () => GetUserProfile(avatarInfo.webID) }>
-                                <LayoutAvatarImageView figure={ avatarInfo.figure } direction={ 4 } style={ { minHeight: 100 } } />
-                            </div>
+                                <div className="min-w-0 flex-1 space-y-2">
+                                    <div className="flex flex-wrap items-center gap-1.5">
+                                        <AlignBadge.Root color="green" variant="lighter" size="small">
+                                            <AlignBadge.Dot />Im Raum
+                                        </AlignBadge.Root>
+                                        { isOwnUser && <AlignBadge.Root color="gray" variant="lighter" size="small">Du</AlignBadge.Root> }
+                                        { roles.map(r =>
+                                        {
+                                            const cfg = ROLE_PRESETS[r];
+                                            if(!cfg) return null;
+                                            return (
+                                                <AlignBadge.Root key={ r } color={ ROLE_BADGE_COLOR[r] ?? 'gray' } variant="lighter" size="small">
+                                                    { cfg.label }
+                                                </AlignBadge.Root>
+                                            );
+                                        }) }
+                                    </div>
 
-                            <div className="flex-1 grid grid-cols-2 gap-1 content-start">
-                                { avatarInfo.badges.slice(0, 5).map((badge, i) => (
-                                    <Tooltip key={ badge + i }><TooltipTrigger asChild>
-                                        <div className="w-full aspect-square rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-default" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } }>
-                                            <LayoutBadgeImageView badgeCode={ badge } showInfo={ true } />
+                                    <div className="grid grid-cols-2 gap-1.5">
+                                        <div className="nitro-infostand-control-layer rounded-xl bg-bg-white-0 px-2.5 py-2 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                                            <div className="text-subheading-2xs uppercase tracking-normal text-text-soft-400">ID</div>
+                                            <div className="truncate font-mono text-label-xs text-text-strong-950">#{ avatarInfo.webID }</div>
                                         </div>
-                                    </TooltipTrigger><TooltipContent className="text-[10px]">{ badge }</TooltipContent></Tooltip>
-                                )) }
-                                { avatarInfo.groupId > 0 && (
-                                    <Tooltip><TooltipTrigger asChild>
-                                        <div className="w-full aspect-square rounded-md flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } } onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
-                                            <LayoutBadgeImageView badgeCode={ avatarInfo.groupBadgeId } isGroup showInfo={ true } customTitle={ avatarInfo.groupName } />
-                                        </div>
-                                    </TooltipTrigger><TooltipContent className="text-[10px]">{ avatarInfo.groupName }</TooltipContent></Tooltip>
-                                ) }
-                                { avatarInfo.groupId <= 0 && avatarInfo.badges.length <= 5 && (
-                                    <div className="w-full aspect-square rounded-md" style={ { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' } } />
-                                ) }
-                            </div>
-                        </div>
 
-                        {/* ── Motto ── */}
-                        <div className="rounded-lg p-2.5" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } }>
-                            { isOwnUser ? (
-                                <div className="flex items-center gap-1.5">
-                                    <Pen className="w-2.5 h-2.5 text-white/20 shrink-0" />
-                                    { !isEditingMotto ? (
-                                        <p className="text-[11px] text-white/50 leading-relaxed truncate cursor-pointer flex-1 italic" onClick={ () => setIsEditingMotto(true) }>{ motto || 'Motto setzen...' }</p>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className="nitro-infostand-control-layer flex min-h-[48px] items-center justify-center rounded-xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                                                    { visibleBadges.length > 0 ? (
+                                                        <LayoutBadgeImageView badgeCode={ visibleBadges[0] } showInfo={ true } />
+                                                    ) : (
+                                                        <span className="text-paragraph-xs text-text-soft-400">Badge</span>
+                                                    ) }
+                                                </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent size="xsmall">{ visibleBadges[0] || 'Kein Badge gesetzt' }</TooltipContent>
+                                        </Tooltip>
+                                    </div>
+
+                                    { avatarInfo.groupId > 0 ? (
+                                        <button className="nitro-infostand-control-layer flex w-full items-center gap-2 rounded-xl bg-bg-white-0 px-2.5 py-2 text-left shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 transition hover:bg-bg-weak-50" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>
+                                            <div className="nitro-infostand-subtle-layer flex size-7 shrink-0 items-center justify-center rounded-lg bg-bg-weak-50">
+                                                <LayoutBadgeImageView badgeCode={ avatarInfo.groupBadgeId } isGroup showInfo={ true } customTitle={ avatarInfo.groupName } />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="text-subheading-2xs uppercase tracking-normal text-text-soft-400">Gruppe</div>
+                                                <div className="truncate text-label-xs text-text-strong-950">{ avatarInfo.groupName }</div>
+                                            </div>
+                                        </button>
                                     ) : (
-                                        <input
-                                            type="text"
-                                            className="flex-1 bg-transparent text-[11px] text-white/80 outline-none border-none p-0"
-                                            maxLength={ GetConfiguration<number>('motto.max.length', 38) }
-                                            value={ motto }
-                                            onChange={ e => setMotto(e.target.value) }
-                                            onBlur={ onMottoBlur }
-                                            onKeyDown={ onMottoKeyDown }
-                                            autoFocus
-                                        />
+                                        <div className="nitro-infostand-control-layer rounded-xl bg-bg-white-0 px-2.5 py-2 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                                            <div className="text-subheading-2xs uppercase tracking-normal text-text-soft-400">Badges</div>
+                                            <div className="truncate text-label-xs text-text-strong-950">{ avatarInfo.badges.length || 0 } sichtbar{ remainingBadges > 0 ? `, +${ remainingBadges }` : '' }</div>
+                                        </div>
                                     ) }
                                 </div>
-                            ) : (
-                                <p className="text-[11px] text-white/50 leading-relaxed italic">{ motto || '...' }</p>
+                            </div>
+
+                            { nameplateUrl && (
+                                <button className="nitro-infostand-control-layer mt-3 flex w-full items-center justify-center rounded-xl bg-bg-white-0 px-3 py-2 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200 transition hover:bg-bg-weak-50" onClick={ () => GetUserProfile(avatarInfo.webID) }>
+                                    <img src={ nameplateUrl } alt="" className="h-8 max-w-full object-contain" draggable={ false } />
+                                </button>
                             ) }
+
+                            <div className="nitro-infostand-control-layer mt-3 rounded-xl bg-bg-white-0 px-3 py-2.5 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                                { isOwnUser ? (
+                                    <div className="flex items-center gap-2">
+                                        <Pen className="size-4 shrink-0 text-text-soft-400" />
+                                        { !isEditingMotto ? (
+                                            <button className="min-w-0 flex-1 truncate text-left text-paragraph-sm italic text-text-sub-600" onClick={ () => setIsEditingMotto(true) }>{ motto || 'Motto setzen...' }</button>
+                                        ) : (
+                                            <AlignInput.Root size="xsmall" className="flex-1">
+                                                <AlignInput.Wrapper className="h-8">
+                                                    <AlignInput.Input
+                                                        type="text"
+                                                        className="h-8 text-paragraph-sm"
+                                                        maxLength={ GetConfiguration<number>('motto.max.length', 38) }
+                                                        value={ motto }
+                                                        onChange={ e => setMotto(e.target.value) }
+                                                        onBlur={ onMottoBlur }
+                                                        onKeyDown={ onMottoKeyDown }
+                                                        autoFocus
+                                                    />
+                                                </AlignInput.Wrapper>
+                                            </AlignInput.Root>
+                                        ) }
+                                    </div>
+                                ) : (
+                                    <p className="truncate text-paragraph-sm italic text-text-sub-600">{ motto || '...' }</p>
+                                ) }
+                            </div>
                         </div>
 
-                        {/* ── Stats ── */}
-                        <div className="rounded-lg p-2.5 space-y-2" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } }>
-                            <SectionHeader>Stats</SectionHeader>
+                        <div className="nitro-infostand-card-layer rounded-2xl bg-bg-weak-50 p-2.5">
+                            <div className="flex items-center justify-between gap-2">
+                                <SectionHeader>Stats</SectionHeader>
+                                <div className="flex flex-wrap justify-end gap-1">
+                                    { levelInfo && (
+                                        <AlignBadge.Root color="blue" variant="lighter" size="small">
+                                            { prestige > 0 && `P${ prestige } ` }Lv.{ levelInfo.displayLevel }
+                                        </AlignBadge.Root>
+                                    ) }
+                                </div>
+                            </div>
 
-                            <div className="flex flex-wrap gap-1">
-                                <Badge variant="secondary" className="text-[9px] h-[18px] px-1.5 gap-1 font-semibold bg-white/5 border-white/8 text-white/60 hover:bg-white/10">
-                                    <Star className="w-2.5 h-2.5" />{ avatarInfo.achievementScore }
-                                </Badge>
+                            <div className="flex items-center gap-2">
+                                <AlignBadge.Root color="yellow" variant="lighter" size="small">
+                                    <AlignBadge.Icon as={ Star } className="size-3" />{ avatarInfo.achievementScore }
+                                </AlignBadge.Root>
                                 { levelInfo && (
-                                    <Tooltip><TooltipTrigger asChild>
-                                        <div className="inline-flex items-center gap-1">
-                                            <Badge variant="secondary" className="text-[9px] h-[18px] px-1.5 gap-1 font-semibold bg-white/5 border-white/8 text-white/60">
-                                                { prestige > 0 && `P${ prestige } ` }Lv.{ levelInfo.displayLevel }
-                                            </Badge>
-                                            <div className="w-10 h-1 rounded-full bg-white/10 overflow-hidden">
-                                                <div className="h-full rounded-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all" style={ { width: `${ levelInfo.progress * 100 }%` } } />
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <div className="flex flex-1 items-center gap-2">
+                                                <AlignProgressBar.Root value={ Math.round(levelInfo.progress * 100) } color="green" className="h-1.5" />
+                                                <span className="w-8 text-right text-paragraph-xs text-text-soft-400">{ Math.round(levelInfo.progress * 100) }%</span>
                                             </div>
-                                        </div>
-                                    </TooltipTrigger><TooltipContent className="text-[10px]">{ Math.round(levelInfo.progress * 100) }% zum naechsten Level</TooltipContent></Tooltip>
-                                ) }
-                                { isOwnUser && (
-                                    <Badge variant="outline" className="text-[9px] h-[18px] px-1.5 font-medium text-white/30 border-white/10">Du</Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent size="xsmall">{ Math.round(levelInfo.progress * 100) }% zum naechsten Level</TooltipContent>
+                                    </Tooltip>
                                 ) }
                             </div>
 
-                            <div className="space-y-1.5 pt-0.5">
-                                <div className="flex items-center gap-2 text-[10px]">
-                                    <Calendar className="w-3 h-3 text-white/20 shrink-0" />
-                                    <span className="text-white/35">Erfolgspunkte</span>
-                                    <span className="text-white/70 font-semibold ml-auto tabular-nums">{ avatarInfo.achievementScore }</span>
+                            <AlignDivider.Root className="my-3" />
+
+                            <div className="space-y-2">
+                                <div className="nitro-infostand-control-layer flex items-center gap-2 rounded-xl bg-bg-white-0 px-2.5 py-2 text-paragraph-xs shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                                    <Calendar className="size-3.5 shrink-0 text-text-soft-400" />
+                                    <span className="text-text-sub-600">Erfolgspunkte</span>
+                                    <span className="ml-auto tabular-nums text-label-xs text-text-strong-950">{ avatarInfo.achievementScore }</span>
                                 </div>
                                 { avatarInfo.groupId > 0 && (
-                                    <div className="flex items-center gap-2 text-[10px]">
-                                        <Users className="w-3 h-3 text-white/20 shrink-0" />
-                                        <span className="text-white/35">Gruppe</span>
-                                        <span className="text-white/60 font-medium ml-auto truncate max-w-[120px] cursor-pointer hover:text-white/80" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>{ avatarInfo.groupName }</span>
+                                    <div className="nitro-infostand-control-layer flex items-center gap-2 rounded-xl bg-bg-white-0 px-2.5 py-2 text-paragraph-xs shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                                        <Users className="size-3.5 shrink-0 text-text-soft-400" />
+                                        <span className="text-text-sub-600">Gruppe</span>
+                                        <button className="ml-auto max-w-[140px] truncate text-label-xs text-text-strong-950 hover:underline" onClick={ () => GetGroupInformation(avatarInfo.groupId) }>{ avatarInfo.groupName }</button>
                                     </div>
                                 ) }
                                 { (avatarInfo.carryItem > 0) && (
-                                    <div className="flex items-center gap-2 text-[10px]">
-                                        <Hand className="w-3 h-3 text-white/20 shrink-0" />
-                                        <span className="text-white/35">Hält</span>
-                                        <span className="text-white/60 font-medium ml-auto">{ LocalizeText('handitem' + avatarInfo.carryItem) }</span>
+                                    <div className="nitro-infostand-control-layer flex items-center gap-2 rounded-xl bg-bg-white-0 px-2.5 py-2 text-paragraph-xs shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                                        <Hand className="size-3.5 shrink-0 text-text-soft-400" />
+                                        <span className="text-text-sub-600">Hält</span>
+                                        <span className="ml-auto text-label-xs text-text-strong-950">{ LocalizeText('handitem' + avatarInfo.carryItem) }</span>
                                     </div>
                                 ) }
                             </div>
                         </div>
 
-                        {/* ── Beziehungen ── */}
-                        <div className="rounded-lg p-2.5 space-y-1.5" style={ { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' } }>
+                        <div className="nitro-infostand-card-layer rounded-2xl bg-bg-weak-50 p-2.5">
                             <SectionHeader>Beziehungen</SectionHeader>
-                            { [ RelationshipStatusEnum.HEART, RelationshipStatusEnum.SMILE, RelationshipStatusEnum.BOBBA ].map(type =>
-                            {
-                                const c = REL_CONFIG[type];
-                                if(!c) return null;
-                                const Icon = c.icon;
-                                const info = relationships?.relationshipStatusMap?.hasKey(type)
-                                    ? relationships.relationshipStatusMap.getValue(type)
-                                    : null;
-                                const hasData = info && info.friendCount > 0;
+                            <div className="space-y-1">
+                                { [ RelationshipStatusEnum.HEART, RelationshipStatusEnum.SMILE, RelationshipStatusEnum.BOBBA ].map(type =>
+                                {
+                                    const c = REL_CONFIG[type];
+                                    if(!c) return null;
+                                    const Icon = c.icon;
+                                    const info = relationships?.relationshipStatusMap?.hasKey(type)
+                                        ? relationships.relationshipStatusMap.getValue(type)
+                                        : null;
+                                    const hasData = info && info.friendCount > 0;
 
-                                return (
-                                    <div key={ type } className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/5 transition-colors" style={ { border: '1px solid rgba(255,255,255,0.04)' } }>
-                                        <div className={ `w-6 h-6 rounded-full ${ c.bg } flex items-center justify-center shrink-0` }>
-                                            <Icon className={ `w-3 h-3 ${ c.color }` } />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            { hasData ? (
-                                                <span className="text-[11px] font-medium text-white/70 cursor-pointer hover:underline truncate block" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
-                                                    { info.randomFriendName }
-                                                </span>
-                                            ) : (
-                                                <span className="text-[11px] text-white/15">—</span>
+                                    return (
+                                        <div key={ type } className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition-colors hover:bg-bg-white-0">
+                                            <div className={ `flex size-8 shrink-0 items-center justify-center rounded-full ${ c.bg }` }>
+                                                <Icon className={ `size-4 ${ c.color }` } />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="text-subheading-2xs uppercase tracking-normal text-text-soft-400">{ c.label }</div>
+                                                { hasData ? (
+                                                    <button className="block max-w-full truncate text-left text-label-xs text-text-strong-950 hover:underline" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
+                                                        { info.randomFriendName }
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-paragraph-xs text-text-soft-400">Nicht gesetzt</span>
+                                                ) }
+                                            </div>
+                                            { hasData && info.friendCount > 1 && <AlignBadge.Root color="gray" variant="lighter" size="small">+{ info.friendCount - 1 }</AlignBadge.Root> }
+                                            { hasData && info.randomFriendFigure && (
+                                                <button className="nitro-infostand-control-layer relative size-8 shrink-0 cursor-pointer overflow-hidden rounded-full bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
+                                                    <LayoutAvatarImageView figure={ info.randomFriendFigure } headOnly direction={ 2 } className="!absolute -left-1 -top-1" />
+                                                </button>
                                             ) }
                                         </div>
-                                        { hasData && info.friendCount > 1 && <span className="text-[9px] text-white/25">+{ info.friendCount - 1 }</span> }
-                                        { hasData && info.randomFriendFigure && (
-                                            <div className="relative w-7 h-7 rounded-full shrink-0 overflow-hidden ring-1 ring-white/10 cursor-pointer" onClick={ () => info.randomFriendId >= 1 && GetUserProfile(info.randomFriendId) }>
-                                                <LayoutAvatarImageView figure={ info.randomFriendFigure } headOnly direction={ 2 } className="!absolute -top-1" />
-                                            </div>
-                                        ) }
-                                    </div>
-                                );
-                            }) }
+                                    );
+                                }) }
+                            </div>
                         </div>
-
                     </div>
-                </ScrollArea>
-
-                {/* ── Discord Effect Overlay ── */}
-                { activeEffect && <ProfileEffectRenderer key={ activeEffect.id } effect={ activeEffect } /> }
-            </div>
+                </div>
+            </AlignSurface.Panel>
         </TooltipProvider>
     );
 };

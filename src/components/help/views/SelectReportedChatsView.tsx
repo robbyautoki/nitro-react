@@ -1,8 +1,10 @@
 import { RoomObjectType } from '@nitrots/nitro-renderer';
 import { FC, useMemo, useState } from 'react';
 import { MessageSquare, Check } from 'lucide-react';
-import { ChatEntryType, IChatEntry, LocalizeText, ReportState, ReportType } from '../../../api';
+import { ChatEntryType, IChatEntry, ReportState, ReportType } from '../../../api';
 import { useChatHistory, useHelp } from '../../../hooks';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import { cn } from '@/align-ui/utils/cn';
 
 export const SelectReportedChatsView: FC<{}> = () =>
 {
@@ -51,16 +53,15 @@ export const SelectReportedChatsView: FC<{}> = () =>
 
     return (
         <div className="space-y-4">
-            <div>
-                <p className="text-xs text-white/40 mb-3">Waehle die Nachrichten, die du melden moechtest</p>
+            <div className="rounded-xl bg-bg-weak-50 px-4 py-3 ring-1 ring-inset ring-stroke-soft-200">
+                <p className="text-label-sm text-text-strong-950">Nachrichten auswaehlen</p>
+                <p className="mt-1 text-paragraph-xs text-text-sub-600">Waehle die Nachrichten, die du melden moechtest.</p>
             </div>
-
             { (!userChats || !userChats.length) && (
-                <div className="px-4 py-6 rounded-xl border border-white/[0.06] bg-white/[0.03] text-center">
-                    <p className="text-sm text-white/40">Keine Nachrichten gefunden.</p>
+                <div className="rounded-xl border border-dashed border-stroke-soft-200 bg-bg-weak-50 px-4 py-6 text-center">
+                    <p className="text-paragraph-sm text-text-sub-600">Keine Nachrichten gefunden.</p>
                 </div>
             ) }
-
             { userChats.length > 0 && (
                 <div className="space-y-1.5 max-h-[280px] overflow-y-auto pr-1">
                     { userChats.map(chat =>
@@ -68,40 +69,41 @@ export const SelectReportedChatsView: FC<{}> = () =>
                         const isSelected = selectedChats.indexOf(chat) >= 0;
 
                         return (
-                            <button
+                            <AlignButton.Root
                                 key={ chat.id }
-                                className={ `w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all text-left ${
-                                    isSelected
-                                        ? 'border-blue-500/30 bg-blue-500/10'
-                                        : 'border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/[0.1]'
-                                }` }
+                                type="button"
+                                variant={ isSelected ? 'primary' : 'neutral' }
+                                mode={ isSelected ? 'lighter' : 'stroke' }
+                                size="medium"
+                                className="h-auto w-full justify-start whitespace-normal px-3 py-2.5 text-left"
                                 onClick={ () => selectChat(chat) }
                             >
-                                <div className={ `shrink-0 size-5 rounded-md border flex items-center justify-center transition-all ${
-                                    isSelected
-                                        ? 'border-blue-500/50 bg-blue-500/20 text-blue-400'
-                                        : 'border-white/[0.1] bg-white/[0.03]'
-                                }` }>
+                                <span className={ cn(
+                                    'flex size-6 shrink-0 items-center justify-center rounded-md ring-1 ring-inset',
+                                    isSelected ? 'bg-primary-base text-static-white ring-primary-base' : 'bg-bg-white-0 text-text-soft-400 ring-stroke-soft-200'
+                                ) }>
                                     { isSelected && <Check className="size-3" /> }
-                                </div>
+                                </span>
                                 <div className="flex items-center gap-2 min-w-0">
-                                    <MessageSquare className="size-3.5 text-white/30 shrink-0" />
-                                    <span className="text-sm text-white/70 truncate">{ chat.message }</span>
+                                    <MessageSquare className="size-3.5 shrink-0 text-text-soft-400" />
+                                    <span className="truncate text-paragraph-sm text-text-sub-600">{ chat.message }</span>
                                 </div>
-                            </button>
+                            </AlignButton.Root>
                         );
                     }) }
                 </div>
             ) }
-
             <div className="flex justify-end pt-2">
-                <button
-                    className="px-4 py-2 rounded-xl text-sm font-medium transition-all bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:bg-blue-500/30 disabled:opacity-30 disabled:cursor-not-allowed"
+                <AlignButton.Root
+                    type="button"
+                    variant="primary"
+                    mode="filled"
+                    size="small"
                     disabled={ selectedChats.length <= 0 }
                     onClick={ submitChats }
                 >
                     Weiter
-                </button>
+                </AlignButton.Root>
             </div>
         </div>
     );

@@ -255,6 +255,34 @@
         bottom: 0;
         z-index: 5;
     }
+
+    .wardrobe-delete-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        z-index: 6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        border: none;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        opacity: 0;
+        transition: opacity 0.15s, background 0.15s;
+        cursor: pointer;
+
+        &:hover {
+            background: rgba(220, 38, 38, 0.9);
+        }
+    }
+
+    &:hover .wardrobe-delete-btn {
+        opacity: 1;
+    }
 }
 
 .nitro-avatar-editor {

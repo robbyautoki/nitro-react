@@ -1,11 +1,11 @@
 import { RoomDataParser } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent } from 'react';
-import { Crown, MessageCircle, Star, Users } from 'lucide-react';
+import { Crown, MessageCircle, Users } from 'lucide-react';
 import { CreateRoomSession, DoorStateType, GetSessionDataManager, TryVisitRoom } from '../../../../api';
 import { LayoutBadgeImageView, LayoutRoomThumbnailView } from '../../../../common';
 import { useNavigator } from '../../../../hooks';
-import { Badge } from '@/components/ui/reui-badge';
-import { cn } from '@/lib/utils';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import { cn } from '@/align-ui/utils/cn';
 
 export interface NavigatorSearchResultItemViewProps
 {
@@ -16,15 +16,15 @@ export interface NavigatorSearchResultItemViewProps
 function ActivityBar({ roomId, userCount }: { roomId: number; userCount: number })
 {
     const activity = userCount <= 0 ? 0 : Math.min(100, userCount * 8 + Math.floor(roomId * 7.3) % 30);
-    let barColor = 'bg-emerald-500';
-    if(activity >= 80) barColor = 'bg-red-500';
-    else if(activity >= 45) barColor = 'bg-amber-500';
-    else if(userCount <= 0) barColor = 'bg-muted-foreground/20';
+    let barColor = 'bg-success-base';
+    if(activity >= 80) barColor = 'bg-error-base';
+    else if(activity >= 45) barColor = 'bg-warning-base';
+    else if(userCount <= 0) barColor = 'bg-bg-soft-200';
 
     return (
         <div className="flex items-center gap-1.5 w-full">
-            <MessageCircle className="w-3 h-3 text-muted-foreground/30 shrink-0" />
-            <div className="flex-1 h-1.5 rounded-full bg-muted/50 overflow-hidden">
+            <MessageCircle className="size-3 shrink-0 text-text-soft-400" />
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-bg-weak-50">
                 <div className={ `h-full rounded-full transition-all ${ barColor }` } style={ { width: `${ Math.max(activity, 2) }%` } } />
             </div>
         </div>
@@ -37,13 +37,13 @@ function UserCountBadge({ userCount, maxUsers }: { userCount: number; maxUsers: 
     const label = `${ userCount }/${ maxUsers }`;
 
     if(userCount <= 0)
-        return <Badge variant="outline" size="xs" className="gap-1 tabular-nums"><Users className="w-3 h-3" />{ label }</Badge>;
+        return <AlignBadge.Root color="gray" variant="stroke" size="small" className="gap-1 tabular-nums"><Users className="size-3" />{ label }</AlignBadge.Root>;
     if(pct >= 90)
-        return <Badge variant="destructive-light" size="xs" className="gap-1 tabular-nums"><span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /><Users className="w-3 h-3" />{ label }</Badge>;
+        return <AlignBadge.Root color="red" variant="light" size="small" className="gap-1 tabular-nums"><span className="size-1.5 animate-pulse rounded-full bg-current" /><Users className="size-3" />{ label }</AlignBadge.Root>;
     if(pct >= 50)
-        return <Badge variant="warning-light" size="xs" className="gap-1 tabular-nums"><Users className="w-3 h-3" />{ label }</Badge>;
+        return <AlignBadge.Root color="orange" variant="light" size="small" className="gap-1 tabular-nums"><Users className="size-3" />{ label }</AlignBadge.Root>;
 
-    return <Badge variant="success-light" size="xs" className="gap-1 tabular-nums"><Users className="w-3 h-3" />{ label }</Badge>;
+    return <AlignBadge.Root color="green" variant="light" size="small" className="gap-1 tabular-nums"><Users className="size-3" />{ label }</AlignBadge.Root>;
 }
 
 function getDoorIconSrc(doorMode: number): string | null
@@ -102,12 +102,12 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
     return (
         <div
             className={ cn(
-                'flex gap-3 p-2.5 rounded-lg cursor-pointer transition-all hover:bg-accent/50',
+                'flex cursor-pointer gap-3 rounded-lg p-2.5 transition-all hover:bg-bg-weak-50',
                 isEmpty && 'opacity-40 hover:opacity-60'
             ) }
             onClick={ visitRoom }
         >
-            {/* Thumbnail — 80x80 like v2 prototype */}
+            { /* Thumbnail — 80x80 like v2 prototype */ }
             <LayoutRoomThumbnailView
                 roomId={ roomData.roomId }
                 customUrl={ roomData.officialRoomPicRef }
@@ -119,41 +119,40 @@ export const NavigatorSearchResultItemView: FC<NavigatorSearchResultItemViewProp
                     </div>
                 ) }
                 { doorIconSrc && (
-                    <div className="absolute bottom-0 right-0 p-0.5 bg-black/50 backdrop-blur-sm rounded-tl-sm">
+                    <div className="absolute bottom-0 right-0 rounded-tl-sm bg-bg-strong-950/70 p-0.5 backdrop-blur-sm">
                         <img src={ doorIconSrc } alt="" className="w-[13px] h-[16px]" style={ { imageRendering: 'pixelated' } } />
                     </div>
                 ) }
             </LayoutRoomThumbnailView>
-
-            {/* Info — v2 prototype RoomCard layout */}
+            { /* Info — v2 prototype RoomCard layout */ }
             <div className="flex-1 min-w-0 flex flex-col gap-1 py-0.5">
-                {/* Name + Count */}
+                { /* Name + Count */ }
                 <div className="flex items-start justify-between gap-2">
-                    <span className="text-[13px] font-semibold truncate leading-tight">{ roomData.roomName }</span>
+                    <span className="truncate text-label-sm leading-tight text-text-strong-950">{ roomData.roomName }</span>
                     <UserCountBadge userCount={ roomData.userCount } maxUsers={ roomData.maxUserCount } />
                 </div>
-
-                {/* Activity bar */}
+                { /* Activity bar */ }
                 <ActivityBar roomId={ roomData.roomId } userCount={ roomData.userCount } />
-
-                {/* Owner row */}
+                { /* Owner row */ }
                 <div className="flex items-center gap-1.5">
                     <img
                         src={ `https://www.habbo.de/habbo-imaging/avatarimage?figure=${ roomData.ownerName ? encodeURIComponent(roomData.ownerName) : '' }&headonly=1&size=s&direction=2&user=${ roomData.ownerName }` }
                         alt=""
                         className="w-6 h-6 shrink-0"
                         style={ { imageRendering: 'pixelated' } }
-                        onError={ (e) => { (e.target as HTMLImageElement).style.display = 'none'; } }
+                        onError={ (e) =>
+                        {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                        } }
                     />
-                    <span className="text-[11px] text-muted-foreground/60 truncate">{ roomData.ownerName }</span>
-                    { isMine && <Crown className="w-3 h-3 text-amber-500 shrink-0" /> }
+                    <span className="truncate text-subheading-2xs text-text-soft-400">{ roomData.ownerName }</span>
+                    { isMine && <Crown className="size-3 shrink-0 text-warning-base" /> }
                 </div>
-
-                {/* Tags */}
+                { /* Tags */ }
                 { roomData.tags && roomData.tags.length > 0 && (
                     <div className="flex items-center gap-1 flex-wrap">
                         { roomData.tags.map((tag: string) => (
-                            <span key={ tag } className="text-[9px] px-1.5 py-px rounded-full bg-muted/50 text-muted-foreground/50 font-medium">
+                            <span key={ tag } className="rounded-full bg-bg-weak-50 px-1.5 py-px text-[9px] font-medium text-text-soft-400">
                                 { tag }
                             </span>
                         )) }

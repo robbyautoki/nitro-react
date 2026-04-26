@@ -3,7 +3,7 @@ import { FaPlus } from 'react-icons/fa';
 import { IPurchasableOffer } from '../../../../../api';
 import { LayoutCurrencyIcon } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
-import { Badge } from '../../../../ui/badge';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
 
 interface CatalogPriceDisplayWidgetViewProps
 {
@@ -22,17 +22,17 @@ export const CatalogPriceDisplayWidgetView: FC<CatalogPriceDisplayWidgetViewProp
     return (
         <>
             { (offer.priceInCredits > 0) &&
-                <Badge className="gap-1 bg-amber-100 text-amber-600 border-amber-300">
+                <AlignBadge.Root color="orange" variant="lighter" size="small" square className="gap-1">
                     <span className="font-bold">{ (offer.priceInCredits * quantity) }</span>
                     <LayoutCurrencyIcon type={ -1 } />
-                </Badge> }
+                </AlignBadge.Root> }
             { separator && (offer.priceInCredits > 0) && (offer.priceInActivityPoints > 0) &&
-                <FaPlus size="xs" className="text-black/30" /> }
+                <FaPlus size="xs" className="text-text-soft-400" /> }
             { (offer.priceInActivityPoints > 0) &&
-                <Badge className="gap-1 bg-teal-900/30 text-teal-300 border-teal-700/40">
+                <AlignBadge.Root color="blue" variant="lighter" size="small" square className="gap-1">
                     <span className="font-bold">{ (offer.priceInActivityPoints * quantity) }</span>
                     <LayoutCurrencyIcon type={ offer.activityPointType } />
-                </Badge> }
+                </AlignBadge.Root> }
         </>
     );
 }

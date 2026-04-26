@@ -1,7 +1,12 @@
 import { FC } from 'react';
+import { Check, HeartHandshake, LockKeyhole, X } from 'lucide-react';
 import { LocalizeText } from '../../../../api';
-import { Button, Column, DraggableWindow, Flex, LayoutAvatarImageView, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
+import { LayoutAvatarImageView } from '../../../../common';
 import { useFurnitureFriendFurniWidget } from '../../../../hooks';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import { FurnitureWidgetActions, FurnitureWidgetPreview, FurnitureWidgetSection, FurnitureWidgetText, FurnitureWidgetWindow } from './FurnitureWidgetLayout';
 
 export const FurnitureFriendFurniView: FC<{}> = props =>
 {
@@ -12,55 +17,67 @@ export const FurnitureFriendFurniView: FC<{}> = props =>
     if(stage > 0)
     {
         return (
-            <NitroCardView className="nitro-engraving-lock" theme="primary-slim">
-                <NitroCardHeaderView headerText={ LocalizeText('friend.furniture.confirm.lock.caption') } onCloseClick={ onClose } />
-                <NitroCardContentView>
-                    <h5 className= "text-white/90 text-center font-bold mt-2 mb-2">
-                        { LocalizeText('friend.furniture.confirm.lock.subtitle') }
-                    </h5>
-                    <div className="flex justify-center mb-2">
-                        <div className={ `engraving-lock-stage-${ stage }` }></div>
-                    </div>
+            <FurnitureWidgetWindow
+                uniqueKey="friend-furni-confirm"
+                title={ LocalizeText('friend.furniture.confirm.lock.caption') }
+                subtitle={ LocalizeText('friend.furniture.confirm.lock.subtitle') }
+                icon={ LockKeyhole }
+                onClose={ onClose }
+                widthClassName="w-[360px]"
+                footer={
+                    <FurnitureWidgetActions className="grid grid-cols-2">
+                        <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ event => respond(false) }>
+                            <AlignButton.Icon as={ X } className="size-4" />
+                            { LocalizeText('friend.furniture.confirm.lock.button.cancel') }
+                        </AlignButton.Root>
+                        <FancyButton.Root variant="primary" size="small" onClick={ event => respond(true) }>
+                            <FancyButton.Icon as={ Check } />
+                            { LocalizeText('friend.furniture.confirm.lock.button.confirm') }
+                        </FancyButton.Root>
+                    </FurnitureWidgetActions>
+                }
+            >
+                <FurnitureWidgetSection className="flex flex-col items-center gap-3 text-center">
+                    <FurnitureWidgetPreview className="size-20">
+                        <div className={ `engraving-lock-stage-${ stage }` } />
+                    </FurnitureWidgetPreview>
+                    <div className="text-label-sm text-text-strong-950">{ LocalizeText('friend.furniture.confirm.lock.subtitle') }</div>
                     { (stage === 2) &&
-                        <div className="text-small text-white/90 text-center mb-2">{ LocalizeText('friend.furniture.confirm.lock.other.locked') }</div> }
-                    <Flex gap={ 1 }>
-                        <Button fullWidth onClick={ event => respond(false) }>{ LocalizeText('friend.furniture.confirm.lock.button.cancel') }</Button>
-                        <Button fullWidth variant="success" onClick={ event => respond(true) }>{ LocalizeText('friend.furniture.confirm.lock.button.confirm') }</Button>
-                    </Flex>
-                </NitroCardContentView>
-            </NitroCardView>
+                        <FurnitureWidgetText>{ LocalizeText('friend.furniture.confirm.lock.other.locked') }</FurnitureWidgetText> }
+                </FurnitureWidgetSection>
+            </FurnitureWidgetWindow>
         );
     }
 
     if(usernames.length > 0)
     {
         return (
-            <DraggableWindow handleSelector=".nitro-engraving-lock-view">
-                <div className={ `nitro-engraving-lock-view engraving-lock-${ type }` }>
-                    <div className="engraving-lock-close" onClick={ onClose } />
-                    <Flex justifyContent="center">
-                        <div className="engraving-lock-avatar">
+            <FurnitureWidgetWindow
+                uniqueKey="friend-furni-view"
+                title={ (type === 3) ? LocalizeText('wildwest.engraving.caption') : LocalizeText('lovelock.engraving.caption') }
+                subtitle={ date }
+                icon={ HeartHandshake }
+                onClose={ onClose }
+                widthClassName="w-[400px]"
+            >
+                <FurnitureWidgetSection className="space-y-4">
+                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                        <FurnitureWidgetPreview className="h-32">
                             <LayoutAvatarImageView figure={ figures[0] } direction={ 2 } />
-                        </div>
-                        <div className="engraving-lock-avatar">
+                        </FurnitureWidgetPreview>
+                        <HeartHandshake className="size-5 text-primary-base" />
+                        <FurnitureWidgetPreview className="h-32">
                             <LayoutAvatarImageView figure={ figures[1] } direction={ 4 } />
-                        </div>
-                    </Flex>
-                    <Column justifyContent="between" className="mt-1">
-                        <Column alignItems="center" justifyContent="center" gap={ 1 }>
-                            <div>
-                                { (type === 0) && LocalizeText('lovelock.engraving.caption') }
-                                { (type === 3) && LocalizeText('wildwest.engraving.caption') }
-                            </div>
-                            <div>{ date }</div>
-                        </Column>
-                        <Flex justifyContent="center" gap={ 4 }>
-                            <div>{ usernames[0] }</div>
-                            <div>{ usernames[1] }</div>
-                        </Flex>
-                    </Column>
-                </div>
-            </DraggableWindow>
+                        </FurnitureWidgetPreview>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                        <AlignBadge.Root color="pink" variant="light" size="medium">{ usernames[0] }</AlignBadge.Root>
+                        <AlignBadge.Root color="pink" variant="light" size="medium">{ usernames[1] }</AlignBadge.Root>
+                    </div>
+                </FurnitureWidgetSection>
+            </FurnitureWidgetWindow>
         );
     }
+
+    return null;
 }

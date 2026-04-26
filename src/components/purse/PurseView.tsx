@@ -1,31 +1,37 @@
-import { FriendlyTime, HabboClubLevelEnum, RateFlatMessageComposer, GuideSessionCreateMessageComposer, GuideSessionAttachedMessageEvent, GuideSessionStartedMessageEvent, GuideSessionMessageMessageComposer, GuideSessionMessageMessageEvent, GuideSessionRequesterCancelsMessageComposer, GuideSessionResolvedMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionPartnerIsTypingMessageEvent, PerkAllowancesMessageEvent, PerkEnum, GuideSessionOnDutyUpdateMessageComposer, GuideOnDutyStatusMessageEvent, GuideSessionGuideDecidesMessageComposer, GuideSessionDetachedMessageEvent } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, LocalizeFormattedNumber, LocalizeShortNumber, LocalizeText, SendMessageComposer, getAuthHeaders } from '../../api';
-import { LayoutCurrencyIcon } from '../../common';
+import { FriendlyTime, RateFlatMessageComposer, GuideSessionAttachedMessageEvent, GuideSessionStartedMessageEvent, GuideSessionMessageMessageComposer, GuideSessionMessageMessageEvent, GuideSessionRequesterCancelsMessageComposer, GuideSessionResolvedMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionPartnerIsTypingMessageEvent, PerkAllowancesMessageEvent, PerkEnum, GuideSessionOnDutyUpdateMessageComposer, GuideOnDutyStatusMessageEvent, GuideSessionGuideDecidesMessageComposer, GuideSessionDetachedMessageEvent } from '@nitrots/nitro-renderer';
+import { FC, Fragment, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, LocalizeFormattedNumber, SendMessageComposer, getAuthHeaders } from '../../api';
 import { useAchievements, useMessageEvent, useNavigator, usePurse, useRoom } from '../../hooks';
 import { RadioPanelView } from '../radio/RadioPanelView';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   HelpCircle, ShieldAlert, MessageCircle, Scale, Settings,
   User, MessageSquare, Check, ChevronLeft, ChevronRight, Send,
   Loader2, CheckCircle2, Clock, AlertTriangle, Sparkles, Gift,
-  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp,
+  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp, SlidersHorizontal, Trophy, Wrench,
 } from 'lucide-react';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignPopover from '@/align-ui/components/ui/popover';
+import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
+import { ArrestToastView } from '../welcome/ArrestToastView';
+import { TopbarBannerStackView } from '../notifications/TopbarBannerStackView';
+import { TopbarBannerStack } from '../../hooks';
 
 function TopbarIcon({ name, w, h }: { name: string; w: number; h: number }) {
   return <img src={`/toolbar-icons/${name}`} alt={name} style={{ width: w, height: h, imageRendering: 'pixelated', objectFit: 'contain' }} draggable={false} />;
 }
 
 function CurrencyIcon({ type }: { type: string }) {
-  const assetsUrl = GetConfiguration<string>('currency.asset.icon.url', '').replace('%type%', type);
-  return <img src={assetsUrl} alt={type} className="w-4 h-4" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
+  const configuredUrl = GetConfiguration<string>('currency.asset.icon.url', '');
+  const assetsUrl = configuredUrl ? configuredUrl.replace('%type%', type) : `/wallet/${type}.png`;
+  return <img src={assetsUrl} alt={type} className="size-4 shrink-0" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
 }
 
 function CatalogIcon({ iconId }: { iconId: number }) {
@@ -36,8 +42,6 @@ function CatalogIcon({ iconId }: { iconId: number }) {
 const TOOL_ICONS: { iconId: number; label: string; link: string }[] = [
   { iconId: 69, label: "Marktplatz", link: "marketplace/toggle" },
   { iconId: 71, label: "Preisliste", link: "pricelist/toggle" },
-  { iconId: 37, label: "Werkstatt", link: "workshop/toggle" },
-  { iconId: 221, label: "Sets", link: "sets/toggle" },
 ];
 
 const HELP_INDEX = [
@@ -244,13 +248,22 @@ function HelpPopover() {
   };
 
   return (
-    <Popover open={popoverOpen} onOpenChange={handlePopoverChange}>
-      <PopoverTrigger asChild>
-        <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-          <i className="icon icon-help" />
-        </div>
-      </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[320px] p-0"
+    <AlignPopover.Root open={popoverOpen} onOpenChange={handlePopoverChange}>
+      <AlignTooltip.Root>
+        <AlignTooltip.Trigger asChild>
+          <AlignPopover.Trigger asChild>
+            <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" aria-label="Hilfe" className="size-8 rounded-10 px-0">
+              <AlignButton.Icon as={HelpCircle} className="size-4" />
+            </AlignButton.Root>
+          </AlignPopover.Trigger>
+        </AlignTooltip.Trigger>
+        <AlignTooltip.Content side="bottom">Hilfe</AlignTooltip.Content>
+      </AlignTooltip.Root>
+      <AlignPopover.Content
+        align="end"
+        sideOffset={10}
+        showArrow={false}
+        className="w-[320px] overflow-hidden p-0"
         onPointerDownOutside={(e) => { if (stepRef.current >= 10) e.preventDefault(); }}
         onInteractOutside={(e) => { if (stepRef.current >= 10) e.preventDefault(); }}
       >
@@ -524,8 +537,8 @@ function HelpPopover() {
             </div>
           )}
         </div>
-      </PopoverContent>
-    </Popover>
+      </AlignPopover.Content>
+    </AlignPopover.Root>
   );
 }
 
@@ -540,16 +553,16 @@ function LevelPopover() {
   const { achievementScore = 0 } = useAchievements();
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <AlignPopover.Root>
+      <AlignPopover.Trigger asChild>
         <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
           <span className="text-xs font-semibold text-foreground">Lvl {Math.floor(achievementScore / 100) || 1}</span>
           <div className="w-[60px] h-[3px] bg-muted/50 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full" style={{ width: `${(achievementScore % 100) || 67}%` }} />
           </div>
         </div>
-      </PopoverTrigger>
-      <PopoverContent align="center" sideOffset={8} className="w-[260px] p-0">
+      </AlignPopover.Trigger>
+      <AlignPopover.Content align="center" sideOffset={10} showArrow={false} className="w-[260px] overflow-hidden p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
             <Sparkles className="size-4 text-amber-400" />
@@ -587,8 +600,8 @@ function LevelPopover() {
             </div>
           </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      </AlignPopover.Content>
+    </AlignPopover.Root>
   );
 }
 
@@ -611,13 +624,18 @@ function SettingsPopover() {
   const [volumes, setVolumes] = useState(VOLUME_SLIDERS.map(v => v.defaultVal));
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <div className="p-2 rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
-          <i className="icon icon-cog" />
-        </div>
-      </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} className="w-[340px] p-0">
+    <AlignPopover.Root>
+      <AlignTooltip.Root>
+        <AlignTooltip.Trigger asChild>
+          <AlignPopover.Trigger asChild>
+            <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" aria-label="Einstellungen" className="size-8 rounded-10 px-0">
+              <AlignButton.Icon as={Settings} className="size-4" />
+            </AlignButton.Root>
+          </AlignPopover.Trigger>
+        </AlignTooltip.Trigger>
+        <AlignTooltip.Content side="bottom">Einstellungen</AlignTooltip.Content>
+      </AlignTooltip.Root>
+      <AlignPopover.Content align="end" sideOffset={10} showArrow={false} className="w-[340px] overflow-hidden p-0">
         <div className="px-4 pt-3 pb-2 border-b border-border/40">
           <div className="flex items-center gap-2">
             <Settings className="size-4 text-muted-foreground" />
@@ -655,23 +673,273 @@ function SettingsPopover() {
             </div>
           </div>
         </div>
-      </PopoverContent>
-    </Popover>
+      </AlignPopover.Content>
+    </AlignPopover.Root>
   );
 }
 
-const CURRENCY_COLORS: Record<number, { bg: string; hover: string }> = {
-  [-1]: { bg: "bg-amber-500/10", hover: "hover:bg-amber-500/20" },
-  5: { bg: "bg-sky-500/10", hover: "hover:bg-sky-500/20" },
-  0: { bg: "bg-emerald-500/10", hover: "hover:bg-emerald-500/20" },
+function TopbarAction({ label, children, onClick, className }: { label: string; children: ReactNode; onClick?: () => void; className?: string }) {
+  return (
+    <AlignTooltip.Root>
+      <AlignTooltip.Trigger asChild>
+        <AlignButton.Root
+          type="button"
+          variant="neutral"
+          mode="ghost"
+          size="xsmall"
+          className={cn('nitro-topbar-action relative size-8 rounded-10 px-0', className)}
+          onClick={onClick}
+        >
+          {children}
+        </AlignButton.Root>
+      </AlignTooltip.Trigger>
+      <AlignTooltip.Content side="bottom">{label}</AlignTooltip.Content>
+    </AlignTooltip.Root>
+  );
+}
+
+function RoomToolsPopover({
+  isZoomedIn,
+  canRate,
+  canManageRoom,
+  onRoomInfo,
+  onRoomSettings,
+  onZoom,
+  onChatHistory,
+  onRate,
+}: {
+  isZoomedIn: boolean;
+  canRate: boolean;
+  canManageRoom: boolean;
+  onRoomInfo: () => void;
+  onRoomSettings: () => void;
+  onZoom: () => void;
+  onChatHistory: () => void;
+  onRate: () => void;
+}) {
+  const actions = [
+    {
+      label: 'Raum-Info',
+      description: 'Details, Besitzer und Raum-Link',
+      icon: Info,
+      onClick: onRoomInfo,
+      visible: true,
+    },
+    {
+      label: 'Raumeinstellungen',
+      description: 'Zugang, Rechte, Chat und Moderation',
+      icon: Settings,
+      onClick: onRoomSettings,
+      visible: canManageRoom,
+    },
+    {
+      label: 'Chatverlauf',
+      description: 'Letzte Nachrichten im Raum anzeigen',
+      icon: MessageSquareDashed,
+      onClick: onChatHistory,
+      visible: true,
+    },
+    {
+      label: isZoomedIn ? 'Herauszoomen' : 'Hineinzoomen',
+      description: 'Raumansicht umschalten',
+      icon: isZoomedIn ? ZoomOut : ZoomIn,
+      onClick: onZoom,
+      visible: true,
+    },
+    {
+      label: 'Raum bewerten',
+      description: 'Ein positives Rating senden',
+      icon: ThumbsUp,
+      onClick: onRate,
+      visible: canRate,
+    },
+  ];
+
+  return (
+    <AlignPopover.Root>
+      <AlignTooltip.Root>
+        <AlignTooltip.Trigger asChild>
+          <AlignPopover.Trigger asChild>
+            <AlignButton.Root
+              type="button"
+              variant="neutral"
+              mode="ghost"
+              size="xsmall"
+              aria-label="Raumtools"
+              className="nitro-topbar-action relative size-8 rounded-10 px-0"
+            >
+              <AlignButton.Icon as={SlidersHorizontal} className="size-4" />
+            </AlignButton.Root>
+          </AlignPopover.Trigger>
+        </AlignTooltip.Trigger>
+        <AlignTooltip.Content side="bottom">Raumtools</AlignTooltip.Content>
+      </AlignTooltip.Root>
+      <AlignPopover.Content
+        unstyled
+        showArrow={false}
+        align="start"
+        sideOffset={10}
+        className="nitro-topbar-popover z-[10000] w-[286px] p-2"
+      >
+        <div className="px-2.5 pb-2 pt-1">
+          <div className="nitro-topbar-popover-title text-label-sm">Raumtools</div>
+          <div className="nitro-topbar-popover-description mt-0.5 text-paragraph-xs">
+            Schnellzugriff für Aktionen im aktuellen Raum.
+          </div>
+        </div>
+        <div className="flex flex-col gap-1">
+          {actions.filter(action => action.visible).map(action => (
+            <AlignPopover.Close asChild key={action.label}>
+              <AlignButton.Root
+                type="button"
+                variant="neutral"
+                mode="ghost"
+                size="small"
+                className="nitro-topbar-popover-action h-auto w-full justify-start gap-3 px-2.5 py-2 text-left"
+                onClick={action.onClick}
+              >
+                <span className="nitro-topbar-popover-action-icon flex size-8 shrink-0 items-center justify-center rounded-10">
+                  <AlignButton.Icon as={action.icon} className="size-4" />
+                </span>
+                <span className="min-w-0">
+                  <span className="nitro-topbar-popover-action-title block truncate text-label-xs">{action.label}</span>
+                  <span className="nitro-topbar-popover-action-description block truncate text-paragraph-xs">{action.description}</span>
+                </span>
+              </AlignButton.Root>
+            </AlignPopover.Close>
+          ))}
+        </div>
+      </AlignPopover.Content>
+    </AlignPopover.Root>
+  );
+}
+
+function RoomEntryInfoPanel({
+  roomName,
+  ownerName,
+  rating,
+  canRate,
+  liked,
+  onLike,
+  isClosing,
+}: {
+  roomName: string;
+  ownerName: string;
+  rating: number;
+  canRate: boolean;
+  liked: boolean;
+  onLike: () => void;
+  isClosing: boolean;
+}) {
+  const displayRating = rating + ((liked && canRate) ? 1 : 0);
+
+  return (
+    <div className="flex w-full justify-center">
+      <div className={cn('nitro-room-entry-card pointer-events-auto flex items-center gap-3 px-3 py-2', isClosing ? 'is-closing' : 'is-visible')}>
+        <div className="nitro-room-entry-icon flex size-9 shrink-0 items-center justify-center">
+          <TopbarIcon name="house.png" w={20} h={20} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-label-sm text-text-strong-950">{roomName || 'Raum'}</div>
+          <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-paragraph-xs">
+            <User className="size-3.5 shrink-0" />
+            <span className="shrink-0">Besitzer</span>
+            <span className="truncate font-medium">{ownerName || 'Unbekannt'}</span>
+            <span className="nitro-room-entry-dot shrink-0" />
+            <ThumbsUp className="size-3.5 shrink-0" />
+            <span className="shrink-0 tabular-nums">{displayRating}</span>
+          </div>
+        </div>
+        {(canRate || liked) && (
+          <AlignButton.Root
+            type="button"
+            variant={liked ? 'neutral' : 'primary'}
+            mode={liked ? 'ghost' : 'filled'}
+            size="xsmall"
+            disabled={liked}
+            className="nitro-room-entry-like shrink-0"
+            onClick={onLike}
+          >
+            <AlignButton.Icon as={ThumbsUp} className="size-4" />
+            {liked ? 'Danke' : 'Liken'}
+          </AlignButton.Root>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const CURRENCY_LABELS: Record<number, string> = {
+  [-1]: 'Credits',
+  0: 'Duckets',
+  5: 'Diamanten',
 };
 
+function formatCurrencyCompact(amount: number): string {
+  if(!amount || isNaN(amount)) return '0';
+  const abs = Math.abs(amount);
+  const sign = amount < 0 ? '-' : '';
+  if(abs < 1000) return sign + String(abs);
+  if(abs < 10_000) return sign + (abs / 1000).toFixed(1).replace('.', ',').replace(/,0$/, '') + 'K';
+  if(abs < 1_000_000) return sign + Math.round(abs / 1000) + 'K';
+  if(abs < 10_000_000) return sign + (abs / 1_000_000).toFixed(1).replace('.', ',').replace(/,0$/, '') + 'M';
+  if(abs < 1_000_000_000) return sign + Math.round(abs / 1_000_000) + 'M';
+  return sign + (abs / 1_000_000_000).toFixed(1).replace('.', ',').replace(/,0$/, '') + 'B';
+}
+
+function CurrencyPill({ type, amount, exactDisplay, label }: { type: number; amount: number; exactDisplay: string; label: string }) {
+  const compact = formatCurrencyCompact(amount);
+
+  return (
+    <AlignTooltip.Root>
+      <AlignTooltip.Trigger asChild>
+        <button
+          type="button"
+          aria-label={`${label}: ${exactDisplay}`}
+          className="nitro-topbar-currency-pill flex h-7 min-w-0 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-label-xs font-medium tabular-nums transition-colors duration-150 ease-out"
+        >
+          <CurrencyIcon type={String(type)} />
+          <span>{compact}</span>
+        </button>
+      </AlignTooltip.Trigger>
+      <AlignTooltip.Content side="bottom">
+        <span className="font-semibold">{label}</span>
+        <span className="ml-2 tabular-nums opacity-70">{exactDisplay}</span>
+      </AlignTooltip.Content>
+    </AlignTooltip.Root>
+  );
+}
+
+function ClubPill({ display }: { display: string }) {
+  return (
+    <AlignTooltip.Root>
+      <AlignTooltip.Trigger asChild>
+        <button
+          type="button"
+          aria-label={`Habbo Club: ${display}`}
+          onClick={() => CreateLinkEvent('habboUI/open/hccenter')}
+          className="nitro-topbar-currency-pill flex h-7 min-w-0 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-label-xs font-medium tabular-nums transition-colors duration-150 ease-out"
+        >
+          <CurrencyIcon type="hc" />
+          <span>{display}</span>
+        </button>
+      </AlignTooltip.Trigger>
+      <AlignTooltip.Content side="bottom">Habbo Club</AlignTooltip.Content>
+    </AlignTooltip.Root>
+  );
+}
+
 export const PurseView: FC<{}> = props => {
-  const { purse = null, hcDisabled = false } = usePurse();
+  const { purse = null } = usePurse();
   const { roomSession = null } = useRoom();
   const { navigatorData = null } = useNavigator();
-  const [catalogOpen, setCatalogOpen] = useState(false);
   const [ isZoomedIn, setIsZoomedIn ] = useState(false);
+  const [ roomEntryVisible, setRoomEntryVisible ] = useState(false);
+  const [ roomEntryClosing, setRoomEntryClosing ] = useState(false);
+  const [ roomEntryLiked, setRoomEntryLiked ] = useState(false);
+  const [ roomEntrySignal, setRoomEntrySignal ] = useState(0);
+  const roomEntryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const roomEntryCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleZoom = useCallback(() => {
     if(!roomSession) return;
@@ -683,10 +951,129 @@ export const PurseView: FC<{}> = props => {
     });
   }, [roomSession]);
 
-  const displayedCurrencies = useMemo(() => GetConfiguration<number[]>('system.currency.types', []), []);
-  const currencyDisplayNumberShort = useMemo(() => GetConfiguration<boolean>('currency.display.number.short', false), []);
-  const imageLibraryUrl = useMemo(() => GetConfiguration<string>('image.library.url', 'http://localhost:8080/c_images/'), []);
+  const roomId = navigatorData?.enteredGuestRoom?.roomId ?? 0;
 
+  const closeRoomEntry = useCallback(() => {
+    if(roomEntryTimerRef.current)
+    {
+      clearTimeout(roomEntryTimerRef.current);
+      roomEntryTimerRef.current = null;
+    }
+
+    if(roomEntryCloseTimerRef.current)
+    {
+      clearTimeout(roomEntryCloseTimerRef.current);
+      roomEntryCloseTimerRef.current = null;
+    }
+
+    setRoomEntryClosing(true);
+    roomEntryCloseTimerRef.current = setTimeout(() => {
+      setRoomEntryVisible(false);
+      setRoomEntryClosing(false);
+      roomEntryCloseTimerRef.current = null;
+    }, 220);
+  }, []);
+
+  useEffect(() => {
+    if(roomEntryTimerRef.current)
+    {
+      clearTimeout(roomEntryTimerRef.current);
+      roomEntryTimerRef.current = null;
+    }
+    if(roomEntryCloseTimerRef.current)
+    {
+      clearTimeout(roomEntryCloseTimerRef.current);
+      roomEntryCloseTimerRef.current = null;
+    }
+
+    if(!roomSession?.roomId || !roomId)
+    {
+      closeRoomEntry();
+      return;
+    }
+
+    setRoomEntryLiked(false);
+    setRoomEntrySignal(value => value + 1);
+    setRoomEntryClosing(false);
+    setRoomEntryVisible(true);
+    roomEntryTimerRef.current = setTimeout(closeRoomEntry, 7000);
+
+    return () => {
+      if(roomEntryTimerRef.current)
+      {
+        clearTimeout(roomEntryTimerRef.current);
+        roomEntryTimerRef.current = null;
+      }
+    };
+  }, [roomSession?.roomId, roomId, closeRoomEntry]);
+
+  useEffect(() => {
+    return () => {
+      if(roomEntryTimerRef.current) clearTimeout(roomEntryTimerRef.current);
+      if(roomEntryCloseTimerRef.current) clearTimeout(roomEntryCloseTimerRef.current);
+    };
+  }, []);
+
+  const handleRoomEntryLike = useCallback(() => {
+    if(!navigatorData?.canRate || roomEntryLiked) return;
+
+    setRoomEntryLiked(true);
+    SendMessageComposer(new RateFlatMessageComposer(1));
+  }, [navigatorData?.canRate, roomEntryLiked]);
+
+  // Push the "Raum betreten" banner into the central topbar stack.
+  // Single source of truth — removes hardcoded JSX render lower down.
+  const enteredGuestRoomForBanner = navigatorData?.enteredGuestRoom;
+  const roomOwnerNameForBanner = navigatorData?.enteredGuestRoom?.ownerName || '';
+  const currentRoomRatingForBanner = navigatorData?.currentRoomRating ?? 0;
+  const canRateEntryRoomForBanner = !!navigatorData?.canRate
+    && ((navigatorData?.enteredGuestRoom?.ownerName || '') !== GetSessionDataManager().userName);
+
+  useEffect(() => {
+    if(!roomEntryVisible || !roomSession || !enteredGuestRoomForBanner)
+    {
+      TopbarBannerStack.remove('room-entry');
+      return;
+    }
+
+    TopbarBannerStack.push({
+      id: 'room-entry',
+      kind: 'room-entry',
+      priority: 0,
+      content: (
+        <RoomEntryInfoPanel
+          key={ roomEntrySignal }
+          roomName={ enteredGuestRoomForBanner.roomName }
+          ownerName={ roomOwnerNameForBanner }
+          rating={ currentRoomRatingForBanner }
+          canRate={ canRateEntryRoomForBanner }
+          liked={ roomEntryLiked }
+          onLike={ handleRoomEntryLike }
+          isClosing={ roomEntryClosing }
+        />
+      )
+    });
+  }, [
+    roomEntryVisible,
+    roomEntryClosing,
+    roomEntrySignal,
+    roomEntryLiked,
+    enteredGuestRoomForBanner,
+    roomOwnerNameForBanner,
+    currentRoomRatingForBanner,
+    canRateEntryRoomForBanner,
+    roomSession,
+    handleRoomEntryLike
+  ]);
+
+  useEffect(() => () => TopbarBannerStack.remove('room-entry'), []);
+
+  const displayedCurrencies = useMemo(() => {
+    const configured = GetConfiguration<number[]>('system.currency.types', []);
+    const types = configured && configured.length ? configured : [-1, 0, 5];
+
+    return types.filter((type, index) => types.indexOf(type) === index);
+  }, []);
   const [offerCount, setOfferCount] = useState(0);
 
   useEffect(() => {
@@ -706,160 +1093,133 @@ export const PurseView: FC<{}> = props => {
     return () => clearInterval(interval);
   }, []);
 
-  const getCurrencyPills = () => {
-    if (!purse || !purse.activityPoints || !purse.activityPoints.size) return null;
-    const types = Array.from(purse.activityPoints.keys()).filter(type => displayedCurrencies.indexOf(type) >= 0);
-    return types.map(type => {
-      const amount = purse.activityPoints.get(type);
-      const display = currencyDisplayNumberShort ? LocalizeShortNumber(amount) : LocalizeFormattedNumber(amount);
-      const colors = CURRENCY_COLORS[type] ?? { bg: "bg-muted/30", hover: "hover:bg-muted/50" };
-      return (
-        <Tooltip key={type}>
-          <TooltipTrigger asChild>
-            <button className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${colors.bg} ${colors.hover}`}>
-              <CurrencyIcon type={String(type)} />
-              <span className="text-xs font-bold text-foreground tabular-nums">{display}</span>
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs">Währung {type}</TooltipContent>
-        </Tooltip>
-      );
-    });
-  };
-
   if (!purse) return null;
 
-  const creditsDisplay = currencyDisplayNumberShort ? LocalizeShortNumber(purse.credits) : LocalizeFormattedNumber(purse.credits);
+  const currencyPills = displayedCurrencies.map(type => {
+    const amount = type === -1 ? purse.credits : (purse.activityPoints?.get(type) ?? 0);
+    const label = CURRENCY_LABELS[type] ?? `Währung ${type}`;
+    const exact = LocalizeFormattedNumber(amount);
+
+    return <CurrencyPill key={type} type={type} amount={amount} exactDisplay={exact} label={label} />;
+  });
+  const clubDisplay = (purse.clubDays > 0 || purse.clubPeriods > 0)
+    ? FriendlyTime.shortFormat(((purse.clubPeriods * 31) + purse.clubDays) * 86400)
+    : null;
   const roomName = navigatorData?.enteredGuestRoom?.roomName;
   const userCount = navigatorData?.enteredGuestRoom?.userCount;
+  const canManageRoom = !!navigatorData?.enteredGuestRoom
+    && ((GetSessionDataManager().userId === navigatorData.enteredGuestRoom.ownerId) || GetSessionDataManager().isModerator);
+  const roomOwnerName = navigatorData?.enteredGuestRoom?.ownerName || '';
+  const canRateEntryRoom = !!navigatorData?.canRate && (roomOwnerName !== GetSessionDataManager().userName);
+  const currentRoomRating = navigatorData?.currentRoomRating ?? 0;
+  const enteredGuestRoom = navigatorData?.enteredGuestRoom;
 
   return (
-    <TooltipProvider delayDuration={200}>
-      <style>{`
-        @keyframes dragonGlow {
-          0%, 100% { filter: drop-shadow(0 0 3px rgba(255,165,0,0.3)); }
-          50% { filter: drop-shadow(0 0 6px rgba(255,165,0,0.5)); }
-        }
-      `}</style>
-      <div className="fixed top-0 left-0 right-0 h-[60px] z-[71] pointer-events-auto bg-card border-b border-border/40">
-        <div className="flex items-center h-full px-4 transition-all duration-300 ease-out">
-          {/* Left: Room Info */}
-          <div className="flex items-center gap-2">
-            {roomSession ? (
-              <>
-                <TopbarIcon name="house.png" w={18} h={18} />
-                <span className="text-sm font-medium text-foreground truncate max-w-[200px]">{roomName || 'Raum'}</span>
-                {userCount != null && userCount > 0 && (
-                  <Badge variant="outline" className="text-xs text-muted-foreground font-normal">{userCount} online</Badge>
+    <AlignTooltip.Provider delayDuration={200}>
+        <div
+          className="fixed top-3 z-[71] pointer-events-none -translate-x-1/2 transition-all duration-300 ease-out"
+          style={{
+            left: 'calc(50% + var(--topbar-center-offset, 40px))',
+            width: 'min(820px, calc(100vw - var(--sidebar-width, 80px) - 24px))'
+          }}
+        >
+          <div className="flex min-w-0 flex-col items-center justify-start gap-2">
+            <div className="nitro-topbar-float pointer-events-auto flex h-12 w-full min-w-0 items-center gap-1.5 rounded-20 px-2.5 text-text-strong-950">
+              <div className="nitro-topbar-room-nav flex min-w-0 shrink items-center gap-1 rounded-full p-0">
+                <button
+                  type="button"
+                  className="nitro-topbar-room-identity flex min-w-0 items-center gap-2 rounded-full py-1 pl-1 pr-3"
+                  onClick={() => roomSession ? CreateLinkEvent('navigator/open-room-info') : CreateLinkEvent('navigator/goto/home')}
+                >
+                  <span className="nitro-topbar-room-chip flex size-8 shrink-0 items-center justify-center rounded-full">
+                    {roomSession
+                      ? <TopbarIcon name="house.png" w={18} h={18} />
+                      : <TopbarIcon name="habbo.png" w={22} h={20} />
+                    }
+                  </span>
+                  <span className="hidden min-w-0 sm:block">
+                    <span className="block max-w-[210px] truncate text-left text-label-sm text-text-strong-950">
+                      {roomSession ? (roomName || 'Raum') : 'Hotel View'}
+                    </span>
+                  </span>
+                </button>
+                {roomSession && userCount != null && userCount > 0 && (
+                  <AlignBadge.Root color="green" variant="lighter" size="small" className="nitro-topbar-room-count hidden shrink-0 md:inline-flex">
+                    {userCount} online
+                  </AlignBadge.Root>
                 )}
-                <div className="w-px h-6 bg-border/30 mx-1" />
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent('navigator/toggle-room-info')}>
-                      <Info className="w-3.5 h-3.5 text-muted-foreground" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">Raum Info</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={handleZoom}>
-                      {isZoomedIn ? <ZoomOut className="w-3.5 h-3.5 text-muted-foreground" /> : <ZoomIn className="w-3.5 h-3.5 text-muted-foreground" />}
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">{isZoomedIn ? 'Herauszoomen' : 'Hineinzoomen'}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent('chat-history/toggle')}>
-                      <MessageSquareDashed className="w-3.5 h-3.5 text-muted-foreground" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-xs">Chat-Verlauf</TooltipContent>
-                </Tooltip>
-                {navigatorData?.canRate && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => SendMessageComposer(new RateFlatMessageComposer(1))}>
-                        <ThumbsUp className="w-3.5 h-3.5 text-muted-foreground" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="text-xs">Raum bewerten</TooltipContent>
-                  </Tooltip>
+                {roomSession && (
+                  <>
+                    <AlignDivider.Root className="nitro-topbar-room-divider mx-1 h-6 w-px shrink-0" />
+                    <RoomToolsPopover
+                      isZoomedIn={isZoomedIn}
+                      canRate={!!navigatorData?.canRate}
+                      canManageRoom={canManageRoom}
+                      onRoomInfo={() => CreateLinkEvent('navigator/open-room-info')}
+                      onRoomSettings={() => CreateLinkEvent('navigator/open-room-settings')}
+                      onZoom={handleZoom}
+                      onChatHistory={() => CreateLinkEvent('chat-history/toggle')}
+                      onRate={() => SendMessageComposer(new RateFlatMessageComposer(1))}
+                    />
+                  </>
                 )}
-              </>
-            ) : (
-              <>
-                <TopbarIcon name="habbo.png" w={20} h={18} />
-                <span className="text-sm font-medium text-foreground">Hotel View</span>
-              </>
-            )}
-          </div>
-
-          <div className="flex-1" />
-
-          {/* Right */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* Zone 0: Radio */}
-            <RadioPanelView embedded />
-
-            <div className="w-px h-6 bg-border/30" />
-
-            {/* Zone 1: Katalog Hover-Slide */}
-            <div
-              className="flex items-center"
-              onMouseEnter={() => setCatalogOpen(true)}
-              onMouseLeave={() => setCatalogOpen(false)}
-            >
-              <div className={`flex items-center gap-0.5 overflow-hidden transition-all duration-300 ease-out ${catalogOpen ? 'max-w-[200px] opacity-100 mr-1' : 'max-w-0 opacity-0'}`}>
-                {TOOL_ICONS.map(({ iconId, label, link }) => (
-                  <Tooltip key={iconId}>
-                    <TooltipTrigger asChild>
-                      <button className="relative p-1.5 rounded-lg hover:bg-accent/50 transition-colors shrink-0" onClick={() => CreateLinkEvent(link)}>
-                        <CatalogIcon iconId={iconId} />
-                        {label === "Marktplatz" && offerCount > 0 && (
-                          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold leading-none shadow-sm">{offerCount}</span>
-                        )}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs">{label}</TooltipContent>
-                  </Tooltip>
-                ))}
               </div>
-              <button className="group p-1.5 rounded-lg hover:bg-accent/50 transition-colors" onClick={() => CreateLinkEvent('catalog/toggle')}>
-                <img
-                  src={`${imageLibraryUrl}catalogue/dragon.gif`}
-                  alt="Katalog"
-                  className="group-hover:[filter:drop-shadow(0_0_8px_rgba(255,165,0,0.6))]"
-                  style={{ width: 20, height: 20, objectFit: 'contain', animation: 'dragonGlow 2s ease-in-out infinite' }}
-                />
-              </button>
+
+              <div className="flex min-w-0 flex-1 items-center justify-end gap-1.5 overflow-hidden">
+                <div className="nitro-topbar-radio hidden min-w-0 shrink items-center">
+                  <RadioPanelView embedded />
+                </div>
+
+                <AlignDivider.Root className="nitro-topbar-radio-divider hidden h-6 w-px shrink-0" />
+
+                <div className="flex shrink-0 items-center gap-0.5">
+                  {TOOL_ICONS.map(({ iconId, label, link }) => (
+                    <TopbarAction key={iconId} label={label} onClick={() => CreateLinkEvent(link)}>
+                      <CatalogIcon iconId={iconId} />
+                      {label === "Marktplatz" && offerCount > 0 && (
+                        <AlignBadge.Root color="red" variant="filled" size="small" className="absolute -right-1 -top-1 h-4 min-w-4 px-1 text-[9px]">
+                          {offerCount}
+                        </AlignBadge.Root>
+                      )}
+                    </TopbarAction>
+                  ))}
+                  <TopbarAction label="Werkstatt" onClick={() => CreateLinkEvent('workshop/toggle')}>
+                    <AlignButton.Icon as={Wrench} className="size-4" />
+                  </TopbarAction>
+                  <TopbarAction label="Z-Katalog" onClick={() => CreateLinkEvent('sets/toggle')}>
+                    <AlignButton.Icon as={Trophy} className="size-4" />
+                  </TopbarAction>
+                </div>
+
+                <AlignDivider.Root className="h-6 w-px shrink-0" />
+
+                <div className="nitro-topbar-wallet-group flex h-8 min-w-0 shrink-0 items-center rounded-full px-1">
+                  {currencyPills.map((pill, i) => (
+                    <Fragment key={i}>
+                      {i > 0 && <span className="nitro-topbar-wallet-sep mx-0.5 h-4 w-px shrink-0" aria-hidden />}
+                      {pill}
+                    </Fragment>
+                  ))}
+                  {clubDisplay && (
+                    <>
+                      <span className="nitro-topbar-wallet-sep mx-0.5 h-4 w-px shrink-0" aria-hidden />
+                      <ClubPill display={clubDisplay} />
+                    </>
+                  )}
+                </div>
+
+                <AlignDivider.Root className="h-6 w-px shrink-0" />
+
+                <div className="flex shrink-0 items-center gap-1">
+                  <HelpPopover />
+                  <SettingsPopover />
+                </div>
+              </div>
             </div>
-
-            <div className="w-px h-6 bg-border/30" />
-
-            {/* Zone 2: Wallet (colored pills) */}
-            <div className="flex items-center gap-1 px-1.5 py-1 rounded-xl bg-muted/30 border border-border/30">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors cursor-pointer bg-amber-500/10 hover:bg-amber-500/20">
-                    <CurrencyIcon type="-1" />
-                    <span className="text-xs font-bold text-foreground tabular-nums">{creditsDisplay}</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="text-xs">Credits</TooltipContent>
-              </Tooltip>
-              {getCurrencyPills()}
-            </div>
-
-            <div className="w-px h-6 bg-border/30" />
-
-            {/* Zone 3: Utilities */}
-            <HelpPopover />
-            <SettingsPopover />
+            <TopbarBannerStackView />
+            <ArrestToastView />
           </div>
         </div>
-      </div>
-    </TooltipProvider>
+    </AlignTooltip.Provider>
   );
 }

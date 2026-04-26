@@ -3,9 +3,9 @@ import { FC, useEffect, useState } from 'react';
 import { Megaphone } from 'lucide-react';
 import { LocalizeText, SendMessageComposer } from '../../../../../api';
 import { useCatalog, useMessageEvent, useNavigator, useRoomPromote } from '../../../../../hooks';
-import { Button } from '../../../../ui/button';
-import { Input } from '../../../../ui/input';
-import { Textarea } from '../../../../ui/textarea';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as Input from '@/align-ui/components/ui/input';
+import * as Textarea from '@/align-ui/components/ui/textarea';
 import { CatalogNativeSelect } from '../../CatalogNativeSelect';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
@@ -68,7 +68,6 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
                 <span className="text-sm font-bold">{ LocalizeText('roomad.catalog_header') }</span>
             </div>
             <p className="text-xs text-muted-foreground">{ LocalizeText('roomad.catalog_text', [ 'duration' ], [ '120' ]) }</p>
-
             <div className="rounded-lg border border-border/40 bg-card p-4 space-y-3">
                 <div>
                     <span className="text-xs font-semibold mb-1 block">{ LocalizeText('navigator.category') }</span>
@@ -78,11 +77,15 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
                 </div>
                 <div>
                     <span className="text-xs font-semibold mb-1 block">{ LocalizeText('roomad.catalog_name') }</span>
-                    <Input type="text" className="h-8 text-xs" maxLength={ 64 } value={ eventName } onChange={ e => setEventName(e.target.value) } readOnly={ extended } />
+                    <Input.Root size="xsmall">
+                        <Input.Wrapper className="h-8">
+                            <Input.Input type="text" className="text-xs" maxLength={ 64 } value={ eventName } onChange={ e => setEventName(e.target.value) } readOnly={ extended } />
+                        </Input.Wrapper>
+                    </Input.Root>
                 </div>
                 <div>
                     <span className="text-xs font-semibold mb-1 block">{ LocalizeText('roomad.catalog_description') }</span>
-                    <Textarea className="min-h-[60px] text-xs resize-none" maxLength={ 64 } value={ eventDesc } onChange={ e => setEventDesc(e.target.value) } readOnly={ extended } />
+                    <Textarea.Root simple className="min-h-[60px] text-xs" maxLength={ 64 } value={ eventDesc } onChange={ e => setEventDesc(e.target.value) } readOnly={ extended } />
                 </div>
                 <div>
                     <span className="text-xs font-semibold mb-1 block">{ LocalizeText('roomad.catalog_roomname') }</span>
@@ -91,16 +94,17 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
                         { availableRooms && availableRooms.map((room, index) => <option key={ index } value={ room.roomId }>{ room.roomName }</option>) }
                     </CatalogNativeSelect>
                 </div>
-                <Button
-                    variant={ (!eventName || !eventDesc || roomId === -1) ? 'destructive' : 'success' }
-                    size="sm"
+                <AlignButton.Root
+                    variant={ (!eventName || !eventDesc || roomId === -1) ? 'error' : 'primary' }
+                    mode="filled"
+                    size="small"
                     className="w-full h-9 gap-2 rounded-xl text-xs font-bold"
                     onClick={ purchaseAd }
                     disabled={ (!eventName || !eventDesc || roomId === -1) }
                 >
                     <Megaphone className="w-3.5 h-3.5" />
                     { extended ? LocalizeText('roomad.extend.event') : LocalizeText('buy') }
-                </Button>
+                </AlignButton.Root>
             </div>
         </div>
     );

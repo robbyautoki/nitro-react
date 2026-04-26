@@ -24,7 +24,7 @@ export const MultiPlaceCounterView: FC<{}> = () =>
             className="fixed pointer-events-none z-[9999]"
             style={{ left: mousePos.x + 16, top: mousePos.y - 8 }}
         >
-            <div className="bg-black/80 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20 shadow-lg backdrop-blur-sm">
+            <div className="rounded-full border border-stroke-soft-200 bg-bg-strong-950 px-2 py-1 text-xs font-bold text-text-white-0 shadow-lg backdrop-blur-sm">
                 ×{ multiPlaceCount }
             </div>
         </div>

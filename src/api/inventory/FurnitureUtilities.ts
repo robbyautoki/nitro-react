@@ -1,10 +1,42 @@
 import { FurnitureListItemParser, IObjectData } from '@nitrots/nitro-renderer';
-import { GetRoomEngine } from '../nitro';
+import { GetRoomEngine, GetSessionDataManager } from '../nitro';
 import { FurniCategory } from './FurniCategory';
 import { FurnitureItem } from './FurnitureItem';
 import { GroupItem } from './GroupItem';
 
 export const createGroupItem = (type: number, category: number, stuffData: IObjectData, extra: number = NaN) => new GroupItem(type, category, GetRoomEngine(), stuffData, extra);
+
+const getFurnitureData = (item: FurnitureItem) =>
+{
+    const sessionData = GetSessionDataManager();
+
+    return sessionData.getFloorItemData(item.type) || sessionData.getWallItemData(item.type);
+}
+
+const isExternalImageFurnitureItem = (item: FurnitureItem) =>
+{
+    const furnitureData = getFurnitureData(item) as any;
+
+    return !!(furnitureData?.isExternalImage || furnitureData?.className?.startsWith('external_image'));
+}
+
+const isRareFurnitureItem = (item: FurnitureItem) =>
+{
+    const furnitureData = getFurnitureData(item) as any;
+    const className = `${ furnitureData?.className || '' }`.toLowerCase();
+    const publicName = `${ furnitureData?.name || '' }`.toLowerCase();
+
+    return (
+        className.startsWith('rare_') ||
+        className.startsWith('bonusrare') ||
+        className.startsWith('bonusbag') ||
+        className.includes('_ltd') ||
+        /\bltd\b/.test(className) ||
+        /\brare\b/.test(publicName) ||
+        /\blimited\b/.test(publicName) ||
+        /\bltd\b/.test(publicName)
+    );
+}
 
 const addSingleFurnitureItem = (set: GroupItem[], item: FurnitureItem, unseen: boolean) =>
 {
@@ -114,8 +146,9 @@ const addGroupableFurnitureItem = (set: GroupItem[], item: FurnitureItem, unseen
 export const addFurnitureItem = (set: GroupItem[], item: FurnitureItem, unseen: boolean) =>
 {
     const isLtd = item.stuffData.uniqueNumber > 0;
+    const shouldKeepSingle = isLtd || !item.isGroupable || isExternalImageFurnitureItem(item) || isRareFurnitureItem(item);
 
-    if(isLtd)
+    if(shouldKeepSingle)
     {
         addSingleFurnitureItem(set, item, unseen);
     }

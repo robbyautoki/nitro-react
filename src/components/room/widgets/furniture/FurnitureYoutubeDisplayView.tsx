@@ -1,14 +1,12 @@
 import { FC, useEffect, useState } from 'react';
+import { ListVideo, SkipBack, SkipForward, Youtube } from 'lucide-react';
 import YouTube, { Options } from 'react-youtube';
 import { YouTubePlayer } from 'youtube-player/dist/types';
 import { LocalizeText, YoutubeVideoPlaybackStateEnum } from '../../../../api';
-import { AutoGrid, AutoGridProps, LayoutGridItem, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
 import { useFurnitureYoutubeWidget } from '../../../../hooks';
-
-interface FurnitureYoutubeDisplayViewProps extends AutoGridProps
-{
-
-}
+import * as AlignButton from '@/align-ui/components/ui/button';
+import { cn } from '@/align-ui/utils/cn';
+import { FurnitureWidgetSection, FurnitureWidgetWindow } from './FurnitureWidgetLayout';
 
 export const FurnitureYoutubeDisplayView: FC<{}> = FurnitureYoutubeDisplayViewProps =>
 {
@@ -59,8 +57,8 @@ export const FurnitureYoutubeDisplayView: FC<{}> = FurnitureYoutubeDisplayViewPr
     if(objectId === -1) return null;
 
     const youtubeOptions: Options = {
-        height: '375',
-        width: '500',
+        height: '360',
+        width: '520',
         playerVars: {
             autoplay: 1,
             disablekb: 1,
@@ -73,37 +71,48 @@ export const FurnitureYoutubeDisplayView: FC<{}> = FurnitureYoutubeDisplayViewPr
     }
 
     return (
-        <NitroCardView className="youtube-tv-widget">
-		<NitroCardHeaderView headerText={ LocalizeText('catalog.page.youtube_tvs') } onCloseClick={ onClose } />
-            <NitroCardContentView>
-                <div className="row w-full h-full">
-                    <div className="youtube-video-container col-9 overflow-hidden">
-                        { (videoId && videoId.length > 0) &&
-                            <YouTube videoId={ videoId } opts={ youtubeOptions } onReady={ event => setPlayer(event.target) } onStateChange={ onStateChange } containerClassName={ 'youtubeContainer' } />
-                        }
-                        { (!videoId || videoId.length === 0) &&
-                            <div className="empty-video w-full h-full justify-center items-center flex">{ LocalizeText('widget.furni.video_viewer.no_videos') }</div>
-                        }
-                    </div>
-                    <div className="playlist-container col-3 flex flex-col">
-                        <span className="playlist-controls justify-center flex">
-                            <i className="icon icon-youtube-prev cursor-pointer" onClick={ previous } />
-                            <i className="icon icon-youtube-next cursor-pointer" onClick={ next } />
-                        </span>
-                        <div className="mb-1">{ LocalizeText('widget.furni.video_viewer.playlists') }</div>
-                        <AutoGrid columnCount={ 1 } columnMinWidth={ 80 } columnMinHeight={ 100 } className="mb-1" overflow="auto">
-                            { playlists && playlists.map((entry, index) =>
-                            {
-                                return (
-                                    <LayoutGridItem key={ index } onClick={ event => selectVideo(entry.video) } itemActive={ (entry.video === selectedVideo) }>
-                                        <b>{ entry.title }</b>
-                                    </LayoutGridItem>
-								)
-                            }) }
-                        </AutoGrid>
-                    </div>
+        <FurnitureWidgetWindow
+            uniqueKey="furniture-youtube"
+            title={ LocalizeText('catalog.page.youtube_tvs') }
+            subtitle={ LocalizeText('widget.furni.video_viewer.playlists') }
+            icon={ Youtube }
+            onClose={ onClose }
+            widthClassName="w-[760px]"
+            bodyClassName="grid max-h-[520px] grid-cols-[1fr_190px] gap-4 !overflow-hidden"
+        >
+            <FurnitureWidgetSection className="min-h-[360px] overflow-hidden p-2">
+                <div className="youtube-video-container h-full overflow-hidden rounded-xl bg-bg-strong-950">
+                    { (videoId && videoId.length > 0) &&
+                        <YouTube videoId={ videoId } opts={ youtubeOptions } onReady={ event => setPlayer(event.target) } onStateChange={ onStateChange } containerClassName={ 'youtubeContainer' } />
+                    }
+                    { (!videoId || videoId.length === 0) &&
+                        <div className="flex h-full w-full items-center justify-center px-4 text-center text-paragraph-sm text-text-white-0">{ LocalizeText('widget.furni.video_viewer.no_videos') }</div>
+                    }
                 </div>
-            </NitroCardContentView>
-        </NitroCardView>
+            </FurnitureWidgetSection>
+            <FurnitureWidgetSection title={ LocalizeText('widget.furni.video_viewer.playlists') } className="min-h-0 overflow-hidden">
+                <div className="mb-3 grid grid-cols-2 gap-2">
+                    <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" onClick={ previous }>
+                        <AlignButton.Icon as={ SkipBack } className="size-4" />
+                    </AlignButton.Root>
+                    <AlignButton.Root variant="neutral" mode="stroke" size="xsmall" onClick={ next }>
+                        <AlignButton.Icon as={ SkipForward } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+                <div className="flex max-h-[304px] flex-col gap-2 overflow-auto pr-1">
+                    { playlists && playlists.map((entry, index) => (
+                        <button
+                            type="button"
+                            key={ index }
+                            className={ cn('flex min-h-16 items-center gap-2 rounded-xl border p-3 text-left transition duration-200 ease-out', (entry.video === selectedVideo) ? 'border-primary-base bg-primary-alpha-10' : 'border-stroke-soft-200 bg-bg-white-0 hover:bg-bg-weak-50') }
+                            onClick={ event => selectVideo(entry.video) }
+                        >
+                            <ListVideo className="size-4 shrink-0 text-text-sub-600" />
+                            <span className="line-clamp-2 text-paragraph-xs text-text-strong-950">{ entry.title }</span>
+                        </button>
+                    )) }
+                </div>
+            </FurnitureWidgetSection>
+        </FurnitureWidgetWindow>
     )
 }

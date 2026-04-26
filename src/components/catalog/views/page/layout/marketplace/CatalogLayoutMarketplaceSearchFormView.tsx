@@ -1,7 +1,7 @@
 import { FC, useCallback, useEffect, useState } from 'react';
 import { IMarketplaceSearchOptions, LocalizeText, MarketplaceSearchType } from '../../../../../../api';
-import { Button } from '../../../../../ui/button';
-import { Input } from '../../../../../ui/input';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as Input from '@/align-ui/components/ui/input';
 import { CatalogNativeSelect } from '../../../CatalogNativeSelect';
 
 export interface SearchFormViewProps
@@ -48,32 +48,47 @@ export const SearchFormView: FC<SearchFormViewProps> = props =>
     return (
         <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-                <span className="w-[100px] text-[10px] uppercase font-bold text-black/40 tracking-[0.1em] shrink-0">{ LocalizeText('catalog.marketplace.sort_order') }</span>
-                <div className="flex-1 bg-black/[0.03] border border-black/8 rounded overflow-hidden">
-                    <CatalogNativeSelect value={ sortType } onChange={ event => onSortTypeChange(parseInt(event.target.value)) } className="text-xs h-7 bg-transparent border-0 text-black/70 focus:ring-0">
-                        { sortTypes.map(type => <option key={ type } value={ type } className="bg-white text-black/85">{ LocalizeText(`catalog.marketplace.sort.${ type }`) }</option>) }
+                <span className="w-[100px] text-[10px] uppercase font-bold text-text-soft-400 tracking-[0.1em] shrink-0">{ LocalizeText('catalog.marketplace.sort_order') }</span>
+                <div className="flex-1 overflow-hidden">
+                    <CatalogNativeSelect value={ sortType } onChange={ event => onSortTypeChange(parseInt(event.target.value)) } className="h-7 text-xs">
+                        { sortTypes.map(type => <option key={ type } value={ type }>{ LocalizeText(`catalog.marketplace.sort.${ type }`) }</option>) }
                     </CatalogNativeSelect>
                 </div>
             </div>
             { searchType === MarketplaceSearchType.ADVANCED &&
                 <>
                     <div className="flex items-center gap-2">
-                        <span className="w-[100px] text-[10px] uppercase font-bold text-black/40 tracking-[0.1em] shrink-0">{ LocalizeText('catalog.marketplace.search_name') }</span>
-                        <Input className="h-7 text-xs bg-black/[0.03] border-black/8 text-black/85 rounded focus-visible:ring-1 focus-visible:ring-emerald-500/50" type="text" value={ searchQuery } onChange={ event => setSearchQuery(event.target.value) } placeholder="FURNI NAME..." />
+                        <span className="w-[100px] text-[10px] uppercase font-bold text-text-soft-400 tracking-[0.1em] shrink-0">{ LocalizeText('catalog.marketplace.search_name') }</span>
+                        <Input.Root size="xsmall">
+                            <Input.Wrapper className="h-7">
+                                <Input.Input className="h-7 text-xs" type="text" value={ searchQuery } onChange={ event => setSearchQuery(event.target.value) } placeholder="FURNI NAME..." />
+                            </Input.Wrapper>
+                        </Input.Root>
                     </div>
                     <div className="flex items-center gap-2">
-                        <span className="w-[100px] text-[10px] uppercase font-bold text-black/40 tracking-[0.1em] shrink-0">{ LocalizeText('catalog.marketplace.search_price') }</span>
+                        <span className="w-[100px] text-[10px] uppercase font-bold text-text-soft-400 tracking-[0.1em] shrink-0">{ LocalizeText('catalog.marketplace.search_price') }</span>
                         <div className="flex flex-1 gap-2">
-                            <Input className="h-7 text-xs font-mono bg-black/[0.03] border-black/8 text-amber-600 rounded focus-visible:ring-1 focus-visible:ring-emerald-500/50" type="number" min={ 0 } value={ min } onChange={ event => setMin(event.target.valueAsNumber) } placeholder="MIN" />
-                            <Input className="h-7 text-xs font-mono bg-black/[0.03] border-black/8 text-amber-600 rounded focus-visible:ring-1 focus-visible:ring-emerald-500/50" type="number" min={ 0 } value={ max } onChange={ event => setMax(event.target.valueAsNumber) } placeholder="MAX" />
+                            <Input.Root size="xsmall">
+                                <Input.Wrapper className="h-7">
+                                    <Input.Input className="h-7 text-xs font-mono text-warning-base" type="number" min={ 0 } value={ min } onChange={ event => setMin(event.target.valueAsNumber) } placeholder="MIN" />
+                                </Input.Wrapper>
+                            </Input.Root>
+                            <Input.Root size="xsmall">
+                                <Input.Wrapper className="h-7">
+                                    <Input.Input className="h-7 text-xs font-mono text-warning-base" type="number" min={ 0 } value={ max } onChange={ event => setMax(event.target.valueAsNumber) } placeholder="MAX" />
+                                </Input.Wrapper>
+                            </Input.Root>
                         </div>
                     </div>
-                    <button 
-                        className="mt-2 w-full h-8 flex items-center justify-center bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-600 text-[11px] font-bold uppercase tracking-widest rounded transition-colors" 
+                    <AlignButton.Root
+                        variant="primary"
+                        mode="lighter"
+                        size="xsmall"
+                        className="mt-2 w-full h-8 text-[11px] font-bold uppercase tracking-widest"
                         onClick={ onClickSearch }
                     >
                         { LocalizeText('generic.search') }
-                    </button>
+                    </AlignButton.Root>
                 </> }
         </div>
     );

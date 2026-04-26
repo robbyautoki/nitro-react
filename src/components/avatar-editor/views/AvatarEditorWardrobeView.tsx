@@ -1,7 +1,9 @@
 import { IAvatarFigureContainer, SaveWardrobeOutfitMessageComposer } from '@nitrots/nitro-renderer';
-import { Dispatch, FC, SetStateAction, useCallback, useMemo } from 'react';
+import { Trash2 } from 'lucide-react';
+import { Dispatch, FC, SetStateAction, useCallback, useMemo, useState } from 'react';
 import { FigureData, GetAvatarRenderManager, GetClubMemberLevel, GetConfiguration, LocalizeText, SendMessageComposer } from '../../../api';
 import { AutoGrid, Base, Button, Flex, LayoutAvatarImageView, LayoutCurrencyIcon, LayoutGridItem } from '../../../common';
+import { AlignGameConfirm } from '../../align-game-ui/AlignGameConfirm';
 
 export interface AvatarEditorWardrobeViewProps
 {
@@ -16,6 +18,20 @@ export const AvatarEditorWardrobeView: FC<AvatarEditorWardrobeViewProps> = props
     const { figureData = null, savedFigures = [], setSavedFigures = null, loadAvatarInEditor = null } = props;
 
     const hcDisabled = GetConfiguration<boolean>('hc.disabled', false);
+
+    const [ deleteIndex, setDeleteIndex ] = useState<number | null>(null);
+
+    const deleteFigureAtWardrobeIndex = useCallback((index: number) =>
+    {
+        if((index >= savedFigures.length) || (index < 0)) return;
+
+        const newFigures = [ ...savedFigures ];
+
+        newFigures[index] = [ null, null ];
+
+        setSavedFigures(newFigures);
+        SendMessageComposer(new SaveWardrobeOutfitMessageComposer((index + 1), '', ''));
+    }, [ savedFigures, setSavedFigures ]);
 
     const wearFigureAtIndex = useCallback((index: number) =>
     {
@@ -59,6 +75,15 @@ export const AvatarEditorWardrobeView: FC<AvatarEditorWardrobeViewProps> = props
                     <LayoutAvatarImageView figure={ figureContainer.getFigureString() } gender={ gender } direction={ 2 } /> }
                     <Base className="avatar-shadow" />
                     { !hcDisabled && (clubLevel > 0) && <LayoutCurrencyIcon className="absolute top-1 left-1" type="hc" /> }
+                    { figureContainer && (
+                        <button
+                            type="button"
+                            className="wardrobe-delete-btn"
+                            title="Outfit löschen"
+                            onClick={ event => { event.stopPropagation(); setDeleteIndex(index); } }>
+                            <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                    ) }
                     <Flex gap={ 1 } className="button-container">
                         <Button variant="link" fullWidth onClick={ event => saveFigureAtWardrobeIndex(index) }>{ LocalizeText('avatareditor.wardrobe.save') }</Button>
                         { figureContainer &&
@@ -72,8 +97,23 @@ export const AvatarEditorWardrobeView: FC<AvatarEditorWardrobeViewProps> = props
     }, [ savedFigures, hcDisabled, saveFigureAtWardrobeIndex, wearFigureAtIndex ]);
 
     return (
-        <AutoGrid columnCount={ 5 } columnMinWidth={ 80 } columnMinHeight={ 140 }>
-            { figures }
-        </AutoGrid>
+        <>
+            <AutoGrid columnCount={ 5 } columnMinWidth={ 80 } columnMinHeight={ 140 }>
+                { figures }
+            </AutoGrid>
+            <AlignGameConfirm
+                open={ deleteIndex !== null }
+                title="Outfit löschen?"
+                description="Dieses gespeicherte Outfit wird aus deinem Kleiderschrank entfernt."
+                confirmLabel="Löschen"
+                cancelLabel="Abbrechen"
+                destructive
+                onConfirm={ () =>
+                {
+                    if(deleteIndex !== null) deleteFigureAtWardrobeIndex(deleteIndex);
+                    setDeleteIndex(null);
+                } }
+                onCancel={ () => setDeleteIndex(null) } />
+        </>
     );
 }

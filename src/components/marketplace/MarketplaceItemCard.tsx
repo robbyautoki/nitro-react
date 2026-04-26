@@ -1,6 +1,7 @@
 import { FC, useMemo } from 'react';
 import { GetImageIconUrlForProduct, LocalizeText, MarketplaceOfferData, MarketPlaceOfferState, ProductTypeEnum } from '../../api';
 import { Coins, Clock, TrendingUp } from 'lucide-react';
+import * as AlignButton from '@/align-ui/components/ui/button';
 
 export interface MarketplaceItemCardProps
 {
@@ -40,59 +41,63 @@ export const MarketplaceItemCard: FC<MarketplaceItemCardProps> = ({ offerData, t
     const isSold = offerData.status === MarketPlaceOfferState.SOLD;
 
     return (
-        <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all group">
-            {/* Item Image */}
-            <div className="w-11 h-11 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center shrink-0 overflow-hidden">
+        <div className="group flex items-center gap-3 rounded-xl border border-stroke-soft-200 bg-bg-white-0 p-2.5 transition-colors hover:bg-bg-weak-50">
+            { /* Item Image */ }
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-stroke-soft-200 bg-bg-weak-50">
                 <div
                     className="w-full h-full bg-center bg-no-repeat bg-contain"
                     style={ { backgroundImage: `url(${ imageUrl })` } }
                 />
             </div>
-
-            {/* Info */}
+            { /* Info */ }
             <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-white/80 truncate">{ title }</div>
+                <div className="truncate text-label-xs text-text-strong-950">{ title }</div>
                 <div className="flex items-center gap-3 mt-0.5">
-                    <span className="flex items-center gap-1 text-[11px] text-amber-400/80">
+                    <span className="flex items-center gap-1 text-paragraph-xs text-warning-base">
                         <Coins className="size-3" />
                         { offerData.price.toLocaleString() }
                     </span>
                     { type === 'public' && offerData.averagePrice > 0 && (
-                        <span className="flex items-center gap-1 text-[11px] text-white/30">
+                        <span className="flex items-center gap-1 text-paragraph-xs text-text-soft-400">
                             <TrendingUp className="size-3" />
                             avg { offerData.averagePrice.toLocaleString() }
                         </span>
                     ) }
                     { type === 'public' && offerData.offerCount > 1 && (
-                        <span className="text-[11px] text-white/30">
+                        <span className="text-paragraph-xs text-text-soft-400">
                             { offerData.offerCount } offers
                         </span>
                     ) }
                     { type === 'own' && (
-                        <span className={ `flex items-center gap-1 text-[11px] ${ isSold ? 'text-emerald-400/80' : 'text-white/30' }` }>
+                        <span className={ `flex items-center gap-1 text-paragraph-xs ${ isSold ? 'text-success-base' : 'text-text-soft-400' }` }>
                             <Clock className="size-3" />
                             { timeLeft }
                         </span>
                     ) }
                 </div>
             </div>
-
-            {/* Action Button */}
+            { /* Action Button */ }
             { type === 'public' && (
-                <button
-                    className="h-7 px-3 rounded-lg bg-emerald-500/20 text-emerald-400 text-[11px] font-medium hover:bg-emerald-500/30 transition-all shrink-0"
+                <AlignButton.Root
+                    variant="primary"
+                    mode="lighter"
+                    size="xxsmall"
+                    className="shrink-0 text-label-xs"
                     onClick={ () => onAction(offerData) }
                 >
                     Buy
-                </button>
+                </AlignButton.Root>
             ) }
             { type === 'own' && !isSold && (
-                <button
-                    className="h-7 px-3 rounded-lg bg-red-500/20 text-red-400 text-[11px] font-medium hover:bg-red-500/30 transition-all shrink-0"
+                <AlignButton.Root
+                    variant="error"
+                    mode="lighter"
+                    size="xxsmall"
+                    className="shrink-0 text-label-xs"
                     onClick={ () => onAction(offerData) }
                 >
                     Cancel
-                </button>
+                </AlignButton.Root>
             ) }
         </div>
     );

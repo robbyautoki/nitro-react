@@ -1,7 +1,10 @@
 import { FC } from 'react';
+import { Check, Sparkles, X } from 'lucide-react';
 import { LocalizeText } from '../../../../../api';
-import { Button, Column, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView, Text } from '../../../../../common';
 import { useRoom } from '../../../../../hooks';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
+import { FurnitureWidgetActions, FurnitureWidgetSection, FurnitureWidgetText, FurnitureWidgetWindow } from '../FurnitureWidgetLayout';
 
 interface EffectBoxConfirmViewProps
 {
@@ -22,19 +25,29 @@ export const EffectBoxConfirmView: FC<EffectBoxConfirmViewProps> = props =>
     }
     
     return (
-        <NitroCardView className="nitro-use-product-confirmation">
-            <NitroCardHeaderView headerText={ LocalizeText('effectbox.header.title') } onCloseClick={ onClose } />
-            <NitroCardContentView center>
-                <Flex gap={ 2 }>
-                    <Column justifyContent="between">
-                        <Text>{ LocalizeText('effectbox.header.description') }</Text>
-                        <Flex alignItems="center" justifyContent="between">
-                            <Button variant="danger" onClick={ onClose }>{ LocalizeText('generic.cancel') }</Button>
-                            <Button variant="success" onClick={ useProduct }>{ LocalizeText('generic.ok') }</Button>
-                        </Flex>
-                    </Column>
-                </Flex>
-            </NitroCardContentView>
-        </NitroCardView>
+        <FurnitureWidgetWindow
+            uniqueKey="effect-box-confirm"
+            title={ LocalizeText('effectbox.header.title') }
+            subtitle={ LocalizeText('effectbox.header.description') }
+            icon={ Sparkles }
+            onClose={ onClose }
+            widthClassName="w-[380px]"
+            footer={
+                <FurnitureWidgetActions className="grid grid-cols-2">
+                    <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ onClose }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                        { LocalizeText('generic.cancel') }
+                    </AlignButton.Root>
+                    <FancyButton.Root variant="primary" size="small" onClick={ useProduct }>
+                        <FancyButton.Icon as={ Check } />
+                        { LocalizeText('generic.ok') }
+                    </FancyButton.Root>
+                </FurnitureWidgetActions>
+            }
+        >
+            <FurnitureWidgetSection>
+                <FurnitureWidgetText>{ LocalizeText('effectbox.header.description') }</FurnitureWidgetText>
+            </FurnitureWidgetSection>
+        </FurnitureWidgetWindow>
     );
 }

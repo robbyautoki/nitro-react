@@ -1,7 +1,7 @@
-import { Dispatch, FC, SetStateAction, useCallback, useEffect, useRef } from 'react';
-import { AvatarEditorGridPartItem, CategoryData, IAvatarEditorCategoryModel } from '../../../../api';
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
+import { AvatarEditorGridPartItem, CategoryData, GetConfiguration, IAvatarEditorCategoryModel } from '../../../../api';
 import { AutoGrid } from '../../../../common';
-import { AvatarEditorFigureSetItemView } from './AvatarEditorFigureSetItemView';
+import { AvatarEditorPartTile } from './AvatarEditorPartTile';
 
 export interface AvatarEditorFigureSetViewProps
 {
@@ -14,6 +14,8 @@ export const AvatarEditorFigureSetView: FC<AvatarEditorFigureSetViewProps> = pro
 {
     const { model = null, category = null, setMaxPaletteCount = null } = props;
     const elementRef = useRef<HTMLDivElement>(null);
+
+    const hcDisabled = useMemo(() => GetConfiguration<boolean>('hc.disabled', false), []);
 
     const selectPart = useCallback((item: AvatarEditorGridPartItem) =>
     {
@@ -36,9 +38,15 @@ export const AvatarEditorFigureSetView: FC<AvatarEditorFigureSetViewProps> = pro
     }, [ model, category ]);
 
     return (
-        <AutoGrid innerRef={ elementRef } columnCount={ 5 } columnMinHeight={ 50 }>
+        <AutoGrid innerRef={ elementRef } columnCount={ 5 } columnMinHeight={ 50 } gap={ 2 }>
             { (category.parts.length > 0) && category.parts.map((item, index) =>
-                <AvatarEditorFigureSetItemView key={ index } partItem={ item } onClick={ event => selectPart(item) } />) }
+                <AvatarEditorPartTile
+                    key={ index }
+                    partItem={ item }
+                    hcDisabled={ hcDisabled }
+                    onClick={ () => selectPart(item) }
+                />
+            ) }
         </AutoGrid>
     );
 }

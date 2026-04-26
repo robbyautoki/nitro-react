@@ -2,8 +2,8 @@ import { FC } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import { LocalizeText } from '../../../../../api';
 import { useCatalog } from '../../../../../hooks';
-import { Button } from '../../../../ui/button';
-import { Input } from '../../../../ui/input';
+import * as Input from '@/align-ui/components/ui/input';
+import * as AlignButton from '@/align-ui/components/ui/button';
 
 const MIN_VALUE: number = 1;
 const MAX_VALUE: number = 100;
@@ -36,27 +36,33 @@ export const CatalogSpinnerWidgetView: FC<{}> = props =>
 
     return (
         <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground/50 font-semibold flex-1">
+            <span className="text-subheading-2xs uppercase text-text-soft-400 flex-1">
                 { LocalizeText('catalog.bundlewidget.spinner.select.amount') }
             </span>
             <div className="flex items-center gap-1">
-                <Button
-                    variant="outline"
-                    size="icon-sm"
-                    className="rounded-md w-6 h-6 min-w-0"
+                <AlignButton.Root
+                    variant="neutral"
+                    mode="stroke"
+                    size="xxsmall"
+                    className="h-7 w-7 min-w-0 px-0"
                     onClick={ event => updateQuantity(quantity - 1) }
                 >
-                    <FaMinus className="text-[9px]" />
-                </Button>
-                <Input type="number" className="h-6 w-10 px-1 text-center text-xs rounded-md" value={ quantity } onChange={ event => updateQuantity(event.target.valueAsNumber) } />
-                <Button
-                    variant="outline"
-                    size="icon-sm"
-                    className="rounded-md w-6 h-6 min-w-0"
+                    <FaMinus className="text-paragraph-xs" />
+                </AlignButton.Root>
+                <Input.Root size="xsmall" className="w-11">
+                    <Input.Wrapper className="h-7 px-1">
+                        <Input.Input type="number" className="h-7 text-center text-label-xs" value={ quantity } onChange={ event => updateQuantity(event.target.valueAsNumber) } />
+                    </Input.Wrapper>
+                </Input.Root>
+                <AlignButton.Root
+                    variant="neutral"
+                    mode="stroke"
+                    size="xxsmall"
+                    className="h-7 w-7 min-w-0 px-0"
                     onClick={ event => updateQuantity(quantity + 1) }
                 >
-                    <FaPlus className="text-[9px]" />
-                </Button>
+                    <FaPlus className="text-paragraph-xs" />
+                </AlignButton.Root>
             </div>
         </div>
     );

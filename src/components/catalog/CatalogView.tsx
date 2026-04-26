@@ -5,14 +5,15 @@ import { AddEventLinkTracker, CatalogType, GetSessionDataManager, LocalizeText, 
 import { CatalogPurchasedEvent } from '../../events';
 import { useCatalog, useUiEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
-import { Button } from '../ui/button';
-import { Separator } from '../ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as Divider from '@/align-ui/components/ui/divider';
+import { Content as TooltipContent, Provider as TooltipProvider, Root as Tooltip, Trigger as TooltipTrigger } from '@/align-ui/components/ui/tooltip';
 import { CatalogInspectorView } from './views/CatalogInspectorView';
 import { CatalogGiftView } from './views/gift/CatalogGiftView';
 import { CatalogNavigationView } from './views/navigation/CatalogNavigationView';
 import { CatalogSubcategoryChipsView } from './views/navigation/CatalogSubcategoryChipsView';
 import { CatalogSearchView } from './views/page/common/CatalogSearchView';
+import { isDiscordAssetCatalogPage } from './views/page/layout/CatalogLayoutDiscordAssetsView';
 import { GetCatalogLayout } from './views/page/layout/GetCatalogLayout';
 import { CatalogVirtualGridView } from './views/page/layout/CatalogVirtualGridView';
 import { MarketplacePostOfferView } from './views/page/layout/marketplace/MarketplacePostOfferView';
@@ -32,14 +33,24 @@ export interface TrackedPurchase
 
 export const loadTracked = (key: string): TrackedPurchase[] =>
 {
-    try { return JSON.parse(localStorage.getItem(key) || '[]'); }
-    catch { return []; }
+    try 
+    {
+        return JSON.parse(localStorage.getItem(key) || '[]'); 
+    }
+    catch 
+    {
+        return []; 
+    }
 };
 
 const saveTracked = (key: string, items: TrackedPurchase[]) =>
 {
-    try { localStorage.setItem(key, JSON.stringify(items.slice(0, MAX_TRACKED))); }
-    catch {}
+    try 
+    {
+        localStorage.setItem(key, JSON.stringify(items.slice(0, MAX_TRACKED))); 
+    }
+    catch 
+    {}
 };
 
 const SELF_CONTAINED_LAYOUTS = new Set([
@@ -77,8 +88,8 @@ export const CatalogView: FC<{}> = props =>
         const onMouseMove = (ev: MouseEvent) =>
         {
             if(!resizingRef.current) return;
-            const newW = Math.max(580, Math.min(1200, resizeStartRef.current.w + (ev.clientX - resizeStartRef.current.x)));
-            const newH = Math.max(300, Math.min(window.innerHeight - 32, resizeStartRef.current.h + (ev.clientY - resizeStartRef.current.y)));
+            const newW = Math.max(900, Math.min(1600, resizeStartRef.current.w + (ev.clientX - resizeStartRef.current.x)));
+            const newH = Math.max(560, Math.min(window.innerHeight - 32, resizeStartRef.current.h + (ev.clientY - resizeStartRef.current.y)));
             setCatalogSize({ width: newW, height: newH });
         };
 
@@ -215,7 +226,7 @@ export const CatalogView: FC<{}> = props =>
         window.dispatchEvent(new Event('catalog_purchase_tracked'));
     });
 
-    const showInspector = currentPage && !SELF_CONTAINED_LAYOUTS.has(currentPage.layoutCode);
+    const showInspector = currentPage && !SELF_CONTAINED_LAYOUTS.has(currentPage.layoutCode) && !isDiscordAssetCatalogPage(currentPage.pageId);
 
     const breadcrumb = useMemo(() =>
         activeNodes?.filter(n => n.localization).map(n => n.localization.replace(/\s*\(\d+\)$/, '')) ?? [],
@@ -290,112 +301,106 @@ export const CatalogView: FC<{}> = props =>
         <>
             <DraggableWindow uniqueKey="catalog" windowPosition={ DraggableWindowPosition.CENTER }>
                 <div
-                    className="nitro-catalog relative flex flex-col rounded-2xl border border-border bg-card text-card-foreground shadow-[0_8px_40px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] overflow-hidden"
-                    style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `${ catalogSize.height }px` } }
+                    className="nitro-catalog relative flex flex-col overflow-hidden rounded-20 bg-bg-white-0 text-text-strong-950 shadow-regular-md ring-1 ring-inset ring-stroke-soft-200"
+                    style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `min(${ catalogSize.height }px, calc(100vh - 32px))` } }
                 >
-                    {/* Header */}
-                    <div className="drag-handler flex items-center gap-3 px-4 shrink-0 border-b border-border/40 bg-muted/30 h-12 min-h-12 cursor-move select-none">
+                    { /* Header */ }
+                    <div className="drag-handler flex h-11 min-h-11 shrink-0 cursor-move select-none items-center gap-3 border-b border-stroke-soft-200 bg-bg-white-0 px-4">
                         <TooltipProvider delayDuration={ 300 }>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setSidebarCollapsed(v => !v) }>
-                                    { sidebarCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" /> }
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent side="bottom">{ sidebarCollapsed ? 'Sidebar einblenden' : 'Sidebar ausblenden' }</TooltipContent>
-                        </Tooltip>
-
-                        <div className="flex-1 min-w-0">
-                            { searchResult ? (
-                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                    <span>Suche: &ldquo;<span className="text-foreground font-medium">{ searchResult.searchValue }</span>&rdquo;</span>
-                                </div>
-                            ) : breadcrumb.length > 0 ? (
-                                <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
-                                    <span className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors shrink-0">Katalog</span>
-                                    { breadcrumb.map((label, i) => (
-                                        <Fragment key={ i }>
-                                            <span className="text-[11px] text-muted-foreground/30 shrink-0">›</span>
-                                            <span className={ `text-xs truncate ${ i === breadcrumb.length - 1 ? 'text-foreground font-medium' : 'text-muted-foreground' }` }>{ label }</span>
-                                        </Fragment>
-                                    )) }
-                                </div>
-                            ) : (
-                                <span className="text-sm text-muted-foreground">Wähle eine Kategorie</span>
-                            ) }
-                        </div>
-
-                        <div className="w-[240px] shrink-0" onMouseDown={ e => e.stopPropagation() }>
-                            <CatalogSearchView />
-                        </div>
-
-                        <Separator orientation="vertical" className="h-5" />
-
-                        <div className="flex items-center gap-1 shrink-0" onMouseDown={ e => e.stopPropagation() }>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className={ `h-7 w-7 ${ virtualPage === 'recent' ? 'bg-primary/10 text-primary' : '' }` }
-                                        onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'recent' })) }
-                                    >
-                                        <Clock className="w-3.5 h-3.5" />
-                                    </Button>
+                                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" className="h-7 w-7 shrink-0 px-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setSidebarCollapsed(v => !v) }>
+                                        { sidebarCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" /> }
+                                    </AlignButton.Root>
                                 </TooltipTrigger>
-                                <TooltipContent side="bottom">Zuletzt gekauft</TooltipContent>
+                                <TooltipContent side="bottom">{ sidebarCollapsed ? 'Sidebar einblenden' : 'Sidebar ausblenden' }</TooltipContent>
                             </Tooltip>
-
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className={ `h-7 w-7 ${ virtualPage === 'frequent' ? 'bg-primary/10 text-primary' : '' }` }
-                                        onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'frequent' })) }
-                                    >
-                                        <Flame className={ `w-3.5 h-3.5 ${ virtualPage !== 'frequent' ? 'text-orange-400' : '' }` } />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom">Meist gekauft</TooltipContent>
-                            </Tooltip>
-
-                            { isMod && (
+                            <div className="flex-1 min-w-0">
+                                { searchResult ? (
+                                    <div className="flex items-center gap-1.5 text-paragraph-sm text-text-sub-600">
+                                        <span>Suche: &ldquo;<span className="font-medium text-text-strong-950">{ searchResult.searchValue }</span>&rdquo;</span>
+                                    </div>
+                                ) : breadcrumb.length > 0 ? (
+                                    <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+                                        <span className="text-paragraph-xs shrink-0 cursor-pointer text-text-sub-600 transition-colors hover:text-text-strong-950">Katalog</span>
+                                        { breadcrumb.map((label, i) => (
+                                            <Fragment key={ i }>
+                                                <span className="shrink-0 text-paragraph-xs text-text-soft-400">›</span>
+                                                <span className={ `truncate text-paragraph-xs ${ i === breadcrumb.length - 1 ? 'font-medium text-text-strong-950' : 'text-text-sub-600' }` }>{ label }</span>
+                                            </Fragment>
+                                        )) }
+                                    </div>
+                                ) : (
+                                    <span className="text-paragraph-sm text-text-sub-600">Wähle eine Kategorie</span>
+                                ) }
+                            </div>
+                            <div className="w-[240px] shrink-0" onMouseDown={ e => e.stopPropagation() }>
+                                <CatalogSearchView />
+                            </div>
+                            <Divider.Root className="h-5 w-px bg-stroke-soft-200" />
+                            <div className="flex items-center gap-1 shrink-0" onMouseDown={ e => e.stopPropagation() }>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className={ `h-7 w-7 ${ staffView ? 'bg-primary/10 text-primary' : '' }` }
-                                            onClick={ () => setStaffView(v => !v) }
+                                        <AlignButton.Root
+                                            variant="neutral"
+                                            mode={ virtualPage === 'recent' ? 'lighter' : 'ghost' }
+                                            size="xxsmall"
+                                            className="h-7 w-7 px-0"
+                                            onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'recent' })) }
                                         >
-                                            <ShieldCheck className="w-3.5 h-3.5" />
-                                        </Button>
+                                            <Clock className="w-3.5 h-3.5" />
+                                        </AlignButton.Root>
                                     </TooltipTrigger>
-                                    <TooltipContent side="bottom">{ staffView ? 'Normal-Katalog' : 'Staff-Katalog' }</TooltipContent>
+                                    <TooltipContent side="bottom">Zuletzt gekauft</TooltipContent>
                                 </Tooltip>
-                            ) }
-                        </div>
-
-                        <button
-                            className="appearance-none border-0 bg-transparent rounded-md p-1 text-muted-foreground/40 hover:bg-accent hover:text-foreground transition-colors shrink-0"
-                            onMouseDown={ e => e.stopPropagation() }
-                            onClick={ () => setIsVisible(false) }
-                        >
-                            <X className="w-3.5 h-3.5" />
-                        </button>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <AlignButton.Root
+                                            variant="neutral"
+                                            mode={ virtualPage === 'frequent' ? 'lighter' : 'ghost' }
+                                            size="xxsmall"
+                                            className="h-7 w-7 px-0"
+                                            onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'frequent' })) }
+                                        >
+                                            <Flame className={ `w-3.5 h-3.5 ${ virtualPage !== 'frequent' ? 'text-warning-base' : '' }` } />
+                                        </AlignButton.Root>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom">Meist gekauft</TooltipContent>
+                                </Tooltip>
+                                { isMod && (
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <AlignButton.Root
+                                                variant="neutral"
+                                                mode={ staffView ? 'lighter' : 'ghost' }
+                                                size="xxsmall"
+                                                className="h-7 w-7 px-0"
+                                                onClick={ () => setStaffView(v => !v) }
+                                            >
+                                                <ShieldCheck className="w-3.5 h-3.5" />
+                                            </AlignButton.Root>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="bottom">{ staffView ? 'Normal-Katalog' : 'Staff-Katalog' }</TooltipContent>
+                                    </Tooltip>
+                                ) }
+                            </div>
+                            <button
+                                className="shrink-0 appearance-none rounded-10 border-0 bg-transparent p-1 text-text-sub-600 transition-colors hover:bg-bg-weak-50 hover:text-text-strong-950"
+                                onMouseDown={ e => e.stopPropagation() }
+                                onClick={ () => setIsVisible(false) }
+                            >
+                                <X className="w-3.5 h-3.5" />
+                            </button>
                         </TooltipProvider>
                     </div>
-
-                    {/* Content: Sidebar | Grid | Inspector */}
+                    { /* Content: Sidebar | Grid | Inspector */ }
                     <div className="flex-1 min-h-0 overflow-hidden flex">
 
                         { !sidebarCollapsed && (
-                            <div className="w-[260px] min-w-[260px] flex-col min-h-0 border-r border-border/40 bg-muted/5 flex">
+                            <div className="flex min-h-0 w-[280px] min-w-[280px] flex-col border-r border-stroke-soft-200 bg-bg-weak-50">
                                 <CatalogNavigationView staffView={ staffView } />
                             </div>
                         ) }
-
                         <div ref={ catalogContentRef } className="flex-1 min-w-0 overflow-hidden flex flex-col relative">
                             { !virtualPage && <CatalogSubcategoryChipsView /> }
                             <div className="flex-1 min-h-0 overflow-hidden flex">
@@ -405,15 +410,13 @@ export const CatalogView: FC<{}> = props =>
                                         : GetCatalogLayout(currentPage, () => setNavigationHidden(true))
                                     }
                                 </div>
-
-                                {/* Right-side Inspector Panel */}
+                                { /* Right-side Inspector Panel */ }
                                 { showInspector && currentOffer && (
                                     <CatalogInspectorView />
                                 ) }
                             </div>
                         </div>
                     </div>
-
                     <div className="catalog-resize-handle" onMouseDown={ onResizeStart } />
                 </div>
             </DraggableWindow>

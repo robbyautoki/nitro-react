@@ -1,7 +1,7 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useState } from 'react';
 import { useBetween } from 'use-between';
-import { AddEventLinkTracker, GetConfiguration, RemoveLinkEventTracker } from '../../api';
+import { AddEventLinkTracker, GetConfiguration, RemoveLinkEventTracker, getAuthHeaders } from '../../api';
 
 export interface WorkshopItem
 {
@@ -39,6 +39,8 @@ const useWorkshopState = () =>
     const [ selectedItem, setSelectedItem ] = useState<WorkshopItem | null>(null);
     const [ isLoading, setIsLoading ] = useState(false);
     const [ isRepairing, setIsRepairing ] = useState(false);
+    const [ error, setError ] = useState<string | null>(null);
+    const [ lastRepairResult, setLastRepairResult ] = useState<Record<string, unknown> | null>(null);
 
     const cmsUrl = GetConfiguration<string>('url.prefix', '');
 
@@ -78,14 +80,24 @@ const useWorkshopState = () =>
         if(!cmsUrl) return;
 
         setIsLoading(true);
+        setError(null);
 
-        fetch(`${ cmsUrl }/api/workshop`, { credentials: 'include' })
-            .then(res => res.json())
+        fetch(`${ cmsUrl }/api/workshop`, { headers: getAuthHeaders() })
+            .then(async res =>
+            {
+                const data = await res.json().catch(() => null);
+                if(!res.ok) throw new Error(data?.error || 'Werkstatt konnte nicht geladen werden');
+                return data;
+            })
             .then((data: WorkshopItem[]) =>
             {
                 setItems(data || []);
             })
-            .catch(() => setItems([]))
+            .catch(error =>
+            {
+                setItems([]);
+                setError(error instanceof Error ? error.message : 'Werkstatt konnte nicht geladen werden');
+            })
             .finally(() => setIsLoading(false));
     }, [ cmsUrl ]);
 
@@ -93,8 +105,13 @@ const useWorkshopState = () =>
     {
         if(!cmsUrl) return;
 
-        fetch(`${ cmsUrl }/api/workshop/feed-candidates`, { credentials: 'include' })
-            .then(res => res.json())
+        fetch(`${ cmsUrl }/api/workshop/feed-candidates`, { headers: getAuthHeaders() })
+            .then(async res =>
+            {
+                const data = await res.json().catch(() => null);
+                if(!res.ok) throw new Error(data?.error || 'Futter-Items konnten nicht geladen werden');
+                return data;
+            })
             .then((data: FeedCandidate[]) =>
             {
                 setFeedCandidates(data || []);
@@ -117,17 +134,19 @@ const useWorkshopState = () =>
         if(!cmsUrl || isRepairing) return;
 
         setIsRepairing(true);
+        setError(null);
+        setLastRepairResult(null);
 
         try
         {
             const res = await fetch(`${ cmsUrl }/api/workshop/repair`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ itemId, type: 'credits' }),
             });
 
             const data = await res.json();
+            setLastRepairResult(data);
 
             if(data.success)
             {
@@ -137,9 +156,12 @@ const useWorkshopState = () =>
 
             return data;
         }
-        catch
+        catch(error)
         {
-            return { error: 'Network error' };
+            const result = { error: error instanceof Error ? error.message : 'Network error' };
+            setError(result.error);
+            setLastRepairResult(result);
+            return result;
         }
         finally
         {
@@ -153,17 +175,19 @@ const useWorkshopState = () =>
         if(!cmsUrl || isRepairing) return;
 
         setIsRepairing(true);
+        setError(null);
+        setLastRepairResult(null);
 
         try
         {
             const res = await fetch(`${ cmsUrl }/api/workshop/repair`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ itemId, type: 'feed', feedItemId }),
             });
 
             const data = await res.json();
+            setLastRepairResult(data);
 
             if(data.success)
             {
@@ -174,9 +198,12 @@ const useWorkshopState = () =>
 
             return data;
         }
-        catch
+        catch(error)
         {
-            return { error: 'Network error' };
+            const result = { error: error instanceof Error ? error.message : 'Network error' };
+            setError(result.error);
+            setLastRepairResult(result);
+            return result;
         }
         finally
         {
@@ -190,6 +217,8 @@ const useWorkshopState = () =>
         items, feedCandidates,
         selectedItem, setSelectedItem,
         isLoading, isRepairing,
+        error, setError,
+        lastRepairResult,
         repairWithCredits, repairWithFeed,
         loadItems,
     };

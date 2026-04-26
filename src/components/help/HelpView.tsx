@@ -1,8 +1,7 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { HelpCircle, ChevronLeft } from 'lucide-react';
-import { AddEventLinkTracker, LocalizeText, RemoveLinkEventTracker, ReportState } from '../../api';
+import { ChevronLeft, HelpCircle, X } from 'lucide-react';
+import { AddEventLinkTracker, RemoveLinkEventTracker, ReportState } from '../../api';
 import { useHelp } from '../../hooks';
 import { DescribeReportView } from './views/DescribeReportView';
 import { HelpIndexView } from './views/HelpIndexView';
@@ -12,6 +11,8 @@ import { SelectReportedChatsView } from './views/SelectReportedChatsView';
 import { SelectReportedUserView } from './views/SelectReportedUserView';
 import { SelectTopicView } from './views/SelectTopicView';
 import { ReportSummaryView } from './views/ReportSummaryView';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignModal from '@/align-ui/components/ui/modal';
 
 const STEP_TITLES: Record<number, string> = {
     [ReportState.SELECT_USER]: 'Wen moechtest du melden?',
@@ -122,44 +123,47 @@ export const HelpView: FC<{}> = () =>
 
     return (
         <>
-            <div className="fixed inset-0 z-[200] flex items-center justify-center pointer-events-auto">
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={ onClose } />
-
-                <div className="relative w-[480px] max-h-[85vh] rounded-2xl border border-white/[0.08] bg-white/[0.04] p-0.5 shadow-2xl">
-                    <div className="relative flex flex-col overflow-hidden rounded-[14px] border border-white/[0.06] bg-[rgba(12,12,16,0.97)] max-h-[calc(85vh-4px)]">
-
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] bg-gradient-to-b from-white/[0.06] to-transparent shrink-0">
-                            <div className="flex items-center gap-2.5">
+            <AlignModal.Root open={ isVisible } onOpenChange={ open => !open && onClose() }>
+                <AlignModal.Content className="z-[201] max-w-[480px] overflow-hidden" overlayClassName="z-[200]" showClose={ false }>
+                    <AlignModal.Header className="items-center py-3 pl-4 pr-3">
+                        <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-bg-weak-50 text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">
+                                <HelpCircle className="size-4" />
+                            </span>
+                            <div className="flex min-w-0 flex-1 items-center gap-2">
                                 { isInReportFlow && (
-                                    <button
-                                        className="p-1 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all mr-1"
+                                    <AlignButton.Root
+                                        type="button"
+                                        variant="neutral"
+                                        mode="ghost"
+                                        size="xxsmall"
+                                        className="size-7 p-0"
                                         onClick={ goBack }
                                     >
-                                        <ChevronLeft className="size-4" />
-                                    </button>
+                                        <AlignButton.Icon as={ ChevronLeft } className="size-4" />
+                                    </AlignButton.Root>
                                 ) }
-                                <HelpCircle className="size-4 text-white/70" />
-                                <span className="text-sm font-semibold text-white/90 tracking-tight">
+                                <AlignModal.Title className="truncate">
                                     { isInReportFlow ? stepTitle : 'Hilfe' }
-                                </span>
+                                </AlignModal.Title>
                             </div>
-                            <button
-                                className="p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/[0.08] transition-all"
-                                onClick={ onClose }
-                            >
-                                <FaTimes className="size-3" />
-                            </button>
                         </div>
-
-                        {/* Content */}
-                        <div className="flex-1 overflow-y-auto px-5 py-4 min-h-[200px]">
-                            <CurrentStepView />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+                        <AlignButton.Root
+                            type="button"
+                            variant="neutral"
+                            mode="ghost"
+                            size="xxsmall"
+                            className="size-7 p-0"
+                            onClick={ onClose }
+                        >
+                            <AlignButton.Icon as={ X } className="size-4" />
+                        </AlignButton.Root>
+                    </AlignModal.Header>
+                    <AlignModal.Body className="max-h-[calc(85vh-80px)] min-h-[200px] overflow-y-auto p-4">
+                        <CurrentStepView />
+                    </AlignModal.Body>
+                </AlignModal.Content>
+            </AlignModal.Root>
             <SanctionSatusView />
             <NameChangeView />
         </>

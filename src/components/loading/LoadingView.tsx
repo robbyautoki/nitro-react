@@ -1,8 +1,8 @@
 import { FC, useEffect, useMemo, useState } from 'react';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { Marquee } from '../ui/marquee';
 import { SlidingNumber } from '../ui/sliding-number';
-import bahhosSvg from '@/assets/images/bahhos.svg';
+import bahhosLogo from '@/assets/images/brand/bahhos-logo.png';
 
 interface LoadingViewProps
 {
@@ -44,7 +44,7 @@ function shuffleArray(arr: string[]): string[]
 function PhotoCard({ url }: { url: string })
 {
     return (
-        <div className="relative w-[320px] h-[240px] rounded-2xl overflow-hidden shadow-lg shrink-0">
+        <div className="relative w-[320px] h-[240px] rounded-2xl overflow-hidden shadow-2xl shrink-0">
             <img
                 src={ url }
                 alt=""
@@ -73,7 +73,8 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                     setPhotoUrls(data.map(p => p.url));
                 }
             })
-            .catch(() => {});
+            .catch(() =>
+            {});
     }, []);
 
     useEffect(() =>
@@ -89,16 +90,22 @@ export const LoadingView: FC<LoadingViewProps> = props =>
         return Array.from({ length: 6 }, () => shuffleArray(ensureMinCards(photoUrls, 4)));
     }, [ photoUrls ]);
 
+    const clampedPercent = Math.min(Math.max(percent, 0), 100);
+
     return (
         <div className="nitro-loading">
-            { /* 3D Gallery Background */ }
+            { /* Animated mesh gradient background (always visible, even without photos) */ }
+            <div className="nitro-loading-mesh" aria-hidden="true" />
+            <div className="nitro-loading-noise" aria-hidden="true" />
+
+            { /* Optional 3D photo gallery layer */ }
             { columns.length > 0 && (
-                <div className="absolute inset-0 overflow-hidden flex items-center justify-center">
+                <div className="absolute inset-0 overflow-hidden flex items-center justify-center z-[1]">
                     <div
-                        className="flex flex-row gap-5 h-full w-[250vw]"
+                        className="flex flex-row gap-5 h-full w-[250vw] blur-[2px]"
                         style={ {
                             transform: 'scale(1.5) rotateX(15deg) rotateY(-8deg) rotateZ(15deg)',
-                            opacity: 0.35,
+                            opacity: 0.22,
                         } }
                     >
                         { columns.map((col, ci) => (
@@ -117,80 +124,102 @@ export const LoadingView: FC<LoadingViewProps> = props =>
                 </div>
             ) }
 
-            { /* Gradient Overlays */ }
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/90 to-transparent z-[1]" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/90 to-transparent z-[1]" />
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-black/80 to-transparent z-[1]" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-black/80 to-transparent z-[1]" />
+            { /* Vignette */ }
+            <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.55)_75%,_rgba(0,0,0,0.85)_100%)]" />
 
             { /* Center Content */ }
-            <div className="relative z-[2] flex flex-col items-center justify-center h-full gap-6">
-                <motion.img
-                    src={ bahhosSvg }
-                    alt="Bahhos"
-                    className="max-w-[320px] w-[50vw] object-contain drop-shadow-2xl"
-                    initial={ { opacity: 0, scale: 0.8 } }
-                    animate={ { opacity: 1, scale: 1 } }
-                    transition={ { duration: 0.8, ease: 'easeOut' } }
-                />
+            <div className="relative z-[3] flex flex-col items-center justify-center h-full gap-8 px-6">
+                <motion.div
+                    className="relative"
+                    initial={ { opacity: 0, scale: 0.85, y: 8 } }
+                    animate={ { opacity: 1, scale: 1, y: 0 } }
+                    transition={ { duration: 0.9, ease: [ 0.16, 1, 0.3, 1 ] } }
+                >
+                    { /* Glow halo behind logo */ }
+                    <div
+                        className="absolute inset-0 -z-10 blur-3xl opacity-70"
+                        style={ {
+                            background: 'radial-gradient(closest-side, rgba(255,166,71,0.55), rgba(78,131,255,0.35) 60%, transparent 80%)',
+                        } }
+                    />
+                    <motion.img
+                        src={ bahhosLogo }
+                        alt="Bahhos.de"
+                        draggable={ false }
+                        className="nitro-loading-logo"
+                        style={ { imageRendering: 'pixelated' } }
+                        animate={ { y: [ 0, -6, 0 ] } }
+                        transition={ { duration: 4.2, repeat: Infinity, ease: 'easeInOut' } }
+                    />
+                </motion.div>
 
                 { isError ? (
                     <motion.div
-                        className="flex flex-col items-center gap-4 max-w-[340px] text-center"
-                        initial={ { opacity: 0, y: 10 } }
+                        className="flex flex-col items-center gap-4 max-w-[360px] text-center"
+                        initial={ { opacity: 0, y: 12 } }
                         animate={ { opacity: 1, y: 0 } }
-                        transition={ { duration: 0.5 } }
+                        transition={ { duration: 0.5, delay: 0.2 } }
                     >
-                        <p className="text-white/90 text-base font-semibold drop-shadow-lg">
-                            { message }
-                        </p>
+                        <div className="rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 px-6 py-5 shadow-2xl">
+                            <p className="text-white/95 text-base font-semibold drop-shadow-lg">
+                                { message }
+                            </p>
+                            <p className="text-white/50 text-xs mt-2">
+                                Falls das Problem bestehen bleibt, schau auf unseren Discord.
+                            </p>
+                        </div>
                         <button
                             onClick={ () => window.location.reload() }
-                            className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-sm font-medium backdrop-blur-sm transition-all duration-200 cursor-pointer"
+                            className="px-7 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 active:scale-[0.97] border border-white/15 text-white text-sm font-semibold backdrop-blur-md transition-all duration-200 cursor-pointer shadow-lg"
                         >
                             Erneut versuchen
                         </button>
-                        <p className="text-white/30 text-xs mt-1">
-                            Falls das Problem bestehen bleibt, schau auf unseren Discord.
-                        </p>
                     </motion.div>
                 ) : (
-                    <>
-                        <motion.div
-                            className="flex items-center gap-1 text-white text-2xl font-mono font-bold drop-shadow-lg"
-                            initial={ { opacity: 0, y: 10 } }
-                            animate={ { opacity: 1, y: 0 } }
-                            transition={ { delay: 0.3, duration: 0.5 } }
-                        >
-                            <SlidingNumber value={ Math.round(percent) } />
-                            <span>%</span>
-                        </motion.div>
+                    <motion.div
+                        className="flex flex-col items-center gap-5 w-full max-w-sm"
+                        initial={ { opacity: 0, y: 12 } }
+                        animate={ { opacity: 1, y: 0 } }
+                        transition={ { duration: 0.6, delay: 0.25 } }
+                    >
+                        { /* Big percentage */ }
+                        <div className="flex items-baseline gap-1 text-white tabular-nums">
+                            <span className="text-5xl font-bold tracking-tight drop-shadow-[0_2px_20px_rgba(255,166,71,0.45)]">
+                                <SlidingNumber value={ Math.round(clampedPercent) } />
+                            </span>
+                            <span className="text-2xl font-semibold text-white/60">%</span>
+                        </div>
 
-                        <motion.div
-                            className="w-[240px] h-[4px] rounded-full bg-white/10 overflow-hidden"
-                            initial={ { opacity: 0 } }
-                            animate={ { opacity: 1 } }
-                            transition={ { delay: 0.4 } }
-                        >
+                        { /* Progress bar with brand gradient */ }
+                        <div className="relative w-[280px] h-[6px] rounded-full bg-white/10 overflow-hidden ring-1 ring-white/5">
                             <motion.div
-                                className="h-full rounded-full bg-white"
+                                className="h-full rounded-full"
+                                style={ {
+                                    background: 'linear-gradient(90deg, #ffa647 0%, #ff7a47 35%, #4e83ff 100%)',
+                                    boxShadow: '0 0 18px rgba(255,166,71,0.55), 0 0 36px rgba(78,131,255,0.35)',
+                                } }
                                 initial={ { width: '0%' } }
-                                animate={ { width: `${ Math.min(percent, 100) }%` } }
-                                transition={ { duration: 0.5, ease: 'easeOut' } }
+                                animate={ { width: `${ clampedPercent }%` } }
+                                transition={ { duration: 0.6, ease: [ 0.16, 1, 0.3, 1 ] } }
                             />
-                        </motion.div>
+                        </div>
 
-                        <motion.p
-                            key={ tipIndex }
-                            className="text-white/60 text-sm font-medium mt-2 drop-shadow"
-                            initial={ { opacity: 0, y: 8 } }
-                            animate={ { opacity: 1, y: 0 } }
-                            exit={ { opacity: 0, y: -8 } }
-                            transition={ { duration: 0.4 } }
-                        >
-                            { LOADING_TIPS[tipIndex] }
-                        </motion.p>
-                    </>
+                        { /* Tip text */ }
+                        <div className="h-5 mt-1 flex items-center justify-center">
+                            <AnimatePresence mode="wait">
+                                <motion.p
+                                    key={ tipIndex }
+                                    className="text-white/75 text-sm font-medium drop-shadow"
+                                    initial={ { opacity: 0, y: 6 } }
+                                    animate={ { opacity: 1, y: 0 } }
+                                    exit={ { opacity: 0, y: -6 } }
+                                    transition={ { duration: 0.35, ease: 'easeOut' } }
+                                >
+                                    { LOADING_TIPS[tipIndex] }
+                                </motion.p>
+                            </AnimatePresence>
+                        </div>
+                    </motion.div>
                 ) }
             </div>
         </div>

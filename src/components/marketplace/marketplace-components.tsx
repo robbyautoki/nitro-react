@@ -12,7 +12,7 @@ export const CurrencyIcon: FC<{ type: string; className?: string }> = ({ type, c
 export const ItemIcon: FC<{ itemName: string; className?: string }> = ({ itemName, className }) =>
 {
     const [ err, setErr ] = useState(false);
-    if(err) return <div className={ `flex items-center justify-center bg-muted/20 ${ className || 'w-full h-full' }` }><Package className="w-3.5 h-3.5 text-muted-foreground/30" /></div>;
+    if(err) return <div className={ `flex items-center justify-center bg-bg-weak-50 ${ className || 'w-full h-full' }` }><Package className="w-3.5 h-3.5 text-text-soft-400" /></div>;
     return <img src={ getFurniIcon(itemName) } alt={ itemName } className={ `object-contain ${ className || 'w-full h-full' }` } style={ { imageRendering: 'pixelated' } } loading="lazy" onError={ () => setErr(true) } />;
 };
 
@@ -20,10 +20,10 @@ export const PriceDelta: FC<{ price: number; avg: number }> = ({ price, avg }) =
 {
     if(avg <= 0) return null;
     const pct = ((price - avg) / avg) * 100;
-    if(Math.abs(pct) < 1) return <span className="text-[9px] text-muted-foreground/50 tabular-nums">~Ø</span>;
+    if(Math.abs(pct) < 1) return <span className="text-subheading-2xs text-text-soft-400 tabular-nums">~Ø</span>;
     const isUp = pct > 0;
     return (
-        <span className={ `text-[9px] tabular-nums font-medium flex items-center gap-0.5 ${ isUp ? 'text-red-500' : 'text-emerald-500' }` }>
+        <span className={ `flex items-center gap-0.5 text-subheading-2xs tabular-nums ${ isUp ? 'text-error-base' : 'text-success-base' }` }>
             { isUp ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" /> }
             { isUp ? '+' : '' }{ pct.toFixed(1) }%
         </span>

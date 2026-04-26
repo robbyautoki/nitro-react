@@ -1,7 +1,7 @@
 import { NavigatorSearchResultSet, RoomDataParser } from '@nitrots/nitro-renderer';
 import { FC, useMemo } from 'react';
-import { CreateRoomSession, GetConfiguration, TryVisitRoom } from '../../../api';
-import { cn } from '@/lib/utils';
+import { CreateRoomSession, GetConfiguration } from '../../../api';
+import { cn } from '@/align-ui/utils/cn';
 
 export interface NavigatorFeaturedRoomsViewProps
 {
@@ -27,7 +27,7 @@ export const NavigatorFeaturedRoomsView: FC<NavigatorFeaturedRoomsViewProps> = p
             }
         }
 
-        return [...roomMap.values()]
+        return [ ...roomMap.values() ]
             .sort((a, b) => b.userCount - a.userCount)
             .slice(0, 3);
     }, [ searchResult ]);
@@ -37,15 +37,15 @@ export const NavigatorFeaturedRoomsView: FC<NavigatorFeaturedRoomsViewProps> = p
     const getStatusColor = (room: RoomDataParser) =>
     {
         const pct = 100 * (room.userCount / room.maxUserCount);
-        if(pct >= 90) return 'bg-red-400';
-        if(pct >= 50) return 'bg-amber-400';
-        return 'bg-green-400';
+        if(pct >= 90) return 'bg-error-base';
+        if(pct >= 50) return 'bg-warning-base';
+        return 'bg-success-base';
     };
 
     return (
         <div className="mb-2">
             <div className="flex items-center gap-2 px-2 pb-1.5">
-                <span className="text-[10px] font-semibold uppercase tracking-[1px] text-zinc-500">Live Activity</span>
+                <span className="text-subheading-2xs font-semibold uppercase tracking-[1px] text-text-soft-400">Live Activity</span>
             </div>
             <div className="nav-live-cards">
                 { featuredRooms.map((room) =>
@@ -58,7 +58,10 @@ export const NavigatorFeaturedRoomsView: FC<NavigatorFeaturedRoomsViewProps> = p
                             onClick={ () => CreateRoomSession(room.roomId) }
                         >
                             <div className="nav-live-card-thumb">
-                                <img src={ thumbnailUrl } alt="" onError={ (e) => { e.currentTarget.style.display = 'none' } } />
+                                <img src={ thumbnailUrl } alt="" onError={ (e) =>
+                                {
+                                    e.currentTarget.style.display = 'none';
+                                } } />
                             </div>
                             <div className="nav-live-card-info">
                                 <span className="nav-live-card-name">{ room.roomName }</span>

@@ -1,5 +1,6 @@
 
 /* eslint-disable react/no-unknown-property */
+import { IGetImageListener, ImageResult, TextureUtils, Vector3d } from "@nitrots/nitro-renderer";
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { Badge } from "@/components/ui/reui-badge";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import * as FancyButton from "@/align-ui/components/ui/fancy-button";
 import {
   ChevronRight,
   ChevronDown,
@@ -70,7 +72,7 @@ import {
   Shirt,
 } from "lucide-react";
 
-import { GetConfiguration } from '@/api';
+import { GetConfiguration, GetRoomEngine } from '@/api';
 const ASSETS_URL = () => {
   try { const v = GetConfiguration<string>('asset.url', ''); if (v && !v.includes('localhost')) return v; } catch {}
   return window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://assets.bahhos.de';
@@ -92,7 +94,73 @@ const HC_FIGURES = [
 ];
 
 function getFurniIcon(cn: string) {
-  return `${ASSETS_URL()}/c_images/${cn.split("*")[0]}_icon.png`;
+  return `${ASSETS_URL()}/c_images/${encodeURIComponent(cn.trim())}_icon.png`;
+}
+function addCaseCandidates(names: Set<string>, name: string) {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+
+  names.add(trimmed);
+  names.add(trimmed.toLowerCase());
+  names.add(trimmed.toUpperCase());
+
+  if (trimmed.includes("_")) {
+    names.add(trimmed.split("_").map((part) => part ? `${part[0].toUpperCase()}${part.slice(1)}` : part).join("_"));
+  }
+}
+function addAliasCandidates(names: Set<string>, name: string) {
+  const trimmed = name.trim();
+  if (!trimmed) return;
+
+  const lowercase = trimmed.toLowerCase();
+  const withoutKnownPrefix = lowercase.replace(/^(habbox|cstm|custom)_/, "");
+  const aliasBases = new Set([lowercase, withoutKnownPrefix]);
+
+  for (const base of aliasBases) {
+    if (!base) continue;
+    names.add(`habbox_${base}`);
+    names.add(`cstm_${base}`);
+
+    if (base.startsWith("luanda_")) {
+      names.add(`cstm_luanda23_${base.slice("luanda_".length)}`);
+    }
+  }
+}
+function getFurniClassnameCandidates(cn: string) {
+  const classname = cn.trim();
+  if (!classname) return [];
+
+  const variantNames = [classname];
+
+  if (classname.includes("*")) {
+    const parts = classname.split("*");
+
+    for (let length = parts.length - 1; length >= 1; length--) {
+      variantNames.push(parts.slice(0, length).join("*"));
+    }
+  }
+
+  const names = new Set<string>();
+  for (const name of variantNames) {
+    addCaseCandidates(names, name);
+    addAliasCandidates(names, name);
+  }
+
+  return Array.from(names);
+}
+function getFurniIconSources(cn: string) {
+  return getFurniClassnameCandidates(cn).map(getFurniIcon);
+}
+function getRoomEngineFurniIcon(spriteId?: number, itemType?: string) {
+  if (!spriteId || spriteId <= 0) return null;
+
+  try {
+    return itemType?.toLowerCase() === "i"
+      ? GetRoomEngine().getFurnitureWallIconUrl(spriteId)
+      : GetRoomEngine().getFurnitureFloorIconUrl(spriteId);
+  } catch {
+    return null;
+  }
 }
 function getCatalogIcon(iconId: number) {
   return `${ASSETS_URL()}/c_images/catalogue/icon_${iconId}.png`;
@@ -173,12 +241,14 @@ interface RecentPurchase {
   id: number; timestamp: number; user_id: number; catalog_item_id: number;
   catalog_name: string; cost_credits: number; cost_points: number; amount: number;
   classname: string | null; public_name: string | null; username: string | null;
+  sprite_id?: number | null; item_type?: string | null;
 }
 
 interface PopularItem {
   catalog_item_id: number; catalog_name: string; purchase_count: number;
   cost_credits: number; cost_points: number;
   classname: string | null; public_name: string | null;
+  sprite_id?: number | null; item_type?: string | null;
 }
 
 const INTERACTION_LABELS: Record<string, { label: string; color: string }> = {
@@ -256,23 +326,138 @@ function CatalogIconImg({ iconId, size = 20 }: { iconId: number; size?: number }
 
 // ─── Furni Icon ─────────────────────────────
 
-function ItemIcon({ classname, className }: { classname: string; className?: string }) {
-  const [err, setErr] = useState(false);
-  if (err)
+type FurniIconItem = {
+  classname?: string | null;
+  sprite_id?: number | null;
+  item_type?: string | null;
+  public_name?: string | null;
+};
+
+function ItemIcon({
+  item,
+  classname,
+  spriteId,
+  itemType,
+  className,
+  preferredSrc,
+  animated = false,
+  loading = "eager",
+}: {
+  item?: FurniIconItem;
+  classname?: string;
+  spriteId?: number;
+  itemType?: string;
+  className?: string;
+  preferredSrc?: string;
+  animated?: boolean;
+  loading?: "eager" | "lazy";
+}) {
+  const resolvedClassname = (classname ?? item?.classname ?? "").trim();
+  const resolvedSpriteId = spriteId ?? item?.sprite_id ?? undefined;
+  const resolvedItemType = itemType ?? item?.item_type ?? undefined;
+  const sources = useMemo(() => {
+    const next = [
+      ...getFurniIconSources(resolvedClassname),
+      preferredSrc || null,
+      getRoomEngineFurniIcon(resolvedSpriteId, resolvedItemType),
+    ].filter((src): src is string => Boolean(src));
+
+    return Array.from(new Set(next));
+  }, [preferredSrc, resolvedSpriteId, resolvedItemType, resolvedClassname]);
+  const sourceKey = useMemo(() => sources.join("|"), [sources]);
+  const canRenderRoomEngineImage = !!resolvedSpriteId && resolvedSpriteId > 0;
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const [generatedImage, setGeneratedImage] = useState<HTMLImageElement | null>(null);
+  const [generationFailed, setGenerationFailed] = useState(false);
+
+  useEffect(() => {
+    setSourceIndex(0);
+    setGeneratedImage(null);
+    setGenerationFailed(false);
+  }, [sourceKey, resolvedSpriteId, resolvedItemType]);
+
+  useEffect(() => {
+    if (sourceIndex < sources.length || generatedImage || generationFailed || !canRenderRoomEngineImage) return;
+
+    let disposed = false;
+    const commitImage = (image: HTMLImageElement | null) => {
+      if (!image || disposed) return;
+
+      const setLoadedImage = () => {
+        if (!disposed) setGeneratedImage(image);
+      };
+
+      if (image.complete || image.src?.startsWith("data:")) setLoadedImage();
+      else image.onload = setLoadedImage;
+    };
+
+    const listener: IGetImageListener = {
+      imageReady: (_id, texture, image) => {
+        if (!image && texture) image = TextureUtils.generateImage(texture);
+        commitImage(image);
+      },
+      imageFailed: () => {
+        if (!disposed) setGenerationFailed(true);
+      },
+    };
+
+    try {
+      let imageResult: ImageResult = null;
+
+      if (resolvedItemType?.toLowerCase() === "i") {
+        imageResult = GetRoomEngine().getFurnitureWallImage(resolvedSpriteId, new Vector3d(2), 64, listener);
+      } else {
+        imageResult = GetRoomEngine().getFurnitureFloorImage(resolvedSpriteId, new Vector3d(2), 64, listener);
+      }
+
+      commitImage(imageResult?.getImage() ?? null);
+    } catch {
+      setGenerationFailed(true);
+    }
+
+    return () => { disposed = true; };
+  }, [canRenderRoomEngineImage, generatedImage, generationFailed, resolvedItemType, resolvedSpriteId, sourceIndex, sources.length]);
+
+  if (sourceIndex >= sources.length && generatedImage) {
+    return (
+      <div className={`flex items-center justify-center overflow-hidden ${className || "w-full h-full"}`}>
+        <img
+          src={generatedImage.src}
+          alt={item?.public_name || resolvedClassname}
+          className={`max-w-full max-h-full object-contain ${animated ? "animate-[float_3s_ease-in-out_infinite]" : ""}`}
+          style={{ imageRendering: "pixelated" }}
+          loading={loading}
+          onError={() => { setGeneratedImage(null); setGenerationFailed(true); }}
+        />
+      </div>
+    );
+  }
+
+  if (sourceIndex >= sources.length && canRenderRoomEngineImage && !generationFailed)
+    return (
+      <div className={`flex items-center justify-center overflow-hidden ${className || "w-full h-full"}`}>
+        <Skeleton className="w-7 h-7 rounded-md bg-muted/20" />
+      </div>
+    );
+
+  if ((!resolvedClassname && !canRenderRoomEngineImage) || sourceIndex >= sources.length)
     return (
       <div className={`flex items-center justify-center rounded bg-muted/30 ${className || "w-full h-full"}`}>
         <Package className="w-4 h-4 text-muted-foreground/40" />
       </div>
     );
+
   return (
-    <img
-      src={getFurniIcon(classname)}
-      alt={classname}
-      className={`object-contain ${className || "w-full h-full"}`}
-      style={{ imageRendering: "pixelated" }}
-      loading="lazy"
-      onError={() => setErr(true)}
-    />
+    <div className={`flex items-center justify-center overflow-hidden ${className || "w-full h-full"}`}>
+      <img
+        src={sources[sourceIndex]}
+        alt={item?.public_name || resolvedClassname}
+        className={`max-w-full max-h-full object-contain ${animated ? "animate-[float_3s_ease-in-out_infinite]" : ""}`}
+        style={{ imageRendering: "pixelated" }}
+        loading={loading}
+        onError={() => setSourceIndex((current) => current + 1)}
+      />
+    </div>
   );
 }
 
@@ -347,7 +532,7 @@ function ItemTile({ item, isSelected, onSelect }: { item: CatalogItem; isSelecte
                 ? "border-primary bg-primary/10 ring-2 ring-primary/20 shadow-[0_0_12px_rgba(var(--primary),0.15)]"
                 : "border-border/50 bg-card hover:border-primary/30 hover:bg-accent/30 hover:shadow-sm"}`}
           >
-            <ItemIcon classname={item.classname} />
+            <ItemIcon item={item} />
             {item.limited_stack > 0 && (
               <div className="absolute top-1 right-1">
                 <Badge variant="warning" size="xs" className="text-[8px] px-1">LTD</Badge>
@@ -527,7 +712,7 @@ function CatalogFrontpage({
               {popularItems.map((item) => (
                 <div key={item.catalog_item_id} className="shrink-0 w-[120px] flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/40 bg-card hover:border-primary/30 hover:shadow-sm transition-all cursor-pointer">
                   <div className="w-12 h-12 rounded-lg bg-muted/20 flex items-center justify-center overflow-hidden">
-                    {item.classname && <ItemIcon classname={item.classname} />}
+                    {item.classname && <ItemIcon item={item} />}
                   </div>
                   <span className="text-[11px] font-medium text-center leading-tight line-clamp-2">{item.public_name || item.classname || item.catalog_name}</span>
                   <Badge variant="secondary" size="xs" className="gap-0.5"><Flame className="w-2.5 h-2.5 text-orange-400" />{item.purchase_count}×</Badge>
@@ -548,7 +733,7 @@ function CatalogFrontpage({
               {recentPurchases.slice(0, 8).map((p) => (
                 <div key={p.id} className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-accent/30 transition-colors cursor-pointer">
                   <div className="w-9 h-9 shrink-0 rounded-lg bg-muted/20 flex items-center justify-center overflow-hidden">
-                    {p.classname && <ItemIcon classname={p.classname} />}
+                    {p.classname && <ItemIcon item={p} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-medium block truncate">{p.public_name || p.classname || p.catalog_name}</span>
@@ -667,12 +852,8 @@ function LayoutPets({ detail, items, selectedItem, onSelect }: {
                 <button key={item.catalog_item_id} onClick={() => onSelect(isActive ? null : item)}
                   className={`relative flex flex-col items-center gap-2 p-4 rounded-xl border transition-all duration-200 ${isActive
                     ? "border-primary bg-primary/10 ring-2 ring-primary/20 shadow-lg" : "border-border/50 bg-card hover:border-primary/30 hover:shadow-md"}`}>
-                  <div className="w-20 h-16 flex items-center justify-center">
-                    <img src={`${ASSETS_URL()}/c_images/${item.classname.split("*")[0]}_icon.png`} alt={item.public_name}
-                      className="max-w-full max-h-full object-contain" style={{ imageRendering: "pixelated" }}
-                      onError={(e) => { (e.target as HTMLImageElement).src = ""; (e.target as HTMLImageElement).style.display = "none"; }} />
-                    {/* Fallback */}
-                    <PawPrint className="w-8 h-8 text-muted-foreground/20 absolute" />
+                  <div className="w-20 h-16 flex items-center justify-center overflow-hidden">
+                    <ItemIcon item={item} className="w-full h-full" />
                   </div>
                   <span className="text-xs font-semibold text-center leading-tight">{item.public_name || item.classname}</span>
                   <PriceDisplay credits={item.cost_credits} points={item.cost_points} isFree={item.cost_credits === 0 && item.cost_points === 0} size="sm" />
@@ -868,7 +1049,7 @@ function LayoutSingleBundle({ detail, items }: { detail: PageDetail | null; item
         <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: "thin" }}>
           {items.map((item) => (
             <div key={item.catalog_item_id} className="shrink-0 w-[56px] h-[56px] rounded-lg border border-border/40 bg-card flex items-center justify-center overflow-hidden">
-              <ItemIcon classname={item.classname} className="w-full h-full" />
+              <ItemIcon item={item} className="w-full h-full" />
             </div>
           ))}
         </div>
@@ -920,7 +1101,7 @@ function LayoutRoomBundle({ detail, items }: { detail: PageDetail | null; items:
             {items.slice(0, 30).map((item) => (
               <div key={item.catalog_item_id} className="flex items-center gap-2 py-1 px-2 rounded-lg hover:bg-accent/30 transition-colors">
                 <div className="w-8 h-8 shrink-0 rounded bg-muted/20 flex items-center justify-center overflow-hidden">
-                  <ItemIcon classname={item.classname} className="w-full h-full" />
+                  <ItemIcon item={item} className="w-full h-full" />
                 </div>
                 <span className="text-[11px] truncate flex-1">{item.public_name || item.classname}</span>
                 {item.amount > 1 && <Badge variant="secondary" size="xs">×{item.amount}</Badge>}
@@ -965,7 +1146,7 @@ function LayoutTrophies({ detail, items, selectedItem, onSelect }: {
           <div className="relative h-[160px] shrink-0 overflow-hidden" style={{ backgroundImage: `url('${ROOM_BG_SVG}')`, backgroundColor: "hsl(var(--muted) / 0.3)" }}>
             <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
             <div className="flex items-center justify-center h-full p-4">
-              <div className="w-24 h-24 drop-shadow-2xl"><ItemIcon classname={selectedItem.classname} /></div>
+              <div className="w-24 h-24 drop-shadow-2xl"><ItemIcon item={selectedItem} /></div>
             </div>
           </div>
           <div className="flex flex-col gap-3 p-4 flex-1">
@@ -1621,16 +1802,15 @@ function PriceDisplay({ credits, points, isFree, size = "lg" }: { credits: numbe
 // ─── Purchase Buttons Component ─────────────
 
 function PurchaseButtons({ size = "lg", className }: { size?: "sm" | "lg"; className?: string }) {
-  const h = size === "lg" ? "h-11" : "h-9";
-  const text = size === "lg" ? "text-sm" : "text-xs";
+  const buttonSize = size === "lg" ? "medium" : "small";
   return (
     <div className={`flex flex-col gap-2 ${className || ""}`}>
-      <Button className={`w-full ${h} gap-2 rounded-xl ${text} font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-200`} size="sm">
-        <ShoppingCart className="w-4 h-4" /> Kaufen
-      </Button>
-      <Button variant="outline" className={`w-full ${size === "lg" ? "h-9" : "h-8"} gap-2 rounded-xl ${text} font-medium hover:bg-accent/50 transition-all`} size="sm">
-        <Gift className="w-4 h-4" /> Schenken
-      </Button>
+      <FancyButton.Root className="w-full" size={buttonSize} variant="primary">
+        <FancyButton.Icon as={ShoppingCart} className="size-4" /> Kaufen
+      </FancyButton.Root>
+      <FancyButton.Root className="w-full" size={buttonSize} variant="basic">
+        <FancyButton.Icon as={Gift} className="size-4" /> Schenken
+      </FancyButton.Root>
     </div>
   );
 }
@@ -1673,7 +1853,7 @@ function PreviewPanel({ item, onClose }: { item: CatalogItem; onClose: () => voi
     return () => clearInterval(timer);
   }, [loadedVariants.length]);
 
-  const currentIcon = loadedVariants.length > 0 ? loadedVariants[variantIdx % loadedVariants.length] : getFurniIcon(item.classname);
+  const currentIcon = loadedVariants.length > 0 ? loadedVariants[variantIdx % loadedVariants.length] : undefined;
   const stateCount = item.interaction_modes_count ?? 0;
 
   return (
@@ -1684,13 +1864,12 @@ function PreviewPanel({ item, onClose }: { item: CatalogItem; onClose: () => voi
         <div className="absolute inset-0 bg-gradient-to-t from-[#111114]/60 via-transparent to-[#111114]/30" />
         {/* Furniture icon */}
         <div className="relative flex items-center justify-center h-full">
-          <img
-            key={currentIcon}
-            src={currentIcon}
-            alt={item.public_name || item.classname}
-            className={`max-w-[160px] max-h-[140px] object-contain drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)] ${loadedVariants.length <= 1 ? "animate-[float_3s_ease-in-out_infinite]" : ""}`}
-            style={{ imageRendering: "pixelated" }}
-            onError={(e) => { (e.target as HTMLImageElement).src = getFurniIcon(item.classname); }}
+          <ItemIcon
+            key={currentIcon || `${item.sprite_id}-${item.classname}`}
+            item={item}
+            preferredSrc={currentIcon}
+            animated={loadedVariants.length <= 1}
+            className="w-[160px] h-[140px] drop-shadow-[0_8px_24px_rgba(0,0,0,0.6)]"
           />
         </div>
         {/* Controls */}
@@ -1798,7 +1977,7 @@ function RecentPurchasesView({ purchases, onLoad }: { purchases: RecentPurchase[
           {purchases.map((p) => (
             <div key={p.id} className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-accent/30 transition-colors border border-transparent hover:border-border/30">
               <div className="w-11 h-11 shrink-0 rounded-xl bg-muted/20 flex items-center justify-center overflow-hidden border border-border/30">
-                {p.classname && <ItemIcon classname={p.classname} />}
+                {p.classname && <ItemIcon item={p} />}
               </div>
               <div className="flex-1 min-w-0">
                 <span className="text-sm font-medium block truncate">{p.public_name || p.classname || p.catalog_name}</span>
@@ -1844,7 +2023,7 @@ function PopularItemsView({ items, onLoad }: { items: PopularItem[]; onLoad: () 
                 </Badge>
               )}
               <div className="w-14 h-14 rounded-xl bg-muted/20 flex items-center justify-center overflow-hidden">
-                {item.classname && <ItemIcon classname={item.classname} />}
+                {item.classname && <ItemIcon item={item} />}
               </div>
               <span className="text-xs font-semibold text-center leading-tight line-clamp-2">{item.public_name || item.classname || item.catalog_name}</span>
               <div className="flex items-center gap-1.5">

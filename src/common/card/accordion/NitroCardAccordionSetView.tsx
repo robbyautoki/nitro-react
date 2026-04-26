@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FaCaretDown, FaCaretUp } from 'react-icons/fa';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Column, ColumnProps, Flex, Text } from '../..';
 import { useNitroCardAccordionContext } from './NitroCardAccordionContext';
 
@@ -26,9 +26,15 @@ export const NitroCardAccordionSetView: FC<NitroCardAccordionSetViewProps> = pro
 
     const getClassNames = useMemo(() =>
     {
-        const newClassNames = [ 'nitro-card-accordion-set' ];
+        const newClassNames = [
+            'nitro-card-accordion-set',
+            '!border-b',
+            '!border-stroke-soft-200',
+            '!bg-bg-white-0',
+            '!text-text-strong-950'
+        ];
 
-        if(isOpen) newClassNames.push('active');
+        if(isOpen) newClassNames.push('active', '!bg-bg-weak-50');
 
         if(classNames && classNames.length) newClassNames.push(...classNames);
 
@@ -70,13 +76,13 @@ export const NitroCardAccordionSetView: FC<NitroCardAccordionSetViewProps> = pro
 
     return (
         <Column classNames={ getClassNames } gap={ gap } { ...rest }>
-            <Flex pointer justifyContent="between" className="nitro-card-accordion-set-header px-2 py-1" onClick={ onClick }>
-                <Text>{ headerText }</Text>
-                { isOpen && <FaCaretUp className="fa-icon" /> }
-                { !isOpen && <FaCaretDown className="fa-icon" /> }
+            <Flex pointer justifyContent="between" className="nitro-card-accordion-set-header !border-b !border-stroke-soft-200 !bg-none !bg-bg-white-0 px-2 py-1 !text-text-strong-950" onClick={ onClick }>
+                <Text className="truncate !text-label-xs !font-medium !text-text-strong-950">{ headerText }</Text>
+                { isOpen && <ChevronUp className="size-4 shrink-0 text-text-sub-600" /> }
+                { !isOpen && <ChevronDown className="size-4 shrink-0 text-text-sub-600" /> }
             </Flex>
             { isOpen &&
-                <Column fullHeight overflow="auto" gap={ 0 } className="nitro-card-accordion-set-content">
+                <Column fullHeight overflow="auto" gap={ 0 } className="nitro-card-accordion-set-content !bg-bg-white-0 !text-text-strong-950">
                     { children }
                 </Column> }
         </Column>

@@ -3,6 +3,41 @@ import { useCallback, useState } from 'react';
 import { useBetween } from 'use-between';
 import { GetConfiguration, GetNitroInstance, GetRoomEngine, GetSessionDataManager, LocalizeBadgeName, LocalizeText, NotificationAlertItem, NotificationAlertType, NotificationBubbleItem, NotificationBubbleType, NotificationConfirmItem, PlaySound, ProductImageUtility, TradingNotificationType } from '../../api';
 import { useMessageEvent } from '../events';
+import { NotificationKind, useNotificationCenter } from './useNotificationCenter';
+
+const BUBBLE_KIND_MAP: Record<string, NotificationKind> = {
+    [NotificationBubbleType.ACHIEVEMENT]: 'achievement',
+    [NotificationBubbleType.BADGE_RECEIVED]: 'badge',
+    [NotificationBubbleType.CLUBGIFT]: 'gift',
+    [NotificationBubbleType.BUYFURNI]: 'gift',
+    [NotificationBubbleType.FRIENDONLINE]: 'friend-online',
+    [NotificationBubbleType.THIRDPARTYFRIENDONLINE]: 'friend-online',
+    [NotificationBubbleType.FRIENDOFFLINE]: 'friend-offline',
+    [NotificationBubbleType.THIRDPARTYFRIENDOFFLINE]: 'friend-offline',
+    [NotificationBubbleType.PETLEVEL]: 'pet',
+    [NotificationBubbleType.RESPECT]: 'respect',
+    [NotificationBubbleType.CLUB]: 'club',
+    [NotificationBubbleType.VIP]: 'club',
+};
+
+const BUBBLE_TITLE_MAP: Record<string, string> = {
+    [NotificationBubbleType.FRIENDONLINE]: 'Freund online',
+    [NotificationBubbleType.THIRDPARTYFRIENDONLINE]: 'Freund online',
+    [NotificationBubbleType.FRIENDOFFLINE]: 'Freund offline',
+    [NotificationBubbleType.THIRDPARTYFRIENDOFFLINE]: 'Freund offline',
+    [NotificationBubbleType.ACHIEVEMENT]: 'Achievement freigeschaltet',
+    [NotificationBubbleType.BADGE_RECEIVED]: 'Neues Badge',
+    [NotificationBubbleType.RESPECT]: 'Respekt erhalten',
+    [NotificationBubbleType.PETLEVEL]: 'Pet Level Up',
+    [NotificationBubbleType.BUYFURNI]: 'Möbel gekauft',
+    [NotificationBubbleType.INFO]: 'Information',
+    [NotificationBubbleType.RECYCLEROK]: 'Recycling abgeschlossen',
+    [NotificationBubbleType.SOUNDMACHINE]: 'Soundmachine',
+    [NotificationBubbleType.VIP]: 'VIP',
+    [NotificationBubbleType.CLUB]: 'HC',
+    [NotificationBubbleType.CLUBGIFT]: 'HC-Geschenke',
+    [NotificationBubbleType.ROOMMESSAGESPOSTED]: 'Raum-Nachrichten',
+};
 
 const cleanText = (text: string) => (text && text.length) ? text.replace(/\\r/g, '\r') : '';
 
@@ -22,6 +57,7 @@ const useNotificationState = () =>
     const [ confirms, setConfirms ] = useState<NotificationConfirmItem[]>([]);
     const [ bubblesDisabled, setBubblesDisabled ] = useState(false);
     const [ modDisclaimerShown, setModDisclaimerShown ] = useState(false);
+    const { addEntry: addCenterEntry } = useNotificationCenter();
 
     const getMainNotificationConfig = () => GetConfiguration<{ [key: string]: { delivery?: string, display?: string; title?: string; image?: string }}>('notification', {});
 
@@ -77,7 +113,20 @@ const useNotificationState = () =>
         const alertItem = new NotificationAlertItem([ cleanText(cleanMessage) ], type, clickUrl, clickUrlText, title, imageUrl, figure);
 
         setAlerts(prevValue => [ alertItem, ...prevValue ]);
-    }, []);
+
+        // In den Notification-Center kopieren (außer MOTD — bleibt Modal)
+        if(type !== NotificationAlertType.MOTD)
+        {
+            const isMod = type === 'moderator' || (title && /mod|warn/i.test(title));
+            addCenterEntry({
+                kind: isMod ? 'mod' : 'system',
+                title,
+                message: cleanText(cleanMessage),
+                iconUrl: imageUrl,
+                linkUrl: clickUrl,
+            });
+        }
+    }, [ addCenterEntry ]);
 
     const showNitroAlert = useCallback(() => simpleAlert(null, NotificationAlertType.NITRO), [ simpleAlert ]);
 
@@ -88,7 +137,16 @@ const useNotificationState = () =>
         const notificationItem = new NotificationBubbleItem(message, type, imageUrl, internalLink);
 
         setBubbleAlerts(prevValue => [ notificationItem, ...prevValue ]);
-    }, [ bubblesDisabled ]);
+
+        // In den Notification-Center spiegeln
+        addCenterEntry({
+            kind: BUBBLE_KIND_MAP[type] ?? 'info',
+            title: BUBBLE_TITLE_MAP[type] ?? 'Benachrichtigung',
+            message: cleanText(message),
+            iconUrl: imageUrl,
+            linkUrl: internalLink,
+        });
+    }, [ bubblesDisabled, addCenterEntry ]);
 
     const showNotification = (type: string, options: Map<string, string> = null) =>
     {
@@ -366,6 +424,9 @@ const useNotificationState = () =>
 
         // Combat events are handled by CombatShopView / CombatHudView
         if(parser.type && parser.type.startsWith('combat.')) return;
+
+        // Patrol bot editor config is handled by PatrolBotEditorView
+        if(parser.type && parser.type.startsWith('patrol.')) return;
 
         showNotification(parser.type, parser.parameters);
     });

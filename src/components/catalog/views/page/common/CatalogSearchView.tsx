@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from 'react';
 import { FaSearch, FaTimes } from 'react-icons/fa';
 import { CatalogPage, CatalogType, FilterCatalogNode, FurnitureOffer, GetOfferNodes, GetSessionDataManager, ICatalogNode, ICatalogPage, IPurchasableOffer, LocalizeText, PageLocalization, SearchResult } from '../../../../../api';
 import { useCatalog } from '../../../../../hooks';
-import { Input } from '../../../../ui/input';
+import * as Input from '@/align-ui/components/ui/input';
 
 export const CatalogSearchView: FC<{}> = props =>
 {
@@ -94,20 +94,24 @@ export const CatalogSearchView: FC<{}> = props =>
 
     return (
         <div className="relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px] pointer-events-none" />
-            <Input
-                type="text"
-                className="h-9 text-xs pl-8 pr-8 rounded-xl border-input focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-all duration-200"
-                placeholder={ LocalizeText('generic.search') }
-                value={ searchValue }
-                onChange={ event => setSearchValue(event.target.value) }
-            />
+            <FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-paragraph-xs text-text-soft-400" />
+            <Input.Root size="small">
+                <Input.Wrapper className="h-9 pl-8 pr-8">
+                    <Input.Input
+                        type="text"
+                        className="text-paragraph-sm"
+                        placeholder={ LocalizeText('generic.search') }
+                        value={ searchValue }
+                        onChange={ event => setSearchValue(event.target.value) }
+                    />
+                </Input.Wrapper>
+            </Input.Root>
             { searchValue && !!searchValue.length &&
                 <button
-                    className="appearance-none border-0 bg-transparent absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 appearance-none rounded border-0 bg-transparent p-0.5 text-text-soft-400 transition-colors hover:text-text-strong-950"
                     onClick={ () => setSearchValue('') }
                 >
-                    <FaTimes className="text-[9px]" />
+                    <FaTimes className="text-subheading-2xs" />
                 </button> }
         </div>
     );

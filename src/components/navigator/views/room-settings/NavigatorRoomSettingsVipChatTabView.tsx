@@ -1,10 +1,16 @@
 import { RoomChatSettings } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText } from '../../../../api';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Frame, FramePanel } from '@/components/ui/frame';
+import * as AlignCheckbox from '@/align-ui/components/ui/checkbox';
+import * as AlignSelect from '@/align-ui/components/ui/select';
+import { NavigatorPanel, NavigatorPanelStack, NavigatorTextInput } from '../NavigatorPrimitives';
+
+const Checkbox = AlignCheckbox.Root;
+const Select = AlignSelect.Root;
+const SelectTrigger = AlignSelect.Trigger;
+const SelectValue = AlignSelect.Value;
+const SelectContent = AlignSelect.Content;
+const SelectItem = AlignSelect.Item;
 
 interface NavigatorRoomSettingsTabViewProps
 {
@@ -23,83 +29,74 @@ export const NavigatorRoomSettingsVipChatTabView: FC<NavigatorRoomSettingsTabVie
     }, [ roomData.chatSettings ]);
 
     return (
-        <Frame stacked spacing="sm" className="w-full">
-            <FramePanel>
+        <NavigatorPanelStack>
+            <NavigatorPanel>
                 <div className="flex gap-3">
                     <div className="flex-1 flex flex-col gap-2">
-                        <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.chat_settings') }</span>
-
-                        <Select value={ String(roomData.chatSettings.mode) } onValueChange={ val => handleChange('bubble_mode', val) }>
-                            <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                        <span className="text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.chat_settings') }</span>
+                        <Select size="xsmall" value={ String(roomData.chatSettings.mode) } onValueChange={ val => handleChange('bubble_mode', val) }>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
-                                <SelectItem value={ String(RoomChatSettings.CHAT_MODE_FREE_FLOW) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.mode.free.flow') }</SelectItem>
-                                <SelectItem value={ String(RoomChatSettings.CHAT_MODE_LINE_BY_LINE) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.mode.line.by.line') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.CHAT_MODE_FREE_FLOW) }>{ LocalizeText('navigator.roomsettings.chat.mode.free.flow') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.CHAT_MODE_LINE_BY_LINE) }>{ LocalizeText('navigator.roomsettings.chat.mode.line.by.line') }</SelectItem>
                             </SelectContent>
                         </Select>
-
-                        <Select value={ String(roomData.chatSettings.weight) } onValueChange={ val => handleChange('chat_weight', val) }>
-                            <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                        <Select size="xsmall" value={ String(roomData.chatSettings.weight) } onValueChange={ val => handleChange('chat_weight', val) }>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
-                                <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_NORMAL) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.bubbles.width.normal') }</SelectItem>
-                                <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_THIN) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.bubbles.width.thin') }</SelectItem>
-                                <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_WIDE) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.bubbles.width.wide') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_NORMAL) }>{ LocalizeText('navigator.roomsettings.chat.bubbles.width.normal') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_THIN) }>{ LocalizeText('navigator.roomsettings.chat.bubbles.width.thin') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.CHAT_BUBBLE_WIDTH_WIDE) }>{ LocalizeText('navigator.roomsettings.chat.bubbles.width.wide') }</SelectItem>
                             </SelectContent>
                         </Select>
-
-                        <Select value={ String(roomData.chatSettings.speed) } onValueChange={ val => handleChange('bubble_speed', val) }>
-                            <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                        <Select size="xsmall" value={ String(roomData.chatSettings.speed) } onValueChange={ val => handleChange('bubble_speed', val) }>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
-                                <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_FAST) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.speed.fast') }</SelectItem>
-                                <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_NORMAL) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.speed.normal') }</SelectItem>
-                                <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_SLOW) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.speed.slow') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_FAST) }>{ LocalizeText('navigator.roomsettings.chat.speed.fast') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_NORMAL) }>{ LocalizeText('navigator.roomsettings.chat.speed.normal') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.CHAT_SCROLL_SPEED_SLOW) }>{ LocalizeText('navigator.roomsettings.chat.speed.slow') }</SelectItem>
                             </SelectContent>
                         </Select>
-
-                        <Select value={ String(roomData.chatSettings.protection) } onValueChange={ val => handleChange('flood_protection', val) }>
-                            <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                        <Select size="xsmall" value={ String(roomData.chatSettings.protection) } onValueChange={ val => handleChange('flood_protection', val) }>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
-                                <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_LOOSE) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.flood.loose') }</SelectItem>
-                                <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_NORMAL) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.flood.normal') }</SelectItem>
-                                <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_STRICT) } className="text-xs">{ LocalizeText('navigator.roomsettings.chat.flood.strict') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_LOOSE) }>{ LocalizeText('navigator.roomsettings.chat.flood.loose') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_NORMAL) }>{ LocalizeText('navigator.roomsettings.chat.flood.normal') }</SelectItem>
+                                <SelectItem value={ String(RoomChatSettings.FLOOD_FILTER_STRICT) }>{ LocalizeText('navigator.roomsettings.chat.flood.strict') }</SelectItem>
                             </SelectContent>
                         </Select>
-
                         <div className="flex flex-col gap-1">
-                            <span className="text-[11px] text-muted-foreground">{ LocalizeText('navigator.roomsettings.chat_settings.hearing.distance') }</span>
-                            <Input type="number" min="0" className="h-7 text-xs" value={ chatDistance } onChange={ event => setChatDistance(event.target.valueAsNumber) } onBlur={ () => handleChange('chat_distance', chatDistance) } />
+                            <span className="text-paragraph-xs text-text-sub-600">{ LocalizeText('navigator.roomsettings.chat_settings.hearing.distance') }</span>
+                            <NavigatorTextInput type="number" min="0" value={ chatDistance } onChange={ event => setChatDistance(event.target.valueAsNumber) } onBlur={ () => handleChange('chat_distance', chatDistance) } />
                         </div>
                     </div>
-
                     <div className="flex-1 flex flex-col gap-2">
-                        <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.vip_settings') }</span>
-
+                        <span className="text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.vip_settings') }</span>
                         <div className="flex items-center gap-2">
                             <Checkbox id="hideWalls" checked={ roomData.hideWalls } onCheckedChange={ val => handleChange('hide_walls', !!val) } />
-                            <label htmlFor="hideWalls" className="text-xs cursor-pointer">{ LocalizeText('navigator.roomsettings.hide_walls') }</label>
+                            <label htmlFor="hideWalls" className="cursor-pointer text-paragraph-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.hide_walls') }</label>
                         </div>
-
-                        <Select value={ String(roomData.wallThickness) } onValueChange={ val => handleChange('wall_thickness', val) }>
-                            <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                        <Select size="xsmall" value={ String(roomData.wallThickness) } onValueChange={ val => handleChange('wall_thickness', val) }>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
-                                <SelectItem value="0" className="text-xs">{ LocalizeText('navigator.roomsettings.wall_thickness.normal') }</SelectItem>
-                                <SelectItem value="1" className="text-xs">{ LocalizeText('navigator.roomsettings.wall_thickness.thick') }</SelectItem>
-                                <SelectItem value="-1" className="text-xs">{ LocalizeText('navigator.roomsettings.wall_thickness.thin') }</SelectItem>
-                                <SelectItem value="-2" className="text-xs">{ LocalizeText('navigator.roomsettings.wall_thickness.thinnest') }</SelectItem>
+                                <SelectItem value="0">{ LocalizeText('navigator.roomsettings.wall_thickness.normal') }</SelectItem>
+                                <SelectItem value="1">{ LocalizeText('navigator.roomsettings.wall_thickness.thick') }</SelectItem>
+                                <SelectItem value="-1">{ LocalizeText('navigator.roomsettings.wall_thickness.thin') }</SelectItem>
+                                <SelectItem value="-2">{ LocalizeText('navigator.roomsettings.wall_thickness.thinnest') }</SelectItem>
                             </SelectContent>
                         </Select>
-
-                        <Select value={ String(roomData.floorThickness) } onValueChange={ val => handleChange('floor_thickness', val) }>
-                            <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+                        <Select size="xsmall" value={ String(roomData.floorThickness) } onValueChange={ val => handleChange('floor_thickness', val) }>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent className="z-[9999]">
-                                <SelectItem value="0" className="text-xs">{ LocalizeText('navigator.roomsettings.floor_thickness.normal') }</SelectItem>
-                                <SelectItem value="1" className="text-xs">{ LocalizeText('navigator.roomsettings.floor_thickness.thick') }</SelectItem>
-                                <SelectItem value="-1" className="text-xs">{ LocalizeText('navigator.roomsettings.floor_thickness.thin') }</SelectItem>
-                                <SelectItem value="-2" className="text-xs">{ LocalizeText('navigator.roomsettings.floor_thickness.thinnest') }</SelectItem>
+                                <SelectItem value="0">{ LocalizeText('navigator.roomsettings.floor_thickness.normal') }</SelectItem>
+                                <SelectItem value="1">{ LocalizeText('navigator.roomsettings.floor_thickness.thick') }</SelectItem>
+                                <SelectItem value="-1">{ LocalizeText('navigator.roomsettings.floor_thickness.thin') }</SelectItem>
+                                <SelectItem value="-2">{ LocalizeText('navigator.roomsettings.floor_thickness.thinnest') }</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
-            </FramePanel>
-        </Frame>
+            </NavigatorPanel>
+        </NavigatorPanelStack>
     );
 }

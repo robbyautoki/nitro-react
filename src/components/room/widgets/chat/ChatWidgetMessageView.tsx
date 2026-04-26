@@ -29,6 +29,7 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = props =>
                 return 2000;
         }
     }, [ bubbleWidth ]);
+    const bubbleClassName = `chat-bubble bubble-${ chat.styleId } type-${ chat.type }${ chat.adminSpecialEffect ? ' admin-special-effect' : '' }`;
 
     useEffect(() =>
     {
@@ -80,7 +81,12 @@ export const ChatWidgetMessageView: FC<ChatWidgetMessageViewProps> = props =>
         <div ref={ elementRef } className={ `bubble-container ${ isVisible ? 'visible' : 'invisible' }` } onClick={ event => GetRoomEngine().selectRoomObject(chat.roomId, chat.senderId, RoomObjectCategory.UNIT) }>
             { (chat.styleId === 0) &&
                 <div className="user-container-bg" style={ { backgroundColor: chat.color } } /> }
-            <div className={ `chat-bubble bubble-${ chat.styleId } type-${ chat.type }` } style={ { maxWidth: getBubbleWidth } }>
+            <div className={ bubbleClassName } style={ { maxWidth: getBubbleWidth } }>
+                { chat.adminSpecialEffect &&
+                    <div className="admin-special-aura" aria-hidden="true">
+                        <span />
+                        <span />
+                    </div> }
                 <div className="user-container">
                     { chat.imageUrl && (chat.imageUrl.length > 0) &&
                         <div className="user-image" style={ { backgroundImage: `url(${ chat.imageUrl })` } } /> }

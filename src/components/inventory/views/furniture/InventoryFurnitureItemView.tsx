@@ -1,9 +1,12 @@
 import { MouseEventType } from '@nitrots/nitro-renderer';
-import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { ComponentProps, FC, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { Box, Check } from 'lucide-react';
 import { attemptItemPlacement, GetSessionDataManager, GroupItem } from '../../../../api';
 import { useInventoryFurni } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
-import { FaWrench, FaBox } from 'react-icons/fa';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
+import { cn } from '@/align-ui/utils/cn';
 
 interface InventoryFurnitureItemViewProps
 {
@@ -13,17 +16,17 @@ interface InventoryFurnitureItemViewProps
     onMultiToggle?: (group: GroupItem) => void;
 }
 
+type RarityColor = ComponentProps<typeof AlignBadge.Root>['color'];
+
 export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = props =>
 {
     const { groupItem = null, multiSelectMode = false, isMultiSelected = false, onMultiToggle = null } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
-    const [ showTooltip, setShowTooltip ] = useState(false);
     const [ imgError, setImgError ] = useState(false);
     const [ contextMenu, setContextMenu ] = useState<{ x: number; y: number } | null>(null);
     const { selectedItem = null, setSelectedItem = null } = useInventoryFurni();
     const { categories, getItemCategories, toggleAssignment } = useInventoryCategories();
     const contextRef = useRef<HTMLDivElement>(null);
-    const tooltipTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
     const isActive = !multiSelectMode && groupItem === selectedItem;
     const count = groupItem.getUnlockedCount();
@@ -39,15 +42,15 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
     const isWall = groupItem.isWallItem;
 
     // Rarity detection
-    const getRarity = (): { label: string; cls: string } | null =>
+    const getRarity = (): { label: string; color: RarityColor } | null =>
     {
-        if(isLtd) return { label: 'LGD', cls: 'rarity-legendary' };
+        if(isLtd) return { label: 'LGD', color: 'orange' };
         const cn = className.toLowerCase();
         const name = groupItem.name.toLowerCase();
         if(cn.includes('rare_') || name.includes('rare') || name.includes('selten'))
-            return { label: 'RARE', cls: 'rarity-rare' };
+            return { label: 'RARE', color: 'blue' };
         if(cn.includes('epic_') || name.includes('epic'))
-            return { label: 'EPIC', cls: 'rarity-epic' };
+            return { label: 'EPIC', color: 'purple' };
         return null;
     };
     const rarity = getRarity();
@@ -78,17 +81,6 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
         }
     }
 
-    const onHoverEnter = useCallback(() =>
-    {
-        tooltipTimer.current = setTimeout(() => setShowTooltip(true), 350);
-    }, []);
-
-    const onHoverLeave = useCallback(() =>
-    {
-        if(tooltipTimer.current) clearTimeout(tooltipTimer.current);
-        setShowTooltip(false);
-    }, []);
-
     const onContextMenu = useCallback((e: MouseEvent) =>
     {
         e.preventDefault();
@@ -114,83 +106,125 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
         return () => document.removeEventListener('mousedown', handleClick);
     }, [ contextMenu ]);
 
-    useEffect(() => () => { if(tooltipTimer.current) clearTimeout(tooltipTimer.current); }, []);
-
     const itemCategories = getItemCategories(assignmentKey);
-
-    let tileClass = 'inv-tile';
-    if(isActive) tileClass += ' active';
-    if(multiSelectMode && isMultiSelected) tileClass += ' multi-selected';
-    if(!count) tileClass += ' dimmed';
-    if(groupItem.hasUnseenItems) tileClass += ' unseen';
+    const sizeLabel = !isWall && (floorData as any)
+        ? `${ (floorData as any)?.customParams?.split(',')[0] || '1' }×${ (floorData as any)?.customParams?.split(',')[1] || '1' }`
+        : 'Wand';
 
     return (
         <>
-            <div
-                className={ tileClass }
-                onMouseDown={ onMouseEvent }
-                onMouseUp={ onMouseEvent }
-                onMouseOut={ e => { onMouseEvent(e); onHoverLeave(); } }
-                onMouseEnter={ onHoverEnter }
-                onDoubleClick={ onMouseEvent }
-                onContextMenu={ multiSelectMode ? undefined : onContextMenu }
-            >
-                { !imgError ? (
-                    <img
-                        className="inv-tile-img"
-                        src={ groupItem.iconUrl }
-                        alt=""
-                        onError={ () => setImgError(true) }
-                    />
-                ) : (
-                    <FaBox className="inv-tile-fallback" />
-                ) }
-
-                { multiSelectMode &&
-                    <div className={ 'inv-tile-check' + (isMultiSelected ? ' checked' : '') }>
-                        { isMultiSelected && '✓' }
-                    </div> }
-
-                { isLtd &&
-                    <span className="inv-tile-ltd">{ groupItem.stuffData.uniqueNumber }</span> }
-
-                { count > 1 &&
-                    <span className="inv-tile-count">{ count }</span> }
-
-                { rarity &&
-                    <span className={ 'inv-tile-rarity ' + rarity.cls }>{ rarity.label }</span> }
-
-                {/* Tooltip */}
-                { showTooltip && !contextMenu &&
-                    <div className="inv-tooltip">
-                        <div className="inv-tooltip-name">{ groupItem.name }</div>
-                        <div className="inv-tooltip-classname">{ className }</div>
-                        <div className="inv-tooltip-meta">
-                            <span>{ count }×</span>
-                            <span>·</span>
-                            <span>{ isWall ? 'Wand' : `${ (floorData as any)?.customParams?.split(',')[0] || '1' }×${ (floorData as any)?.customParams?.split(',')[1] || '1' }` }</span>
+            <AlignTooltip.Provider delayDuration={ 350 }>
+                <AlignTooltip.Root>
+                    <AlignTooltip.Trigger asChild>
+                        <div
+                            className={ cn(
+                                'group relative -m-px flex size-[52px] cursor-pointer select-none items-center justify-center border bg-bg-white-0 transition duration-200 ease-out',
+                                'border-stroke-soft-200 hover:bg-bg-weak-50',
+                                isActive && 'z-[2] border-primary-base bg-primary-alpha-10 ring-1 ring-inset ring-primary-base',
+                                multiSelectMode && isMultiSelected && 'z-[2] border-information-base bg-information-lighter ring-1 ring-inset ring-information-base',
+                                !count && 'opacity-50',
+                            ) }
+                            onMouseDown={ onMouseEvent }
+                            onMouseUp={ onMouseEvent }
+                            onMouseOut={ onMouseEvent }
+                            onDoubleClick={ onMouseEvent }
+                            onContextMenu={ multiSelectMode ? undefined : onContextMenu }
+                        >
+                            { !imgError ? (
+                                <img
+                                    className="pointer-events-none size-9 object-contain"
+                                    style={ { imageRendering: 'pixelated' } }
+                                    src={ groupItem.iconUrl }
+                                    alt=""
+                                    onError={ () => setImgError(true) }
+                                />
+                            ) : (
+                                <Box className="size-4 text-text-soft-400" />
+                            ) }
+                            { groupItem.hasUnseenItems && (
+                                <span className="absolute left-1 top-1 z-[3] size-1.5 rounded-full bg-information-base" />
+                            ) }
+                            { multiSelectMode && (
+                                <span
+                                    className={ cn(
+                                        'absolute left-1 top-1 z-[3] flex size-3.5 items-center justify-center rounded border-[1.5px] bg-bg-white-0',
+                                        isMultiSelected ? 'border-information-base bg-information-base' : 'border-stroke-soft-200',
+                                    ) }
+                                >
+                                    { isMultiSelected && <Check className="size-2.5 text-static-white" strokeWidth={ 3 } /> }
+                                </span>
+                            ) }
+                            { isLtd && (
+                                <AlignBadge.Root
+                                    color="orange"
+                                    variant="filled"
+                                    size="small"
+                                    square
+                                    className="absolute right-0.5 top-0.5 h-3.5 px-1 text-[7px]"
+                                >
+                                    { groupItem.stuffData.uniqueNumber }
+                                </AlignBadge.Root>
+                            ) }
+                            { count > 1 && (
+                                <AlignBadge.Root
+                                    color="gray"
+                                    variant="lighter"
+                                    size="small"
+                                    square
+                                    className="absolute bottom-0.5 right-0.5 h-3.5 px-1 text-[9px] font-bold"
+                                >
+                                    { count }
+                                </AlignBadge.Root>
+                            ) }
+                            { rarity && (
+                                <AlignBadge.Root
+                                    color={ rarity.color }
+                                    variant="lighter"
+                                    size="small"
+                                    square
+                                    className="absolute bottom-0.5 left-0.5 h-3 px-1 text-[7px] font-bold uppercase tracking-wider"
+                                >
+                                    { rarity.label }
+                                </AlignBadge.Root>
+                            ) }
                         </div>
-                        { isLtd && <div className="inv-tooltip-ltd">LTD #{ groupItem.stuffData.uniqueNumber }/{ groupItem.stuffData.uniqueSeries }</div> }
-                    </div> }
-            </div>
-
+                    </AlignTooltip.Trigger>
+                    { !contextMenu && (
+                        <AlignTooltip.Content size="small" variant="dark" className="max-w-[220px]">
+                            <div className="flex flex-col gap-0.5">
+                                <span className="truncate font-semibold">{ groupItem.name }</span>
+                                { className && <span className="truncate font-mono text-[9px] opacity-60">{ className }</span> }
+                                <div className="flex items-center gap-1 text-[10px] opacity-70">
+                                    <span>{ count }×</span>
+                                    <span>·</span>
+                                    <span>{ sizeLabel }</span>
+                                </div>
+                                { isLtd && <span className="text-[10px] font-semibold text-warning-light">LTD #{ groupItem.stuffData.uniqueNumber }/{ groupItem.stuffData.uniqueSeries }</span> }
+                            </div>
+                        </AlignTooltip.Content>
+                    ) }
+                </AlignTooltip.Root>
+            </AlignTooltip.Provider>
             { contextMenu && categories.length > 0 && (
                 <div
                     ref={ contextRef }
-                    className="inv-category-context"
-                    style={{ left: contextMenu.x, top: contextMenu.y }}
+                    className="fixed z-[9999] min-w-[160px] overflow-hidden rounded-xl bg-bg-white-0 py-1 shadow-regular-md ring-1 ring-inset ring-stroke-soft-200"
+                    style={ { left: contextMenu.x, top: contextMenu.y } }
                 >
-                    <div className="context-header">Kategorie</div>
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-soft-400">
+                        Kategorie
+                    </div>
                     { categories.map(cat => (
-                        <div
+                        <button
                             key={ cat.id }
-                            className="context-item"
+                            type="button"
+                            className="flex w-full items-center gap-2 px-3 py-1.5 text-paragraph-xs text-text-sub-600 transition-colors hover:bg-bg-weak-50"
                             onClick={ () => onToggleCategory(cat.id) }
                         >
-                            <span className="color-dot" style={{ backgroundColor: cat.color }} />
-                            <span>{ cat.name }</span>
-                            { itemCategories.includes(cat.id) && <span className="context-check">&#10003;</span> }
-                        </div>
+                            <span className="size-2 shrink-0 rounded-full" style={ { backgroundColor: cat.color } } />
+                            <span className="flex-1 text-left">{ cat.name }</span>
+                            { itemCategories.includes(cat.id) && <Check className="size-3 text-success-base" /> }
+                        </button>
                     )) }
                 </div>
             ) }

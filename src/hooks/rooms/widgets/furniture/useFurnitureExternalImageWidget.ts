@@ -1,6 +1,6 @@
 import { RoomEngineTriggerWidgetEvent, RoomObjectCategory, RoomObjectVariable } from '@nitrots/nitro-renderer';
 import { useState } from 'react';
-import { GetRoomEngine, IPhotoData } from '../../../../api';
+import { GetRoomEngine, GetSessionDataManager, IPhotoData } from '../../../../api';
 import { useRoomEngineEvent } from '../../../events';
 import { useFurniRemovedEvent } from '../../engine';
 import { useRoom } from '../../useRoom';
@@ -13,6 +13,29 @@ const useFurnitureExternalImageWidgetState = () =>
     const [ currentPhotos, setCurrentPhotos ] = useState<IPhotoData[]>([]);
     const { roomSession = null } = useRoom();
 
+    const isExternalImageObject = (type: string) =>
+    {
+        const itemData = GetSessionDataManager().getWallItemData(type as any) as any;
+
+        return !!(itemData?.isExternalImage || type?.startsWith('external_image'));
+    }
+
+    const parsePhotoData = (data: string): IPhotoData | null =>
+    {
+        if(!data) return null;
+
+        try
+        {
+            const parsed = JSON.parse(data) as IPhotoData;
+
+            return parsed?.w ? parsed : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     const onClose = () =>
     {
         setObjectId(-1);
@@ -24,7 +47,7 @@ const useFurnitureExternalImageWidgetState = () =>
     useRoomEngineEvent<RoomEngineTriggerWidgetEvent>(RoomEngineTriggerWidgetEvent.REQUEST_EXTERNAL_IMAGE, event =>
     {
         const roomObject = GetRoomEngine().getRoomObject(event.roomId, event.objectId, event.category);
-        const roomTotalImages = GetRoomEngine().getRoomObjects(roomSession?.roomId, RoomObjectCategory.WALL);
+        const roomTotalImages = GetRoomEngine().getRoomObjects(roomSession?.roomId ?? event.roomId, RoomObjectCategory.WALL) || [];
 
         if(!roomObject) return;
 
@@ -32,19 +55,22 @@ const useFurnitureExternalImageWidgetState = () =>
 
         roomTotalImages.forEach(object =>
         {
-            if (object.type !== 'external_image_wallitem_poster_small') return null;
+            if(!isExternalImageObject(object.type)) return null;
 
             const data = object.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA);
-            const jsonData: IPhotoData = JSON.parse(data);
+            const jsonData = parsePhotoData(data);
 
+            if(!jsonData) return null;
             datas.push(jsonData);
         });
+
+        const roomObjectPhotoData = parsePhotoData(roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA));
+
+        if(!datas.length && roomObjectPhotoData) datas.push(roomObjectPhotoData);
 
         setObjectId(event.objectId);
         setCategory(event.category);
         setCurrentPhotos(datas);
-
-        const roomObjectPhotoData = (JSON.parse(roomObject.model.getValue<string>(RoomObjectVariable.FURNITURE_DATA)) as IPhotoData);
 
         setCurrentPhotoIndex(prevValue =>
         {

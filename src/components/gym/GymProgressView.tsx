@@ -3,6 +3,8 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { GetRoomObjectBounds, GetRoomSession, GetSessionDataManager } from '../../api';
 import { useMessageEvent } from '../../hooks';
+import * as AlignProgressBar from '@/align-ui/components/ui/progress-bar';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 
 interface TrainerProgress {
     roomIndex: number;
@@ -14,8 +16,8 @@ interface TrainerProgress {
 
 export const GymProgressView: FC<{}> = () =>
 {
-    const [trainers, setTrainers] = useState<Map<number, TrainerProgress>>(new Map());
-    const [positions, setPositions] = useState<Map<number, { x: number; y: number }>>(new Map());
+    const [ trainers, setTrainers ] = useState<Map<number, TrainerProgress>>(new Map());
+    const [ positions, setPositions ] = useState<Map<number, { x: number; y: number }>>(new Map());
     const trainersRef = useRef(trainers);
     trainersRef.current = trainers;
 
@@ -23,11 +25,13 @@ export const GymProgressView: FC<{}> = () =>
     {
         const parser = event.getParser();
 
-        if (parser.type === 'gym.progress') {
+        if (parser.type === 'gym.progress')
+        {
             const p = parser.parameters;
             const userId = parseInt(p?.get('user_id') || '0');
             if (userId !== GetSessionDataManager().userId) return;
-            setTrainers(prev => {
+            setTrainers(prev =>
+            {
                 const next = new Map(prev);
                 next.set(userId, {
                     roomIndex: parseInt(p?.get('room_index') || '0'),
@@ -40,9 +44,11 @@ export const GymProgressView: FC<{}> = () =>
             });
         }
 
-        if (parser.type === 'gym.progress.stop') {
+        if (parser.type === 'gym.progress.stop')
+        {
             const userId = parseInt(parser.parameters?.get('user_id') || '0');
-            setTrainers(prev => {
+            setTrainers(prev =>
+            {
                 const next = new Map(prev);
                 next.delete(userId);
                 return next;
@@ -76,32 +82,34 @@ export const GymProgressView: FC<{}> = () =>
         };
 
         GetTicker().add(updatePositions);
-        return () => { GetTicker().remove(updatePositions); };
+        return () =>
+        {
+            GetTicker().remove(updatePositions);
+        };
     }, []);
 
     if (trainers.size === 0) return null;
 
     return (
         <>
-            {Array.from(trainers.entries()).map(([userId, data]) => {
+            { Array.from(trainers.entries()).map(([ userId, data ]) =>
+            {
                 const pos = positions.get(userId);
                 if (!pos) return null;
 
                 const tickPercent = Math.min((data.elapsed / data.tickSeconds) * 100, 100);
 
                 return (
-                    <div key={userId} className="fixed z-[100] pointer-events-none -translate-x-1/2" style={{ left: pos.x, top: pos.y + 14 }}>
-                        <div className="flex flex-col items-center gap-0.5 rounded-md border border-border/40 bg-card/90 backdrop-blur-sm px-1.5 py-1 min-w-[70px]">
-                            <div className="w-full h-1.5 rounded-full overflow-hidden bg-muted">
-                                <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-[width] duration-[9500ms] linear" style={{ width: `${tickPercent}%` }} />
+                    <div key={ userId } className="fixed z-[100] pointer-events-none -translate-x-1/2" style={ { left: pos.x, top: pos.y + 14 } }>
+                        <AlignSurface.Panel className="flex min-w-[70px] flex-col items-center gap-0.5 rounded-lg px-1.5 py-1">
+                            <AlignProgressBar.Root className="h-1.5" value={ tickPercent } color="blue" />
+                            <div className="whitespace-nowrap text-[9px] font-bold text-text-strong-950">
+                                { data.xp }/{ data.xpMax } XP
                             </div>
-                            <div className="text-[9px] font-bold text-foreground whitespace-nowrap">
-                                {data.xp}/{data.xpMax} XP
-                            </div>
-                        </div>
+                        </AlignSurface.Panel>
                     </div>
                 );
-            })}
+            }) }
         </>
     );
 };

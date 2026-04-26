@@ -1,8 +1,12 @@
 import { RoomBannedUsersComposer, RoomDataParser, RoomSettingsDataEvent, SaveRoomSettingsComposer } from '@nitrots/nitro-renderer';
 import { FC, useState } from 'react';
 import { IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
-import { NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView } from '../../../../common';
+import { DraggableWindow, DraggableWindowPosition } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import { X } from 'lucide-react';
+import { NavigatorPanel, NavigatorScrollViewport, NavigatorTabButton } from '../NavigatorPrimitives';
 import { NavigatorRoomSettingsAccessTabView } from './NavigatorRoomSettingsAccessTabView';
 import { NavigatorRoomSettingsBasicTabView } from './NavigatorRoomSettingsBasicTabView';
 import { NavigatorRoomSettingsModTabView } from './NavigatorRoomSettingsModTabView';
@@ -181,16 +185,24 @@ export const NavigatorRoomSettingsView: FC<{}> = props =>
     if(!roomData) return null;
 
     return (
-        <NitroCardView uniqueKey="nitro-room-settings" className="nitro-room-settings">
-            <NitroCardHeaderView headerText={ LocalizeText('navigator.roomsettings') } onCloseClick={ onClose } />
-            <NitroCardTabsView>
-                { TABS.map(tab =>
-                {
-                    return <NitroCardTabsItemView key={ tab } isActive={ (currentTab === tab) } onClick={ event => setCurrentTab(tab) }>{ LocalizeText(tab) }</NitroCardTabsItemView>
-                }) }
-            </NitroCardTabsView>
-            <NitroCardContentView>
-                <div className="text-white">
+        <DraggableWindow uniqueKey="nitro-room-settings" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
+            <AlignSurface.Panel className="nitro-room-settings flex w-[400px] flex-col overflow-hidden">
+                <div className="drag-handler flex h-9 shrink-0 cursor-grab items-center justify-between border-b border-stroke-soft-200 px-3 active:cursor-grabbing">
+                    <span className="truncate text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings') }</span>
+                    <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onMouseDown={ event => event.stopPropagation() } onClick={ onClose }>
+                        <AlignButton.Icon as={ X } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+                <NavigatorScrollViewport className="max-h-[500px] p-3">
+                    <NavigatorPanel className="mb-2 p-1.5">
+                        <div className="flex w-full gap-1 overflow-x-auto">
+                            { TABS.map(tab => (
+                                <NavigatorTabButton key={ tab } active={ currentTab === tab } onClick={ () => setCurrentTab(tab) }>
+                                    { LocalizeText(tab) }
+                                </NavigatorTabButton>
+                            )) }
+                        </div>
+                    </NavigatorPanel>
                     { (currentTab === TABS[0]) &&
                         <NavigatorRoomSettingsBasicTabView roomData={ roomData } handleChange={ handleChange } onClose={ onClose } /> }
                     { (currentTab === TABS[1]) &&
@@ -201,8 +213,8 @@ export const NavigatorRoomSettingsView: FC<{}> = props =>
                         <NavigatorRoomSettingsVipChatTabView roomData={ roomData } handleChange={ handleChange } /> }
                     { (currentTab === TABS[4]) &&
                         <NavigatorRoomSettingsModTabView roomData={ roomData } handleChange={ handleChange } /> }
-                </div>
-            </NitroCardContentView>
-        </NitroCardView>
+                </NavigatorScrollViewport>
+            </AlignSurface.Panel>
+        </DraggableWindow>
     );
 };

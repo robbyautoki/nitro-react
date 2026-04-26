@@ -3,7 +3,6 @@ import { Package, Loader2, AlertTriangle } from 'lucide-react';
 import { CustomMarketplaceApi } from './CustomMarketplaceApi';
 import { CustomListingCard } from './CustomListingCard';
 import { CustomListing } from './CustomMarketplaceTypes';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const CustomMarketplaceSalesView: FC<{}> = () =>
 {
@@ -21,33 +20,32 @@ export const CustomMarketplaceSalesView: FC<{}> = () =>
 
     return (
         <div className="flex flex-col h-full">
-            {/* Error Banner */}
+            { /* Error Banner */ }
             { error && (
-                <div className="flex items-center gap-2 px-3 py-2 border-b border-destructive/20 bg-destructive/10">
-                    <AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0" />
-                    <span className="text-[11px] text-destructive">{ error }</span>
+                <div className="flex items-center gap-2 border-b border-error-base/20 bg-error-lighter px-3 py-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-error-base shrink-0" />
+                    <span className="text-paragraph-xs text-error-base">{ error }</span>
                 </div>
             ) }
-
-            <ScrollArea className="flex-1 min-h-0">
+            <div className="min-h-0 flex-1 overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
                 { loading ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                    <div className="flex flex-col items-center justify-center py-12 text-text-sub-600">
                         <Loader2 className="w-6 h-6 animate-spin opacity-30 mb-2" />
-                        <p className="text-xs">Laden...</p>
+                        <p className="text-paragraph-xs">Laden...</p>
                     </div>
                 ) : sales.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                    <div className="flex flex-col items-center justify-center py-12 text-text-sub-600">
                         <Package className="w-8 h-8 opacity-20 mb-2" />
-                        <p className="text-xs">Du hast noch nichts verkauft</p>
+                        <p className="text-paragraph-xs">Du hast noch nichts verkauft</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-border/30">
+                    <div className="space-y-1 p-2">
                         { sales.map(sale => (
                             <CustomListingCard key={ sale.id } listing={ sale } mode="sold" />
                         )) }
                     </div>
                 ) }
-            </ScrollArea>
+            </div>
         </div>
     );
 };

@@ -1,6 +1,7 @@
 import { CatalogPageMessageOfferData } from '@nitrots/nitro-renderer';
 import { FC, useCallback } from 'react';
 import { LocalizeText, ProductImageUtility } from '../../../../../../api';
+import * as AlignButton from '@/align-ui/components/ui/button';
 
 export interface VipGiftItemViewProps
 {
@@ -51,12 +52,12 @@ export const VipGiftItem : FC<VipGiftItemViewProps> = props =>
     },[ daysRequired ]);
 
     return (
-        <div className="flex items-center gap-3 p-2 rounded-lg border border-black/[0.06] bg-black/[0.04]">
-            <img src={getImageUrlForOffer()} alt="" className="w-10 h-10 object-contain shrink-0" />
-            <span className="flex-1 text-xs font-semibold text-black/85 truncate">{ getItemTitle() }</span>
-            <button className="appearance-none h-7 px-3 text-xs rounded-md border border-black/[0.06] bg-black/[0.04] text-black/50 hover:bg-black/[0.06] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0" onClick={ () => onSelect(offer.localizationId) } disabled={ !isAvailable }>
+        <div className="flex items-center gap-3 p-2 rounded-lg border border-stroke-soft-200 bg-bg-weak-50">
+            <img src={ getImageUrlForOffer() } alt="" className="w-10 h-10 object-contain shrink-0" />
+            <span className="flex-1 text-xs font-semibold text-text-strong-950 truncate">{ getItemTitle() }</span>
+            <AlignButton.Root variant="neutral" mode="stroke" size="xxsmall" className="h-7 px-3 text-xs shrink-0" onClick={ () => onSelect(offer.localizationId) } disabled={ !isAvailable }>
                 { LocalizeText('catalog.club_gift.select') }
-            </button>
+            </AlignButton.Root>
         </div>
     );
 }

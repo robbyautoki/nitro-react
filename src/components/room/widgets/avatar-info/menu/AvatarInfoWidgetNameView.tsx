@@ -3,10 +3,8 @@ import { FC, useMemo } from 'react';
 import { AvatarInfoName, GetAvatarRenderManager, GetSessionDataManager } from '../../../../../api';
 import { getPrestigeFromBadges } from '../../../../../api/utils/PrestigeUtils';
 import { useRoom } from '../../../../../hooks';
+import { useEquippedAssets } from '../../../../discord-shop/useEquippedAssets';
 import { ContextMenuView } from '../../context-menu/ContextMenuView';
-
-const DEFAULT_NAMEPLATE_URL = 'https://cdn.discordapp.com/assets/content/7bb8e28111f5b9f6f142c9a9dc7b70336e74afca0ab9de4c035b35caf4305709';
-const DEFAULT_DECO_URL = 'https://cdn.discordapp.com/assets/content/9fd289ab5082a14f189b0333d38ef32082a97502ac6e72a09ace2a13a7b47724';
 
 interface AvatarInfoWidgetNameViewProps
 {
@@ -18,6 +16,11 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
 {
     const { nameInfo = null, onClose = null } = props;
     const { roomSession = null } = useRoom();
+    const isUser = nameInfo.userType === RoomObjectType.USER;
+    const equippedAssets = useEquippedAssets(isUser ? nameInfo.id : 0, isUser && !!nameInfo.figure);
+    const nameplateUrl = equippedAssets.nameplate?.staticUrl || null;
+    const decoUrl = equippedAssets.avatarDecoration?.animatedUrl || equippedAssets.avatarDecoration?.staticUrl || null;
+    const hasEquippedFrame = Boolean(nameplateUrl || decoUrl);
 
     const prestige = useMemo(() =>
     {
@@ -33,11 +36,11 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
         const newClassNames: string[] = [ 'name-only' ];
 
         if(nameInfo.isFriend) newClassNames.push('is-friend');
-        if(nameInfo.userType === RoomObjectType.USER && nameInfo.figure) newClassNames.push('has-nameplate');
+        if(nameInfo.userType === RoomObjectType.USER && nameInfo.figure && hasEquippedFrame) newClassNames.push('has-nameplate');
         if(nameInfo.userType === RoomObjectType.BOT) newClassNames.push('is-bot');
 
         return newClassNames;
-    }, [ nameInfo ]);
+    }, [ nameInfo, hasEquippedFrame ]);
 
     const avatarHeadUrl = useMemo(() =>
     {
@@ -63,16 +66,14 @@ export const AvatarInfoWidgetNameView: FC<AvatarInfoWidgetNameViewProps> = props
         }
     }, [ nameInfo.figure, nameInfo.userType ]);
 
-    const isUser = nameInfo.userType === RoomObjectType.USER;
-
-    if(isUser && nameInfo.figure)
+    if(isUser && nameInfo.figure && hasEquippedFrame)
     {
         return (
             <ContextMenuView objectId={ nameInfo.roomIndex } category={ nameInfo.category } userType={ nameInfo.userType } fades={ (nameInfo.id !== GetSessionDataManager().userId) } classNames={ getClassNames } onClose={ onClose }>
-                <div className="nameplate-banner" style={{ backgroundImage: `url(${ DEFAULT_NAMEPLATE_URL })` }}>
+                <div className="nameplate-banner" style={ nameplateUrl ? { backgroundImage: `url(${ nameplateUrl })` } : undefined }>
                     <div className="nameplate-avatar">
                         { avatarHeadUrl && <img src={ avatarHeadUrl } alt="" className="nameplate-head" draggable={ false } /> }
-                        <img src={ DEFAULT_DECO_URL } alt="" className="nameplate-deco" draggable={ false } />
+                        { decoUrl && <img src={ decoUrl } alt="" className="nameplate-deco" draggable={ false } /> }
                     </div>
                     <div className="nameplate-info">
                         <div className="nameplate-name">

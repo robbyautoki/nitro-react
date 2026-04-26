@@ -16,6 +16,7 @@ export * from './notification';
 export * from './purse';
 export * from './rooms';
 export * from './session';
+export * from './useDebouncedCallback';
 export * from './useLocalStorage';
 export * from './UseMountEffect';
 export * from './useSharedVisibility';

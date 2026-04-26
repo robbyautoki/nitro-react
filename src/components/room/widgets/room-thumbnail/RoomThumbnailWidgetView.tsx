@@ -33,6 +33,15 @@ export const RoomThumbnailWidgetView: FC<{}> = props =>
     {
         GetRoomEngine().saveTextureAsScreenshot(texture, true);
 
+        try
+        {
+            if(roomSession?.roomId)
+            {
+                window.localStorage.setItem(`room-thumbnail-v:${ roomSession.roomId }`, Date.now().toString());
+            }
+        }
+        catch(_e) { /* ignore quota / privacy errors */ }
+
         setIsVisible(false);
     }
 

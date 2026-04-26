@@ -1,9 +1,23 @@
 import { RoomDataParser } from '@nitrots/nitro-renderer';
-import { FC, useEffect, useState } from 'react';
+import { FC, ReactNode, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText } from '../../../../api';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Frame, FramePanel } from '@/components/ui/frame';
+import * as AlignCheckbox from '@/align-ui/components/ui/checkbox';
+import { cn } from '@/align-ui/utils/cn';
+import { NavigatorPanel, NavigatorPanelStack, NavigatorTextInput } from '../NavigatorPrimitives';
+
+const Checkbox = AlignCheckbox.Root;
+
+function RadioOption({ checked, onClick, children, className }: { checked: boolean; onClick: () => void; children?: ReactNode; className?: string })
+{
+    return (
+        <button type="button" role="radio" aria-checked={ checked } className={ cn('flex cursor-pointer items-center gap-2 text-left', className) } onClick={ onClick }>
+            <span className={ cn('flex size-3.5 shrink-0 items-center justify-center rounded-full ring-1 ring-inset transition', checked ? 'bg-primary-base ring-primary-base' : 'bg-bg-white-0 ring-stroke-soft-200') }>
+                { checked && <span className="size-1.5 rounded-full bg-static-white" /> }
+            </span>
+            { children && <span className="text-paragraph-xs text-text-strong-950">{ children }</span> }
+        </button>
+    );
+}
 
 interface NavigatorRoomSettingsTabViewProps
 {
@@ -32,59 +46,56 @@ export const NavigatorRoomSettingsAccessTabView: FC<NavigatorRoomSettingsTabView
     }, [ roomData ]);
 
     return (
-        <Frame stacked spacing="sm" className="w-full">
-            <FramePanel>
+        <NavigatorPanelStack>
+            <NavigatorPanel>
                 <div className="flex flex-col gap-3">
                     <div className="flex flex-col gap-1">
-                        <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.roomaccess.caption') }</span>
-                        <span className="text-[11px] text-muted-foreground leading-relaxed">{ LocalizeText('navigator.roomsettings.roomaccess.info') }</span>
+                        <span className="text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.roomaccess.caption') }</span>
+                        <span className="text-paragraph-xs leading-relaxed text-text-sub-600">{ LocalizeText('navigator.roomsettings.roomaccess.info') }</span>
                     </div>
                     <div className="flex flex-col gap-2">
-                        <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.doormode') }</span>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="lockState" className="accent-primary w-3.5 h-3.5" checked={ (roomData.lockState === RoomDataParser.OPEN_STATE) && !isTryingPassword } onChange={ () => handleChange('lock_state', RoomDataParser.OPEN_STATE) } />
-                            <span className="text-xs">{ LocalizeText('navigator.roomsettings.doormode.open') }</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="lockState" className="accent-primary w-3.5 h-3.5" checked={ (roomData.lockState === RoomDataParser.DOORBELL_STATE) && !isTryingPassword } onChange={ () => handleChange('lock_state', RoomDataParser.DOORBELL_STATE) } />
-                            <span className="text-xs">{ LocalizeText('navigator.roomsettings.doormode.doorbell') }</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="lockState" className="accent-primary w-3.5 h-3.5" checked={ (roomData.lockState === RoomDataParser.INVISIBLE_STATE) && !isTryingPassword } onChange={ () => handleChange('lock_state', RoomDataParser.INVISIBLE_STATE) } />
-                            <span className="text-xs">{ LocalizeText('navigator.roomsettings.doormode.invisible') }</span>
-                        </label>
+                        <span className="text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.doormode') }</span>
+                        <RadioOption checked={ (roomData.lockState === RoomDataParser.OPEN_STATE) && !isTryingPassword } onClick={ () => handleChange('lock_state', RoomDataParser.OPEN_STATE) }>
+                            { LocalizeText('navigator.roomsettings.doormode.open') }
+                        </RadioOption>
+                        <RadioOption checked={ (roomData.lockState === RoomDataParser.DOORBELL_STATE) && !isTryingPassword } onClick={ () => handleChange('lock_state', RoomDataParser.DOORBELL_STATE) }>
+                            { LocalizeText('navigator.roomsettings.doormode.doorbell') }
+                        </RadioOption>
+                        <RadioOption checked={ (roomData.lockState === RoomDataParser.INVISIBLE_STATE) && !isTryingPassword } onClick={ () => handleChange('lock_state', RoomDataParser.INVISIBLE_STATE) }>
+                            { LocalizeText('navigator.roomsettings.doormode.invisible') }
+                        </RadioOption>
                         <div className="flex items-start gap-2">
-                            <input type="radio" name="lockState" className="accent-primary w-3.5 h-3.5 mt-0.5" checked={ (roomData.lockState === RoomDataParser.PASSWORD_STATE) || isTryingPassword } onChange={ event => setIsTryingPassword(event.target.checked) } />
+                            <RadioOption checked={ (roomData.lockState === RoomDataParser.PASSWORD_STATE) || isTryingPassword } onClick={ () => setIsTryingPassword(true) } className="mt-0.5" />
                             <div className="flex flex-col gap-1.5 flex-1">
-                                <span className="text-xs">{ LocalizeText('navigator.roomsettings.doormode.password') }</span>
+                                <span className="text-paragraph-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.doormode.password') }</span>
                                 { (isTryingPassword || (roomData.lockState === RoomDataParser.PASSWORD_STATE)) && (
                                     <>
-                                        <Input type="password" className="h-7 text-xs" value={ password } onChange={ event => setPassword(event.target.value) } placeholder={ LocalizeText('navigator.roomsettings.password') } onFocus={ () => setIsTryingPassword(true) } />
+                                        <NavigatorTextInput type="password" value={ password } onChange={ event => setPassword(event.target.value) } placeholder={ LocalizeText('navigator.roomsettings.password') } onFocus={ () => setIsTryingPassword(true) } />
                                         { isTryingPassword && (password.length <= 0) &&
-                                            <span className="text-[10px] text-destructive font-medium">{ LocalizeText('navigator.roomsettings.passwordismandatory') }</span> }
-                                        <Input type="password" className="h-7 text-xs" value={ confirmPassword } onChange={ event => setConfirmPassword(event.target.value) } onBlur={ saveRoomPassword } placeholder={ LocalizeText('navigator.roomsettings.passwordconfirm') } />
+                                            <span className="text-subheading-2xs font-medium text-error-base">{ LocalizeText('navigator.roomsettings.passwordismandatory') }</span> }
+                                        <NavigatorTextInput type="password" value={ confirmPassword } onChange={ event => setConfirmPassword(event.target.value) } onBlur={ saveRoomPassword } placeholder={ LocalizeText('navigator.roomsettings.passwordconfirm') } />
                                         { isTryingPassword && ((password.length > 0) && (password !== confirmPassword)) &&
-                                            <span className="text-[10px] text-destructive font-medium">{ LocalizeText('navigator.roomsettings.invalidconfirm') }</span> }
+                                            <span className="text-subheading-2xs font-medium text-error-base">{ LocalizeText('navigator.roomsettings.invalidconfirm') }</span> }
                                     </>
                                 ) }
                             </div>
                         </div>
                     </div>
                 </div>
-            </FramePanel>
-            <FramePanel>
+            </NavigatorPanel>
+            <NavigatorPanel>
                 <div className="flex flex-col gap-2">
-                    <span className="text-xs font-medium">{ LocalizeText('navigator.roomsettings.pets') }</span>
+                    <span className="text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.pets') }</span>
                     <div className="flex items-center gap-2">
                         <Checkbox id="pets" checked={ roomData.allowPets } onCheckedChange={ val => handleChange('allow_pets', !!val) } />
-                        <label htmlFor="pets" className="text-xs cursor-pointer">{ LocalizeText('navigator.roomsettings.allowpets') }</label>
+                        <label htmlFor="pets" className="cursor-pointer text-paragraph-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.allowpets') }</label>
                     </div>
                     <div className="flex items-center gap-2">
                         <Checkbox id="petsEat" checked={ roomData.allowPetsEat } onCheckedChange={ val => handleChange('allow_pets_eat', !!val) } />
-                        <label htmlFor="petsEat" className="text-xs cursor-pointer">{ LocalizeText('navigator.roomsettings.allowfoodconsume') }</label>
+                        <label htmlFor="petsEat" className="cursor-pointer text-paragraph-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings.allowfoodconsume') }</label>
                     </div>
                 </div>
-            </FramePanel>
-        </Frame>
+            </NavigatorPanel>
+        </NavigatorPanelStack>
     );
 };

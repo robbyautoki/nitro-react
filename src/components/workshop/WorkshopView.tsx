@@ -1,12 +1,17 @@
 import { FC, useCallback, useMemo, useState } from 'react';
-import { FaTimes } from 'react-icons/fa';
 import {
     Wrench, Search, X, Coins, Utensils, AlertTriangle, Check,
-    Package, ChevronDown, History, ArrowRight
+    Package, ArrowRight
 } from 'lucide-react';
 import { useWorkshop, WorkshopItem, FeedCandidate } from '../../hooks/workshop/useWorkshop';
 import { GetConfiguration } from '../../api';
 import { DraggableWindow, DraggableWindowPosition } from '../../common';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignProgress from '@/align-ui/components/ui/progress-bar';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
 
 const STATUS_TABS = [
     { id: '', label: 'Alle' },
@@ -48,7 +53,7 @@ const ItemIcon: FC<{ classname: string; className?: string; broken?: boolean }> 
 
     if(err) return (
         <div className={ `flex items-center justify-center ${ className || 'w-full h-full' }` }>
-            <Package className="w-3.5 h-3.5 text-muted-foreground/30" />
+            <Package className="w-3.5 h-3.5 text-text-soft-400" />
         </div>
     );
 
@@ -71,17 +76,11 @@ const DonutChart: FC<{ value: number; size?: number; muted?: boolean }> = ({ val
     const r = (size - 6) / 2;
     const c = 2 * Math.PI * r;
     const offset = c - (value / 100) * c;
-    const color = muted
-        ? 'var(--muted-foreground)'
-        : value < 20
-            ? 'var(--destructive)'
-            : 'var(--foreground)';
-
     return (
-        <svg width={ size } height={ size } className="shrink-0">
-            <circle cx={ size / 2 } cy={ size / 2 } r={ r } fill="none" stroke="currentColor" strokeWidth={ 3 } className="text-muted-foreground/10" />
-            <circle cx={ size / 2 } cy={ size / 2 } r={ r } fill="none" stroke={ color } strokeWidth={ 3 } strokeDasharray={ c } strokeDashoffset={ offset } strokeLinecap="round" transform={ `rotate(-90 ${ size / 2 } ${ size / 2 })` } style={ { transition: 'stroke-dashoffset 500ms ease', opacity: muted ? 0.25 : value < 20 ? 1 : 0.5 } } />
-            <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" className={ `text-[11px] font-bold tabular-nums ${ muted ? 'fill-muted-foreground/40' : 'fill-foreground' }` }>{ value }%</text>
+        <svg width={ size } height={ size } className={ `shrink-0 ${ muted ? 'text-text-soft-400' : value < 20 ? 'text-error-base' : 'text-text-sub-600' }` }>
+            <circle cx={ size / 2 } cy={ size / 2 } r={ r } fill="none" stroke="currentColor" strokeWidth={ 3 } className="opacity-10" />
+            <circle cx={ size / 2 } cy={ size / 2 } r={ r } fill="none" stroke="currentColor" strokeWidth={ 3 } strokeDasharray={ c } strokeDashoffset={ offset } strokeLinecap="round" transform={ `rotate(-90 ${ size / 2 } ${ size / 2 })` } style={ { transition: 'stroke-dashoffset 500ms ease', opacity: muted ? 0.25 : value < 20 ? 1 : 0.5 } } />
+            <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" className="fill-current text-label-xs tabular-nums">{ value }%</text>
         </svg>
     );
 };
@@ -97,6 +96,7 @@ export const WorkshopView: FC<{}> = () =>
         items, feedCandidates,
         selectedItem, setSelectedItem,
         isLoading, isRepairing,
+        error, lastRepairResult,
         repairWithCredits, repairWithFeed,
     } = useWorkshop();
 
@@ -162,60 +162,64 @@ export const WorkshopView: FC<{}> = () =>
 
     return (
         <DraggableWindow uniqueKey="workshop" handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-            <div className="w-[660px] rounded-2xl border border-border/60 bg-card shadow-2xl overflow-hidden flex flex-col" style={ { maxHeight: '75vh' } }>
+            <AlignSurface.Panel className="flex w-[900px] max-w-[94vw] overflow-hidden flex-col" style={ { maxHeight: '84vh' } }>
 
                 {/* Title Bar */}
-                <div className="drag-handler shrink-0 flex items-center justify-between px-3 py-2 border-b border-border/40 bg-muted/20 cursor-move select-none">
+                <div className="drag-handler flex h-11 shrink-0 cursor-move select-none items-center justify-between border-b border-stroke-soft-200 bg-bg-white-0 px-3">
                     <div className="flex items-center gap-2">
-                        <Wrench className="w-3.5 h-3.5 text-muted-foreground/50" />
-                        <span className="text-[13px] font-semibold text-foreground">Werkstatt</span>
+                        <Wrench className="w-3.5 h-3.5 text-text-sub-600" />
+                        <span className="text-label-sm text-text-strong-950">Werkstatt</span>
+                        <AlignBadge.Root color="gray" variant="lighter" size="small" square>{ stats.total } Items</AlignBadge.Root>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-2.5 text-[10px] text-muted-foreground tabular-nums">
+                        <div className="flex items-center gap-2.5 text-paragraph-xs text-text-sub-600 tabular-nums">
                             <span>{ stats.total } Gesamt</span>
-                            { stats.broken > 0 && <span className="text-destructive font-medium">{ stats.broken } zerbrochen</span> }
-                            { stats.critical > 0 && <span className="text-muted-foreground/70">{ stats.critical } kritisch</span> }
+                            { stats.broken > 0 && <span className="text-error-base font-medium">{ stats.broken } zerbrochen</span> }
+                            { stats.critical > 0 && <span className="text-warning-base">{ stats.critical } kritisch</span> }
                         </div>
-                        <button
-                            className="w-5 h-5 rounded flex items-center justify-center text-muted-foreground/40 hover:text-foreground hover:bg-accent/50 transition-colors cursor-pointer"
+                        <AlignButton.Root
+                            variant="neutral"
+                            mode="ghost"
+                            size="xxsmall"
+                            className="w-7 h-7 px-0"
                             onClick={ onClose }
                             onMouseDown={ (e) => e.stopPropagation() }
                         >
-                            <FaTimes className="w-3 h-3" />
-                        </button>
+                            <X className="w-3.5 h-3.5" />
+                        </AlignButton.Root>
                     </div>
                 </div>
 
                 {/* Search + Filter */}
-                <div className="shrink-0 px-3 py-2 space-y-1.5 border-b border-border/30">
-                    <div className="relative">
-                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground/50" />
-                        <input
-                            type="text"
-                            placeholder="Suchen…"
-                            value={ search }
-                            onChange={ (e) => setSearch(e.target.value) }
-                            className="w-full pl-7 pr-6 h-7 text-[11px] rounded-md border border-border/40 bg-transparent text-foreground placeholder:text-muted-foreground/40 outline-none focus:border-ring/50"
-                        />
-                        { search && (
-                            <button onClick={ () => setSearch('') } className="absolute right-1.5 top-1/2 -translate-y-1/2 cursor-pointer">
-                                <X className="w-2.5 h-2.5 text-muted-foreground/50" />
-                            </button>
-                        ) }
-                    </div>
-                    <div className="flex gap-1 flex-wrap">
+                <div className="shrink-0 space-y-2 border-b border-stroke-soft-200 bg-bg-weak-50 px-3 py-3">
+                    <AlignInput.Root size="xsmall">
+                        <AlignInput.Wrapper className="h-8">
+                            <AlignInput.Icon as={ Search } className="size-3.5" />
+                            <AlignInput.Input
+                                placeholder="Suchen..."
+                                value={ search }
+                                onChange={ (e) => setSearch(e.target.value) }
+                                className="h-8 text-paragraph-xs"
+                            />
+                            { search && (
+                                <button onClick={ () => setSearch('') } className="shrink-0 cursor-pointer text-text-soft-400 hover:text-text-strong-950">
+                                    <X className="w-2.5 h-2.5" />
+                                </button>
+                            ) }
+                        </AlignInput.Wrapper>
+                    </AlignInput.Root>
+                    <div className="flex flex-wrap gap-1">
                         { STATUS_TABS.map(tab => (
-                            <button
+                            <AlignButton.Root
                                 key={ tab.id }
                                 onClick={ () => setStatusFilter(tab.id) }
-                                className={ `px-2 py-0.5 rounded-md text-[10px] font-medium transition-colors cursor-pointer ${
-                                    statusFilter === tab.id
-                                        ? 'bg-foreground/10 text-foreground'
-                                        : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
-                                }` }
+                                variant="neutral"
+                                mode={ statusFilter === tab.id ? 'lighter' : 'ghost' }
+                                size="xxsmall"
+                                className="text-label-xs"
                             >
                                 { tab.label }
-                            </button>
+                            </AlignButton.Root>
                         )) }
                     </div>
                 </div>
@@ -224,18 +228,18 @@ export const WorkshopView: FC<{}> = () =>
                 <div className="flex flex-1 min-h-0" style={ { minHeight: 320 } }>
 
                     {/* Left: Item List */}
-                    <div className="border-r border-border/30 overflow-y-auto" style={ { width: '44%', scrollbarWidth: 'thin' } }>
+                    <div className="overflow-y-auto border-r border-stroke-soft-200 bg-bg-white-0 p-2" style={ { width: '42%', scrollbarWidth: 'thin' } }>
                         { isLoading && (
-                            <div className="flex items-center justify-center py-16 text-muted-foreground/40 text-xs">Laden...</div>
+                            <div className="flex items-center justify-center py-16 text-text-soft-400 text-xs">Laden...</div>
                         ) }
                         { !isLoading && filtered.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                                <Package className="w-8 h-8 mb-2 opacity-20" />
+                            <div className="flex flex-col items-center justify-center py-16 text-text-soft-400">
+                                <Package className="w-8 h-8 mb-2" />
                                 <p className="text-xs font-medium">Keine Items</p>
                             </div>
                         ) }
                         { !isLoading && filtered.length > 0 && (
-                            <div className="divide-y divide-border/20">
+                            <div className="space-y-1">
                                 { filtered.map(item =>
                                 {
                                     const isBroken = item.status === 'broken';
@@ -246,27 +250,22 @@ export const WorkshopView: FC<{}> = () =>
                                         <button
                                             key={ item.itemId }
                                             onClick={ () => selectItem(item) }
-                                            className={ `w-full flex items-center gap-2 px-2.5 py-2 text-left transition-colors cursor-pointer ${
-                                                selectedItem?.itemId === item.itemId ? 'bg-accent/40' : 'hover:bg-accent/20'
-                                            } ${ isBroken ? 'border-l-2 border-l-destructive' : isConf ? 'border-l-2 border-l-muted-foreground/20' : 'border-l-2 border-l-transparent' }` }
+                                            className={ `w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-left transition-colors cursor-pointer ${
+                                                selectedItem?.itemId === item.itemId ? 'bg-bg-weak-50' : 'hover:bg-bg-weak-50'
+                                            } ${ isBroken ? 'border-l-2 border-l-error-base' : isConf ? 'border-l-2 border-l-stroke-soft-200' : 'border-l-2 border-l-transparent' }` }
                                         >
-                                            <div className="relative w-8 h-8 shrink-0 rounded border border-border/30 bg-muted/10 flex items-center justify-center overflow-hidden">
+                                            <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-bg-weak-50">
                                                 <ItemIcon classname={ item.internalName } className="w-6 h-6" broken={ isBroken } />
-                                                { isBroken && <div className="absolute -top-0.5 -left-0.5 w-2 h-2 rounded-full bg-destructive" /> }
-                                                { isConf && <div className="absolute -top-0.5 -left-0.5 w-2 h-2 rounded-full bg-muted-foreground/40" /> }
+                                                { isBroken && <div className="absolute -top-0.5 -left-0.5 w-2 h-2 rounded-full bg-error-base" /> }
+                                                { isConf && <div className="absolute -top-0.5 -left-0.5 w-2 h-2 rounded-full bg-faded-base" /> }
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <span className={ `text-[11px] font-medium truncate block ${ isConf ? 'text-muted-foreground/50 line-through' : 'text-foreground' }` }>
+                                                <span className={ `block truncate text-label-xs ${ isConf ? 'text-text-soft-400 line-through' : 'text-text-strong-950' }` }>
                                                     { item.itemName }
                                                 </span>
                                                 <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <div className="flex-1 h-1 rounded-full bg-foreground/[0.08] overflow-hidden">
-                                                        <div
-                                                            className={ `h-full rounded-full transition-all ${ isDanger || isBroken ? 'bg-destructive' : 'bg-foreground/30' }` }
-                                                            style={ { width: `${ item.durabilityRemaining }%` } }
-                                                        />
-                                                    </div>
-                                                    <span className={ `text-[9px] font-bold tabular-nums ${ isDanger || isBroken ? 'text-destructive' : 'text-muted-foreground' }` }>
+                                                    <AlignProgress.Root value={ item.durabilityRemaining } color={ isDanger || isBroken ? 'red' : 'blue' } className="flex-1 h-1" />
+                                                    <span className={ `text-subheading-2xs tabular-nums ${ isDanger || isBroken ? 'text-error-base' : 'text-text-sub-600' }` }>
                                                         { item.durabilityRemaining }%
                                                     </span>
                                                 </div>
@@ -281,9 +280,9 @@ export const WorkshopView: FC<{}> = () =>
                     {/* Right: Detail Panel */}
                     <div className="flex-1 min-w-0 flex flex-col overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
                         { !selectedItem ? (
-                            <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground/30 gap-2">
+                            <div className="flex-1 flex flex-col items-center justify-center text-text-soft-400 gap-2">
                                 <Wrench className="w-8 h-8" />
-                                <p className="text-[11px]">Item auswählen</p>
+                                <p className="text-paragraph-xs">Item auswählen</p>
                             </div>
                         ) : (
                             <div className="p-3 space-y-3">
@@ -292,11 +291,11 @@ export const WorkshopView: FC<{}> = () =>
                                 <div className="flex items-start gap-3">
                                     <DonutChart value={ selectedItem.durabilityRemaining } size={ 52 } muted={ selectedItem.status === 'confiscated' } />
                                     <div className="flex-1 min-w-0">
-                                        <span className="text-[13px] font-semibold truncate block text-foreground">{ selectedItem.itemName }</span>
-                                        <p className="text-[9px] text-muted-foreground/40 font-mono mt-0.5">{ selectedItem.internalName } · #{ selectedItem.itemId }</p>
+                                        <span className="block truncate text-label-sm text-text-strong-950">{ selectedItem.itemName }</span>
+                                        <p className="mt-0.5 font-mono text-paragraph-xs text-text-soft-400">{ selectedItem.internalName } · #{ selectedItem.itemId }</p>
                                         <div className="flex items-center gap-2 mt-1">
                                             { selectedItem.tradeValue > 0 && (
-                                                <span className="text-[10px] text-muted-foreground/50 flex items-center gap-0.5 tabular-nums">
+                                                <span className="flex items-center gap-0.5 text-paragraph-xs text-text-sub-600 tabular-nums">
                                                     { selectedItem.tradeValue.toLocaleString('de-DE') } Credits
                                                 </span>
                                             ) }
@@ -311,93 +310,113 @@ export const WorkshopView: FC<{}> = () =>
                                         { label: 'Max Tage', value: String(selectedItem.maxDays) },
                                         { label: 'Status', value: selectedItem.status === 'active' ? 'Aktiv' : selectedItem.status === 'broken' ? 'Zerbrochen' : 'Eingezogen' },
                                     ].map(cell => (
-                                        <div key={ cell.label } className="rounded-md bg-muted/10 border border-border/20 px-2 py-1.5 text-center">
-                                            <p className="text-[8px] text-muted-foreground/40 uppercase tracking-wider">{ cell.label }</p>
-                                            <p className="text-[12px] font-medium text-muted-foreground mt-0.5 tabular-nums">{ cell.value }</p>
+                                        <div key={ cell.label } className="rounded-lg bg-bg-weak-50 px-2 py-1.5 text-center">
+                                            <p className="text-subheading-2xs uppercase text-text-soft-400">{ cell.label }</p>
+                                            <p className="mt-0.5 text-label-xs text-text-sub-600 tabular-nums">{ cell.value }</p>
                                         </div>
                                     )) }
                                 </div>
 
                                 {/* Alerts */}
+                                { error && (
+                                    <div className="flex items-center gap-2 rounded-md border border-error-base/30 bg-error-lighter px-2.5 py-2">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-error-base shrink-0" />
+                                        <p className="text-paragraph-xs text-error-base">{ error }</p>
+                                    </div>
+                                ) }
+                                { lastRepairResult?.success === true && (
+                                    <div className="flex items-center gap-2 rounded-md border border-success-base/30 bg-success-lighter px-2.5 py-2">
+                                        <Check className="w-3.5 h-3.5 text-success-base shrink-0" />
+                                        <p className="text-paragraph-xs text-success-base">
+                                            Reparatur abgeschlossen: { String(lastRepairResult.durabilityBefore ?? selectedItem.durabilityRemaining) }% auf { String(lastRepairResult.durabilityAfter ?? 100) }%.
+                                        </p>
+                                    </div>
+                                ) }
+                                { lastRepairResult?.error && (
+                                    <div className="flex items-center gap-2 rounded-md border border-error-base/30 bg-error-lighter px-2.5 py-2">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-error-base shrink-0" />
+                                        <p className="text-paragraph-xs text-error-base">{ String(lastRepairResult.error) }</p>
+                                    </div>
+                                ) }
                                 { isUrgent && (
-                                    <div className="flex items-center gap-2 rounded-md border border-destructive/30 px-2.5 py-2">
-                                        <AlertTriangle className="w-3.5 h-3.5 text-destructive shrink-0" />
-                                        <p className="text-[10px] text-destructive">Einziehung in <strong className="tabular-nums">{ graceDays } Tagen</strong> — jetzt reparieren!</p>
+                                    <div className="flex items-center gap-2 rounded-md border border-error-base/30 bg-error-lighter px-2.5 py-2">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-error-base shrink-0" />
+                                        <p className="text-paragraph-xs text-error-base">Einziehung in <strong className="tabular-nums">{ graceDays } Tagen</strong> - jetzt reparieren!</p>
                                     </div>
                                 ) }
                                 { !isUrgent && selectedItem.status === 'broken' && (
-                                    <div className="flex items-center gap-2 rounded-md border border-destructive/20 px-2.5 py-2">
-                                        <AlertTriangle className="w-3.5 h-3.5 text-destructive/60 shrink-0" />
-                                        <p className="text-[10px] text-muted-foreground">
+                                    <div className="flex items-center gap-2 rounded-md border border-error-base/20 px-2.5 py-2">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-error-base shrink-0" />
+                                        <p className="text-paragraph-xs text-text-sub-600">
                                             Zerbrochen — { graceDays !== null ? <span className="tabular-nums">{ graceDays } Tage Grace verbleibend</span> : 'Grace-Periode aktiv' }
                                         </p>
                                     </div>
                                 ) }
                                 { !isUrgent && isCritical && (
-                                    <div className="flex items-center gap-2 rounded-md border border-border/30 px-2.5 py-2">
-                                        <AlertTriangle className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                                        <p className="text-[10px] text-muted-foreground">Kritischer Zustand — Reparatur empfohlen</p>
+                                    <div className="flex items-center gap-2 rounded-md border border-warning-base/30 bg-warning-lighter px-2.5 py-2">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-warning-base shrink-0" />
+                                        <p className="text-paragraph-xs text-warning-dark">Kritischer Zustand - Reparatur empfohlen</p>
                                     </div>
                                 ) }
                                 { selectedItem.status === 'confiscated' && (
-                                    <div className="rounded-md border border-border/20 px-2.5 py-2">
-                                        <p className="text-[10px] text-muted-foreground/50">Eingezogen — Reparatur nicht mehr möglich</p>
+                                    <div className="rounded-md border border-stroke-soft-200 px-2.5 py-2">
+                                        <p className="text-paragraph-xs text-text-soft-400">Eingezogen - Reparatur nicht mehr möglich</p>
                                     </div>
                                 ) }
 
                                 {/* Repair Block */}
                                 { selectedItem.status !== 'confiscated' && (
-                                    <div className="rounded-lg border border-border bg-card p-3 space-y-2.5">
+                                    <div className="space-y-2.5 rounded-xl bg-bg-weak-50 p-3">
                                         {/* Mode Toggle */}
                                         <div className="flex items-center gap-1">
-                                            <button
+                                            <AlignButton.Root
                                                 onClick={ () => setRepairMode('credits') }
-                                                className={ `flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
-                                                    repairMode === 'credits'
-                                                        ? 'bg-foreground/10 text-foreground'
-                                                        : 'text-muted-foreground hover:text-foreground'
-                                                }` }
+                                                variant="neutral"
+                                                mode={ repairMode === 'credits' ? 'lighter' : 'ghost' }
+                                                size="xxsmall"
+                                                className="gap-1 text-label-xs"
                                             >
                                                 <Coins className="w-3 h-3" />Credits
-                                            </button>
-                                            <button
+                                            </AlignButton.Root>
+                                            <AlignButton.Root
                                                 onClick={ () => setRepairMode('feed') }
-                                                className={ `flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium transition-colors cursor-pointer ${
-                                                    repairMode === 'feed'
-                                                        ? 'bg-foreground/10 text-foreground'
-                                                        : 'text-muted-foreground hover:text-foreground'
-                                                }` }
+                                                variant="neutral"
+                                                mode={ repairMode === 'feed' ? 'lighter' : 'ghost' }
+                                                size="xxsmall"
+                                                className="gap-1 text-label-xs"
                                             >
                                                 <Utensils className="w-3 h-3" />Verfüttern
-                                            </button>
+                                            </AlignButton.Root>
                                         </div>
 
                                         { repairMode === 'credits' ? (
                                             <div className="space-y-2">
-                                                <div className="flex items-center justify-between text-[10px]">
-                                                    <span className="text-muted-foreground">Kosten</span>
-                                                    <span className="font-medium tabular-nums text-foreground">{ selectedItem.repairCost.toLocaleString('de-DE') } Credits</span>
+                                                <div className="flex items-center justify-between text-paragraph-xs">
+                                                    <span className="text-text-sub-600">Kosten</span>
+                                                    <span className="font-medium tabular-nums text-text-strong-950">{ selectedItem.repairCost.toLocaleString('de-DE') } Credits</span>
                                                 </div>
-                                                <div className="flex items-center justify-between text-[10px]">
-                                                    <span className="text-muted-foreground">Ergebnis</span>
-                                                    <span className="font-medium tabular-nums text-foreground">
-                                                        { selectedItem.durabilityRemaining }% <ArrowRight className="w-2.5 h-2.5 inline text-muted-foreground/40" /> 100%
+                                                <div className="flex items-center justify-between text-paragraph-xs">
+                                                    <span className="text-text-sub-600">Ergebnis</span>
+                                                    <span className="font-medium tabular-nums text-text-strong-950">
+                                                        { selectedItem.durabilityRemaining }% <ArrowRight className="w-2.5 h-2.5 inline text-text-soft-400" /> 100%
                                                     </span>
                                                 </div>
-                                                <button
-                                                    className="w-full h-8 text-[11px] font-semibold rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-40 cursor-pointer"
+                                                <FancyButton.Root
+                                                    variant="primary"
+                                                    size="xsmall"
+                                                    className="w-full"
                                                     disabled={ selectedItem.durabilityRemaining >= 100 || isRepairing }
                                                     onClick={ handleRepairCredits }
                                                 >
                                                     { isRepairing ? 'Repariere...' : 'Jetzt reparieren' }
-                                                </button>
+                                                </FancyButton.Root>
                                             </div>
                                         ) : (
                                             <div className="space-y-2">
-                                                <p className="text-[9px] text-muted-foreground/50">Opfer-Item wählen (wird zerstört):</p>
+                                                <p className="text-paragraph-xs text-text-sub-600">Opfer-Item wählen (wird zerstört):</p>
                                                 <div className="space-y-0.5 max-h-[100px] overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
                                                     { feedCandidates.length === 0 && (
-                                                        <p className="text-[10px] text-muted-foreground/40 py-3 text-center">Keine Items mit Trade-Value im Inventar</p>
+                                                        <p className="py-3 text-center text-paragraph-xs text-text-soft-400">Keine Items mit Trade-Value im Inventar</p>
                                                     ) }
                                                     { feedCandidates.map(fc =>
                                                     {
@@ -411,33 +430,35 @@ export const WorkshopView: FC<{}> = () =>
                                                                 key={ fc.itemId }
                                                                 onClick={ () => setSelectedFeed(fc) }
                                                                 className={ `w-full flex items-center gap-2 px-2 py-1 rounded text-left transition-colors cursor-pointer ${
-                                                                    isSel ? 'bg-foreground/[0.07] ring-1 ring-foreground/20' : 'hover:bg-accent/20'
+                                                                    isSel ? 'bg-bg-weak-50 ring-1 ring-stroke-soft-200' : 'hover:bg-bg-weak-50'
                                                                 }` }
                                                             >
-                                                                <div className="w-6 h-6 shrink-0 rounded border border-border/20 bg-muted/10 flex items-center justify-center">
+                                                                <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-bg-white-0">
                                                                     <ItemIcon classname={ fc.internalName } className="w-5 h-5" />
                                                                 </div>
-                                                                <span className="text-[10px] truncate flex-1 text-foreground">{ fc.itemName }</span>
-                                                                <span className="text-[9px] font-medium text-muted-foreground tabular-nums shrink-0">+{ repairPct }%</span>
+                                                                <span className="flex-1 truncate text-paragraph-xs text-text-strong-950">{ fc.itemName }</span>
+                                                                <span className="shrink-0 text-subheading-2xs text-text-sub-600 tabular-nums">+{ repairPct }%</span>
                                                             </button>
                                                         );
                                                     }) }
                                                 </div>
                                                 { selectedFeed && (
-                                                    <div className="flex items-center justify-between text-[10px] pt-1 border-t border-border/20">
-                                                        <span className="text-muted-foreground">Ergebnis</span>
-                                                        <span className="font-medium tabular-nums text-foreground">
-                                                            { selectedItem.durabilityRemaining }% <ArrowRight className="w-2.5 h-2.5 inline text-muted-foreground/40" /> { Math.min(100, selectedItem.durabilityRemaining + (selectedItem.repairCost > 0 ? Math.min(100, Math.round(selectedFeed.tradeValue * (selectedItem.feedValuePercent / 100) * 100 / selectedItem.repairCost)) : 100)) }%
+                                                    <div className="flex items-center justify-between border-t border-stroke-soft-200 pt-1 text-paragraph-xs">
+                                                        <span className="text-text-sub-600">Ergebnis</span>
+                                                        <span className="font-medium tabular-nums text-text-strong-950">
+                                                            { selectedItem.durabilityRemaining }% <ArrowRight className="w-2.5 h-2.5 inline text-text-soft-400" /> { Math.min(100, selectedItem.durabilityRemaining + (selectedItem.repairCost > 0 ? Math.min(100, Math.round(selectedFeed.tradeValue * (selectedItem.feedValuePercent / 100) * 100 / selectedItem.repairCost)) : 100)) }%
                                                         </span>
                                                     </div>
                                                 ) }
-                                                <button
-                                                    className="w-full h-8 text-[11px] font-semibold rounded-md border border-border text-foreground hover:bg-accent/50 transition-colors disabled:opacity-40 cursor-pointer"
+                                                <FancyButton.Root
+                                                    variant="basic"
+                                                    size="xsmall"
+                                                    className="w-full"
                                                     disabled={ !selectedFeed || selectedItem.durabilityRemaining >= 100 || isRepairing }
                                                     onClick={ handleRepairFeed }
                                                 >
                                                     { isRepairing ? 'Verfüttere...' : 'Verfüttern' }
-                                                </button>
+                                                </FancyButton.Root>
                                             </div>
                                         ) }
                                     </div>
@@ -446,7 +467,7 @@ export const WorkshopView: FC<{}> = () =>
                         ) }
                     </div>
                 </div>
-            </div>
+            </AlignSurface.Panel>
         </DraggableWindow>
     );
 };

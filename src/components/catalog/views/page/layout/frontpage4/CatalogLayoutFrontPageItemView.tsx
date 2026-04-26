@@ -19,10 +19,10 @@ export const CatalogLayoutFrontPageItemView: FC<CatalogLayoutFrontPageItemViewPr
     return (
         <div
             className="relative flex-1 rounded-xl overflow-hidden cursor-pointer bg-cover bg-center min-h-[120px] hover:brightness-105 transition-all duration-200"
-            style={{ backgroundImage: `url(${imageUrl})` }}
-            onClick={onClick}
+            style={ { backgroundImage: `url(${ imageUrl })` } }
+            onClick={ onClick }
         >
-            <span className="absolute bottom-2 left-2 text-white text-xs font-medium bg-black/60 backdrop-blur-sm rounded-lg px-2.5 py-1">
+            <span className="absolute bottom-2 left-2 text-static-white text-xs font-medium bg-bg-strong-950/70 backdrop-blur-sm rounded-lg px-2.5 py-1">
                 { item.itemName }
             </span>
             { children }

@@ -4,8 +4,11 @@ import { RoomSessionEvent } from '@nitrots/nitro-renderer';
 import { GetConfiguration, GetRoomSession, GetSessionDataManager } from '../../api';
 import { useRoom, useRoomSessionManagerEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
-import { Frame, FramePanel } from '../ui/frame';
-import { Button } from '../ui/button';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignDivider from '@/align-ui/components/ui/divider';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import * as FancyButton from '@/align-ui/components/ui/fancy-button';
 
 interface RoomSaleData {
     room: string;
@@ -37,7 +40,10 @@ export const RoomSaleView: FC<{}> = () =>
 
     useEffect(() =>
     {
-        if(!roomSession) { setSaleData(null); setShowBanner(false); return; }
+        if(!roomSession)
+        {
+            setSaleData(null); setShowBanner(false); return;
+        }
 
         const roomId = roomSession.roomId;
         const cmsUrl = GetConfiguration<string>('url.prefix', '');
@@ -74,7 +80,8 @@ export const RoomSaleView: FC<{}> = () =>
                     setShowBanner(false);
                 }
             })
-            .catch(() => {});
+            .catch(() =>
+            {});
     }, [ roomSession ]);
 
     const onBuyConfirm = useCallback(() =>
@@ -84,7 +91,8 @@ export const RoomSaleView: FC<{}> = () =>
             const session = GetRoomSession();
             if(session) session.sendChatMessage(':buyroom confirm', 0);
         }
-        catch {}
+        catch
+        {}
 
         setShowPanel(false);
         setShowBanner(false);
@@ -109,83 +117,88 @@ export const RoomSaleView: FC<{}> = () =>
     {
         return (
             <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.CENTER }>
-                <div className="w-[420px]">
-                    <Frame className="relative">
-                        <div className="drag-handler absolute inset-0 cursor-move" />
-                        <FramePanel className="overflow-hidden p-0! relative z-10">
-                            <div className="flex items-center justify-between px-4 py-2.5 border-b">
-                                <div className="flex items-center gap-2">
-                                    <Home className="size-4 text-emerald-500" />
-                                    <span className="text-sm font-semibold">Raum kaufen</span>
+                <div className="w-[420px] max-w-[calc(100vw-32px)]">
+                    <AlignSurface.Panel className="overflow-hidden">
+                        <AlignSurface.Header
+                            className="drag-handler cursor-grab select-none active:cursor-grabbing"
+                            title={
+                                <div className="flex min-w-0 items-center gap-2">
+                                    <span className="flex size-8 items-center justify-center rounded-lg bg-success-lighter text-success-base ring-1 ring-inset ring-success-light">
+                                        <Home className="size-4" />
+                                    </span>
+                                    <span className="truncate">Raum kaufen</span>
                                 </div>
-                                <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={ onClose }>
-                                    <X className="size-3.5" />
-                                </button>
+                            }
+                            description={ `Verkäufer: ${ saleData.owner }` }
+                            onClose={ onClose }
+                        />
+                        <div className="space-y-4 p-4">
+                            <div className="space-y-2">
+                                <div className="truncate text-title-h6 text-text-strong-950">{ saleData.room }</div>
+                                <div className="flex flex-wrap gap-2">
+                                    <AlignBadge.Root color="orange" variant="light" size="small">
+                                        { saleData.price.toLocaleString() } { saleData.currency }
+                                    </AlignBadge.Root>
+                                    <AlignBadge.Root color="gray" variant="lighter" size="small">
+                                        { saleData.items } Möbel
+                                    </AlignBadge.Root>
+                                </div>
                             </div>
-
-                            <div className="px-4 py-3 space-y-3">
-                                <div>
-                                    <div className="text-base font-bold text-foreground">{ saleData.room }</div>
-                                    <div className="text-xs text-muted-foreground mt-0.5">Verkäufer: { saleData.owner }</div>
+                            <div className="space-y-2 rounded-xl bg-bg-weak-50 p-3 ring-1 ring-inset ring-stroke-soft-200">
+                                <div className="flex justify-between gap-3 text-paragraph-xs">
+                                    <span className="text-text-sub-600">Preis</span>
+                                    <span className="font-semibold text-warning-base">{ saleData.price.toLocaleString() } { saleData.currency }</span>
                                 </div>
-
-                                <div className="rounded-lg border p-3 space-y-2">
-                                    <div className="flex justify-between text-xs">
-                                        <span className="text-muted-foreground">Preis</span>
-                                        <span className="font-bold text-amber-500">{ saleData.price.toLocaleString() } { saleData.currency }</span>
-                                    </div>
-                                    <div className="flex justify-between text-xs">
-                                        <span className="text-muted-foreground">Möbel</span>
-                                        <span className="text-foreground">{ saleData.items }</span>
-                                    </div>
-                                    <div className="flex justify-between text-xs">
-                                        <span className="text-muted-foreground">Bots</span>
-                                        <span className="text-foreground">{ saleData.bots }</span>
-                                    </div>
-                                    <div className="flex justify-between text-xs">
-                                        <span className="text-muted-foreground">Haustiere</span>
-                                        <span className="text-foreground">{ saleData.pets }</span>
-                                    </div>
-                                    { saleData.limiteds > 0 && (
-                                        <div className="flex justify-between text-xs">
-                                            <span className="text-orange-500 font-semibold">Limitierte Items</span>
-                                            <span className="text-orange-500 font-bold">{ saleData.limiteds }</span>
-                                        </div>
-                                    )}
+                                <AlignDivider.Root />
+                                <div className="flex justify-between gap-3 text-paragraph-xs">
+                                    <span className="text-text-sub-600">Möbel</span>
+                                    <span className="font-medium text-text-strong-950">{ saleData.items }</span>
                                 </div>
-
+                                <div className="flex justify-between gap-3 text-paragraph-xs">
+                                    <span className="text-text-sub-600">Bots</span>
+                                    <span className="font-medium text-text-strong-950">{ saleData.bots }</span>
+                                </div>
+                                <div className="flex justify-between gap-3 text-paragraph-xs">
+                                    <span className="text-text-sub-600">Haustiere</span>
+                                    <span className="font-medium text-text-strong-950">{ saleData.pets }</span>
+                                </div>
                                 { saleData.limiteds > 0 && (
-                                    <div className="flex items-start gap-2 rounded-lg border border-orange-500/20 bg-orange-500/5 p-2.5">
-                                        <AlertTriangle className="size-4 text-orange-500 shrink-0 mt-0.5" />
-                                        <div className="text-[11px] text-orange-500/80 leading-relaxed">
-                                            Dieser Raum enthält { saleData.limiteds } limitierte Items. Diese werden mit dem Kauf übertragen.
-                                        </div>
+                                    <div className="flex justify-between gap-3 text-paragraph-xs">
+                                        <span className="font-medium text-warning-base">Limitierte Items</span>
+                                        <span className="font-semibold text-warning-base">{ saleData.limiteds }</span>
                                     </div>
-                                )}
-
-                                { !confirming ? (
-                                    <Button className="w-full" size="sm" onClick={ () => setConfirming(true) }>
-                                        <ShoppingCart className="size-4" />
-                                        Raum kaufen
-                                    </Button>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <div className="text-xs text-center text-red-500 font-semibold">
-                                            Bist du sicher? { saleData.price.toLocaleString() } { saleData.currency } werden abgezogen!
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button variant="outline" size="sm" className="flex-1" onClick={ () => setConfirming(false) }>
-                                                Abbrechen
-                                            </Button>
-                                            <Button variant="destructive" size="sm" className="flex-1" onClick={ onBuyConfirm }>
-                                                Ja, kaufen!
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
+                                ) }
                             </div>
-                        </FramePanel>
-                    </Frame>
+                            { saleData.limiteds > 0 && (
+                                <div className="flex items-start gap-2 rounded-xl bg-warning-lighter p-3 text-warning-base ring-1 ring-inset ring-warning-light">
+                                    <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                                    <div className="text-paragraph-xs leading-relaxed">
+                                        Dieser Raum enthält { saleData.limiteds } limitierte Items. Diese werden mit dem Kauf übertragen.
+                                    </div>
+                                </div>
+                            ) }
+                            { !confirming ? (
+                                <FancyButton.Root className="w-full" size="small" variant="primary" onClick={ () => setConfirming(true) }>
+                                    <FancyButton.Icon as={ ShoppingCart } className="size-4" />
+                                    Raum kaufen
+                                </FancyButton.Root>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="rounded-xl bg-error-lighter px-3 py-2 text-center text-paragraph-xs font-medium text-error-base">
+                                        Bist du sicher? { saleData.price.toLocaleString() } { saleData.currency } werden abgezogen!
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <AlignButton.Root variant="neutral" mode="stroke" size="small" className="flex-1" onClick={ () => setConfirming(false) }>
+                                            Abbrechen
+                                        </AlignButton.Root>
+                                        <FancyButton.Root variant="destructive" size="small" className="flex-1" onClick={ onBuyConfirm }>
+                                            Ja, kaufen!
+                                        </FancyButton.Root>
+                                    </div>
+                                </div>
+                            ) }
+                        </div>
+                    </AlignSurface.Panel>
                 </div>
             </DraggableWindow>
         );
@@ -195,26 +208,29 @@ export const RoomSaleView: FC<{}> = () =>
     {
         return (
             <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[90] pointer-events-auto">
-                <Frame>
-                    <FramePanel className="!p-0">
-                        <div className="flex items-center gap-3 px-4 py-3">
-                            <Home className="size-5 text-emerald-500 shrink-0" />
-                            <div className="flex-1 min-w-0">
-                                <div className="text-sm font-semibold text-foreground">Raum zu verkaufen!</div>
-                                <div className="text-xs text-muted-foreground">
-                                    { saleData.price.toLocaleString() } { saleData.currency }
-                                    { ' · ' }{ saleData.items } Möbel
-                                </div>
-                            </div>
-                            <Button size="sm" onClick={ () => { setShowPanel(true); setShowBanner(false); } }>
-                                Details
-                            </Button>
-                            <button className="p-1 rounded text-muted-foreground hover:text-foreground" onClick={ onDismissBanner }>
-                                <X className="size-3" />
-                            </button>
+                <AlignSurface.Panel className="min-w-[320px] overflow-hidden">
+                    <div className="flex items-center gap-3 px-4 py-3">
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-success-lighter text-success-base ring-1 ring-inset ring-success-light">
+                            <Home className="size-5" />
                         </div>
-                    </FramePanel>
-                </Frame>
+                        <div className="min-w-0 flex-1">
+                            <div className="text-label-sm text-text-strong-950">Raum zu verkaufen!</div>
+                            <div className="text-paragraph-xs text-text-sub-600">
+                                { saleData.price.toLocaleString() } { saleData.currency }
+                                { ' · ' }{ saleData.items } Möbel
+                            </div>
+                        </div>
+                        <AlignButton.Root size="xsmall" variant="primary" mode="filled" onClick={ () =>
+                        {
+                            setShowPanel(true); setShowBanner(false);
+                        } }>
+                            Details
+                        </AlignButton.Root>
+                        <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ onDismissBanner }>
+                            <AlignButton.Icon as={ X } className="size-4" />
+                        </AlignButton.Root>
+                    </div>
+                </AlignSurface.Panel>
             </div>
         );
     }

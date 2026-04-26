@@ -1,14 +1,11 @@
 .nitro-context-menu {
     padding: 2px;
-    background: var(--card);
-    border: 1px solid var(--border);
+    background: hsl(var(--align-bg-white-0));
     border-radius: $border-radius;
     font-size: $font-size-sm;
     z-index: $context-menu-zindex;
     pointer-events: all;
-    box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.12),
-        0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-regular-md);
 
     &.bot-chat {
         max-width: 250px;
@@ -17,30 +14,23 @@
 
     &.name-only {
         &.is-bot {
-            color: #22d3ee;
+            color: hsl(var(--align-information-base));
         }
 
-        background:
-            linear-gradient(rgba(12, 12, 16, 0.80), rgba(12, 12, 16, 0.80)) padding-box,
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.03)) border-box;
+        background: hsl(var(--align-bg-strong-950) / 0.85);
         padding: 4px 12px;
         width: unset;
         text-align: center;
         font-size: 13px;
         font-weight: 700;
-        color: rgba(255, 255, 255, 0.95);
+        color: hsl(var(--align-static-white));
         letter-spacing: 0.3px;
         white-space: nowrap;
         border-radius: 6px;
-        box-shadow:
-            0 8px 24px rgba(0, 0, 0, 0.25),
-            0 2px 8px rgba(0, 0, 0, 0.15),
-            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        box-shadow: var(--shadow-regular-md);
 
         &.is-friend {
-            background:
-                linear-gradient(rgba(22, 101, 52, 0.80), rgba(22, 101, 52, 0.80)) padding-box,
-                linear-gradient(to bottom, rgba(34, 197, 94, 0.30), rgba(34, 197, 94, 0.10)) border-box;
+            background: hsl(var(--align-success-base) / 0.85);
         }
 
         &.has-nameplate {
@@ -49,7 +39,7 @@
             border: none;
             border-radius: 8px;
             overflow: visible;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            box-shadow: var(--shadow-regular-md);
             backdrop-filter: none;
 
             .nameplate-banner {
@@ -59,7 +49,7 @@
                 padding: 3px 14px 3px 3px;
                 height: 38px;
                 overflow: visible;
-                background-color: var(--card);
+                background-color: hsl(var(--align-bg-white-0));
                 background-size: 100% 100%;
                 background-position: center;
                 background-repeat: no-repeat;
@@ -106,7 +96,7 @@
             .nameplate-name {
                 font-size: 13px;
                 font-weight: 700;
-                color: var(--card-foreground);
+                color: hsl(var(--align-text-strong-950));
                 white-space: nowrap;
                 letter-spacing: 0.3px;
             }
@@ -142,16 +132,39 @@
             height: 10px;
             width: 10px;
             transform: rotate(45deg);
-            border-color: transparent var(--border) var(--border) transparent;
             border-style: solid;
-            border-width: 5px;
-            background: var(--card);
+            border-width: 0;
+            background: hsl(var(--align-bg-white-0));
+            box-shadow: var(--shadow-regular-md);
+        }
+    }
+
+    &.nitro-furni-floatbar {
+        padding: 0;
+        background: hsl(var(--align-bg-white-0));
+        border-radius: 14px;
+        color: hsl(var(--align-text-strong-950));
+        box-shadow: var(--shadow-regular-md);
+        min-width: 0 !important;
+
+        &:after {
+            background: hsl(var(--align-bg-white-0));
+        }
+
+        .menu-footer {
+            color: hsl(var(--align-text-soft-400));
+            padding-top: 0;
+            padding-bottom: 4px;
+
+            &:hover {
+                color: hsl(var(--align-text-strong-950));
+            }
         }
     }
 
     .menu-header {
-        background: var(--accent);
-        color: var(--foreground);
+        background: hsl(var(--align-bg-weak-50));
+        color: hsl(var(--align-text-strong-950));
         min-width: 117px;
         min-height: 25px;
         font-size: 16px;
@@ -167,7 +180,7 @@
     }
 
     .menu-footer {
-        color: var(--muted-foreground);
+        color: hsl(var(--align-text-sub-600));
         font-size: 16px;
         width: 100%;
         min-width: 25px;
@@ -175,7 +188,7 @@
         cursor: pointer;
 
         &:hover {
-            color: var(--foreground);
+            color: hsl(var(--align-text-strong-950));
         }
     }
 
@@ -212,35 +225,35 @@
             background: transparent;
             cursor: pointer;
             border-radius: 3px;
-            color: var(--foreground);
+            color: hsl(var(--align-text-strong-950));
             transition: background 0.1s ease;
 
             &:not(.disabled):hover {
-                background: var(--accent);
-                color: var(--foreground);
+                background: hsl(var(--align-bg-weak-50));
+                color: hsl(var(--align-text-strong-950));
             }
 
             &.menu-item-danger {
-                color: var(--destructive);
+                color: hsl(var(--align-error-base));
                 &:not(.disabled):hover {
-                    background: color-mix(in oklch, var(--destructive) 12%, transparent);
-                    color: var(--destructive);
+                    background: hsl(var(--align-error-base) / 0.12);
+                    color: hsl(var(--align-error-base));
                 }
             }
 
             &.menu-item-warning {
-                color: var(--warning);
+                color: hsl(var(--align-warning-base));
                 &:not(.disabled):hover {
-                    background: color-mix(in oklch, var(--warning) 12%, transparent);
-                    color: var(--warning);
+                    background: hsl(var(--align-warning-base) / 0.12);
+                    color: hsl(var(--align-warning-base));
                 }
             }
 
             &.menu-item-success {
-                color: var(--success);
+                color: hsl(var(--align-success-base));
                 &:not(.disabled):hover {
-                    background: color-mix(in oklch, var(--success) 12%, transparent);
-                    color: var(--success);
+                    background: hsl(var(--align-success-base) / 0.12);
+                    color: hsl(var(--align-success-base));
                 }
             }
 

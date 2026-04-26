@@ -3,6 +3,9 @@ import { FC, useEffect, useRef, useState } from 'react';
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { GetRoomObjectBounds, GetRoomSession, GetSessionDataManager } from '../../api';
 import { useMessageEvent } from '../../hooks';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignProgressBar from '@/align-ui/components/ui/progress-bar';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
 
 interface HpData {
     roomIndex: number;
@@ -13,8 +16,8 @@ interface HpData {
 
 export const CombatHudView: FC<{}> = () =>
 {
-    const [hpMap, setHpMap] = useState<Map<number, HpData>>(new Map());
-    const [positions, setPositions] = useState<Map<number, { x: number; y: number }>>(new Map());
+    const [ hpMap, setHpMap ] = useState<Map<number, HpData>>(new Map());
+    const [ positions, setPositions ] = useState<Map<number, { x: number; y: number }>>(new Map());
     const hpMapRef = useRef(hpMap);
     hpMapRef.current = hpMap;
 
@@ -33,17 +36,22 @@ export const CombatHudView: FC<{}> = () =>
         const dead = p?.get('dead') === '1';
         const roomIndex = parseInt(p?.get('room_index') || '0');
 
-        setHpMap(prev => {
+        setHpMap(prev =>
+        {
             const next = new Map(prev);
             next.set(userId, { roomIndex, hp, maxHp, dead });
             return next;
         });
 
-        if (hp >= maxHp && !dead) {
-            setTimeout(() => {
-                setHpMap(prev => {
+        if (hp >= maxHp && !dead)
+        {
+            setTimeout(() =>
+            {
+                setHpMap(prev =>
+                {
                     const current = prev.get(userId);
-                    if (current && current.hp >= current.maxHp && !current.dead) {
+                    if (current && current.hp >= current.maxHp && !current.dead)
+                    {
                         const next = new Map(prev);
                         next.delete(userId);
                         return next;
@@ -80,45 +88,47 @@ export const CombatHudView: FC<{}> = () =>
         };
 
         GetTicker().add(updatePositions);
-        return () => { GetTicker().remove(updatePositions); };
+        return () =>
+        {
+            GetTicker().remove(updatePositions);
+        };
     }, []);
 
     if (hpMap.size === 0) return null;
 
     return (
         <>
-            {Array.from(hpMap.entries()).map(([userId, data]) => {
+            { Array.from(hpMap.entries()).map(([ userId, data ]) =>
+            {
                 const pos = positions.get(userId);
                 if (!pos) return null;
 
                 const hpPercent = Math.max(0, Math.min((data.hp / data.maxHp) * 100, 100));
-                const barColor = data.dead
-                    ? 'bg-red-500'
+                const barColor: 'red' | 'orange' | 'green' = data.dead
+                    ? 'red'
                     : hpPercent > 60
-                        ? 'bg-emerald-500'
+                        ? 'green'
                         : hpPercent > 30
-                            ? 'bg-amber-500'
-                            : 'bg-red-500';
+                            ? 'orange'
+                            : 'red';
 
                 return (
-                    <div key={userId} className="fixed z-[100] pointer-events-none -translate-x-1/2" style={{ left: pos.x, top: pos.y + 6 }}>
-                        <div className={ `flex flex-col items-center gap-px rounded-md px-1.5 py-0.5 min-w-[60px] border bg-card/90 backdrop-blur-sm ${ data.dead ? 'border-red-500/40' : 'border-border/40' }` }>
-                            {data.dead ? (
-                                <div className="text-[9px] font-bold text-red-500">KO</div>
+                    <div key={ userId } className="fixed z-[100] pointer-events-none -translate-x-1/2" style={ { left: pos.x, top: pos.y + 6 } }>
+                        <AlignSurface.Panel className={ `flex min-w-[60px] flex-col items-center gap-px rounded-lg px-1.5 py-0.5 ${ data.dead ? 'ring-error-base' : '' }` }>
+                            { data.dead ? (
+                                <AlignBadge.Root color="red" variant="lighter" size="small">KO</AlignBadge.Root>
                             ) : (
                                 <>
-                                    <div className="w-full h-[5px] rounded-full overflow-hidden bg-muted">
-                                        <div className={ `h-full rounded-full transition-[width] duration-300 ease-out ${ barColor }` } style={{ width: `${hpPercent}%` }} />
-                                    </div>
-                                    <div className="text-[8px] font-bold text-foreground whitespace-nowrap">
-                                        {data.hp}/{data.maxHp}
+                                    <AlignProgressBar.Root className="h-[5px]" value={ hpPercent } color={ barColor } />
+                                    <div className="whitespace-nowrap text-[8px] font-bold text-text-strong-950">
+                                        { data.hp }/{ data.maxHp }
                                     </div>
                                 </>
-                            )}
-                        </div>
+                            ) }
+                        </AlignSurface.Panel>
                     </div>
                 );
-            })}
+            }) }
         </>
     );
 };

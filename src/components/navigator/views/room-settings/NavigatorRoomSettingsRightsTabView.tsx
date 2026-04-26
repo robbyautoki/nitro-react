@@ -3,9 +3,8 @@ import { FC, useEffect, useState } from 'react';
 import { IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { UserProfileIconView } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Frame, FramePanel } from '@/components/ui/frame';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import { NavigatorPanel, NavigatorPanelStack, NavigatorScrollViewport } from '../NavigatorPrimitives';
 import { X } from 'lucide-react';
 
 interface NavigatorRoomSettingsTabViewProps
@@ -56,45 +55,46 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
     }, [ roomData.roomId ]);
 
     return (
-        <Frame stacked spacing="sm" className="w-full">
-            <FramePanel>
+        <NavigatorPanelStack>
+            <NavigatorPanel>
                 <div className="flex flex-col gap-2">
-                    <span className="text-xs font-medium">
+                    <span className="text-label-xs text-text-strong-950">
                         { LocalizeText('navigator.flatctrls.userswithrights', [ 'displayed', 'total' ], [ usersWithRights.size.toString(), usersWithRights.size.toString() ]) }
                     </span>
-                    <ScrollArea className="h-[120px]">
+                    <NavigatorScrollViewport className="h-[120px]">
                         <div className="flex flex-col gap-0.5">
                             { usersWithRights.size === 0 && (
-                                <span className="text-[11px] text-muted-foreground text-center py-4">Keine User mit Rechten</span>
+                                <span className="py-4 text-center text-paragraph-xs text-text-sub-600">Keine User mit Rechten</span>
                             ) }
                             { Array.from(usersWithRights.entries()).map(([ id, name ], index) => (
                                 <div
                                     key={ index }
-                                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted/50 transition-colors group"
+                                    className="group flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-bg-weak-50"
                                 >
                                     <UserProfileIconView userName={ name } />
-                                    <span className="text-xs flex-1 truncate">{ name }</span>
+                                    <span className="flex-1 truncate text-paragraph-xs text-text-strong-950">{ name }</span>
                                     <button
-                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-destructive/10"
+                                        className="rounded p-0.5 opacity-0 transition-opacity hover:bg-error-lighter group-hover:opacity-100"
                                         onClick={ () => SendMessageComposer(new RoomTakeRightsComposer(id)) }
                                     >
-                                        <X className="w-3 h-3 text-destructive" />
+                                        <X className="size-3 text-error-base" />
                                     </button>
                                 </div>
                             )) }
                         </div>
-                    </ScrollArea>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-xs text-destructive hover:text-destructive"
+                    </NavigatorScrollViewport>
+                    <AlignButton.Root
+                        type="button"
+                        variant="error"
+                        mode="stroke"
+                        size="xsmall"
                         disabled={ !usersWithRights.size }
                         onClick={ () => SendMessageComposer(new RemoveAllRightsMessageComposer(roomData.roomId)) }
                     >
                         { LocalizeText('navigator.flatctrls.clear') }
-                    </Button>
+                    </AlignButton.Root>
                 </div>
-            </FramePanel>
-        </Frame>
+            </NavigatorPanel>
+        </NavigatorPanelStack>
     );
 }

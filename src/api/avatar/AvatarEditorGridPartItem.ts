@@ -186,6 +186,15 @@ export class AvatarEditorGridPartItem implements IAvatarImageListener
             container.addChild(sprite);
         }
 
+        if(!container.children.length)
+        {
+            container.destroy({
+                children: true
+            });
+
+            return null;
+        }
+
         return container;
     }
 
@@ -242,9 +251,17 @@ export class AvatarEditorGridPartItem implements IAvatarImageListener
 
     public resetFigure(figure: string): void
     {
-        if(!this.analyzeFigure()) return;
+        // Defer to next tick: AvatarAssetDownloadManager calls listener.resetFigure()
+        // BEFORE dispatching LIBRARY_LOADED → _aliasCollection.reset(), so on the
+        // first synchronous call the new asset aliases are not yet registered.
+        setTimeout(() =>
+        {
+            if(this._disposed) return;
 
-        this.update();
+            this._isValidFigure = true;
+
+            this.update();
+        }, 0);
     }
 
     public get disposed(): boolean

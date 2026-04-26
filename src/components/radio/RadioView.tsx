@@ -1,10 +1,32 @@
 import { ILinkEventTracker, NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
-import { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { AddEventLinkTracker, CreateLinkEvent, GetRoomSession, RemoveLinkEventTracker } from '../../api';
+import { FC, InputHTMLAttributes, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { AddEventLinkTracker, GetRoomSession, RemoveLinkEventTracker } from '../../api';
 import { useMessageEvent } from '../../hooks';
 import { DraggableWindow, DraggableWindowPosition } from '../../common/draggable-window';
-import { Frame, FramePanel } from '../ui/frame';
-import { Radio, X } from 'lucide-react';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
+import * as AlignButton from '@/align-ui/components/ui/button';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignProgressBar from '@/align-ui/components/ui/progress-bar';
+import * as AlignSelect from '@/align-ui/components/ui/select';
+import * as AlignSurface from '@/align-ui/components/ui/surface';
+import {
+    ArrowLeft,
+    Check,
+    ListMusic,
+    Loader2,
+    Megaphone,
+    Music,
+    Pause,
+    Play,
+    Plus,
+    Power,
+    Radio,
+    Repeat,
+    SkipForward,
+    Trash2,
+    Volume2,
+    X
+} from 'lucide-react';
 
 /* ── Types ── */
 
@@ -25,14 +47,26 @@ interface Playlist {
 
 const parseQueue = (json: string): RadioTrack[] =>
 {
-    try { return JSON.parse(json || '[]'); }
-    catch { return []; }
+    try
+    {
+        return JSON.parse(json || '[]');
+    }
+    catch
+    {
+        return [];
+    }
 };
 
 const parsePlaylists = (json: string): Playlist[] =>
 {
-    try { return JSON.parse(json || '[]'); }
-    catch { return []; }
+    try
+    {
+        return JSON.parse(json || '[]');
+    }
+    catch
+    {
+        return [];
+    }
 };
 
 const formatTime = (sec: number): string =>
@@ -65,6 +99,31 @@ const TAB_ALL: { id: TabId; label: string; staffOnly: boolean }[] = [
     { id: 'addtrack', label: 'Track +', staffOnly: true },
     { id: 'controls', label: 'DJ Controls', staffOnly: true },
 ];
+
+const FieldLabel: FC<{ children: ReactNode }> = ({ children }) => (
+    <label className="mb-1 block text-subheading-2xs uppercase text-text-sub-600">
+        { children }
+    </label>
+);
+
+const TextInput: FC<InputHTMLAttributes<HTMLInputElement>> = ({ className = '', ...props }) => (
+    <AlignInput.Root size="xsmall" className={ className }>
+        <AlignInput.Wrapper className="h-8">
+            <AlignInput.Input className="h-8 text-paragraph-xs" { ...props } />
+        </AlignInput.Wrapper>
+    </AlignInput.Root>
+);
+
+const EmptyState: FC<{ icon: ReactNode; message: string; tone?: 'default' | 'error' }> = ({ icon, message, tone = 'default' }) => (
+    <div className="flex flex-col items-center justify-center rounded-2xl bg-bg-weak-50 px-4 py-8 text-center ring-1 ring-inset ring-stroke-soft-200">
+        <div className={ tone === 'error' ? 'mb-2 text-error-base' : 'mb-2 text-text-soft-400' }>
+            { icon }
+        </div>
+        <div className={ tone === 'error' ? 'text-paragraph-xs text-error-base' : 'text-paragraph-xs text-text-sub-600' }>
+            { message }
+        </div>
+    </div>
+);
 
 /* ── Component ── */
 
@@ -154,7 +213,8 @@ export const RadioView: FC<{}> = () =>
             const session = GetRoomSession();
             if(session) session.sendChatMessage(cmd, 0);
         }
-        catch {}
+        catch
+        {}
     }, []);
 
     // ── Listen for server events ──
@@ -289,7 +349,10 @@ export const RadioView: FC<{}> = () =>
     // ── Progress bar ticker ──
     useEffect(() =>
     {
-        if(progressTimerRef.current) { clearInterval(progressTimerRef.current); progressTimerRef.current = null; }
+        if(progressTimerRef.current)
+        {
+            clearInterval(progressTimerRef.current); progressTimerRef.current = null;
+        }
 
         if(!currentTrack)
         {
@@ -313,7 +376,13 @@ export const RadioView: FC<{}> = () =>
         update();
         progressTimerRef.current = setInterval(update, 500);
 
-        return () => { if(progressTimerRef.current) { clearInterval(progressTimerRef.current); progressTimerRef.current = null; } };
+        return () =>
+        {
+            if(progressTimerRef.current)
+            {
+                clearInterval(progressTimerRef.current); progressTimerRef.current = null;
+            }
+        };
     }, [ currentTrack, startedAt, paused ]);
 
     // ── Add track handler (auto-detect duration) ──
@@ -350,21 +419,26 @@ export const RadioView: FC<{}> = () =>
                 document.body.appendChild(tempDiv);
 
                 new window.YT.Player(tempDiv.id,
-                {
-                    height: '1',
-                    width: '1',
-                    videoId: ytId,
-                    events:
+                    {
+                        height: '1',
+                        width: '1',
+                        videoId: ytId,
+                        events:
                     {
                         onReady: (ev: any) =>
                         {
                             const dur = Math.ceil(ev.target.getDuration());
-                            try { ev.target.destroy(); } catch {}
+                            try
+                            {
+                                ev.target.destroy();
+                            }
+                            catch
+                            {}
                             tempDiv.remove();
                             submitTrack(dur > 0 ? dur : 300);
                         }
                     }
-                });
+                    });
             }
             else
             {
@@ -392,440 +466,511 @@ export const RadioView: FC<{}> = () =>
 
     const visibleTabs = TAB_ALL.filter(t => !t.staffOnly || isStaff);
 
-    // ── Shared input class ──
-    const inputClass = 'w-full px-2.5 py-1.5 text-[11px] rounded-lg bg-muted border border-border text-foreground placeholder:text-muted-foreground/50 outline-none focus:border-ring transition-colors';
-    const btnClass = 'px-3 py-1.5 text-[11px] rounded-lg font-medium transition-colors';
-
     return (
         <DraggableWindow handleSelector=".drag-handler" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
-            <div className="w-[420px]">
-            <Frame className="relative">
-                <div className="drag-handler absolute inset-0 cursor-move" />
-                <FramePanel className="overflow-hidden p-0! relative z-10">
-                    <div className="flex items-center justify-between px-4 py-2.5 border-b">
-                        <div className="flex items-center gap-2">
-                            <Radio className="size-4 text-purple-500" />
-                            <span className="text-sm font-semibold">BAHHOS RADIO</span>
+            <AlignSurface.Panel className="w-[420px] max-w-[calc(100vw-24px)] overflow-hidden">
+                <div className="drag-handler flex h-11 cursor-move select-none items-center justify-between border-b border-stroke-soft-200 bg-bg-white-0 px-3">
+                    <div className="flex min-w-0 items-center gap-2">
+                        <span className="flex size-8 items-center justify-center rounded-lg bg-primary-alpha-10 text-primary-base">
+                            <Radio className="size-4" />
+                        </span>
+                        <div className="min-w-0">
+                            <div className="truncate text-label-sm text-text-strong-950">BAHHOS RADIO</div>
+                            <div className="truncate text-paragraph-xs text-text-sub-600">
+                                { radioEnabled ? 'Live' : 'Deaktiviert' }{ isStaff ? ' · Staff' : '' }
+                            </div>
                         </div>
-                        <button className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={ () => setIsVisible(false) }>
-                            <X className="size-3.5" />
-                        </button>
                     </div>
-                    <div className="px-4 py-3">
-                <div className="flex flex-col h-full">
-                    {/* ── Tab Bar ── */}
-                    <div className="flex gap-1 mb-3 border-b border-white/[0.06] pb-2">
+                    <AlignButton.Root
+                        type="button"
+                        variant="neutral"
+                        mode="ghost"
+                        size="xxsmall"
+                        className="size-7 px-0"
+                        onClick={ () => setIsVisible(false) }
+                        onMouseDown={ (e) => e.stopPropagation() }
+                    >
+                        <AlignButton.Icon as={ X } className="size-4" />
+                    </AlignButton.Root>
+                </div>
+                <div className="border-b border-stroke-soft-200 bg-bg-weak-50 px-3 py-2">
+                    { /* ── Tab Bar ── */ }
+                    <div className="flex gap-1 overflow-x-auto">
                         { visibleTabs.map(tab => (
-                            <button
+                            <AlignButton.Root
                                 key={ tab.id }
+                                type="button"
+                                variant={ currentTab === tab.id ? 'primary' : 'neutral' }
+                                mode={ currentTab === tab.id ? 'lighter' : 'ghost' }
+                                size="xxsmall"
+                                className="shrink-0 text-label-xs"
                                 onClick={ () => setCurrentTab(tab.id) }
-                                className={ `px-3 py-1.5 text-[11px] rounded-lg font-medium transition-all ${
-                                    currentTab === tab.id
-                                        ? 'bg-white/15 text-white shadow-sm'
-                                        : 'text-white/40 hover:text-white/70 hover:bg-white/5'
-                                }` }
                             >
                                 { tab.label }
-                            </button>
+                            </AlignButton.Root>
                         )) }
                     </div>
-
-                    {/* ── Tab: Now Playing ── */}
+                </div>
+                <div className="max-h-[560px] overflow-y-auto bg-bg-white-0 p-4">
+                    { /* ── Tab: Now Playing ── */ }
                     { currentTab === 'playing' && (
-                        <div className="flex-1 overflow-y-auto">
+                        <div className="space-y-4">
                             { !radioEnabled ? (
-                                <div className="text-center py-8">
-                                    <div className="text-3xl mb-2 opacity-30">📻</div>
-                                    <div className="text-xs text-red-400/60 italic">Radio ist deaktiviert</div>
-                                </div>
+                                <EmptyState icon={ <Radio className="size-7" /> } message="Radio ist deaktiviert" tone="error" />
                             ) : currentTrack ? (
-                                <div>
-                                    {/* Current Track */}
-                                    <div className="bg-gradient-to-br from-white/[0.04] to-white/[0.02] rounded-xl p-4 mb-3">
+                                <>
+                                    { /* Current Track */ }
+                                    <div className="rounded-2xl bg-bg-weak-50 p-4 ring-1 ring-inset ring-stroke-soft-200">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-purple-500/30 to-blue-500/30 flex items-center justify-center text-2xl shrink-0">
-                                                🎵
+                                            <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-primary-alpha-10 text-primary-base ring-1 ring-inset ring-primary-base/20">
+                                                <Music className="size-6" />
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <div className="text-sm font-semibold text-white/90 truncate">
-                                                    { currentTrack.title }
-                                                    { looping && <span className="ml-1.5 text-blue-300 text-[10px]">🔁</span> }
+                                                <div className="flex min-w-0 items-center gap-2">
+                                                    <div className="truncate text-label-sm text-text-strong-950">{ currentTrack.title }</div>
+                                                    { looping && (
+                                                        <AlignBadge.Root color="blue" variant="lighter" size="small">
+                                                            <AlignBadge.Icon as={ Repeat } className="size-3" />
+                                                            Loop
+                                                        </AlignBadge.Root>
+                                                    ) }
                                                 </div>
-                                                <div className="text-xs text-white/50 truncate">{ currentTrack.artist }</div>
-                                                <div className="text-[10px] text-white/30 mt-0.5">
+                                                <div className="truncate text-paragraph-xs text-text-sub-600">{ currentTrack.artist }</div>
+                                                <div className="mt-0.5 text-subheading-2xs uppercase text-text-soft-400">
                                                     { currentTrack.type === 'youtube' ? 'YouTube' : 'Audio' }
                                                 </div>
                                             </div>
                                         </div>
-
-                                        {/* Progress */}
-                                        <div className="mt-3">
-                                            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-gradient-to-r from-purple-400/60 to-blue-400/60 rounded-full transition-all duration-500 ease-linear"
-                                                    style={{ width: `${ progress }%` }}
-                                                />
-                                            </div>
-                                            <div className="flex items-center justify-between mt-1">
-                                                <span className="text-[10px] text-white/40">{ timeText }</span>
-                                                { paused && <span className="text-[10px] text-amber-300 font-medium">PAUSIERT</span> }
+                                        { /* Progress */ }
+                                        <div className="mt-4 space-y-1.5">
+                                            <AlignProgressBar.Root value={ progress } color="blue" />
+                                            <div className="flex items-center justify-between text-subheading-2xs text-text-sub-600">
+                                                <span>{ timeText }</span>
+                                                { paused && <span className="font-medium text-warning-base">PAUSIERT</span> }
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Queue */}
+                                    { /* Queue */ }
                                     <div>
-                                        <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-1.5">
+                                        <div className="mb-2 text-subheading-2xs uppercase text-text-sub-600">
                                             Queue ({ queue.length })
                                         </div>
                                         { queue.length === 0 ? (
-                                            <div className="text-xs text-white/25 italic py-2">Queue ist leer</div>
+                                            <div className="rounded-xl bg-bg-weak-50 px-3 py-3 text-paragraph-xs text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">Queue ist leer</div>
                                         ) : (
-                                            <div className="space-y-0.5 max-h-[200px] overflow-y-auto">
+                                            <div className="max-h-[200px] space-y-1 overflow-y-auto">
                                                 { queue.map((t, i) => (
-                                                    <div key={ `${ t.id }-${ i }` } className="flex items-center gap-2 py-1 px-2 rounded-lg hover:bg-white/[0.03] transition-colors">
-                                                        <span className="text-[10px] text-white/30 w-4 text-right">{ i + 1 }</span>
+                                                    <div key={ `${ t.id }-${ i }` } className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-paragraph-xs transition-colors hover:bg-bg-weak-50">
+                                                        <span className="w-5 shrink-0 text-right text-subheading-2xs text-text-soft-400">{ i + 1 }</span>
                                                         <div className="min-w-0 flex-1">
-                                                            <span className="text-xs text-white/60 truncate block">{ t.title } – { t.artist }</span>
+                                                            <span className="block truncate text-text-strong-950">{ t.title } – { t.artist }</span>
                                                         </div>
-                                                        <span className="text-[10px] text-white/25 shrink-0">{ formatTime(t.duration) }</span>
+                                                        <span className="shrink-0 text-subheading-2xs text-text-sub-600">{ formatTime(t.duration) }</span>
                                                     </div>
                                                 )) }
                                             </div>
                                         ) }
                                     </div>
-                                </div>
+                                </>
                             ) : (
-                                <div className="text-center py-8">
-                                    <div className="text-3xl mb-2 opacity-30">🎵</div>
-                                    <div className="text-xs text-white/30 italic">Kein Track wird abgespielt</div>
-                                </div>
+                                <EmptyState icon={ <Music className="size-7" /> } message="Kein Track wird abgespielt" />
                             ) }
                         </div>
                     ) }
-
-                    {/* ── Tab: Playlisten ── */}
+                    { /* ── Tab: Playlisten ── */ }
                     { currentTab === 'playlists' && isStaff && (
-                        <div className="flex-1 overflow-y-auto">
+                        <div className="space-y-4">
                             { !selectedPlaylist ? (
-                                <div>
-                                    {/* Create new playlist */}
-                                    <div className="flex gap-1.5 mb-3">
-                                        <input
-                                            type="text"
+                                <>
+                                    { /* Create new playlist */ }
+                                    <div className="flex gap-2">
+                                        <TextInput
                                             placeholder="Neue Playlist..."
                                             value={ newPlaylistName }
                                             onChange={ (e) => setNewPlaylistName(e.target.value) }
-                                            className={ inputClass + ' flex-1' }
-                                            onKeyDown={ (e) => { if(e.key === 'Enter' && newPlaylistName) { sendCommand(`:radio playlist create ${ newPlaylistName }`); setNewPlaylistName(''); } } }
+                                            className="flex-1"
+                                            onKeyDown={ (e) =>
+                                            {
+                                                if(e.key === 'Enter' && newPlaylistName)
+                                                {
+                                                    sendCommand(`:radio playlist create ${ newPlaylistName }`);
+                                                    setNewPlaylistName('');
+                                                }
+                                            } }
                                         />
-                                        <button
-                                            onClick={ () => { if(newPlaylistName) { sendCommand(`:radio playlist create ${ newPlaylistName }`); setNewPlaylistName(''); } } }
+                                        <AlignButton.Root
+                                            type="button"
+                                            variant="primary"
+                                            mode="filled"
+                                            size="xsmall"
                                             disabled={ !newPlaylistName }
-                                            className={ `${ btnClass } bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 disabled:opacity-30` }
+                                            onClick={ () =>
+                                            {
+                                                if(newPlaylistName)
+                                                {
+                                                    sendCommand(`:radio playlist create ${ newPlaylistName }`);
+                                                    setNewPlaylistName('');
+                                                }
+                                            } }
                                         >
-                                            + Erstellen
-                                        </button>
+                                            <AlignButton.Icon as={ Plus } className="size-4" />
+                                            Erstellen
+                                        </AlignButton.Root>
                                     </div>
-
-                                    {/* Playlist list */}
+                                    { /* Playlist list */ }
                                     { playlists.length === 0 ? (
-                                        <div className="text-center py-6">
-                                            <div className="text-2xl mb-2 opacity-30">📋</div>
-                                            <div className="text-xs text-white/30 italic">Keine Playlisten vorhanden</div>
-                                        </div>
+                                        <EmptyState icon={ <ListMusic className="size-7" /> } message="Keine Playlisten vorhanden" />
                                     ) : (
-                                        <div className="space-y-1">
+                                        <div className="space-y-1.5">
                                             { playlists.map(pl => (
                                                 <div
                                                     key={ pl.id }
-                                                    className="flex items-center gap-3 py-2 px-3 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-colors cursor-pointer"
-                                                    onClick={ () => { setSelectedPlaylist(pl); sendCommand(`:radio playlist show ${ pl.id }`); } }
+                                                    className="flex cursor-pointer items-center gap-3 rounded-xl bg-bg-weak-50 px-3 py-2 ring-1 ring-inset ring-stroke-soft-200 transition-colors hover:bg-bg-white-0"
+                                                    onClick={ () =>
+                                                    {
+                                                        setSelectedPlaylist(pl); sendCommand(`:radio playlist show ${ pl.id }`);
+                                                    } }
                                                 >
-                                                    <div className="w-8 h-8 rounded-md bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center text-sm">
-                                                        🎶
+                                                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary-alpha-10 text-primary-base">
+                                                        <ListMusic className="size-4" />
                                                     </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="text-xs font-medium text-white/80 truncate">{ pl.name }</div>
-                                                        <div className="text-[10px] text-white/30">{ pl.trackCount } Tracks</div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="truncate text-label-xs text-text-strong-950">{ pl.name }</div>
+                                                        <div className="text-subheading-2xs text-text-sub-600">{ pl.trackCount } Tracks</div>
                                                     </div>
-                                                    <div className="flex gap-1 shrink-0">
-                                                        <button
-                                                            onClick={ (e) => { e.stopPropagation(); sendCommand(`:radio playlist load ${ pl.id }`); } }
-                                                            className="px-2 py-1 text-[10px] rounded bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 transition-colors"
+                                                    <div className="flex shrink-0 gap-1">
+                                                        <AlignButton.Root
+                                                            type="button"
+                                                            variant="primary"
+                                                            mode="lighter"
+                                                            size="xxsmall"
+                                                            onClick={ (e) =>
+                                                            {
+                                                                e.stopPropagation(); sendCommand(`:radio playlist load ${ pl.id }`);
+                                                            } }
                                                             title="In Queue laden"
                                                         >
-                                                            ▶ Load
-                                                        </button>
-                                                        <button
-                                                            onClick={ (e) => { e.stopPropagation(); sendCommand(`:radio playlist delete ${ pl.id }`); } }
-                                                            className="px-2 py-1 text-[10px] rounded bg-red-500/15 hover:bg-red-500/25 text-red-300/80 transition-colors"
+                                                            <AlignButton.Icon as={ Play } className="size-3.5" />
+                                                            Load
+                                                        </AlignButton.Root>
+                                                        <AlignButton.Root
+                                                            type="button"
+                                                            variant="error"
+                                                            mode="lighter"
+                                                            size="xxsmall"
+                                                            onClick={ (e) =>
+                                                            {
+                                                                e.stopPropagation(); sendCommand(`:radio playlist delete ${ pl.id }`);
+                                                            } }
                                                             title="Loeschen"
                                                         >
-                                                            ✕
-                                                        </button>
+                                                            <AlignButton.Icon as={ Trash2 } className="size-3.5" />
+                                                        </AlignButton.Root>
                                                     </div>
                                                 </div>
                                             )) }
                                         </div>
                                     ) }
-                                </div>
+                                </>
                             ) : (
-                                <div>
-                                    {/* Back button + playlist name */}
+                                <div className="space-y-3">
+                                    { /* Back button + playlist name */ }
                                     <div className="flex items-center gap-2 mb-3">
-                                        <button
-                                            onClick={ () => { setSelectedPlaylist(null); setPlaylistTracks([]); } }
-                                            className="text-xs text-white/40 hover:text-white/80 transition-colors"
+                                        <AlignButton.Root
+                                            type="button"
+                                            variant="neutral"
+                                            mode="ghost"
+                                            size="xxsmall"
+                                            onClick={ () =>
+                                            {
+                                                setSelectedPlaylist(null); setPlaylistTracks([]);
+                                            } }
                                         >
-                                            ← Zurueck
-                                        </button>
-                                        <div className="text-xs font-semibold text-white/80">{ selectedPlaylist.name }</div>
+                                            <AlignButton.Icon as={ ArrowLeft } className="size-3.5" />
+                                            Zurueck
+                                        </AlignButton.Root>
+                                        <div className="min-w-0 flex-1 truncate text-label-xs text-text-strong-950">{ selectedPlaylist.name }</div>
                                     </div>
-
-                                    {/* Playlist tracks */}
+                                    { /* Playlist tracks */ }
                                     { playlistTracks.length === 0 ? (
-                                        <div className="text-center py-6">
-                                            <div className="text-xs text-white/30 italic">Playlist ist leer</div>
-                                        </div>
+                                        <EmptyState icon={ <ListMusic className="size-7" /> } message="Playlist ist leer" />
                                     ) : (
-                                        <div className="space-y-0.5 max-h-[300px] overflow-y-auto">
+                                        <div className="max-h-[300px] space-y-1 overflow-y-auto">
                                             { playlistTracks.map((t, i) => (
-                                                <div key={ `${ t.id }-${ i }` } className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-white/[0.03] transition-colors group">
-                                                    <span className="text-[10px] text-white/30 w-4 text-right">{ i + 1 }</span>
+                                                <div key={ `${ t.id }-${ i }` } className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-bg-weak-50">
+                                                    <span className="w-5 shrink-0 text-right text-subheading-2xs text-text-soft-400">{ i + 1 }</span>
                                                     <div className="min-w-0 flex-1">
-                                                        <span className="text-xs text-white/60 truncate block">{ t.title }</span>
-                                                        <span className="text-[10px] text-white/30">{ t.artist }</span>
+                                                        <span className="block truncate text-paragraph-xs text-text-strong-950">{ t.title }</span>
+                                                        <span className="text-subheading-2xs text-text-sub-600">{ t.artist }</span>
                                                     </div>
-                                                    <button
+                                                    <AlignButton.Root
+                                                        type="button"
+                                                        variant="error"
+                                                        mode="ghost"
+                                                        size="xxsmall"
+                                                        className="size-7 px-0 opacity-0 transition-opacity group-hover:opacity-100"
                                                         onClick={ () => sendCommand(`:radio playlist remove ${ selectedPlaylist.id } ${ i + 1 }`) }
-                                                        className="text-[10px] text-red-400/0 group-hover:text-red-400/60 hover:!text-red-400 transition-colors"
                                                     >
-                                                        ✕
-                                                    </button>
+                                                        <AlignButton.Icon as={ X } className="size-3.5" />
+                                                    </AlignButton.Root>
                                                 </div>
                                             )) }
                                         </div>
                                     ) }
-
-                                    {/* Load playlist to queue */}
-                                    <div className="mt-3 pt-2 border-t border-white/[0.06]">
-                                        <button
+                                    { /* Load playlist to queue */ }
+                                    <div className="border-t border-stroke-soft-200 pt-3">
+                                        <AlignButton.Root
+                                            type="button"
+                                            variant="primary"
+                                            mode="lighter"
+                                            size="xsmall"
+                                            className="w-full"
                                             onClick={ () => sendCommand(`:radio playlist load ${ selectedPlaylist.id }`) }
-                                            className={ `w-full ${ btnClass } bg-blue-500/20 hover:bg-blue-500/30 text-blue-300` }
                                         >
-                                            ▶ Alle in Queue laden
-                                        </button>
+                                            <AlignButton.Icon as={ Play } className="size-4" />
+                                            Alle in Queue laden
+                                        </AlignButton.Root>
                                     </div>
                                 </div>
                             ) }
                         </div>
                     ) }
-
-                    {/* ── Tab: Track hinzufuegen ── */}
+                    { /* ── Tab: Track hinzufuegen ── */ }
                     { currentTab === 'addtrack' && isStaff && (
-                        <div className="flex-1">
-                            <div className="space-y-2">
+                        <div className="space-y-3">
+                            <div>
+                                <FieldLabel>URL</FieldLabel>
+                                <TextInput
+                                    placeholder="YouTube URL oder MP3 Link..."
+                                    value={ addUrl }
+                                    onChange={ (e) => setAddUrl(e.target.value) }
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">URL</label>
-                                    <input
-                                        type="text"
-                                        placeholder="YouTube URL oder MP3 Link..."
-                                        value={ addUrl }
-                                        onChange={ (e) => setAddUrl(e.target.value) }
-                                        className={ inputClass }
+                                    <FieldLabel>Titel</FieldLabel>
+                                    <TextInput
+                                        placeholder="Track Titel"
+                                        value={ addTitle }
+                                        onChange={ (e) => setAddTitle(e.target.value) }
                                     />
                                 </div>
-
-                                <div className="flex gap-2">
-                                    <div className="flex-1">
-                                        <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Titel</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Track Titel"
-                                            value={ addTitle }
-                                            onChange={ (e) => setAddTitle(e.target.value) }
-                                            className={ inputClass }
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Artist</label>
-                                        <input
-                                            type="text"
-                                            placeholder="Artist Name"
-                                            value={ addArtist }
-                                            onChange={ (e) => setAddArtist(e.target.value) }
-                                            className={ inputClass }
-                                        />
-                                    </div>
-                                </div>
-
                                 <div>
-                                    <label className="text-[10px] text-white/40 uppercase tracking-wider mb-1 block">Ziel</label>
-                                    <select
-                                        value={ addTarget === 'queue' ? 'queue' : String(addTarget) }
-                                        onChange={ (e) => setAddTarget(e.target.value === 'queue' ? 'queue' : parseInt(e.target.value)) }
-                                        className={ inputClass + ' cursor-pointer' }
-                                    >
-                                        <option value="queue">Zur Queue hinzufuegen</option>
-                                        { playlists.map(pl => (
-                                            <option key={ pl.id } value={ pl.id }>Playlist: { pl.name }</option>
-                                        )) }
-                                    </select>
+                                    <FieldLabel>Artist</FieldLabel>
+                                    <TextInput
+                                        placeholder="Artist Name"
+                                        value={ addArtist }
+                                        onChange={ (e) => setAddArtist(e.target.value) }
+                                    />
                                 </div>
-
-                                <button
-                                    onClick={ handleAddTrack }
-                                    disabled={ addDetecting || !addUrl || !addTitle || !addArtist }
-                                    className={ `w-full ${ btnClass } ${
-                                        addDetecting
-                                            ? 'bg-white/5 text-white/30 cursor-wait'
-                                            : 'bg-white/10 hover:bg-white/20 text-white/80'
-                                    }` }
-                                >
-                                    { addDetecting ? 'Erkennung...' : '+ Track hinzufuegen' }
-                                </button>
                             </div>
+                            <div>
+                                <FieldLabel>Ziel</FieldLabel>
+                                <AlignSelect.Root
+                                    size="xsmall"
+                                    value={ addTarget === 'queue' ? 'queue' : String(addTarget) }
+                                    onValueChange={ (value) => setAddTarget(value === 'queue' ? 'queue' : parseInt(value, 10)) }
+                                >
+                                    <AlignSelect.Trigger>
+                                        <AlignSelect.Value />
+                                    </AlignSelect.Trigger>
+                                    <AlignSelect.Content>
+                                        <AlignSelect.Item value="queue">Zur Queue hinzufuegen</AlignSelect.Item>
+                                        { playlists.map(pl => (
+                                            <AlignSelect.Item key={ pl.id } value={ String(pl.id) }>Playlist: { pl.name }</AlignSelect.Item>
+                                        )) }
+                                    </AlignSelect.Content>
+                                </AlignSelect.Root>
+                            </div>
+                            <AlignButton.Root
+                                type="button"
+                                variant="primary"
+                                mode="filled"
+                                size="small"
+                                className="w-full"
+                                onClick={ handleAddTrack }
+                                disabled={ addDetecting || !addUrl || !addTitle || !addArtist }
+                            >
+                                <AlignButton.Icon as={ addDetecting ? Loader2 : Plus } className={ addDetecting ? 'size-4 animate-spin' : 'size-4' } />
+                                { addDetecting ? 'Erkennung...' : 'Track hinzufuegen' }
+                            </AlignButton.Root>
                         </div>
                     ) }
-
-                    {/* ── Tab: DJ Controls ── */}
+                    { /* ── Tab: DJ Controls ── */ }
                     { currentTab === 'controls' && isStaff && (
-                        <div className="flex-1 overflow-y-auto space-y-3">
-                            {/* Playback Controls */}
+                        <div className="space-y-4">
+                            { /* Playback Controls */ }
                             <div>
-                                <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-1.5">Playback</div>
+                                <div className="mb-2 text-subheading-2xs uppercase text-text-sub-600">Playback</div>
                                 <div className="flex flex-wrap gap-1.5">
-                                    <button
+                                    <AlignButton.Root
+                                        type="button"
+                                        variant={ radioEnabled ? 'error' : 'primary' }
+                                        mode="lighter"
+                                        size="xsmall"
                                         onClick={ () => sendCommand(radioEnabled ? ':radio off' : ':radio on') }
-                                        className={ `${ btnClass } ${
-                                            radioEnabled
-                                                ? 'bg-red-500/15 hover:bg-red-500/25 text-red-300/80'
-                                                : 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300'
-                                        }` }
                                     >
+                                        <AlignButton.Icon as={ Power } className="size-4" />
                                         { radioEnabled ? '⏻ Radio Aus' : '⏻ Radio Ein' }
-                                    </button>
-                                    <button
+                                    </AlignButton.Root>
+                                    <AlignButton.Root
+                                        type="button"
+                                        variant={ loopEnabled ? 'primary' : 'neutral' }
+                                        mode="lighter"
+                                        size="xsmall"
                                         onClick={ () => sendCommand(loopEnabled ? ':radio loop off' : ':radio loop on') }
-                                        className={ `${ btnClass } ${
-                                            loopEnabled
-                                                ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300'
-                                                : 'bg-white/10 hover:bg-white/15 text-white/50'
-                                        }` }
                                     >
-                                        🔁 Loop { loopEnabled ? 'An' : 'Aus' }
-                                    </button>
+                                        <AlignButton.Icon as={ Repeat } className="size-4" />
+                                        Loop { loopEnabled ? 'An' : 'Aus' }
+                                    </AlignButton.Root>
                                     { radioEnabled && (
                                         <>
                                             { !currentTrack && queue.length > 0 && (
-                                                <button onClick={ () => sendCommand(':radio play') } className={ `${ btnClass } bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300` }>
-                                                    ▶ Start
-                                                </button>
+                                                <AlignButton.Root type="button" variant="primary" mode="lighter" size="xsmall" onClick={ () => sendCommand(':radio play') }>
+                                                    <AlignButton.Icon as={ Play } className="size-4" />
+                                                    Start
+                                                </AlignButton.Root>
                                             ) }
                                             { currentTrack && (
-                                                <button onClick={ () => sendCommand(paused ? ':radio play' : ':radio pause') } className={ `${ btnClass } bg-white/10 hover:bg-white/15 text-white/80` }>
-                                                    { paused ? '▶ Play' : '⏸ Pause' }
-                                                </button>
+                                                <AlignButton.Root type="button" variant="neutral" mode="stroke" size="xsmall" onClick={ () => sendCommand(paused ? ':radio play' : ':radio pause') }>
+                                                    <AlignButton.Icon as={ paused ? Play : Pause } className="size-4" />
+                                                    { paused ? 'Play' : 'Pause' }
+                                                </AlignButton.Root>
                                             ) }
                                             { currentTrack && (
-                                                <button onClick={ () => sendCommand(':radio skip') } className={ `${ btnClass } bg-white/10 hover:bg-white/15 text-white/80` }>
-                                                    ⏭ Skip
-                                                </button>
+                                                <AlignButton.Root type="button" variant="neutral" mode="stroke" size="xsmall" onClick={ () => sendCommand(':radio skip') }>
+                                                    <AlignButton.Icon as={ SkipForward } className="size-4" />
+                                                    Skip
+                                                </AlignButton.Root>
                                             ) }
                                             { queue.length > 0 && (
-                                                <button onClick={ () => sendCommand(':radio clear') } className={ `${ btnClass } bg-red-500/15 hover:bg-red-500/25 text-red-300/80` }>
-                                                    ✕ Clear
-                                                </button>
+                                                <AlignButton.Root type="button" variant="error" mode="lighter" size="xsmall" onClick={ () => sendCommand(':radio clear') }>
+                                                    <AlignButton.Icon as={ Trash2 } className="size-4" />
+                                                    Clear
+                                                </AlignButton.Root>
                                             ) }
                                         </>
                                     ) }
                                 </div>
                             </div>
-
-                            {/* Transition Info */}
-                            <div className="text-[10px] text-white/30">
+                            { /* Transition Info */ }
+                            <div className="rounded-xl bg-bg-weak-50 px-3 py-2 text-paragraph-xs text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">
                                 Transition: { transitionType } ({ crossfadeMs }ms)
                             </div>
-
-                            {/* SFX */}
+                            { /* SFX */ }
                             { radioEnabled && (
-                                <div className="border-t border-white/[0.06] pt-2">
-                                    <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-1.5">Sound Effect</div>
-                                    <div className="flex gap-1.5">
-                                        <input
-                                            type="text"
+                                <div className="border-t border-stroke-soft-200 pt-3">
+                                    <div className="mb-2 text-subheading-2xs uppercase text-text-sub-600">Sound Effect</div>
+                                    <div className="flex gap-2">
+                                        <TextInput
                                             placeholder="SFX URL (MP3)..."
                                             value={ sfxUrl }
                                             onChange={ (e) => setSfxUrl(e.target.value) }
-                                            className={ inputClass + ' flex-1' }
+                                            className="flex-1"
                                         />
-                                        <button
-                                            onClick={ () => { if(sfxUrl) { sendCommand(`:radio sfx ${ sfxUrl }`); setSfxUrl(''); } } }
-                                            className={ `${ btnClass } bg-amber-500/20 hover:bg-amber-500/30 text-amber-300` }
+                                        <AlignButton.Root
+                                            type="button"
+                                            variant="neutral"
+                                            mode="stroke"
+                                            size="xsmall"
+                                            onClick={ () =>
+                                            {
+                                                if(sfxUrl)
+                                                {
+                                                    sendCommand(`:radio sfx ${ sfxUrl }`); setSfxUrl('');
+                                                }
+                                            } }
                                         >
-                                            ▶ Play
-                                        </button>
+                                            <AlignButton.Icon as={ Volume2 } className="size-4" />
+                                            Play
+                                        </AlignButton.Root>
                                     </div>
                                 </div>
                             ) }
-
-                            {/* TTS Durchsage */}
+                            { /* TTS Durchsage */ }
                             { radioEnabled && (
-                                <div className="border-t border-white/[0.06] pt-2">
-                                    <div className="text-[10px] font-bold text-white/50 uppercase tracking-wider mb-1.5">Durchsage (TTS)</div>
-
+                                <div className="border-t border-stroke-soft-200 pt-3">
+                                    <div className="mb-2 text-subheading-2xs uppercase text-text-sub-600">Durchsage (TTS)</div>
                                     { !ttsPreview ? (
                                         <>
-                                            <div className="flex gap-1.5">
-                                                <input
-                                                    type="text"
+                                            <div className="flex gap-2">
+                                                <TextInput
                                                     placeholder="Durchsage-Text eingeben..."
                                                     value={ ttsText }
                                                     onChange={ (e) => setTtsText(e.target.value) }
-                                                    className={ inputClass + ' flex-1' }
-                                                    onKeyDown={ (e) => { if(e.key === 'Enter' && ttsText && !ttsGenerating) { setTtsGenerating(true); setTtsError(''); sendCommand(`:radio tts ${ ttsText }`); } } }
+                                                    className="flex-1"
+                                                    onKeyDown={ (e) =>
+                                                    {
+                                                        if(e.key === 'Enter' && ttsText && !ttsGenerating)
+                                                        {
+                                                            setTtsGenerating(true);
+                                                            setTtsError('');
+                                                            sendCommand(`:radio tts ${ ttsText }`);
+                                                        }
+                                                    } }
                                                 />
-                                                <button
-                                                    onClick={ () => { if(ttsText && !ttsGenerating) { setTtsGenerating(true); setTtsError(''); sendCommand(`:radio tts ${ ttsText }`); } } }
+                                                <AlignButton.Root
+                                                    type="button"
+                                                    variant="primary"
+                                                    mode="lighter"
+                                                    size="xsmall"
                                                     disabled={ !ttsText || ttsGenerating }
-                                                    className={ `${ btnClass } ${
-                                                        ttsGenerating
-                                                            ? 'bg-white/5 text-white/30 cursor-wait'
-                                                            : 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-300'
-                                                    }` }
+                                                    onClick={ () =>
+                                                    {
+                                                        if(ttsText && !ttsGenerating)
+                                                        {
+                                                            setTtsGenerating(true);
+                                                            setTtsError('');
+                                                            sendCommand(`:radio tts ${ ttsText }`);
+                                                        }
+                                                    } }
                                                 >
+                                                    <AlignButton.Icon as={ ttsGenerating ? Loader2 : Megaphone } className={ ttsGenerating ? 'size-4 animate-spin' : 'size-4' } />
                                                     { ttsGenerating ? '...' : 'Generieren' }
-                                                </button>
+                                                </AlignButton.Root>
                                             </div>
                                             { ttsError && (
-                                                <div className="mt-1 text-[10px] text-red-400/80">{ ttsError }</div>
+                                                <div className="mt-2 rounded-lg bg-error-lighter px-2 py-1.5 text-paragraph-xs text-error-base ring-1 ring-inset ring-error-light">{ ttsError }</div>
                                             ) }
                                         </>
                                     ) : (
-                                        <div className="space-y-2">
-                                            <div className="text-[11px] text-white/60 italic truncate">
+                                        <div className="space-y-2 rounded-xl bg-bg-weak-50 p-3 ring-1 ring-inset ring-stroke-soft-200">
+                                            <div className="truncate text-paragraph-xs text-text-sub-600">
                                                 &quot;{ ttsPreview.text }&quot;
                                             </div>
                                             <audio
                                                 src={ ttsPreview.url }
                                                 controls
-                                                className="w-full h-7 opacity-80"
-                                                style={{ filter: 'invert(1) hue-rotate(180deg)', maxHeight: '28px' }}
+                                                className="h-8 w-full"
                                             />
-                                            <div className="flex gap-1.5">
-                                                <button
-                                                    onClick={ () => { sendCommand(':radio tts confirm'); setTtsPreview(null); setTtsText(''); } }
-                                                    className={ `flex-1 ${ btnClass } bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300` }
+                                            <div className="flex gap-2">
+                                                <AlignButton.Root
+                                                    type="button"
+                                                    variant="primary"
+                                                    mode="filled"
+                                                    size="xsmall"
+                                                    className="flex-1"
+                                                    onClick={ () =>
+                                                    {
+                                                        sendCommand(':radio tts confirm'); setTtsPreview(null); setTtsText('');
+                                                    } }
                                                 >
+                                                    <AlignButton.Icon as={ Check } className="size-4" />
                                                     Senden
-                                                </button>
-                                                <button
-                                                    onClick={ () => { sendCommand(':radio tts cancel'); setTtsPreview(null); } }
-                                                    className={ `flex-1 ${ btnClass } bg-red-500/15 hover:bg-red-500/25 text-red-300/80` }
+                                                </AlignButton.Root>
+                                                <AlignButton.Root
+                                                    type="button"
+                                                    variant="error"
+                                                    mode="lighter"
+                                                    size="xsmall"
+                                                    className="flex-1"
+                                                    onClick={ () =>
+                                                    {
+                                                        sendCommand(':radio tts cancel'); setTtsPreview(null);
+                                                    } }
                                                 >
                                                     Abbrechen
-                                                </button>
+                                                </AlignButton.Root>
                                             </div>
                                         </div>
                                     ) }
@@ -834,10 +979,7 @@ export const RadioView: FC<{}> = () =>
                         </div>
                     ) }
                 </div>
-                    </div>
-                </FramePanel>
-            </Frame>
-            </div>
+            </AlignSurface.Panel>
         </DraggableWindow>
     );
 };

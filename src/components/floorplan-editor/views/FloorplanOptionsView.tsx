@@ -1,9 +1,11 @@
 import { FC, useState } from 'react';
 import { FaCaretLeft, FaCaretRight } from 'react-icons/fa';
-import ReactSlider from 'react-slider';
 import { LocalizeText } from '../../../api';
 import { Column, Flex, LayoutGridItem, Text } from '../../../common';
-import { COLORMAP, FloorAction } from '../common/Constants';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import * as AlignSelect from '@/align-ui/components/ui/select';
+import * as AlignSlider from '@/align-ui/components/ui/slider';
+import { FloorAction } from '../common/Constants';
 import { FloorplanEditor } from '../common/FloorplanEditor';
 import { useFloorplanEditorContext } from '../FloorplanEditorContext';
 
@@ -149,7 +151,11 @@ export const FloorplanOptionsView: FC<{}> = props =>
                     <Text bold>{ LocalizeText('floor.editor.wall.height') }</Text>
                     <Flex alignItems="center" gap={ 1 }>
                         <FaCaretLeft className="cursor-pointer fa-icon" onClick={ decreaseWallHeight } />
-                        <input type="number" className="form-control form-control-sm quantity-input" value={ visualizationSettings.wallHeight } onChange={ event => onWallHeightChange(event.target.valueAsNumber) } />
+                        <AlignInput.Root size="xsmall" className="w-24">
+                            <AlignInput.Wrapper>
+                                <AlignInput.Input type="number" value={ visualizationSettings.wallHeight } onChange={ event => onWallHeightChange(event.target.valueAsNumber) } />
+                            </AlignInput.Wrapper>
+                        </AlignInput.Root>
                         <FaCaretRight className="cursor-pointer fa-icon" onClick={ increaseWallHeight } />
                     </Flex>
                 </Column>
@@ -157,30 +163,42 @@ export const FloorplanOptionsView: FC<{}> = props =>
             <Flex gap={ 1 }>
                 <Column size={ 6 }>
                     <Text bold>{ LocalizeText('floor.plan.editor.tile.height') }: { floorHeight }</Text>
-                    <ReactSlider
-                        className="nitro-slider"
+                    <AlignSlider.Root
+                        value={ [ floorHeight ] }
                         min={ MIN_FLOOR_HEIGHT }
                         max={ MAX_FLOOR_HEIGHT }
                         step={ 1 }
-                        value={ floorHeight }
-                        onChange={ event => onFloorHeightChange(event) }
-                        renderThumb={ ({ style, ...rest }, state) => <div style={ { backgroundColor: `#${ COLORMAP[state.valueNow.toString(33)] }`, ...style } } { ...rest }>{ state.valueNow }</div> } />
+                        onValueChange={ ([ value ]) => onFloorHeightChange(value) }
+                        className="mt-2"
+                    >
+                        <AlignSlider.Thumb />
+                    </AlignSlider.Root>
                 </Column>
                 <Column size={ 6 }>
                     <Text bold>{ LocalizeText('floor.plan.editor.room.options') }</Text>
-                    <Flex className="items-center">
-                        <select className="form-control form-control-sm" value={ visualizationSettings.thicknessWall } onChange={ event => onWallThicknessChange(parseInt(event.target.value)) }>
-                            <option value={ 0 }>{ LocalizeText('navigator.roomsettings.wall_thickness.thinnest') }</option>
-                            <option value={ 1 }>{ LocalizeText('navigator.roomsettings.wall_thickness.thin') }</option>
-                            <option value={ 2 }>{ LocalizeText('navigator.roomsettings.wall_thickness.normal') }</option>
-                            <option value={ 3 }>{ LocalizeText('navigator.roomsettings.wall_thickness.thick') }</option>
-                        </select>
-                        <select className="form-control form-control-sm" value={ visualizationSettings.thicknessFloor } onChange={ event => onFloorThicknessChange(parseInt(event.target.value)) }>
-                            <option value={ 0 }>{ LocalizeText('navigator.roomsettings.floor_thickness.thinnest') }</option>
-                            <option value={ 1 }>{ LocalizeText('navigator.roomsettings.floor_thickness.thin') }</option>
-                            <option value={ 2 }>{ LocalizeText('navigator.roomsettings.floor_thickness.normal') }</option>
-                            <option value={ 3 }>{ LocalizeText('navigator.roomsettings.floor_thickness.thick') }</option>
-                        </select>
+                    <Flex className="items-center gap-2">
+                        <AlignSelect.Root value={ String(visualizationSettings.thicknessWall) } onValueChange={ value => onWallThicknessChange(parseInt(value)) } size="xsmall">
+                            <AlignSelect.Trigger className="w-36">
+                                <AlignSelect.Value />
+                            </AlignSelect.Trigger>
+                            <AlignSelect.Content>
+                                <AlignSelect.Item value="0">{ LocalizeText('navigator.roomsettings.wall_thickness.thinnest') }</AlignSelect.Item>
+                                <AlignSelect.Item value="1">{ LocalizeText('navigator.roomsettings.wall_thickness.thin') }</AlignSelect.Item>
+                                <AlignSelect.Item value="2">{ LocalizeText('navigator.roomsettings.wall_thickness.normal') }</AlignSelect.Item>
+                                <AlignSelect.Item value="3">{ LocalizeText('navigator.roomsettings.wall_thickness.thick') }</AlignSelect.Item>
+                            </AlignSelect.Content>
+                        </AlignSelect.Root>
+                        <AlignSelect.Root value={ String(visualizationSettings.thicknessFloor) } onValueChange={ value => onFloorThicknessChange(parseInt(value)) } size="xsmall">
+                            <AlignSelect.Trigger className="w-36">
+                                <AlignSelect.Value />
+                            </AlignSelect.Trigger>
+                            <AlignSelect.Content>
+                                <AlignSelect.Item value="0">{ LocalizeText('navigator.roomsettings.floor_thickness.thinnest') }</AlignSelect.Item>
+                                <AlignSelect.Item value="1">{ LocalizeText('navigator.roomsettings.floor_thickness.thin') }</AlignSelect.Item>
+                                <AlignSelect.Item value="2">{ LocalizeText('navigator.roomsettings.floor_thickness.normal') }</AlignSelect.Item>
+                                <AlignSelect.Item value="3">{ LocalizeText('navigator.roomsettings.floor_thickness.thick') }</AlignSelect.Item>
+                            </AlignSelect.Content>
+                        </AlignSelect.Root>
                     </Flex>
                 </Column>
             </Flex>

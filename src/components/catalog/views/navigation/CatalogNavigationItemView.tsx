@@ -27,30 +27,30 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                 onMouseLeave={ () => setHovered(false) }
             >
                 <button
-                    className={ `w-full flex items-center gap-2 py-1 px-2 text-xs rounded-lg transition-all duration-150 ${
+                    className={ `flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-label-xs transition-all duration-150 ${
                         node.isActive
-                            ? 'bg-accent text-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                            ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs'
+                            : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950'
                     }` }
                     onClick={ () => activateNode(node) }
                 >
-                    <div className="w-4 h-4 rounded flex items-center justify-center shrink-0">
+                    <div className="flex size-5 shrink-0 items-center justify-center rounded">
                         <CatalogIconView icon={ node.iconId } />
                     </div>
                     <span className="truncate flex-1 text-left">{ node.localization?.replace(/\s*\(\d+\)$/, '') }</span>
 
                     { hovered && onToggleFavorite ? (
                         <button
-                            className="shrink-0 p-0.5 rounded hover:bg-accent transition-colors"
+                            className="shrink-0 rounded p-0.5 transition-colors hover:bg-bg-weak-50"
                             onClick={ (e) => { e.stopPropagation(); onToggleFavorite(node.pageId); } }
                         >
-                            <Star className={ `w-3 h-3 ${ isFavorite ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30' }` } />
+                            <Star className={ `w-3 h-3 ${ isFavorite ? 'fill-warning-base text-warning-base' : 'text-text-soft-400' }` } />
                         </button>
                     ) : null }
                 </button>
             </div>
             { node.isOpen && node.isBranch &&
-                <div className="ml-4 border-l border-border/40 pl-0.5 mt-0.5">
+                <div className="ml-4 mt-1 border-l border-stroke-soft-200 pl-1">
                     <CatalogNavigationSetView node={ node } child={ true } />
                 </div> }
         </div>

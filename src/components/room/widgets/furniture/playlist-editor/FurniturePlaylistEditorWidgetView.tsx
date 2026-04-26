@@ -1,7 +1,8 @@
 import { FC } from 'react';
+import { Music2 } from 'lucide-react';
 import { LocalizeText } from '../../../../../api';
-import { NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../../common';
 import { useFurniturePlaylistEditorWidget } from '../../../../../hooks';
+import { FurnitureWidgetWindow } from '../FurnitureWidgetLayout';
 import { DiskInventoryView } from './DiskInventoryView';
 import { SongPlaylistView } from './SongPlaylistView';
 
@@ -12,18 +13,21 @@ export const FurniturePlaylistEditorWidgetView: FC<{}> = props =>
     if(objectId === -1) return null;
 
     return (
-        <NitroCardView className="nitro-playlist-editor-widget" theme="primary-slim">
-            <NitroCardHeaderView headerText={ LocalizeText('playlist.editor.title') } onCloseClick={ onClose } />
-            <NitroCardContentView>
-                <div className="flex flex-row gap-1 h-full">
-                    <div className="w-1/2 relative overflow-hidden h-full rounded flex flex-col">
-                        <DiskInventoryView addToPlaylist={ addToPlaylist } diskInventory={ diskInventory } />
-                    </div>
-                    <div className="w-1/2 relative overflow-hidden h-full rounded flex flex-col">
-                        <SongPlaylistView furniId={ objectId } removeFromPlaylist={ removeFromPlaylist } playlist={ playlist } togglePlayPause={ togglePlayPause } currentPlayingIndex={ currentPlayingIndex }/>
-                    </div>
-                </div>
-            </NitroCardContentView>
-        </NitroCardView>
+        <FurnitureWidgetWindow
+            uniqueKey="furniture-playlist-editor"
+            title={ LocalizeText('playlist.editor.title') }
+            subtitle={ LocalizeText('playlist.editor.playlist') }
+            icon={ Music2 }
+            onClose={ onClose }
+            widthClassName="w-[680px]"
+            bodyClassName="grid h-[420px] grid-cols-2 gap-4 !overflow-hidden"
+        >
+            <div className="min-h-0 overflow-hidden rounded-xl border border-stroke-soft-200 bg-bg-white-0 p-3 shadow-regular-xs">
+                <DiskInventoryView addToPlaylist={ addToPlaylist } diskInventory={ diskInventory } />
+            </div>
+            <div className="min-h-0 overflow-hidden rounded-xl border border-stroke-soft-200 bg-bg-white-0 p-3 shadow-regular-xs">
+                <SongPlaylistView furniId={ objectId } removeFromPlaylist={ removeFromPlaylist } playlist={ playlist } togglePlayPause={ togglePlayPause } currentPlayingIndex={ currentPlayingIndex } />
+            </div>
+        </FurnitureWidgetWindow>
     );
 }

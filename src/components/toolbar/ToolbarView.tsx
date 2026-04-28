@@ -1,17 +1,14 @@
 import { Dispose, DropBounce, EaseOut, JumpBy, Motions, NitroToolbarAnimateIconEvent, PerkAllowancesMessageEvent, PerkEnum, Queue, Wait } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { Bell, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, MessengerIconState, OpenMessengerChat, VisitDesktop } from '../../api';
 import { LayoutAvatarImageView } from '../../common';
-import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useNotificationCenter, useRoomEngineEvent, useSessionInfo } from '../../hooks';
+import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useRoomEngineEvent, useSessionInfo } from '../../hooks';
 import { ToolbarMeView } from './ToolbarMeView';
 import { ToolbarSpotlightPill } from './ToolbarSpotlightPill';
-import { VoiceChannelView } from '../room/VoiceChannelView';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignDivider from '@/align-ui/components/ui/divider';
-import * as AlignPopover from '@/align-ui/components/ui/popover';
 import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
 
 function ToolbarIcon({ name, w, h }: { name: string; w: number; h: number }) {
@@ -86,28 +83,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
   const { getTotalUnseen = 0 } = useAchievements();
   const { requests = [], onlineFriends = [] } = useFriends();
   const { iconState = MessengerIconState.HIDDEN } = useMessenger();
-  const { unreadCount = 0 } = useNotificationCenter();
   const isMod = GetSessionDataManager().isModerator;
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    const saved = window.localStorage.getItem('nitro.theme');
-    if (saved === 'dark') return true;
-    if (saved === 'light') return false;
-    return document.documentElement.classList.contains('dark');
-  });
-
-  useEffect(() => {
-    const saved = typeof window !== 'undefined' ? window.localStorage.getItem('nitro.theme') : null;
-    if (saved === 'dark') document.documentElement.classList.add('dark');
-    else if (saved === 'light') document.documentElement.classList.remove('dark');
-  }, []);
-
-  const toggleTheme = useCallback(() => {
-    const next = !isDark;
-    document.documentElement.classList.toggle('dark', next);
-    localStorage.setItem('nitro.theme', next ? 'dark' : 'light');
-    setIsDark(next);
-  }, [isDark]);
 
   useMessageEvent<PerkAllowancesMessageEvent>(PerkAllowancesMessageEvent, event => {
     const parser = event.getParser();
@@ -186,7 +162,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
               type="button"
               aria-label="Mein Menü"
               className={cn(
-                'nitro-toolbar-avatar group relative mx-auto mb-2 mt-1 flex h-[72px] w-[72px]',
+                'nitro-toolbar-avatar group relative mx-auto mb-1 mt-0 flex h-[72px] w-[72px]',
                 'shrink-0 items-center justify-center overflow-hidden rounded-full bg-transparent border-0 p-0',
                 'cursor-pointer transition-transform duration-200',
                 'hover:scale-105 active:scale-100',
@@ -207,13 +183,13 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
                   backgroundRepeat: 'no-repeat',
                   imageRendering: 'pixelated',
                   transform: 'scale(2.4)',
-                  transformOrigin: 'center 30%',
+                  transformOrigin: 'center 35%',
                 }}
               />
             </button>
           </ToolbarMeView>
 
-          <AlignDivider.Root className="mx-4 my-3 w-[calc(100%-2rem)]" />
+          <AlignDivider.Root className="mx-4 mt-2 mb-3 w-[calc(100%-2rem)]" />
 
           {/* Navigation Items */}
           <div className="px-2 space-y-2 shrink-0 w-full">
@@ -260,14 +236,6 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
                 dataBadge="messenger"
               />
             )}
-            <SidebarItem
-              icon={<Bell className="size-6 text-current" />}
-              label="Benachrichtigungen"
-              badge={unreadCount}
-              badgeVariant="destructive"
-              onClick={() => CreateLinkEvent('notifications/toggle')}
-              dataBadge="notifications"
-            />
           </div>
 
           <AlignDivider.Root className="mx-4 my-3 w-[calc(100%-2rem)]" />
@@ -302,39 +270,12 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
             </div>
           )}
 
-          {/* Bottom: Voice Chat + Hub + Dark Mode */}
+          {/* Bottom: Hub */}
           <div className="px-2 space-y-2 shrink-0 w-full">
-            {isInRoom && (
-              <AlignPopover.Root>
-                <AlignPopover.Trigger asChild>
-                  <AlignButton.Root
-                    variant="neutral"
-                    mode="ghost"
-                    size="medium"
-                    className="nitro-toolbar-item group relative h-[52px] min-h-[52px] w-full justify-center rounded-16 px-2 text-text-sub-600"
-                  >
-                    <div className="shrink-0 flex size-12 items-center justify-center">
-                      <Volume2 className="size-6 text-current" />
-                    </div>
-                  </AlignButton.Root>
-                </AlignPopover.Trigger>
-                <AlignPopover.Content side="right" align="end" sideOffset={16} showArrow={false} unstyled className="w-[260px] p-0 border-none bg-transparent shadow-none">
-                  <VoiceChannelView />
-                </AlignPopover.Content>
-              </AlignPopover.Root>
-            )}
-
             <SidebarItem
               icon={<ToolbarIcon name="habbo.png" w={32} h={32} />}
               label="Zurück zum Hub"
               onClick={handleCmsClick}
-            />
-
-            <SidebarItem
-              icon={<ToolbarIcon name="me-menu/cog.png" w={28} h={34} />}
-              label={isDark ? 'Light Mode' : 'Dark Mode'}
-              active={false}
-              onClick={toggleTheme}
             />
           </div>
         </div>

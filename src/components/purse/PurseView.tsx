@@ -1,7 +1,7 @@
 import { FriendlyTime, RateFlatMessageComposer, GuideSessionAttachedMessageEvent, GuideSessionStartedMessageEvent, GuideSessionMessageMessageComposer, GuideSessionMessageMessageEvent, GuideSessionRequesterCancelsMessageComposer, GuideSessionResolvedMessageComposer, GuideSessionEndedMessageEvent, GuideSessionErrorMessageEvent, GuideSessionPartnerIsTypingMessageEvent, PerkAllowancesMessageEvent, PerkEnum, GuideSessionOnDutyUpdateMessageComposer, GuideOnDutyStatusMessageEvent, GuideSessionGuideDecidesMessageComposer, GuideSessionDetachedMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, Fragment, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { CreateLinkEvent, GetConfiguration, GetRoomEngine, GetSessionDataManager, LocalizeFormattedNumber, SendMessageComposer, getAuthHeaders } from '../../api';
-import { useAchievements, useMessageEvent, useNavigator, usePurse, useRoom } from '../../hooks';
+import { useAchievements, useMessageEvent, useNavigator, useNotificationCenter, usePurse, useRoom } from '../../hooks';
 import { RadioPanelView } from '../radio/RadioPanelView';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import {
   HelpCircle, ShieldAlert, MessageCircle, Scale, Settings,
   User, MessageSquare, Check, ChevronLeft, ChevronRight, Send,
   Loader2, CheckCircle2, Clock, AlertTriangle, Sparkles, Gift,
-  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp, SlidersHorizontal, Trophy, Wrench,
+  Info, ZoomIn, ZoomOut, MessageSquareDashed, ThumbsUp, SlidersHorizontal,
 } from 'lucide-react';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
 import * as AlignButton from '@/align-ui/components/ui/button';
@@ -40,9 +40,11 @@ function CatalogIcon({ iconId }: { iconId: number }) {
   return <img src={`${imageUrl}catalogue/icon_${iconId}.png`} alt="" className="w-5 h-5" style={{ imageRendering: "pixelated", objectFit: "contain" }} draggable={false} />;
 }
 
-const TOOL_ICONS: { iconId: number; label: string; link: string }[] = [
-  { iconId: 69, label: "Marktplatz", link: "marketplace/toggle" },
+const TOOL_ICONS: { iconId: number; label: string; link: string; badgeKey?: string }[] = [
+  { iconId: 69, label: "Marktplatz", link: "marketplace/toggle", badgeKey: "marketplace" },
   { iconId: 71, label: "Preisliste", link: "pricelist/toggle" },
+  { iconId: 1004, label: "Werkstatt", link: "workshop/toggle" },
+  { iconId: 221, label: "Z-Katalog", link: "sets/toggle" },
 ];
 
 const HELP_INDEX = [
@@ -934,6 +936,7 @@ export const PurseView: FC<{}> = props => {
   const { purse = null } = usePurse();
   const { roomSession = null } = useRoom();
   const { navigatorData = null } = useNavigator();
+  const { unreadCount = 0 } = useNotificationCenter();
   const [ isZoomedIn, setIsZoomedIn ] = useState(false);
   const [ roomEntryVisible, setRoomEntryVisible ] = useState(false);
   const [ roomEntryClosing, setRoomEntryClosing ] = useState(false);
@@ -1174,21 +1177,23 @@ export const PurseView: FC<{}> = props => {
                 <AlignDivider.Root className="nitro-topbar-radio-divider hidden h-6 w-px shrink-0" />
 
                 <div className="flex shrink-0 items-center gap-0.5">
-                  {TOOL_ICONS.map(({ iconId, label, link }) => (
+                  {TOOL_ICONS.map(({ iconId, label, link, badgeKey }) => (
                     <TopbarAction key={iconId} label={label} onClick={() => CreateLinkEvent(link)}>
                       <CatalogIcon iconId={iconId} />
-                      {label === "Marktplatz" && offerCount > 0 && (
+                      {badgeKey === "marketplace" && offerCount > 0 && (
                         <AlignBadge.Root color="red" variant="filled" size="small" className="absolute -right-1 -top-1 h-4 min-w-4 px-1 text-[9px]">
                           {offerCount}
                         </AlignBadge.Root>
                       )}
                     </TopbarAction>
                   ))}
-                  <TopbarAction label="Werkstatt" onClick={() => CreateLinkEvent('workshop/toggle')}>
-                    <AlignButton.Icon as={Wrench} className="size-4" />
-                  </TopbarAction>
-                  <TopbarAction label="Z-Katalog" onClick={() => CreateLinkEvent('sets/toggle')}>
-                    <AlignButton.Icon as={Trophy} className="size-4" />
+                  <TopbarAction label="Benachrichtigungen" onClick={() => CreateLinkEvent('notifications/toggle')}>
+                    <CatalogIcon iconId={5} />
+                    {unreadCount > 0 && (
+                      <AlignBadge.Root color="red" variant="filled" size="small" className="absolute -right-1 -top-1 h-4 min-w-4 px-1 text-[9px]">
+                        {unreadCount}
+                      </AlignBadge.Root>
+                    )}
                   </TopbarAction>
                 </div>
 

@@ -36,22 +36,22 @@ export const AvatarEditorColorSwatch: FC<AvatarEditorColorSwatchProps> = props =
             onClick={ onClick }
             disabled={ isLocked }
             className={ cn(
-                'group relative aspect-square rounded-md ring-1 ring-inset ring-stroke-soft-200 transition-all',
-                isLocked && 'cursor-not-allowed opacity-70',
-                isActive && 'ring-2 ring-primary-base ring-offset-1 ring-offset-bg-white-0',
-                !isActive && !isLocked && 'hover:ring-2 hover:ring-stroke-strong-950'
+                'group relative aspect-square rounded-md ring-1 ring-inset ring-stroke-soft-200 transition-all duration-150',
+                isLocked && 'cursor-not-allowed opacity-60',
+                isActive && 'z-10 ring-2 ring-primary-base ring-offset-2 ring-offset-bg-weak-50',
+                !isActive && !isLocked && 'hover:z-10 hover:scale-110 hover:ring-2 hover:ring-stroke-strong-950'
             ) }
             style={ { backgroundColor: colorItem.color } }
         >
             { isActive && (
                 <Check
-                    className="absolute inset-0 m-auto size-3.5 text-text-white-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+                    className="absolute inset-0 m-auto size-4 text-static-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]"
                     strokeWidth={ 3 }
                 />
             ) }
             { isLocked && (
-                <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-bg-white-0 ring-1 ring-stroke-soft-200">
-                    <Lock className="size-2 text-text-sub-600" />
+                <span className="absolute -bottom-1 -right-1 flex size-4 items-center justify-center rounded-full bg-bg-white-0 ring-1 ring-stroke-soft-200 shadow-regular-xs">
+                    <Lock className="size-2.5 text-text-sub-600" />
                 </span>
             ) }
         </button>

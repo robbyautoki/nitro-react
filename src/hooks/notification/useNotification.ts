@@ -39,6 +39,8 @@ const BUBBLE_TITLE_MAP: Record<string, string> = {
     [NotificationBubbleType.ROOMMESSAGESPOSTED]: 'Raum-Nachrichten',
 };
 
+
+
 const cleanText = (text: string) => (text && text.length) ? text.replace(/\\r/g, '\r') : '';
 
 const getTimeZeroPadded = (time: number) =>
@@ -407,26 +409,264 @@ const useNotificationState = () =>
     {
         const parser = event.getParser();
 
-        // Lottery events are handled by LotteryView
-        if(parser.type && parser.type.startsWith('lottery.')) return;
+        // ---- Internal Channels ----
+        // Diese Notification-Typen sind NIE als Toast/Modal gedacht — sie werden von
+        // dedizierten Hooks/Views konsumiert. Deshalb GANZ OBEN skippen, bevor irgend-
+        // welche Sub-Branches greifen, sonst landet z.B. spotlight.list als Modal-Spam.
+        // Ausnahme: jail.siren + jail.mugshot werden weiter unten als MOTD-Toast gerendert.
+        if(parser.type)
+        {
+            const internalPrefixes = [ 'spotlight.', 'lottery.', 'radio.', 'win.', 'gym.', 'combat.', 'patrol.' ];
+            for(const prefix of internalPrefixes)
+            {
+                if(parser.type.startsWith(prefix)) return;
+            }
+            // Jail-Branch separat: nur jail.siren + jail.mugshot durchlassen, alles andere skippen
+            if(parser.type.startsWith('jail.') && parser.type !== 'jail.siren' && parser.type !== 'jail.mugshot') return;
+        }
 
-        // Jail events are handled by ArrestToastView
-        if(parser.type && parser.type.startsWith('jail.')) return;
+        // Jail siren — push as MOTD toast (rechts oben)
+        if(parser.type === 'jail.siren')
+        {
+            const alertItem = new NotificationAlertItem(
+                [ 'Polizei-Einsatz im Gange. Bitte den Anweisungen folgen.' ],
+                NotificationAlertType.MOTD,
+                null, null,
+                'Sirene · Festnahme läuft',
+                null
+            );
+            setAlerts(prevValue => [ alertItem, ...prevValue ]);
+            return;
+        }
 
-        // Radio events are handled by RadioPanelView
-        if(parser.type && parser.type.startsWith('radio.')) return;
+        // Jail mugshot — decode base64 payload und render Booking-Sheet als MOTD-Toast
+        if(parser.type === 'jail.mugshot')
+        {
+            try
+            {
+                const payload = parser.parameters?.get('payload') || '';
+                const bytes = Uint8Array.from(atob(payload), c => c.charCodeAt(0));
+                const data = JSON.parse(new TextDecoder().decode(bytes)) as {
+                    username: string;
+                    figure: string;
+                    caseId: number;
+                    reason: string;
+                    arrests: number;
+                    isMostWanted: boolean;
+                    escalationLevel: number;
+                };
+                const figureUrl = `https://www.habbo.com/habbo-imaging/avatarimage?figure=${ encodeURIComponent(data.figure) }&size=l&direction=2&head_direction=2&action=std`;
+                const messages: string[] = [
+                    `Case #${ String(data.caseId).padStart(6, '0') }`,
+                    `Vorstrafen: ${ data.arrests }`,
+                    `Eskalations-Level: ${ data.escalationLevel }`,
+                    `Anklage: ${ data.reason || '—' }`
+                ];
+                if(data.isMostWanted) messages.push('⚠️ MOST WANTED');
 
-        // Win events are handled by WinRewardView / WinNotification
-        if(parser.type && parser.type.startsWith('win.')) return;
+                const alertItem = new NotificationAlertItem(
+                    messages,
+                    NotificationAlertType.MOTD,
+                    null, null,
+                    `${ data.username } · Booking Sheet`,
+                    figureUrl
+                );
+                setAlerts(prevValue => [ alertItem, ...prevValue ]);
+            }
+            catch(err)
+            {
+                // payload kaputt — silently ignorieren
+            }
+            return;
+        }
 
-        // Gym events are handled by GymInfoView
-        if(parser.type && parser.type.startsWith('gym.')) return;
+        // Staff-Online MOTD — Toast mit Habbo-Avatar + dezentem Pulse-Glow
+        if(parser.type === 'staff_online')
+        {
+            try
+            {
+                const payload = parser.parameters?.get('payload') || '';
+                const bytes = Uint8Array.from(atob(payload), c => c.charCodeAt(0));
+                const data = JSON.parse(new TextDecoder().decode(bytes)) as {
+                    name: string;
+                    rank: number;
+                    rankLabel: string;
+                    figure: string;
+                    message: string;
+                };
+                const figureUrl = `https://www.habbo.com/habbo-imaging/avatarimage?figure=${ encodeURIComponent(data.figure) }&size=l&direction=2&head_direction=2&action=std`;
 
-        // Combat events are handled by CombatShopView / CombatHudView
-        if(parser.type && parser.type.startsWith('combat.')) return;
+                const alertItem = new NotificationAlertItem(
+                    [
+                        `${ data.rankLabel || 'Staff' } ${ data.name } ist jetzt online.`,
+                        data.message || 'Bei Fragen oder Problemen — sag Hi!'
+                    ],
+                    NotificationAlertType.STAFF_ONLINE,
+                    null, null,
+                    `${ data.name } · ${ data.rankLabel || 'Staff' }`,
+                    figureUrl,
+                    data.figure
+                );
+                (alertItem as any).rank = data.rank;
+                (alertItem as any).rankLabel = data.rankLabel;
+                setAlerts(prevValue => [ alertItem, ...prevValue ]);
+            }
+            catch(err)
+            {
+                // payload kaputt — silently ignorieren
+            }
+            return;
+        }
 
-        // Patrol bot editor config is handled by PatrolBotEditorView
-        if(parser.type && parser.type.startsWith('patrol.')) return;
+        // (Skip-Branches für jail./radio./win./gym./combat./patrol./spotlight. sind
+        //  bereits ganz oben über die Prefix-Liste abgehandelt.)
+
+        // Hotel-Event (`:event`) — eigener Premium-View. Daten kommen aus
+        // parser.parameters. Server kann Keys in unterschiedlicher Schreibweise
+        // liefern (`user` vs `USERNAME`, `look` vs `LOOK`), je nach Plugin-Variante.
+        // Wir lookupen case-insensitive und strippen das vorgerenderte
+        // Locale-Template aus dem MESSAGE, damit nur der User-Input übrig bleibt.
+        if(parser.type === 'hotel.event')
+        {
+            const params = parser.parameters;
+
+            const pickParam = (...keys: string[]): string =>
+            {
+                if(!params) return '';
+                // 1) Direkter Key-Match
+                for(const k of keys)
+                {
+                    const v = params.get(k);
+                    if(v && v.length) return v;
+                }
+                // 2) Case-insensitive Fallback über alle Einträge
+                const lowerKeys = keys.map(k => k.toLowerCase());
+                try
+                {
+                    for(const [ key, value ] of (params as any).entries())
+                    {
+                        if(value && (value as string).length && lowerKeys.indexOf(String(key).toLowerCase()) >= 0) return value as string;
+                    }
+                }
+                catch
+                {
+                    // Map kann je nach Renderer-Version andere Iter-API haben — ignorieren
+                }
+                return '';
+            };
+
+            let username = pickParam('user', 'USER', 'username', 'USERNAME');
+            const look = pickParam('look', 'LOOK', 'figure', 'FIGURE');
+            const roomId = pickParam('roomId', 'ROOMID', 'room_id', 'roomid');
+            const roomName = pickParam('roomName', 'ROOMNAME', 'room_name', 'roomname');
+            let message = pickParam('message', 'MESSAGE');
+
+            // Always-on Debug-Log (gedrosselt durch globalen Timestamp)
+            try
+            {
+                const w = (typeof window !== 'undefined') ? (window as any) : null;
+                const now = Date.now();
+                if(w && (!w.__hotelEventLastLog || (now - w.__hotelEventLastLog) > 800))
+                {
+                    w.__hotelEventLastLog = now;
+                    const entries = params ? Array.from((params as any).entries()) : [];
+                    // eslint-disable-next-line no-console
+                    console.log('[hotel.event] raw params:', entries, '\n  picked:', { username, look, roomId, roomName, messageLen: message.length });
+                }
+            }
+            catch { /* noop */ }
+
+            // ---- ROBUSTER MESSAGE-CLEANUP ----
+            // Der Server liefert MESSAGE oft schon als FERTIG gerendertes Locale-Template:
+            //   "<b>SCALAR veranstaltet ein Event:</b><br><br>23<br><br><b>Mach mit und gewinne Preise!</b>"
+            // 1) HTML strippen (<br> → \n, <b>/<i> weg, \r → \n)
+            // 2) Splitten an doppelten Newlines → erstes Segment = Prefix, letztes = Suffix, Mitte = User-Input
+            // 3) Falls username leer → aus Prefix per Regex extrahieren (vor "veranstaltet ein Event" o.ä.)
+            const stripHtml = (s: string) => s
+                .replace(/<br\s*\/?>(\s*)/gi, '\n')
+                .replace(/<\/?b>/gi, '')
+                .replace(/<\/?i>/gi, '')
+                .replace(/<\/?strong>/gi, '')
+                .replace(/<\/?em>/gi, '')
+                .replace(/\r\n?/g, '\n');
+
+            if(message)
+            {
+                const stripped = stripHtml(message);
+                // Splitte an `\n\n+` — typischerweise gibt es 3 Segmente: prefix, body, suffix
+                const segments = stripped.split(/\n{2,}/).map(s => s.trim()).filter(s => s.length > 0);
+
+                if(segments.length >= 3)
+                {
+                    // Username aus erstem Segment ziehen (falls noch nicht gesetzt)
+                    if(!username)
+                    {
+                        const prefix0 = segments[0];
+                        // Pattern: "<NAME> veranstaltet ein Event" oder "<NAME> is hosting an event"
+                        const m = prefix0.match(/^(.+?)\s+(?:veranstaltet|is\s+hosting|hostet|ist\s+host)/i);
+                        if(m && m[1] && !/%username%|%user%/i.test(m[1])) username = m[1].trim();
+                    }
+                    // Mittlere Segmente = User-Input
+                    message = segments.slice(1, -1).join('\n\n');
+                }
+                else if(segments.length === 2)
+                {
+                    // Erstes = prefix, zweites = entweder body oder suffix — heuristisch: nimm das LÄNGERE
+                    if(!username)
+                    {
+                        const m = segments[0].match(/^(.+?)\s+(?:veranstaltet|is\s+hosting|hostet|ist\s+host)/i);
+                        if(m && m[1]) username = m[1].trim();
+                    }
+                    // Wenn Segment 1 wie "Mach mit und gewinne Preise" / "Join in and win prizes" aussieht → es ist Suffix → Body unbekannt
+                    if(/mach\s+mit\s+und\s+gewinne|join\s+in\s+and\s+win/i.test(segments[1]))
+                    {
+                        message = '';
+                    }
+                    else
+                    {
+                        message = segments[1];
+                    }
+                }
+                else
+                {
+                    // Nur 1 Segment — als-is, aber Bekanntes Template-Muster trotzdem rauswerfen
+                    message = stripped
+                        .replace(/^(.+?)\s+veranstaltet\s+ein\s+Event:?/i, '')
+                        .replace(/^(.+?)\s+is\s+hosting\s+an\s+event:?/i, '')
+                        .replace(/Mach\s+mit\s+und\s+gewinne\s+Preise!?/i, '')
+                        .replace(/Join\s+in\s+and\s+win\s+prizes!?/i, '');
+                }
+            }
+
+            // Defensiver Cleanup: alle übrig gebliebenen %token% rauswerfen
+            message = message
+                .replace(/%username%/gi, username || '')
+                .replace(/%user%/gi, username || '')
+                .replace(/%[a-zA-Z_][a-zA-Z0-9_]*%/g, '')
+                .replace(/^[\s\r\n]+|[\s\r\n]+$/g, '');
+
+            const eventTitleKey = 'notification.hotel.event.title';
+            const localizedTitle = LocalizeText(eventTitleKey);
+            const title = (localizedTitle && localizedTitle !== eventTitleKey) ? localizedTitle : 'Ein Event beginnt!';
+
+            const clickUrl = roomId ? `event:navigator/goto/${ roomId }` : null;
+            const clickUrlText = 'notification.hotel.event.linkTitle';
+
+            const alertItem = new NotificationAlertItem(
+                message ? [ message ] : [],
+                'hotel.event',
+                clickUrl,
+                clickUrlText,
+                title,
+                null,
+                look || null
+            );
+            (alertItem as any).hostUsername = username;
+            (alertItem as any).roomName = roomName;
+
+            setAlerts(prevValue => [ alertItem, ...prevValue ]);
+            return;
+        }
 
         showNotification(parser.type, parser.parameters);
     });

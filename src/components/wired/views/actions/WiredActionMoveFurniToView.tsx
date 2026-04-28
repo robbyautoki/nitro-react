@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
-import ReactSlider from 'react-slider';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Column, Flex, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { cn } from '@/lib/utils';
+import { WiredSliderField } from '../WiredSliderField';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 const directionOptions: { value: number, icon: string }[] = [
@@ -48,29 +48,36 @@ export const WiredActionMoveFurniToView: FC<{}> = props =>
 
     return (
         <WiredActionBaseView requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_OR_BY_TYPE } hasSpecialInput={ true } save={ save }>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('wiredfurni.params.emptytiles', [ 'tiles' ], [ spacing.toString() ]) }</Text>
-                <ReactSlider
-                    className={ 'nitro-slider' }
+            <div className="space-y-3">
+                <WiredSliderField
+                    label={ LocalizeText('wiredfurni.params.emptytiles', [ 'tiles' ], [ spacing.toString() ]) }
+                    value={ spacing }
                     min={ 1 }
                     max={ 5 }
-                    value={ spacing }
-                    onChange={ event => setSpacing(event) } />
-            </Column>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('wiredfurni.params.startdir') }</Text>
-                <Flex gap={ 1 }>
-                    { directionOptions.map(value =>
-                    {
-                        return (
-                            <Flex key={ value.value } alignItems="center" gap={ 1 }>
-                                <input className="form-check-input" type="radio" name="movement" id={ `movement${ value.value }` } checked={ (movement === value.value) } onChange={ event => setMovement(value.value) } />
-                                <Text><i className={ `icon icon-${ value.icon }` } /></Text>
-                            </Flex>
-                        )
-                    }) }
-                </Flex>
-            </Column>
+                    onChange={ setSpacing }
+                />
+                <div className="space-y-1.5">
+                    <span className="text-label-sm text-text-strong-950">{ LocalizeText('wiredfurni.params.startdir') }</span>
+                    <div className="flex flex-wrap gap-2">
+                        { directionOptions.map(option => (
+                            <button
+                                key={ option.value }
+                                type="button"
+                                onClick={ () => setMovement(option.value) }
+                                className={ cn(
+                                    'flex size-9 items-center justify-center rounded-lg ring-1 ring-inset transition-colors',
+                                    movement === option.value
+                                        ? 'bg-primary-base text-static-white ring-primary-base shadow-regular-xs'
+                                        : 'bg-bg-white-0 text-text-sub-600 ring-stroke-soft-200 hover:bg-bg-weak-50',
+                                ) }
+                                aria-label={ option.icon }
+                            >
+                                <i className={ `icon icon-${ option.icon }` } />
+                            </button>
+                        )) }
+                    </div>
+                </div>
+            </div>
         </WiredActionBaseView>
     );
 }

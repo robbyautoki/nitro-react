@@ -1,8 +1,7 @@
 import { FC, useEffect, useState } from 'react';
-import ReactSlider from 'react-slider';
 import { WiredFurniType } from '../../../../api';
-import { Column, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredSliderField } from '../WiredSliderField';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
 export const WiredConditionRandomChanceView: FC<{}> = props =>
@@ -19,15 +18,14 @@ export const WiredConditionRandomChanceView: FC<{}> = props =>
 
     return (
         <WiredConditionBaseView requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_NONE } hasSpecialInput={ true } save={ save }>
-            <Column gap={ 1 }>
-                <Text bold>{ `Chance: ${ chance }%` }</Text>
-                <ReactSlider
-                    className={ 'nitro-slider' }
-                    min={ 1 }
-                    max={ 100 }
-                    value={ chance }
-                    onChange={ event => setChance(event) } />
-            </Column>
+            <WiredSliderField
+                label="Chance"
+                value={ chance }
+                min={ 1 }
+                max={ 100 }
+                onChange={ setChance }
+                valueLabel={ `${ chance }%` }
+            />
         </WiredConditionBaseView>
     );
 }

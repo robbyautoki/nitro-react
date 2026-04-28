@@ -21,6 +21,7 @@ import * as AlignDivider from '@/align-ui/components/ui/divider';
 import * as AlignPopover from '@/align-ui/components/ui/popover';
 import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
 import { ArrestToastView } from '../welcome/ArrestToastView';
+import { JailEnterpriseEffectsView } from '../jail/JailEnterpriseEffectsView';
 import { TopbarBannerStackView } from '../notifications/TopbarBannerStackView';
 import { TopbarBannerStack } from '../../hooks';
 
@@ -1218,6 +1219,7 @@ export const PurseView: FC<{}> = props => {
             </div>
             <TopbarBannerStackView />
             <ArrestToastView />
+            <JailEnterpriseEffectsView />
           </div>
         </div>
     </AlignTooltip.Provider>

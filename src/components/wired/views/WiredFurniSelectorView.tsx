@@ -1,18 +1,23 @@
 import { FC, useEffect, useState } from 'react';
-import { LocalizeText, WiredFurniType } from '../../../api';
-import { Column, Flex, Text } from '../../../common';
+import { Hand, MousePointerClick, Package, Radio } from 'lucide-react';
+import { WiredFurniType } from '../../../api';
 import { useWired } from '../../../hooks';
+import { cn } from '@/lib/utils';
 
-const STUFF_SELECTION_LABELS = [
-    'Ausgewählte Möbel nehmen',
-    'Möbel vom Signal nehmen',
-    'Möbel vom Selektor nehmen'
+type SelectionOption = {
+    label: string;
+    icon: typeof Hand;
+};
+
+const STUFF_SELECTION_OPTIONS: SelectionOption[] = [
+    { label: 'Ausgewählte', icon: MousePointerClick },
+    { label: 'Vom Signal', icon: Radio },
+    { label: 'Vom Selektor', icon: Package }
 ];
 
 export const WiredFurniSelectorView: FC<{}> = props =>
 {
     const { trigger = null, furniIds = [], allowsFurni = WiredFurniType.STUFF_SELECTION_OPTION_NONE } = useWired();
-    const [ showAdvanced, setShowAdvanced ] = useState(false);
     const [ selectionCode, setSelectionCode ] = useState(0);
 
     useEffect(() =>
@@ -20,38 +25,64 @@ export const WiredFurniSelectorView: FC<{}> = props =>
         if(trigger) setSelectionCode(trigger.stuffTypeSelectionCode ?? 0);
     }, [ trigger ]);
 
-    const cycleSelection = (direction: number) =>
+    const handleSelect = (index: number) =>
     {
         if(!trigger) return;
-        const maxOptions = STUFF_SELECTION_LABELS.length;
-        let next = selectionCode + direction;
-        if(next < 0) next = maxOptions - 1;
-        if(next >= maxOptions) next = 0;
-        trigger.stuffTypeSelectionCode = next;
-        setSelectionCode(next);
+        trigger.stuffTypeSelectionCode = index;
+        setSelectionCode(index);
     };
 
     const showSourcePicker = allowsFurni >= WiredFurniType.STUFF_SELECTION_OPTION_BY_ID_BY_TYPE_OR_FROM_CONTEXT;
+    const limit = trigger?.maximumItemSelectionCount ?? 0;
+    const count = furniIds.length;
+    const isEmpty = count === 0;
 
     return (
-        <Column gap={ 1 }>
-            <Text bold>{ LocalizeText('wiredfurni.pickfurnis.caption', [ 'count', 'limit' ], [ furniIds.length.toString(), trigger.maximumItemSelectionCount.toString() ]) }</Text>
-            <Text small>{ LocalizeText('wiredfurni.pickfurnis.desc') }</Text>
-            { showSourcePicker &&
-                <Column gap={ 1 } className="mt-1">
-                    <Text small pointer underline className="text-center" onClick={ () => setShowAdvanced(prev => !prev) }>
-                        { showAdvanced ? 'Erweiterte Einstellungen ausblenden:' : 'Erweiterte Einstellungen anzeigen:' }
-                    </Text>
-                    { showAdvanced &&
-                        <Column gap={ 1 }>
-                            <Text bold small>Möbelquelle auswählen:</Text>
-                            <Flex alignItems="center" justifyContent="between" gap={ 1 }>
-                                <Text pointer bold className="px-1" onClick={ () => cycleSelection(-1) }>&lt;</Text>
-                                <Text small center className="flex-grow-1">{ STUFF_SELECTION_LABELS[selectionCode] || STUFF_SELECTION_LABELS[0] }</Text>
-                                <Text pointer bold className="px-1" onClick={ () => cycleSelection(1) }>&gt;</Text>
-                            </Flex>
-                        </Column> }
-                </Column> }
-        </Column>
+        <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-label-sm text-text-strong-950">
+                    <Hand className="size-4 text-text-sub-600" />
+                    Möbelauswahl
+                </div>
+                { isEmpty
+                    ? <span className="rounded-full bg-warning-lighter px-2 py-0.5 text-paragraph-xs font-medium text-warning-base">
+                        Erforderlich
+                    </span>
+                    : <span className="rounded-full bg-bg-weak-50 px-2 py-0.5 text-paragraph-xs tabular-nums text-text-sub-600 ring-1 ring-inset ring-stroke-soft-200">
+                        { count }/{ limit }
+                    </span>
+                }
+            </div>
+            <p className="text-paragraph-xs leading-5 text-text-sub-600">
+                { isEmpty
+                    ? 'Klicke Möbel im Raum an, um sie auszuwählen.'
+                    : `${ count } von ${ limit } Möbeln gewählt.` }
+            </p>
+            { showSourcePicker && (
+                <div className="grid grid-cols-3 gap-1 rounded-lg bg-bg-weak-50 p-1 ring-1 ring-inset ring-stroke-soft-200">
+                    { STUFF_SELECTION_OPTIONS.map((option, index) =>
+                    {
+                        const Icon = option.icon;
+                        const active = selectionCode === index;
+                        return (
+                            <button
+                                key={ index }
+                                type="button"
+                                onClick={ () => handleSelect(index) }
+                                className={ cn(
+                                    'inline-flex items-center justify-center gap-1.5 rounded-md px-2 py-1 text-paragraph-xs font-medium transition',
+                                    active
+                                        ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs'
+                                        : 'text-text-sub-600 hover:text-text-strong-950'
+                                ) }
+                            >
+                                <Icon className="size-3.5" />
+                                { option.label }
+                            </button>
+                        );
+                    }) }
+                </div>
+            ) }
+        </div>
     );
 }

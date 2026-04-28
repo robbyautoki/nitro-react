@@ -1,6 +1,7 @@
 import { BadgePointLimitsEvent, ILinkEventTracker, IRoomSession, RoomEngineObjectEvent, RoomEngineObjectPlacedEvent, RoomPreviewer, RoomSessionEvent } from '@nitrots/nitro-renderer';
 import { ComponentType, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Award, Bot, Check, PawPrint, Plus, Sofa, X } from 'lucide-react';
+import bahhosLogoUrl from '@/assets/images/brand/bahhos-logo.png';
 import { AddEventLinkTracker, GetLocalization, GetRoomEngine, isObjectMoverRequested, LocalizeText, RemoveLinkEventTracker, setObjectMoverRequested, UnseenItemCategory } from '../../api';
 import { DraggableWindow, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../common';
 import { useInventoryFurni, useInventoryTrade, useInventoryUnseenTracker, useMessageEvent, useRoomEngineEvent, useRoomSessionManagerEvent } from '../../hooks';
@@ -63,8 +64,8 @@ export const InventoryView: FC<{}> = props =>
     const totalItems = useMemo(() => groupItems.reduce((s, g) => s + g.getUnlockedCount(), 0), [ groupItems ]);
 
     // Resize
-    const MIN_W = 500, MIN_H = 400, MAX_W = 900, MAX_H = 700;
-    const [ size, setSize ] = useState({ w: 620, h: 520 });
+    const MIN_W = 560, MIN_H = 400, MAX_W = 900, MAX_H = 700;
+    const [ size, setSize ] = useState({ w: 760, h: 580 });
     const resizeRef = useRef<{ startX: number; startY: number; startW: number; startH: number } | null>(null);
 
     useEffect(() =>
@@ -218,7 +219,21 @@ export const InventoryView: FC<{}> = props =>
 
                 <div className="flex min-h-0 flex-1 overflow-hidden">
                     { /* Sidebar */ }
-                    <div className="flex w-[140px] shrink-0 flex-col overflow-y-auto border-r border-stroke-soft-200 bg-bg-weak-50">
+                    <div className="relative flex w-[150px] shrink-0 flex-col overflow-hidden border-r border-stroke-soft-200 bg-bg-weak-50">
+                        { /* Atmosphere — Bahhos logo with fade-out mask */ }
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-x-0 bottom-0 h-[180px] opacity-[0.08] dark:opacity-[0.14]"
+                            style={ {
+                                backgroundImage: `url(${ bahhosLogoUrl })`,
+                                backgroundPosition: 'bottom center',
+                                backgroundRepeat: 'no-repeat',
+                                backgroundSize: '140px auto',
+                                maskImage: 'linear-gradient(to top, black 30%, transparent 100%)',
+                                WebkitMaskImage: 'linear-gradient(to top, black 30%, transparent 100%)',
+                            } }
+                        />
+                        <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-y-auto">
                         <div className="flex flex-col gap-0.5 p-1.5">
                             { TABS.map((name, index) =>
                             {
@@ -230,9 +245,9 @@ export const InventoryView: FC<{}> = props =>
                                         key={ index }
                                         type="button"
                                         className={ cn(
-                                            'flex items-center gap-2 rounded-lg border-l-2 border-transparent px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
+                                            'relative flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
                                             isActive
-                                                ? 'border-l-primary-base bg-primary-alpha-10 font-semibold text-primary-base'
+                                                ? 'bg-primary-alpha-10 font-semibold text-primary-base before:absolute before:left-0 before:top-1/2 before:h-4 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary-base'
                                                 : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950',
                                         ) }
                                         onClick={ () => setCurrentTab(name) }
@@ -258,9 +273,9 @@ export const InventoryView: FC<{}> = props =>
                                 <button
                                     type="button"
                                     className={ cn(
-                                        'flex items-center gap-2 rounded-lg border-l-2 border-transparent px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
+                                        'relative flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
                                         activeCategory === null
-                                            ? 'border-l-primary-base bg-primary-alpha-10 font-semibold text-primary-base'
+                                            ? 'bg-primary-alpha-10 font-semibold text-primary-base before:absolute before:left-0 before:top-1/2 before:h-4 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary-base'
                                             : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950',
                                     ) }
                                     onClick={ () => setActiveCategory(null) }
@@ -277,9 +292,9 @@ export const InventoryView: FC<{}> = props =>
                                             key={ cat.id }
                                             type="button"
                                             className={ cn(
-                                                'flex items-center gap-2 rounded-lg border-l-2 border-transparent px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
+                                                'relative flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-paragraph-xs font-medium transition duration-200 ease-out',
                                                 isActive
-                                                    ? 'border-l-primary-base bg-primary-alpha-10 font-semibold text-primary-base'
+                                                    ? 'bg-primary-alpha-10 font-semibold text-primary-base before:absolute before:left-0 before:top-1/2 before:h-4 before:w-[3px] before:-translate-y-1/2 before:rounded-r-full before:bg-primary-base'
                                                     : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950',
                                             ) }
                                             onClick={ () => setActiveCategory(isActive ? null : cat.id) }
@@ -351,7 +366,7 @@ export const InventoryView: FC<{}> = props =>
                                 ) : (
                                     <button
                                         type="button"
-                                        className="flex items-center gap-2 rounded-lg border-l-2 border-transparent px-2.5 py-1.5 text-left text-paragraph-xs text-text-soft-400 transition-colors hover:bg-bg-white-0 hover:text-text-sub-600"
+                                        className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-paragraph-xs text-text-soft-400 transition-colors hover:bg-bg-white-0 hover:text-text-sub-600"
                                         onClick={ () => setCreatingCategory(true) }
                                     >
                                         <Plus className="size-3 shrink-0" />
@@ -360,6 +375,11 @@ export const InventoryView: FC<{}> = props =>
                                 ) }
                             </div>
                         ) }
+                        </div>
+                        { /* Footer Strip */ }
+                        <div className="relative z-10 shrink-0 border-t border-stroke-soft-200/60 px-3 py-1.5 text-center">
+                            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-text-soft-400">bahhos.de</span>
+                        </div>
                     </div>
 
                     { /* Content */ }

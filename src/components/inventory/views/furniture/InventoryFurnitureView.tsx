@@ -322,7 +322,7 @@ export const InventoryFurnitureView: FC<InventoryFurnitureViewProps> = props =>
             </div>
             { /* Multi toolbar */ }
             { multiSelectMode && selectedGroups.size > 0 && (
-                <div className="flex shrink-0 items-center justify-between border-b border-stroke-soft-200 bg-primary-alpha-10 px-3 py-1.5">
+                <div className="relative flex shrink-0 items-center justify-between border-b border-stroke-soft-200 bg-bg-weak-50 px-3 py-1.5 before:absolute before:left-0 before:top-0 before:h-full before:w-[3px] before:bg-primary-base">
                     <AlignBadge.Root color="blue" variant="lighter" size="small">
                         { selectedGroups.size } ausgewählt
                     </AlignBadge.Root>

@@ -1,8 +1,10 @@
 import { FC, useEffect, useState } from 'react';
-import { AlertTriangle, ChevronDown, Home, RefreshCw } from 'lucide-react';
+import { motion } from 'motion/react';
+import { ChevronDown, Home, RefreshCw } from 'lucide-react';
+import { RiAlertLine, RiArrowRightLine } from '@remixicon/react';
 import bahhosLogo from '@/assets/images/brand/bahhos-logo.png';
 import * as AlignButton from '@/align-ui/components/ui/button';
-import * as AlignSurface from '@/align-ui/components/ui/surface';
+import * as AlignBadge from '@/align-ui/components/ui/badge';
 
 interface ErrorFallbackViewProps
 {
@@ -43,71 +45,133 @@ export const ErrorFallbackView: FC<ErrorFallbackViewProps> = ({ error, info, aut
     const togglePause = () => setPaused(p => !p);
 
     const stack = error?.stack ?? null;
+    const message = error?.message ?? '';
 
     return (
-        <div className="nitro-error-overlay">
-            <div className="nitro-error-mesh" aria-hidden="true" />
-            <div className="nitro-error-noise" aria-hidden="true" />
+        <div className="nitro-loading flex items-center justify-center bg-bg-weak-50 p-6">
+            <div className="nitro-loading__grid" aria-hidden="true" />
 
-            <AlignSurface.Panel className="nitro-error-box">
-                <img
-                    src={ bahhosLogo }
-                    alt="Bahhos.de"
-                    draggable={ false }
-                    className="nitro-error-logo"
-                    style={ { imageRendering: 'pixelated' } }
-                />
-
-                <div className="nitro-error-icon">
-                    <AlertTriangle className="size-7" />
-                </div>
-
-                <div className="nitro-error-title">Etwas ist schiefgelaufen</div>
-                <div className="nitro-error-message">
-                    Der Client ist auf einen unerwarteten Fehler gestoßen. Lade die Seite neu, um fortzufahren.
-                </div>
-
-                { autoReloadSeconds > 0 && (
-                    <div className="nitro-error-countdown">
-                        { paused
-                            ? <span>Auto-Reload pausiert</span>
-                            : <span>Automatischer Reload in <strong>{ remaining }s</strong></span> }
-                        <button type="button" className="nitro-error-pause" onClick={ togglePause }>
-                            { paused ? 'Fortsetzen' : 'Anhalten' }
-                        </button>
+            <motion.div
+                initial={ { opacity: 0, y: 12 } }
+                animate={ { opacity: 1, y: 0 } }
+                transition={ { duration: 0.3, ease: [ 0.16, 1, 0.3, 1 ] } }
+                className="relative z-[1] w-full max-w-[480px] rounded-3xl border border-stroke-soft-200 bg-bg-white-0 p-8 shadow-regular-md"
+            >
+                { /* Header */ }
+                <div className="flex items-center gap-3">
+                    <img
+                        src={ bahhosLogo }
+                        alt="Bahhos"
+                        draggable={ false }
+                        className="size-10 shrink-0"
+                        style={ { imageRendering: 'pixelated' } }
+                    />
+                    <div className="flex min-w-0 flex-1 flex-col">
+                        <div className="text-label-md font-semibold leading-tight text-text-strong-950">
+                            BAHHOS
+                        </div>
+                        <div className="text-paragraph-xs text-text-soft-400">
+                            Hotel · v1.0
+                        </div>
                     </div>
-                ) }
-
-                <div className="nitro-error-buttons">
-                    <AlignButton.Root type="button" variant="primary" mode="filled" size="medium" className="w-full" onClick={ handleReload }>
-                        <AlignButton.Icon as={ RefreshCw } className="size-4" />
-                        Neu laden
-                    </AlignButton.Root>
-                    <AlignButton.Root type="button" variant="neutral" mode="stroke" size="medium" className="w-full" onClick={ handleHome }>
-                        <AlignButton.Icon as={ Home } className="size-4" />
-                        Zur Startseite
-                    </AlignButton.Root>
+                    <AlignBadge.Root color="red" variant="light" size="small">
+                        <AlignBadge.Dot />
+                        Fehler
+                    </AlignBadge.Root>
                 </div>
 
-                { (stack || info) && (
-                    <div className="nitro-error-details">
-                        <button
-                            type="button"
-                            className="nitro-error-details-toggle"
-                            onClick={ () => setShowDetails(v => !v) }
-                            aria-expanded={ showDetails }
+                <div className="my-6 h-px w-full bg-stroke-soft-200" />
+
+                { /* Error Alert */ }
+                <div className="flex flex-col gap-5">
+                    <div className="flex items-start gap-3 rounded-2xl bg-error-lighter p-4">
+                        <RiAlertLine className="mt-0.5 size-5 shrink-0 text-error-base" />
+                        <div className="flex flex-col gap-1">
+                            <div className="text-label-sm text-text-strong-950">
+                                Etwas ist schiefgelaufen
+                            </div>
+                            <div className="text-paragraph-sm text-text-sub-600">
+                                Der Client ist auf einen unerwarteten Fehler gestoßen. Lade die Seite neu, um fortzufahren.
+                            </div>
+                        </div>
+                    </div>
+
+                    { /* Auto-Reload Countdown */ }
+                    { autoReloadSeconds > 0 && (
+                        <div className="flex items-center justify-center gap-2 rounded-full bg-bg-weak-50 px-3 py-2 text-paragraph-xs text-text-sub-600">
+                            { paused ? (
+                                <span>Auto-Reload pausiert</span>
+                            ) : (
+                                <span>
+                                    Automatischer Reload in <strong className="font-semibold text-text-strong-950">{ remaining }s</strong>
+                                </span>
+                            ) }
+                            <span className="text-text-soft-400">·</span>
+                            <button
+                                type="button"
+                                onClick={ togglePause }
+                                className="font-medium text-primary-base underline-offset-2 hover:underline"
+                            >
+                                { paused ? 'Fortsetzen' : 'Anhalten' }
+                            </button>
+                        </div>
+                    ) }
+
+                    { /* Action Buttons */ }
+                    <div className="flex flex-col gap-2">
+                        <AlignButton.Root
+                            variant="primary"
+                            mode="filled"
+                            size="medium"
+                            onClick={ handleReload }
+                            className="w-full"
                         >
-                            <ChevronDown className={ `size-3.5 transition-transform ${ showDetails ? 'rotate-180' : '' }` } />
-                            Technische Details
-                        </button>
-                        { showDetails && (
-                            <pre className="nitro-error-stack">
-                                { (error?.message ?? '') }{ stack ? `\n\n${ stack }` : '' }{ info ? `\n\n${ info }` : '' }
-                            </pre>
-                        ) }
+                            <AlignButton.Icon as={ RefreshCw } className="size-4" />
+                            Neu laden
+                            <AlignButton.Icon as={ RiArrowRightLine } />
+                        </AlignButton.Root>
+                        <AlignButton.Root
+                            variant="neutral"
+                            mode="stroke"
+                            size="medium"
+                            onClick={ handleHome }
+                            className="w-full"
+                        >
+                            <AlignButton.Icon as={ Home } className="size-4" />
+                            Zur Startseite
+                        </AlignButton.Root>
                     </div>
-                ) }
-            </AlignSurface.Panel>
+
+                    { /* Collapsible Technical Details */ }
+                    { (stack || info || message) && (
+                        <div className="border-t border-stroke-soft-200 pt-4">
+                            <button
+                                type="button"
+                                onClick={ () => setShowDetails(v => !v) }
+                                aria-expanded={ showDetails }
+                                className="inline-flex items-center gap-1.5 text-paragraph-xs font-medium text-text-sub-600 transition-colors hover:text-text-strong-950"
+                            >
+                                <ChevronDown
+                                    className={ `size-3.5 transition-transform ${ showDetails ? 'rotate-180' : '' }` }
+                                />
+                                Technische Details
+                            </button>
+                            { showDetails && (
+                                <pre className="mt-2 max-h-[200px] overflow-auto whitespace-pre-wrap break-words rounded-xl bg-bg-weak-50 p-3 font-mono text-[11px] leading-relaxed text-text-sub-600">
+                                    { message }{ stack ? `\n\n${ stack }` : '' }{ info ? `\n\n${ info }` : '' }
+                                </pre>
+                            ) }
+                        </div>
+                    ) }
+                </div>
+
+                { /* Footer */ }
+                <div className="mt-7 flex items-center justify-center">
+                    <div className="text-paragraph-xs uppercase tracking-[0.12em] text-text-soft-400">
+                        Bahhos · Powered by Nitro
+                    </div>
+                </div>
+            </motion.div>
         </div>
     );
 }

@@ -3,6 +3,7 @@ import { FaClock, FaFire } from 'react-icons/fa';
 import { LocalizeText } from '../../../../../api';
 import { useCatalog } from '../../../../../hooks';
 import { loadTracked, TrackedPurchase } from '../../../CatalogView';
+import { CATALOG_GRID_CLASSES } from '../common/CatalogGridStyles';
 
 interface CatalogVirtualGridViewProps
 {
@@ -48,24 +49,24 @@ export const CatalogVirtualGridView: FC<CatalogVirtualGridViewProps> = props =>
                     </div>
                 ) }
 
-                <div className="grid grid-cols-[repeat(auto-fill,82px)] gap-2">
+                <div className={ CATALOG_GRID_CLASSES }>
                     { items.map((item, i) => (
                         <div
                             key={ i }
-                            className="relative flex cursor-pointer items-center justify-center overflow-hidden rounded-10 bg-bg-white-0 shadow-regular-xs ring-1 ring-stroke-soft-200 transition-all duration-150 aspect-square group hover:bg-primary-alpha-10 hover:ring-primary-base hover:z-10"
+                            className="relative flex cursor-pointer items-center justify-center overflow-hidden rounded-lg transition-colors aspect-square group hover:bg-primary-alpha-10 hover:ring-1 hover:ring-inset hover:ring-primary-base"
                             style={ item.iconUrl ? { backgroundImage: `url(${ item.iconUrl })`, backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundSize: 'contain' } : undefined }
                             onClick={ () => item.offerId > 0 && openPageByOfferId(item.offerId) }
                         >
                             {/* Name + Price overlay on hover */}
                             <div className="absolute bottom-0 inset-x-0 flex flex-col items-center py-[2px] bg-bg-white-0/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                <span className="text-paragraph-xs text-text-sub-600 truncate max-w-[68px] leading-tight">{ item.name }</span>
+                                <span className="text-[10px] text-text-sub-600 truncate max-w-[60px] leading-tight">{ item.name }</span>
                                 { item.priceCredits > 0 &&
-                                    <span className="text-subheading-2xs text-warning-base">{ item.priceCredits }</span> }
+                                    <span className="text-[10px] text-warning-base leading-tight">{ item.priceCredits }</span> }
                             </div>
 
                             {/* Count badge for frequent purchases */}
                             { item.count > 1 &&
-                                <span className="absolute -top-0.5 -right-0.5 text-subheading-2xs bg-primary-alpha-10 text-primary-base rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1 leading-none z-10">
+                                <span className="absolute right-0.5 top-0.5 text-[10px] bg-primary-alpha-10 text-primary-base rounded min-w-3.5 h-3.5 flex items-center justify-center px-0.5 leading-none z-10">
                                     ×{ item.count }
                                 </span> }
                         </div>

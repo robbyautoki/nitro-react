@@ -27,14 +27,14 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                 onMouseLeave={ () => setHovered(false) }
             >
                 <button
-                    className={ `flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-label-xs transition-all duration-150 ${
+                    className={ `flex w-full items-center gap-2 rounded-md px-2 py-1 text-label-xs transition-colors duration-150 ${
                         node.isActive
-                            ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs'
+                            ? 'bg-bg-white-0 text-text-strong-950'
                             : 'text-text-sub-600 hover:bg-bg-white-0 hover:text-text-strong-950'
                     }` }
                     onClick={ () => activateNode(node) }
                 >
-                    <div className="flex size-5 shrink-0 items-center justify-center rounded">
+                    <div className="flex size-5 shrink-0 items-center justify-center">
                         <CatalogIconView icon={ node.iconId } />
                     </div>
                     <span className="truncate flex-1 text-left">{ node.localization?.replace(/\s*\(\d+\)$/, '') }</span>

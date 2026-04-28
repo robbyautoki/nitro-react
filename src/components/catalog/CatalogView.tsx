@@ -1,6 +1,6 @@
 import { ILinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { X, PanelLeftClose, PanelLeft, Clock, Flame, ShieldCheck } from 'lucide-react';
+import { X, PanelLeftClose, PanelLeft, Clock, Flame, ShieldCheck, ShoppingBag } from 'lucide-react';
 import { AddEventLinkTracker, CatalogType, GetSessionDataManager, LocalizeText, Offer, OpenUrl, RemoveLinkEventTracker } from '../../api';
 import { CatalogPurchasedEvent } from '../../events';
 import { useCatalog, useUiEvent } from '../../hooks';
@@ -301,43 +301,51 @@ export const CatalogView: FC<{}> = props =>
         <>
             <DraggableWindow uniqueKey="catalog" windowPosition={ DraggableWindowPosition.CENTER }>
                 <div
-                    className="nitro-catalog relative flex flex-col overflow-hidden rounded-20 bg-bg-white-0 text-text-strong-950 shadow-regular-md ring-1 ring-inset ring-stroke-soft-200"
+                    className="nitro-catalog relative flex flex-col overflow-hidden rounded-2xl bg-bg-white-0 text-text-strong-950 shadow-regular-md ring-1 ring-inset ring-stroke-soft-200"
                     style={ { width: `min(${ catalogSize.width }px, calc(100vw - 32px))`, height: `min(${ catalogSize.height }px, calc(100vh - 32px))` } }
                 >
                     { /* Header */ }
-                    <div className="drag-handler flex h-11 min-h-11 shrink-0 cursor-move select-none items-center gap-3 border-b border-stroke-soft-200 bg-bg-white-0 px-4">
+                    <div className="drag-handler flex shrink-0 cursor-move select-none items-center gap-4 border-b border-stroke-soft-200 bg-bg-white-0 px-4 py-3">
                         <TooltipProvider delayDuration={ 300 }>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" className="h-7 w-7 shrink-0 px-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setSidebarCollapsed(v => !v) }>
+                                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" className="h-8 w-8 shrink-0 px-0" onMouseDown={ e => e.stopPropagation() } onClick={ () => setSidebarCollapsed(v => !v) }>
                                         { sidebarCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" /> }
                                     </AlignButton.Root>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom">{ sidebarCollapsed ? 'Sidebar einblenden' : 'Sidebar ausblenden' }</TooltipContent>
                             </Tooltip>
-                            <div className="flex-1 min-w-0">
-                                { searchResult ? (
-                                    <div className="flex items-center gap-1.5 text-paragraph-sm text-text-sub-600">
-                                        <span>Suche: &ldquo;<span className="font-medium text-text-strong-950">{ searchResult.searchValue }</span>&rdquo;</span>
+                            { /* Title block: Icon-Tile + Title + Description */ }
+                            <div className="flex flex-1 min-w-0 items-center gap-3">
+                                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                                    <ShoppingBag className="h-4 w-4 text-text-sub-600" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <div className="text-label-md text-text-strong-950">
+                                        { staffView ? 'Staff-Katalog' : 'Katalog' }
                                     </div>
-                                ) : breadcrumb.length > 0 ? (
-                                    <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
-                                        <span className="text-paragraph-xs shrink-0 cursor-pointer text-text-sub-600 transition-colors hover:text-text-strong-950">Katalog</span>
-                                        { breadcrumb.map((label, i) => (
-                                            <Fragment key={ i }>
-                                                <span className="shrink-0 text-paragraph-xs text-text-soft-400">›</span>
-                                                <span className={ `truncate text-paragraph-xs ${ i === breadcrumb.length - 1 ? 'font-medium text-text-strong-950' : 'text-text-sub-600' }` }>{ label }</span>
-                                            </Fragment>
-                                        )) }
-                                    </div>
-                                ) : (
-                                    <span className="text-paragraph-sm text-text-sub-600">Wähle eine Kategorie</span>
-                                ) }
+                                    { searchResult ? (
+                                        <div className="text-paragraph-xs text-text-sub-600 truncate">
+                                            Suche: &ldquo;<span className="font-medium text-text-strong-950">{ searchResult.searchValue }</span>&rdquo;
+                                        </div>
+                                    ) : breadcrumb.length > 0 ? (
+                                        <div className="flex items-center gap-1 min-w-0 overflow-hidden">
+                                            { breadcrumb.map((label, i) => (
+                                                <Fragment key={ i }>
+                                                    { i > 0 && <span className="shrink-0 text-paragraph-xs text-text-soft-400">›</span> }
+                                                    <span className={ `truncate text-paragraph-xs ${ i === breadcrumb.length - 1 ? 'font-medium text-text-strong-950' : 'text-text-sub-600' }` }>{ label }</span>
+                                                </Fragment>
+                                            )) }
+                                        </div>
+                                    ) : (
+                                        <div className="text-paragraph-xs text-text-sub-600">Wähle eine Kategorie</div>
+                                    ) }
+                                </div>
                             </div>
                             <div className="w-[240px] shrink-0" onMouseDown={ e => e.stopPropagation() }>
                                 <CatalogSearchView />
                             </div>
-                            <Divider.Root className="h-5 w-px bg-stroke-soft-200" />
+                            <Divider.Root className="h-6 w-px bg-stroke-soft-200" />
                             <div className="flex items-center gap-1 shrink-0" onMouseDown={ e => e.stopPropagation() }>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
@@ -345,7 +353,7 @@ export const CatalogView: FC<{}> = props =>
                                             variant="neutral"
                                             mode={ virtualPage === 'recent' ? 'lighter' : 'ghost' }
                                             size="xxsmall"
-                                            className="h-7 w-7 px-0"
+                                            className="h-8 w-8 px-0"
                                             onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'recent' })) }
                                         >
                                             <Clock className="w-3.5 h-3.5" />
@@ -359,7 +367,7 @@ export const CatalogView: FC<{}> = props =>
                                             variant="neutral"
                                             mode={ virtualPage === 'frequent' ? 'lighter' : 'ghost' }
                                             size="xxsmall"
-                                            className="h-7 w-7 px-0"
+                                            className="h-8 w-8 px-0"
                                             onClick={ () => window.dispatchEvent(new CustomEvent('catalog_virtual_page', { detail: 'frequent' })) }
                                         >
                                             <Flame className={ `w-3.5 h-3.5 ${ virtualPage !== 'frequent' ? 'text-warning-base' : '' }` } />
@@ -374,7 +382,7 @@ export const CatalogView: FC<{}> = props =>
                                                 variant="neutral"
                                                 mode={ staffView ? 'lighter' : 'ghost' }
                                                 size="xxsmall"
-                                                className="h-7 w-7 px-0"
+                                                className="h-8 w-8 px-0"
                                                 onClick={ () => setStaffView(v => !v) }
                                             >
                                                 <ShieldCheck className="w-3.5 h-3.5" />
@@ -384,13 +392,16 @@ export const CatalogView: FC<{}> = props =>
                                     </Tooltip>
                                 ) }
                             </div>
-                            <button
-                                className="shrink-0 appearance-none rounded-10 border-0 bg-transparent p-1 text-text-sub-600 transition-colors hover:bg-bg-weak-50 hover:text-text-strong-950"
+                            <AlignButton.Root
+                                variant="neutral"
+                                mode="ghost"
+                                size="xxsmall"
+                                className="h-8 w-8 shrink-0 px-0"
                                 onMouseDown={ e => e.stopPropagation() }
                                 onClick={ () => setIsVisible(false) }
                             >
-                                <X className="w-3.5 h-3.5" />
-                            </button>
+                                <X className="w-4 h-4" />
+                            </AlignButton.Root>
                         </TooltipProvider>
                     </div>
                     { /* Content: Sidebar | Grid | Inspector */ }

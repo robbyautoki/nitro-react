@@ -21,33 +21,12 @@
         }
     }
 
-    // Bottom inspector panel slide-in animation
-    .catalog-inspector-enter {
-        animation: slideUpFade 0.2s ease-out;
-    }
-
-    @keyframes slideUpFade {
-        from {
-            opacity: 0;
-            transform: translateY(8px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    // Hero preview: subtle inner-shadow to ground the 3D model
-    .catalog-inspector-hero {
-        box-shadow: inset 0 -1px 0 rgba(0,0,0,0.04), inset 0 0 40px rgba(0,0,0,0.05);
-    }
-
     // ─── Server HTML Content Reset ───
     // Server localization texts contain old Habbo HTML with inline styles
     // (gray backgrounds, old fonts, etc.) — neutralize them all
     .catalog-page-text {
         font-size: 12px;
-        color: rgba(var(--inv-fg-rgb, 0, 0, 0), 0.60);
+        color: hsl(var(--align-text-sub-600));
         line-height: 1.6;
         word-break: break-word;
 
@@ -63,7 +42,7 @@
 
         b, strong {
             font-weight: 600;
-            color: rgba(var(--inv-fg-rgb, 0, 0, 0), 0.85) !important;
+            color: hsl(var(--align-text-strong-950)) !important;
         }
 
         a {
@@ -121,12 +100,12 @@
             right: 6px;
             width: 6px;
             height: 6px;
-            border-right: 2px solid rgba(var(--inv-fg-rgb, 0, 0, 0), 0.12);
-            border-bottom: 2px solid rgba(var(--inv-fg-rgb, 0, 0, 0), 0.12);
+            border-right: 2px solid hsl(var(--align-stroke-soft-200));
+            border-bottom: 2px solid hsl(var(--align-stroke-soft-200));
         }
 
         &:hover::after {
-            border-color: rgba(var(--inv-fg-rgb, 0, 0, 0), 0.25);
+            border-color: hsl(var(--align-stroke-sub-300));
         }
     }
 }

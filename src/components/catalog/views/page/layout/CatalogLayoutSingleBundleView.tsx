@@ -1,11 +1,13 @@
 import { FC, useMemo } from 'react';
 import { Box, Layers } from 'lucide-react';
-import { GetConfiguration, Offer } from '../../../../../api';
+import { GetConfiguration } from '../../../../../api';
 import { useCatalog } from '../../../../../hooks';
 import { CatalogPriceDisplay } from '../../shared/CatalogPriceDisplay';
 import { CatalogPurchaseWidgetView } from '../widgets/CatalogPurchaseWidgetView';
 import { CatalogBundleGridWidgetView } from '../widgets/CatalogBundleGridWidgetView';
 import { CatalogFirstProductSelectorWidgetView } from '../widgets/CatalogFirstProductSelectorWidgetView';
+import { CatalogPageHero } from '../common/CatalogPageHero';
+import { LAYOUT_LABELS } from '../common/CatalogTileTokens';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayoutSingleBundleView: FC<CatalogLayoutProps> = props =>
@@ -27,24 +29,20 @@ export const CatalogLayoutSingleBundleView: FC<CatalogLayoutProps> = props =>
         <div className="flex flex-col h-full overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
             <CatalogFirstProductSelectorWidgetView />
 
-            {/* Hero Banner */}
-            { teaser ? (
-                <div className="shrink-0 relative h-[200px] overflow-hidden bg-gradient-to-br from-primary-alpha-10 via-bg-white-0 to-bg-white-0">
+            {/* Phase 14.1: shared hero — same look as CMS Mega-Editor live-preview */}
+            <CatalogPageHero forceShow />
+
+            {/* Bundle teaser banner: only when localization image(1) is set */}
+            { teaser && (
+                <div className="shrink-0 relative h-[160px] overflow-hidden bg-gradient-to-br from-primary-alpha-10 via-bg-white-0 to-bg-white-0 mx-3 mt-3 rounded-2xl ring-1 ring-inset ring-stroke-soft-200">
                     <img src={ teaser } alt="" className="w-full h-full object-cover opacity-80" onError={ e => { (e.target as HTMLImageElement).style.display = 'none'; } } />
-                    <div className="absolute inset-0 bg-gradient-to-t from-bg-white-0 via-bg-white-0/50 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4">
-                        <span className="mb-2 inline-flex items-center gap-1 rounded-md bg-primary-alpha-10 px-2 py-0.5 text-subheading-2xs text-primary-base ring-1 ring-primary-base/20">
-                            <Box className="w-3 h-3" /> Bundle
+                    <div className="absolute inset-0 bg-gradient-to-t from-bg-white-0 via-bg-white-0/40 to-transparent" />
+                    <div className="absolute bottom-3 left-3 right-3">
+                        <span className="mb-1.5 inline-flex items-center gap-1 rounded-full bg-primary-alpha-10 px-2 py-0.5 text-subheading-2xs text-primary-base ring-1 ring-primary-base/20">
+                            <Box className="w-3 h-3" /> { LAYOUT_LABELS['single_bundle'] }
                         </span>
-                        <h2 className="text-title-h5 text-text-strong-950">{ currentPage?.localization?.getText(1) || currentOffer?.localizationName }</h2>
+                        <h2 className="text-title-h6 text-text-strong-950 truncate">{ currentPage?.localization?.getText(1) || currentOffer?.localizationName }</h2>
                     </div>
-                </div>
-            ) : (
-                <div className="shrink-0 border-b border-stroke-soft-200 p-4">
-                    <span className="mb-2 inline-flex items-center gap-1 rounded-md bg-primary-alpha-10 px-2 py-0.5 text-subheading-2xs text-primary-base ring-1 ring-primary-base/20">
-                        <Box className="w-3 h-3" /> Bundle
-                    </span>
-                    <h2 className="text-title-h5 text-text-strong-950">{ currentOffer?.localizationName }</h2>
                 </div>
             ) }
 

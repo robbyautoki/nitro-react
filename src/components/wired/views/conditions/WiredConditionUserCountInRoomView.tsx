@@ -1,8 +1,7 @@
 import { FC, useEffect, useState } from 'react';
-import ReactSlider from 'react-slider';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Column, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredSliderField } from '../WiredSliderField';
 import { WiredConditionBaseView } from './WiredConditionBaseView';
 
 export const WiredConditionUserCountInRoomView: FC<{}> = props =>
@@ -26,27 +25,25 @@ export const WiredConditionUserCountInRoomView: FC<{}> = props =>
             setMax(1);
         }
     }, [ trigger ]);
-    
+
     return (
         <WiredConditionBaseView requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_NONE } hasSpecialInput={ true } save={ save }>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('wiredfurni.params.usercountmin', [ 'value' ], [ min.toString() ]) }</Text>
-                <ReactSlider
-                    className={ 'nitro-slider' }
-                    min={ 1 }
-                    max={ 50 }
+            <div className="space-y-3">
+                <WiredSliderField
+                    label={ LocalizeText('wiredfurni.params.usercountmin', [ 'value' ], [ min.toString() ]) }
                     value={ min }
-                    onChange={ event => setMin(event) } />
-            </Column>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('wiredfurni.params.usercountmax', [ 'value' ], [ max.toString() ]) }</Text>
-                <ReactSlider
-                    className={ 'nitro-slider' }
                     min={ 1 }
                     max={ 50 }
+                    onChange={ setMin }
+                />
+                <WiredSliderField
+                    label={ LocalizeText('wiredfurni.params.usercountmax', [ 'value' ], [ max.toString() ]) }
                     value={ max }
-                    onChange={ event => setMax(event) } />
-            </Column>
+                    min={ 1 }
+                    max={ 50 }
+                    onChange={ setMax }
+                />
+            </div>
         </WiredConditionBaseView>
     );
 }

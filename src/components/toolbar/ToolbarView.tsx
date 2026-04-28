@@ -6,6 +6,7 @@ import { CreateLinkEvent, GetConfiguration, GetSessionDataManager, MessengerIcon
 import { LayoutAvatarImageView } from '../../common';
 import { useAchievements, useFriends, useInventoryUnseenTracker, useMessageEvent, useMessenger, useNotificationCenter, useRoomEngineEvent, useSessionInfo } from '../../hooks';
 import { ToolbarMeView } from './ToolbarMeView';
+import { ToolbarSpotlightPill } from './ToolbarSpotlightPill';
 import { VoiceChannelView } from '../room/VoiceChannelView';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
 import * as AlignButton from '@/align-ui/components/ui/button';
@@ -23,6 +24,11 @@ function ToolbarIcon({ name, w, h }: { name: string; w: number; h: number }) {
     />
   );
 }
+
+const getCmsUrl = (): string => {
+  if (typeof window === 'undefined') return 'https://www.bahhos.de';
+  return window.location.hostname === 'localhost' ? 'http://localhost:3030' : 'https://www.bahhos.de';
+};
 
 interface SidebarItemProps {
   icon: React.ReactNode;
@@ -143,6 +149,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
     CreateLinkEvent('navigator/goto/home');
   }, [isInRoom]);
 
+  const handleCmsClick = useCallback(() => {
+    window.location.href = getCmsUrl();
+  }, []);
+
   useEffect(() => {
     document.documentElement.style.setProperty('--sidebar-width', '84px');
     document.documentElement.style.setProperty('--topbar-center-offset', '42px');
@@ -154,6 +164,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
 
   return (
     <AlignTooltip.Provider delayDuration={200}>
+      {/* Spotlight-Pill — links neben Toolbar (über Avatar), nur sichtbar wenn aktueller Raum spotlighted */}
+      <div className="fixed left-3 top-[40px] z-[71] pointer-events-none flex w-[68px] items-center justify-center">
+        <ToolbarSpotlightPill />
+      </div>
       <div className="nitro-toolbar fixed left-3 top-[72px] z-[70] pointer-events-auto shrink-0">
           <div
             className={cn(
@@ -288,7 +302,7 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
             </div>
           )}
 
-          {/* Bottom: Voice Chat + Dark Mode */}
+          {/* Bottom: Voice Chat + Hub + Dark Mode */}
           <div className="px-2 space-y-2 shrink-0 w-full">
             {isInRoom && (
               <AlignPopover.Root>
@@ -309,6 +323,12 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props => {
                 </AlignPopover.Content>
               </AlignPopover.Root>
             )}
+
+            <SidebarItem
+              icon={<ToolbarIcon name="habbo.png" w={32} h={32} />}
+              label="Zurück zum Hub"
+              onClick={handleCmsClick}
+            />
 
             <SidebarItem
               icon={<ToolbarIcon name="me-menu/cog.png" w={28} h={34} />}

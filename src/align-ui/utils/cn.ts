@@ -55,7 +55,7 @@ export const twMergeConfig = {
       ],
       rounded: [
         {
-          rounded: ['10', '20'],
+          rounded: ['10', '12', '16', '20'],
         },
       ],
     },

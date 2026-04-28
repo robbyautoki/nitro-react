@@ -10,6 +10,7 @@ import { CatalogAddOnBadgeWidgetView } from '../../widgets/CatalogAddOnBadgeWidg
 import { CatalogPurchaseWidgetView } from '../../widgets/CatalogPurchaseWidgetView';
 import { CatalogTotalPriceWidget } from '../../widgets/CatalogTotalPriceWidget';
 import { CatalogViewProductWidgetView } from '../../widgets/CatalogViewProductWidgetView';
+import { CATALOG_GRID_CLASSES } from '../../common/CatalogGridStyles';
 import { CatalogLayoutProps } from '../CatalogLayout.types';
 
 export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
@@ -204,16 +205,16 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
 
     return (
         <div className="flex flex-col h-full gap-2">
-            <div className="grid grid-cols-[repeat(auto-fill,82px)] gap-2 flex-1 min-h-0 overflow-y-auto p-2">
+            <div className={ `${ CATALOG_GRID_CLASSES } flex-1 min-h-0 overflow-y-auto p-2` }>
                 { !colorsShowing && (sellablePalettes.length > 0) && sellablePalettes.map((palette, index) =>
                 {
                     return (
-                        <div key={ index } className={ `flex cursor-pointer items-center justify-center rounded-10 p-1 ring-1 transition-colors ${ selectedPaletteIndex === index ? 'bg-primary-alpha-10 shadow-regular-xs ring-primary-base' : 'bg-bg-weak-50 ring-stroke-soft-200 hover:bg-bg-white-0' }` } onClick={ event => setSelectedPaletteIndex(index) }>
+                        <div key={ index } className={ `aspect-square flex cursor-pointer items-center justify-center rounded-lg p-1 transition-colors ${ selectedPaletteIndex === index ? 'bg-primary-alpha-10 ring-1 ring-inset ring-primary-base' : 'hover:bg-bg-weak-50' }` } onClick={ event => setSelectedPaletteIndex(index) }>
                             <LayoutPetImageView typeId={ petIndex } paletteId={ palette.paletteId } direction={ 2 } headOnly={ true } />
                         </div>
                     );
                 }) }
-                { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <div key={ index } className={ `w-full aspect-square cursor-pointer rounded-10 ring-2 transition-all ${ selectedColorIndex === index ? 'scale-105 ring-primary-base' : 'ring-stroke-soft-200 hover:ring-primary-base' }` } style={ { backgroundColor: ColorConverter.int2rgb(colorSet[0]) } } onClick={ event => setSelectedColorIndex(index) } />) }
+                { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => <div key={ index } className={ `w-full aspect-square cursor-pointer rounded-lg transition-all ${ selectedColorIndex === index ? 'ring-2 ring-inset ring-primary-base' : 'hover:ring-1 hover:ring-inset hover:ring-primary-base' }` } style={ { backgroundColor: ColorConverter.int2rgb(colorSet[0]) } } onClick={ event => setSelectedColorIndex(index) } />) }
             </div>
             <div className="flex flex-col gap-2 rounded-12 bg-bg-weak-50 p-2.5 shadow-regular-xs ring-1 ring-stroke-soft-200 shrink-0">
                 <div className="relative overflow-hidden">

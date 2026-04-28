@@ -1,17 +1,86 @@
+// ─── Cinematic Hotel-View Background ───
+// Statisches Wallpaper + Vignette + Top-Glow + dezenter Grain.
+// Layer-Stack (z-Reihenfolge nach DOM-Order):
+//   1. .nitro-hotel-view__bg     — vollflächiges Bild (cover)
+//   2. .nitro-hotel-view__top-glow — leichter Lichtreflex oben
+//   3. .nitro-hotel-view__vignette — radial dunklere Ecken
+//   4. .nitro-hotel-view__grain   — feine Filmkorn-Textur
+//
+// Tuning via Custom-Props:
+//   --hotel-vignette-strength  (0..1, default .55)
+//   --hotel-top-glow-strength  (0..0.2, default .05)
+//   --hotel-grain-opacity      (0..0.2, default .08)
 .nitro-hotel-view {
-    display: block;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background: hsl(var(--align-bg-white-0));
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0b0d12;
 
-	.particles-bg {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		z-index: 0;
-	}
+    --hotel-vignette-strength: 0.55;
+    --hotel-top-glow-strength: 0.05;
+    --hotel-grain-opacity: 0.08;
+
+    &__bg,
+    &__vignette,
+    &__top-glow,
+    &__grain {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+    }
+
+    &__bg {
+        z-index: 0;
+
+        img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
+            filter: saturate(1.05) contrast(1.02);
+        }
+    }
+
+    // Cinematic Eckenfall — radial dunkler nach außen.
+    &__vignette {
+        z-index: 2;
+        background: radial-gradient(
+            ellipse at center,
+            transparent 45%,
+            rgba(0, 0, 0, calc(var(--hotel-vignette-strength) * 0.4)) 75%,
+            rgba(0, 0, 0, var(--hotel-vignette-strength)) 100%
+        );
+    }
+
+    // Sehr dezenter Top-Lichtreflex unter der Top-Bar.
+    &__top-glow {
+        z-index: 1;
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, var(--hotel-top-glow-strength)) 0%,
+            rgba(255, 255, 255, calc(var(--hotel-top-glow-strength) * 0.3)) 18%,
+            transparent 35%
+        );
+    }
+
+    // Static Filmkorn — SVG-Noise als data-URL, kein JS, kein Reflow.
+    &__grain {
+        z-index: 3;
+        opacity: var(--hotel-grain-opacity);
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
+        background-size: 240px 240px;
+        background-repeat: repeat;
+    }
+
+    // Bestehender Particles-Layer-Slot — bleibt wegen Backwards-Compat, aber jetzt unsichtbar.
+    .particles-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        display: none;
+    }
 }

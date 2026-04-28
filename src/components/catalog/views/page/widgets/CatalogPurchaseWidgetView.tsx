@@ -1,5 +1,6 @@
 import { PurchaseFromCatalogComposer } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Gift } from 'lucide-react';
 import { CatalogPurchaseState, CreateLinkEvent, DispatchUiEvent, GetClubMemberLevel, LocalizeText, LocalStorageKeys, Offer, SendMessageComposer } from '../../../../../api';
 import { LayoutLoadingSpinnerView } from '../../../../../common';
 import * as FancyButton from '@/align-ui/components/ui/fancy-button';
@@ -159,16 +160,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
     const priceCredits = (currentOffer.priceInCredits * purchaseOptions.quantity);
     const pricePoints = (currentOffer.priceInActivityPoints * purchaseOptions.quantity);
 
-    const getPriceLabel = () =>
-    {
-        const parts: string[] = [];
-        if(priceCredits > 0) parts.push(`${ priceCredits } ${ LocalizeText('catalog.purchase.credits') }`);
-        if(pricePoints > 0) parts.push(`${ pricePoints } ${ LocalizeText('catalog.purchase.diamonds') }`);
-        return parts.join(' + ');
-    };
-
     const buyLabel = LocalizeText('catalog.purchase_confirmation.' + (currentOffer.isRentOffer ? 'rent' : 'buy'));
-    const priceLabel = getPriceLabel();
 
     const PurchaseButton = () =>
     {
@@ -205,10 +197,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
             case CatalogPurchaseState.CONFIRM:
                 return (
                     <FancyButton.Root variant="primary" size="small" className="w-full" onClick={ () => purchase() }>
-                        <span className="flex flex-col items-center gap-0.5 leading-none">
-                            <span className="text-label-xs">{ LocalizeText('catalog.marketplace.confirm_title') }</span>
-                            { priceLabel && <span className="text-subheading-2xs opacity-70">{ priceLabel }</span> }
-                        </span>
+                        { LocalizeText('catalog.marketplace.confirm_title') }
                     </FancyButton.Root>
                 );
             case CatalogPurchaseState.PURCHASE:
@@ -239,10 +228,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                         disabled={ (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length)) }
                         onClick={ () => setPurchaseState(CatalogPurchaseState.CONFIRM) }
                     >
-                        <span className="flex flex-col items-center gap-0.5 leading-none">
-                            <span className="text-label-xs">{ buyLabel }</span>
-                            { priceLabel && <span className="text-subheading-2xs opacity-70">{ priceLabel }</span> }
-                        </span>
+                        { buyLabel }
                     </FancyButton.Root>
                 );
         }
@@ -250,17 +236,6 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
 
     if(isMultiBuy)
     {
-        const totalCredits = selectedOffers.reduce((sum, o) => sum + o.priceInCredits, 0);
-        const totalPoints = selectedOffers.reduce((sum, o) => sum + o.priceInActivityPoints, 0);
-
-        const batchPriceLabel = () =>
-        {
-            const parts: string[] = [];
-            if(totalCredits > 0) parts.push(`${ totalCredits } ${ LocalizeText('catalog.purchase.credits') }`);
-            if(totalPoints > 0) parts.push(`${ totalPoints } ${ LocalizeText('catalog.purchase.diamonds') }`);
-            return parts.join(' + ');
-        };
-
         return (
             <div className="flex flex-col gap-1.5 w-full">
                 <FancyButton.Root
@@ -276,10 +251,7 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
                             <span className="text-subheading-2xs opacity-70">Kaufe...</span>
                         </span>
                     ) : (
-                        <span className="flex flex-col items-center gap-0.5 leading-none">
-                            <span className="text-label-xs">{ selectedOffers.length } Items kaufen</span>
-                            { batchPriceLabel() && <span className="text-subheading-2xs opacity-70">{ batchPriceLabel() }</span> }
-                        </span>
+                        <span className="text-label-xs">{ selectedOffers.length } Items kaufen</span>
                     ) }
                 </FancyButton.Root>
                 <div className="flex gap-1 w-full">
@@ -311,14 +283,16 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
         );
     }
 
+    const giftDisabled = ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length)));
+
     return (
-        <div className="flex flex-col gap-1.5 w-full items-center">
+        <div className="flex w-full flex-col gap-2">
             <PurchaseButton />
             <AlignButton.Root
                 variant="neutral"
                 mode={ catalogPlaceMultipleObjects ? 'lighter' : 'stroke' }
                 size="small"
-                className={ 'w-full text-label-xs ' + (catalogPlaceMultipleObjects ? 'text-information-base bg-information-lighter ring-information-base' : '') }
+                className={ 'w-full ' + (catalogPlaceMultipleObjects ? 'text-information-base bg-information-lighter ring-information-base' : '') }
                 onClick={ () => {
                     const newVal = !catalogPlaceMultipleObjects;
                     setCatalogPlaceMultipleObjects(newVal);
@@ -327,15 +301,17 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
             >
                 Platzieren
             </AlignButton.Root>
-            { (!noGiftOption && !currentOffer.isRentOffer) &&
+            { (!noGiftOption && !currentOffer.isRentOffer) && (
                 <button
-                    className="text-paragraph-xs text-text-sub-600 underline underline-offset-2 transition-colors hover:text-text-strong-950 disabled:cursor-not-allowed disabled:opacity-40 disabled:no-underline"
-                    disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) }
+                    type="button"
+                    className="mt-1 inline-flex items-center justify-center gap-1.5 text-paragraph-sm text-text-sub-600 transition-colors hover:text-text-strong-950 disabled:cursor-not-allowed disabled:opacity-40"
+                    disabled={ giftDisabled }
                     onClick={ () => purchase(true) }
                 >
-                    Verschenken
-                </button> }
-            <p className="text-paragraph-xs text-text-soft-400 text-center">⌘/Strg + Klick = Mehrfachauswahl</p>
+                    <Gift className="w-3.5 h-3.5" />
+                    <span className="underline underline-offset-4">Verschenken</span>
+                </button>
+            ) }
         </div>
     );
 }

@@ -7,6 +7,7 @@ import { useCatalog } from '../../../../../hooks';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import { CatalogPageHeaderBanner } from '../../shared/CatalogPageHeaderBanner';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
+import { CATALOG_GRID_CLASSES } from '../common/CatalogGridStyles';
 import { CatalogLayoutProps } from './CatalogLayout.types';
 
 export const CatalogLayoutColorGroupingView: FC<CatalogLayoutProps> = props =>
@@ -111,8 +112,8 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutProps> = props =>
                     ) }
                 </div>
             ) }
-            <div className="flex-1 p-3 min-h-0 overflow-auto">
-                <div className="grid grid-cols-[repeat(auto-fill,82px)] gap-2">
+            <div className="flex-1 p-2 min-h-0 overflow-auto">
+                <div className={ CATALOG_GRID_CLASSES }>
                     { (!colorsShowing || !currentOffer || !colorableItems.has(currentOffer.product.furnitureData.className)) &&
                         offers.map((offer, index) => <CatalogGridOfferView key={ index } itemActive={ (currentOffer && (currentOffer.product.furnitureData.hasIndexedColor ? currentOffer.product.furnitureData.className === offer.product.furnitureData.className : currentOffer.offerId === offer.offerId)) } offer={ offer } selectOffer={ selectOffer } />) }
                     { (colorsShowing && currentOffer && colorableItems.has(currentOffer.product.furnitureData.className)) &&

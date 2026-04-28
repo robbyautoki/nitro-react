@@ -1,5 +1,6 @@
 import { ContextMenuEnum, CustomUserNotificationMessageEvent, RoomObjectCategory } from '@nitrots/nitro-renderer';
 import { FC } from 'react';
+import { ArrowRight, Box, Compass, Hand, Heart, Home, Key, Leaf, LogIn, MessageSquare, PackageOpen, Shirt, Sprout, Trophy, Users } from 'lucide-react';
 import { GetGroupInformation, GetSessionDataManager, LocalizeText } from '../../../../../api';
 import { EFFECTBOX_OPEN, GROUP_FURNITURE, MONSTERPLANT_SEED_CONFIRMATION, MYSTERYTROPHY_OPEN_DIALOG, PURCHASABLE_CLOTHING_CONFIRMATION, useFurnitureContextMenuWidget, useMessageEvent, useNotification } from '../../../../../hooks';
 import { ContextMenuHeaderView } from '../../context-menu/ContextMenuHeaderView';
@@ -55,72 +56,72 @@ export const FurnitureContextMenuView: FC<{}> = props =>
                 <ContextMenuView objectId={ objectId } category={ RoomObjectCategory.FLOOR } onClose={ onClose } fades={ true }>
                     { (mode === ContextMenuEnum.FRIEND_FURNITURE) &&
                         <>
-                            <ContextMenuHeaderView>
+                            <ContextMenuHeaderView icon={ Heart }>
                                 { LocalizeText('friendfurni.context.title') }
                             </ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={ event => processAction('use_friend_furni') }>
+                            <ContextMenuListItemView icon={ Hand } onClick={ event => processAction('use_friend_furni') }>
                                 { LocalizeText('friendfurni.context.use') }
                             </ContextMenuListItemView>
                         </> }
                     { (mode === ContextMenuEnum.MONSTERPLANT_SEED) &&
                         <>
-                            <ContextMenuHeaderView>
+                            <ContextMenuHeaderView icon={ Leaf }>
                                 { LocalizeText('furni.mnstr_seed.name') }
                             </ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={ event => processAction('use_monsterplant_seed') }>
+                            <ContextMenuListItemView icon={ Sprout } onClick={ event => processAction('use_monsterplant_seed') }>
                                 { LocalizeText('widget.monsterplant_seed.button.use') }
                             </ContextMenuListItemView>
                         </> }
                     { (mode === ContextMenuEnum.RANDOM_TELEPORT) &&
                         <>
-                            <ContextMenuHeaderView>
+                            <ContextMenuHeaderView icon={ Compass }>
                                 { LocalizeText('furni.random_teleport.name') }
                             </ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={ event => processAction('use_random_teleport') }>
+                            <ContextMenuListItemView icon={ ArrowRight } onClick={ event => processAction('use_random_teleport') }>
                                 { LocalizeText('widget.random_teleport.button.use') }
                             </ContextMenuListItemView>
                         </> }
                     { (mode === ContextMenuEnum.PURCHASABLE_CLOTHING) &&
                         <>
-                            <ContextMenuHeaderView>
+                            <ContextMenuHeaderView icon={ Shirt }>
                                 { LocalizeText('furni.generic_usable.name') }
                             </ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={ event => processAction('use_purchaseable_clothing') }>
+                            <ContextMenuListItemView icon={ Hand } onClick={ event => processAction('use_purchaseable_clothing') }>
                                 { LocalizeText('widget.generic_usable.button.use') }
                             </ContextMenuListItemView>
                         </> }
                     { (mode === ContextMenuEnum.MYSTERY_BOX) &&
                         <>
-                            <ContextMenuHeaderView>
+                            <ContextMenuHeaderView icon={ Box }>
                                 { LocalizeText('mysterybox.context.title') }
                             </ContextMenuHeaderView>
-                            <ContextMenuListItemView onClick={ event => processAction('use_mystery_box') }>
+                            <ContextMenuListItemView icon={ isOwner ? PackageOpen : Key } onClick={ event => processAction('use_mystery_box') }>
                                 { LocalizeText('mysterybox.context.' + ((isOwner) ? 'owner' : 'other') + '.use') }
                             </ContextMenuListItemView>
                         </> }
                     { (mode === ContextMenuEnum.MYSTERY_TROPHY) &&
                     <>
-                        <ContextMenuHeaderView>
+                        <ContextMenuHeaderView icon={ Trophy }>
                             { LocalizeText('mysterytrophy.header.title') }
                         </ContextMenuHeaderView>
-                        <ContextMenuListItemView onClick={ event => processAction('use_mystery_trophy') }>
+                        <ContextMenuListItemView icon={ PackageOpen } onClick={ event => processAction('use_mystery_trophy') }>
                             { LocalizeText('friendfurni.context.use') }
                         </ContextMenuListItemView>
                     </> }
                     { (mode === GROUP_FURNITURE) && groupData &&
                         <>
-                            <ContextMenuHeaderView className="cursor-pointer truncate" onClick={ () => GetGroupInformation(groupData.guildId) }>
+                            <ContextMenuHeaderView icon={ Users } className="cursor-pointer truncate" onClick={ () => GetGroupInformation(groupData.guildId) }>
                                 { groupData.guildName }
                             </ContextMenuHeaderView>
                             { !isGroupMember &&
-                                <ContextMenuListItemView onClick={ event => processAction('join_group') }>
+                                <ContextMenuListItemView icon={ LogIn } onClick={ event => processAction('join_group') }>
                                     { LocalizeText('widget.furniture.button.join.group') }
                                 </ContextMenuListItemView> }
-                            <ContextMenuListItemView onClick={ event => processAction('go_to_group_homeroom') }>
+                            <ContextMenuListItemView icon={ Home } onClick={ event => processAction('go_to_group_homeroom') }>
                                 { LocalizeText('widget.furniture.button.go.to.group.home.room') }
                             </ContextMenuListItemView>
                             { groupData.guildHasReadableForum &&
-                                <ContextMenuListItemView onClick={ event => processAction('open_forum') }>
+                                <ContextMenuListItemView icon={ MessageSquare } onClick={ event => processAction('open_forum') }>
                                     { LocalizeText('widget.furniture.button.open_group_forum') }
                                 </ContextMenuListItemView> }
                         </> }

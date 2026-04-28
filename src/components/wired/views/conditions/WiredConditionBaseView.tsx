@@ -17,7 +17,11 @@ export const WiredConditionBaseView: FC<PropsWithChildren<WiredConditionBaseView
 
     return (
         <WiredBaseView wiredType="condition" requiresFurni={ requiresFurni } hasSpecialInput={ hasSpecialInput } save={ onSave }>
-            { children }
+            { !!children && (
+                <div className="rounded-xl bg-bg-white-0 p-3 ring-1 ring-inset ring-stroke-soft-200">
+                    { children }
+                </div>
+            ) }
         </WiredBaseView>
     );
 }

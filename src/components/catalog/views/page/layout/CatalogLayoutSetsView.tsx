@@ -330,22 +330,47 @@ export const CatalogLayoutSetsDetailView: FC<CatalogLayoutProps> = props =>
     const hasRewards = set.has_rewards || set.reward_credits > 0 || set.reward_pixels > 0 || set.reward_points > 0 || set.has_reward_item || set.reward_item !== null;
     const difficultyStyle = set.difficulty ? DIFFICULTY_STYLES[set.difficulty] : null;
 
+    // Set-Icon: Reward-Item bevorzugt, Fallback erstes Item des Sets
+    const headerIconItem = set.reward_item?.item_name || (set.items.length > 0 ? set.items[0].item_name : null);
+
     return (
         <div style={ { display: 'flex', flexDirection: 'column', height: '100%', gap: 4, padding: 6, color: TEXT_STRONG } }>
             { /* Header */ }
             <div style={ { background: BG_CARD, borderRadius: 6, padding: 8 } }>
-                <div style={ { display: 'flex', alignItems: 'center', gap: 6 } }>
-                    <div style={ { fontWeight: 'bold', fontSize: 14 } }>{ set.name }</div>
-                    { set.difficulty && difficultyStyle && DIFFICULTY_LABELS[set.difficulty] && (
-                        <span style={ {
-                            fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 4,
-                            background: difficultyStyle.bg,
-                            color: difficultyStyle.text,
-                            border: `1px solid ${ difficultyStyle.border }`,
+                <div style={ { display: 'flex', alignItems: 'center', gap: 8 } }>
+                    { headerIconItem && (
+                        <div style={ {
+                            flexShrink: 0,
+                            width: 36, height: 36,
+                            borderRadius: 6,
+                            background: BG_SOFT,
+                            border: `1px solid ${ STROKE_SOFT }`,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
                         } }>
-                            { DIFFICULTY_LABELS[set.difficulty] }
-                        </span>
+                            <img
+                                src={ getFurniIcon(headerIconItem) }
+                                alt={ set.name }
+                                style={ { width: 28, height: 28, objectFit: 'contain', imageRendering: 'pixelated' } }
+                                onError={ (e) =>
+                                {
+                                    (e.target as HTMLImageElement).style.opacity = '0.3';
+                                } }
+                            />
+                        </div>
                     ) }
+                    <div style={ { display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0, flexWrap: 'wrap' } }>
+                        <div style={ { fontWeight: 'bold', fontSize: 14, color: TEXT_STRONG } }>{ set.name }</div>
+                        { set.difficulty && difficultyStyle && DIFFICULTY_LABELS[set.difficulty] && (
+                            <span style={ {
+                                fontSize: 9, fontWeight: 600, padding: '1px 6px', borderRadius: 4,
+                                background: difficultyStyle.bg,
+                                color: difficultyStyle.text,
+                                border: `1px solid ${ difficultyStyle.border }`,
+                            } }>
+                                { DIFFICULTY_LABELS[set.difficulty] }
+                            </span>
+                        ) }
+                    </div>
                 </div>
                 { set.description &&
                     <div style={ { fontSize: 11, color: TEXT_SUB, marginTop: 2 } }>{ set.description }</div> }

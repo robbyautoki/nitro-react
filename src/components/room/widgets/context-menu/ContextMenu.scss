@@ -1,11 +1,11 @@
 .nitro-context-menu {
-    padding: 2px;
+    padding: 6px;
     background: hsl(var(--align-bg-white-0));
-    border-radius: $border-radius;
+    border-radius: 14px;
     font-size: $font-size-sm;
     z-index: $context-menu-zindex;
     pointer-events: all;
-    box-shadow: var(--shadow-regular-md);
+    box-shadow: var(--shadow-regular-md), 0 0 0 1px hsl(var(--align-stroke-soft-200));
 
     &.bot-chat {
         max-width: 250px;
@@ -125,7 +125,7 @@
         &:after {
             content: '';
             position: absolute;
-            bottom: -7px;
+            bottom: -6px;
             left: 0;
             right: 0;
             margin: auto;
@@ -135,7 +135,8 @@
             border-style: solid;
             border-width: 0;
             background: hsl(var(--align-bg-white-0));
-            box-shadow: var(--shadow-regular-md);
+            border-bottom-right-radius: 2px;
+            box-shadow: 1px 1px 0 0 hsl(var(--align-stroke-soft-200));
         }
     }
 
@@ -165,11 +166,54 @@
     .menu-header {
         background: hsl(var(--align-bg-weak-50));
         color: hsl(var(--align-text-strong-950));
-        min-width: 117px;
-        min-height: 25px;
-        font-size: 16px;
-        margin-bottom: 2px;
-        border-radius: 4px;
+        min-width: 160px;
+        min-height: 32px;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        padding: 6px 10px;
+        border-radius: 10px;
+
+        &.with-icon {
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .menu-header-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: hsl(var(--align-text-soft-400));
+        }
+
+        .menu-header-text {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .menu-header-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: hsl(var(--align-text-strong-950));
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-header-subtitle {
+            font-size: 11px;
+            font-weight: 400;
+            color: hsl(var(--align-text-soft-400));
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .menu-header-relationship {
+            font-size: 12px;
+        }
     }
 
     &.menu-hidden {
@@ -219,18 +263,47 @@
         }
 
         &.list-item {
-            height: 24px;
-            max-height: 24px;
-            padding: 3px;
+            height: 32px;
+            max-height: 32px;
+            padding: 6px 10px;
             background: transparent;
             cursor: pointer;
-            border-radius: 3px;
+            border-radius: 8px;
             color: hsl(var(--align-text-strong-950));
-            transition: background 0.1s ease;
+            transition: background 0.12s ease, color 0.12s ease;
+            font-size: 13px;
+            font-weight: 500;
+
+            &.with-icon {
+                justify-content: flex-start;
+            }
+
+            .menu-item-icon {
+                width: 16px;
+                height: 16px;
+                flex-shrink: 0;
+                color: hsl(var(--align-text-soft-400));
+                opacity: 0.7;
+                transition: opacity 0.12s ease, color 0.12s ease;
+            }
+
+            .menu-item-label {
+                flex: 1;
+                min-width: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                color: hsl(var(--align-text-strong-950));
+            }
 
             &:not(.disabled):hover {
                 background: hsl(var(--align-bg-weak-50));
                 color: hsl(var(--align-text-strong-950));
+            }
+
+            &:not(.disabled):hover .menu-item-icon {
+                opacity: 1;
+                color: hsl(var(--align-text-sub-600));
             }
 
             &.menu-item-danger {

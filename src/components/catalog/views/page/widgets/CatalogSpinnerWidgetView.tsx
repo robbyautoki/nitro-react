@@ -8,8 +8,14 @@ import * as AlignButton from '@/align-ui/components/ui/button';
 const MIN_VALUE: number = 1;
 const MAX_VALUE: number = 100;
 
-export const CatalogSpinnerWidgetView: FC<{}> = props =>
+interface CatalogSpinnerWidgetViewProps
 {
+    hideLabel?: boolean;
+}
+
+export const CatalogSpinnerWidgetView: FC<CatalogSpinnerWidgetViewProps> = props =>
+{
+    const { hideLabel = false } = props;
     const { currentOffer = null, purchaseOptions = null, setPurchaseOptions = null } = useCatalog();
     const { quantity = 1 } = purchaseOptions;
 
@@ -34,36 +40,42 @@ export const CatalogSpinnerWidgetView: FC<{}> = props =>
 
     if(!currentOffer || !currentOffer.bundlePurchaseAllowed) return null;
 
+    const stepper = (
+        <div className="flex items-center gap-1">
+            <AlignButton.Root
+                variant="neutral"
+                mode="stroke"
+                size="xxsmall"
+                className="h-7 w-7 min-w-0 px-0"
+                onClick={ event => updateQuantity(quantity - 1) }
+            >
+                <FaMinus className="text-paragraph-xs" />
+            </AlignButton.Root>
+            <Input.Root size="xsmall" className="w-11">
+                <Input.Wrapper className="h-7 px-1">
+                    <Input.Input type="number" className="h-7 text-center text-label-xs" value={ quantity } onChange={ event => updateQuantity(event.target.valueAsNumber) } />
+                </Input.Wrapper>
+            </Input.Root>
+            <AlignButton.Root
+                variant="neutral"
+                mode="stroke"
+                size="xxsmall"
+                className="h-7 w-7 min-w-0 px-0"
+                onClick={ event => updateQuantity(quantity + 1) }
+            >
+                <FaPlus className="text-paragraph-xs" />
+            </AlignButton.Root>
+        </div>
+    );
+
+    if(hideLabel) return stepper;
+
     return (
         <div className="flex items-center gap-2">
             <span className="text-subheading-2xs uppercase text-text-soft-400 flex-1">
                 { LocalizeText('catalog.bundlewidget.spinner.select.amount') }
             </span>
-            <div className="flex items-center gap-1">
-                <AlignButton.Root
-                    variant="neutral"
-                    mode="stroke"
-                    size="xxsmall"
-                    className="h-7 w-7 min-w-0 px-0"
-                    onClick={ event => updateQuantity(quantity - 1) }
-                >
-                    <FaMinus className="text-paragraph-xs" />
-                </AlignButton.Root>
-                <Input.Root size="xsmall" className="w-11">
-                    <Input.Wrapper className="h-7 px-1">
-                        <Input.Input type="number" className="h-7 text-center text-label-xs" value={ quantity } onChange={ event => updateQuantity(event.target.valueAsNumber) } />
-                    </Input.Wrapper>
-                </Input.Root>
-                <AlignButton.Root
-                    variant="neutral"
-                    mode="stroke"
-                    size="xxsmall"
-                    className="h-7 w-7 min-w-0 px-0"
-                    onClick={ event => updateQuantity(quantity + 1) }
-                >
-                    <FaPlus className="text-paragraph-xs" />
-                </AlignButton.Root>
-            </div>
+            { stepper }
         </div>
     );
 }

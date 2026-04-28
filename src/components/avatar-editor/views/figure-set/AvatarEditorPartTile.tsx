@@ -1,8 +1,7 @@
-import { FC, useEffect, useState } from 'react';
-import { Lock } from 'lucide-react';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { Coins, Lock, X } from 'lucide-react';
 import { AvatarEditorGridPartItem } from '../../../../api';
 import { cn } from '../../../../align-ui/utils/cn';
-import { AvatarEditorIcon } from '../AvatarEditorIcon';
 
 export interface AvatarEditorPartTileProps
 {
@@ -29,6 +28,21 @@ export const AvatarEditorPartTile: FC<AvatarEditorPartTileProps> = props =>
         };
     }, [ partItem ]);
 
+    const tooltip = useMemo(() =>
+    {
+        if(!partItem) return '';
+        if(partItem.isClear) return 'Kein Item';
+
+        const parts: string[] = [];
+        const isLocked = !hcDisabled && partItem.isHC;
+
+        if(isLocked) parts.push('HC-Item (Habbo Club)');
+        if(partItem.isSellable) parts.push('Kaufbar im Katalog');
+        if(partItem.isSelected) parts.push('Ausgewählt');
+
+        return parts.join(' · ');
+    }, [ partItem, hcDisabled ]);
+
     if(!partItem) return null;
 
     const isActive = partItem.isSelected;
@@ -38,30 +52,38 @@ export const AvatarEditorPartTile: FC<AvatarEditorPartTileProps> = props =>
         <button
             type="button"
             onClick={ onClick }
+            title={ tooltip }
             className={ cn(
-                'group relative flex aspect-square min-h-[50px] items-center justify-center rounded-12',
-                'border bg-bg-weak-50 transition-all',
+                'group relative flex aspect-square items-center justify-center rounded-xl',
+                'border-2 bg-bg-white-0 transition-all duration-150',
                 isActive
-                    ? 'border-primary-base ring-2 ring-primary-base/25'
-                    : 'border-stroke-soft-200 hover:border-stroke-sub-300 hover:bg-bg-white-0 hover:shadow-regular-xs'
+                    ? 'border-primary-base bg-primary-alpha-10 shadow-regular-md'
+                    : 'border-stroke-soft-200 hover:-translate-y-0.5 hover:border-stroke-sub-300 hover:shadow-regular-md'
             ) }
         >
             { !partItem.isClear && partItem.imageUrl && (
                 <div
-                    className="size-full bg-center bg-no-repeat"
-                    style={ { backgroundImage: `url(${ partItem.imageUrl })` } }
+                    className={ cn(
+                        'size-full bg-center bg-no-repeat',
+                        isLocked && 'opacity-50 grayscale'
+                    ) }
+                    style={ { backgroundImage: `url(${ partItem.imageUrl })`, backgroundSize: 'auto', imageRendering: 'pixelated' } }
                 />
             ) }
-            { partItem.isClear && <AvatarEditorIcon icon="clear" /> }
+            { partItem.isClear && (
+                <X className="size-6 text-text-sub-600" strokeWidth={ 2.5 } />
+            ) }
 
             { isLocked && (
-                <div className="absolute inset-0 flex items-center justify-center rounded-12 bg-bg-weak-50/75 backdrop-blur-[1px]">
-                    <Lock className="size-4 text-text-sub-600" />
+                <div className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-warning-base shadow-regular-xs ring-2 ring-bg-white-0">
+                    <Lock className="size-3 text-static-white" strokeWidth={ 2.75 } />
                 </div>
             ) }
 
-            { partItem.isSellable && (
-                <AvatarEditorIcon icon="sellable" position="absolute" className="right-1 bottom-1" />
+            { partItem.isSellable && !isLocked && (
+                <div className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-information-base shadow-regular-xs ring-2 ring-bg-white-0">
+                    <Coins className="size-3 text-static-white" strokeWidth={ 2.5 } />
+                </div>
             ) }
         </button>
     );

@@ -74,6 +74,35 @@ Diese Dateien liegen in `client/custom/` (nicht hier) und werden beim Docker-Bui
 `dist/` wird via `client/Dockerfile` in nginx-Image kopiert und auf Port 3080 served.
 `client/config/*.json` werden zur Laufzeit gemountet (kein rebuild nötig für Config).
 
+## AlignUI Strict (KRITISCH für neue UI)
+
+**Quelle:** `/Users/robbyreinemann/Desktop/AlignUI-Kit`
+**Lokale Komponenten:** `src/align-ui/components/ui/*` — siehe `src/align-ui/components/ui/README.md`
+**Tokens:** in `src/tailwind.css` als `@theme inline` definiert (Tailwind 4 + `@tailwindcss/postcss`).
+Primary ist auf Bahhos-Orange `oklch(...)` gemappt — nicht das AlignUI-Default-Grün.
+
+**Regeln für neue Panels / Widgets / Modals / Toolbars:**
+1. NUR Komponenten aus `@/align-ui/components/ui/*` verwenden — z.B. `Modal`, `FancyButton`, `SegmentedControl`, `Badge`, `Divider`, `CompactButton`, `Tooltip`.
+2. KEIN shadcn/ui für neue Flächen. Bestehende shadcn-Flächen bleiben Legacy, werden bei Touch durch AlignUI ersetzt.
+3. KEIN `NitroCardView` (Habbo-Frame) für neue UI. Floating-Cards: `bg-bg-white-0 rounded-20 shadow-regular-md ring-1 ring-stroke-soft-200`.
+4. KEIN Glassmorphism (Backdrop-Blur als Default-Optik), kein hardcoded `#fff`/`#000`.
+5. Eigenständige Erweiterungen MÜSSEN auf AlignUI-Base bauen (`src/align-ui/components/ui/*`). Nicht aus dem Kit kopieren — den Port hier nutzen oder erweitern.
+6. Tailwind-Tokens ausschließlich aus dem AlignUI-Namespace: `text-text-strong-950`, `bg-bg-weak-50`, `text-text-sub-600`, `ring-stroke-soft-200`, `bg-primary-alpha-10`, `text-primary-base`, `shadow-regular-md`, `rounded-10/12/16/20`. Custom-Werte sind in `tailwind.css` und in `src/align-ui/utils/cn.ts` (`twMergeConfig`) registriert.
+
+**Pflicht-Header-Kommentar bei neuen AlignUI-Views:**
+```ts
+// STRIKT AlignUI ONLY:
+//   • Quelle: /Users/robbyreinemann/Desktop/AlignUI-Kit
+//   • Komponenten ausschließlich aus `@/align-ui/components/ui/*`
+//   • KEIN shadcn/ui, KEIN Glassmorphism, KEIN NitroCardView
+```
+
+**Referenz-Implementierungen:**
+- `src/components/room/widgets/avatar-info/AvatarInfoPetTrainingPanelView.tsx` (Floating-Card + SegmentedControl + Modal)
+- `src/components/align-game-ui/AlignGameConfirm.tsx` (Confirm-Modal + FancyButton)
+- `src/components/welcome/WelcomeDialogView.tsx`
+- `src/components/jail/JailEnterpriseEffectsView.tsx`
+
 ## Theming / Dark Mode (KRITISCH)
 
 Der Client nutzt **shadcn/ui + Tailwind** mit Dark-Mode via `.dark` Klasse auf `<html>`.

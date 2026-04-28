@@ -20,6 +20,33 @@ const isExternalImageFurnitureItem = (item: FurnitureItem) =>
     return !!(furnitureData?.isExternalImage || furnitureData?.className?.startsWith('external_image'));
 }
 
+export const getExternalImagePhotoUrl = (groupItem: GroupItem): string | null =>
+{
+    const item = groupItem.getLastItem();
+
+    if(!item || !item.isWallItem) return null;
+
+    const wallData = GetSessionDataManager().getWallItemData(item.type) as any;
+    const isExt = !!(wallData?.isExternalImage || wallData?.className?.startsWith('external_image'));
+
+    if(!isExt) return null;
+
+    try
+    {
+        const raw = item.stuffData?.getLegacyString?.();
+
+        if(!raw) return null;
+
+        const parsed = JSON.parse(raw);
+
+        return (typeof parsed?.w === 'string' && parsed.w) ? parsed.w : null;
+    }
+    catch
+    {
+        return null;
+    }
+}
+
 const isRareFurnitureItem = (item: FurnitureItem) =>
 {
     const furnitureData = getFurnitureData(item) as any;

@@ -1,4 +1,4 @@
-import { FC, useMemo } from 'react';
+import { ComponentType, FC, useMemo } from 'react';
 import { Column, Flex, FlexProps } from '../../../../common';
 
 interface ContextMenuHeaderViewProps extends FlexProps
@@ -6,31 +6,37 @@ interface ContextMenuHeaderViewProps extends FlexProps
     subtitle?: string;
     relationshipIcon?: string;
     relationshipColor?: string;
+    icon?: ComponentType<{ className?: string }>;
 }
 
 export const ContextMenuHeaderView: FC<ContextMenuHeaderViewProps> = props =>
 {
-    const { subtitle, relationshipIcon, relationshipColor, justifyContent = 'center', alignItems = 'center', classNames = [], children, ...rest } = props;
+    const { subtitle, relationshipIcon, relationshipColor, icon: Icon, justifyContent = 'center', alignItems = 'center', classNames = [], children, ...rest } = props;
 
     const getClassNames = useMemo(() =>
     {
-        const newClassNames: string[] = [ 'menu-header', 'p-1' ];
+        const newClassNames: string[] = [ 'menu-header' ];
+
+        if(Icon || subtitle) newClassNames.push('with-icon');
 
         if(classNames.length) newClassNames.push(...classNames);
 
         return newClassNames;
-    }, [ classNames ]);
+    }, [ Icon, subtitle, classNames ]);
 
-    if(subtitle || relationshipIcon)
+    if(Icon || subtitle || relationshipIcon)
     {
         return (
-            <Column classNames={ getClassNames } { ...rest }>
-                <Flex justifyContent="center" alignItems="center" gap={ 1 }>
-                    { children }
-                    { relationshipIcon && <span style={{ fontSize: '12px', color: relationshipColor || 'inherit' }}>{ relationshipIcon }</span> }
-                </Flex>
-                { subtitle && <span style={{ fontSize: '10px', opacity: 0.55, marginTop: '-2px' }}>{ subtitle }</span> }
-            </Column>
+            <Flex alignItems="center" gap={ 2 } classNames={ getClassNames } { ...rest }>
+                { Icon && <Icon className="menu-header-icon" /> }
+                <Column className="menu-header-text" gap={ 0 }>
+                    <Flex alignItems="center" gap={ 1 } className="menu-header-title">
+                        { children }
+                        { relationshipIcon && <span className="menu-header-relationship" style={{ color: relationshipColor || 'inherit' }}>{ relationshipIcon }</span> }
+                    </Flex>
+                    { subtitle && <span className="menu-header-subtitle">{ subtitle }</span> }
+                </Column>
+            </Flex>
         );
     }
 

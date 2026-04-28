@@ -1,6 +1,5 @@
 import { MouseEventType } from '@nitrots/nitro-renderer';
-import { FC, MouseEvent, useMemo, useState } from 'react';
-import { Sparkles, ImageOff } from 'lucide-react';
+import { FC, MouseEvent, useState } from 'react';
 import { IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
 import { LayoutAvatarImageView } from '../../../../../common';
 import { LayoutLimitedEditionStyledNumberView } from '../../../../../common/layout/limited-edition';
@@ -9,6 +8,7 @@ import { useCatalog, useInventoryFurni } from '../../../../../hooks';
 import { Content as TooltipContent, Provider as TooltipProvider, Root as Tooltip, Trigger as TooltipTrigger } from '@/align-ui/components/ui/tooltip';
 import { INTERACTION_LABELS } from '../../shared/CatalogInteractionFilter';
 import { CatalogCurrencyIcon } from '../../shared/CatalogCurrencyIcon';
+import { CatalogProductTile } from './CatalogProductTile';
 
 interface CatalogGridOfferViewProps
 {
@@ -22,15 +22,10 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
 {
     const { offer = null, selectOffer = null, itemActive = false, isMultiSelected = false } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
-    const [ iconFailed, setIconFailed ] = useState(false);
     const { requestOfferToMover = null } = useCatalog();
     const { isVisible = false } = useInventoryFurni();
 
-    const iconUrl = useMemo(() =>
-    {
-        if(offer.pricingModel === Offer.PRICING_MODEL_BUNDLE) return null;
-        return offer.product.getIconUrl(offer);
-    }, [ offer ]);
+    const isBundle = offer.pricingModel === Offer.PRICING_MODEL_BUNDLE;
 
     const onMouseEvent = (event: MouseEvent) =>
     {
@@ -56,7 +51,7 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
     const isUnique = product.uniqueLimitedItemSeriesSize > 0;
     const isSoldOut = product.uniqueLimitedItemSeriesSize > 0 && !product.uniqueLimitedItemsLeft;
     const itemCount = (offer.pricingModel === Offer.PRICING_MODEL_MULTI) ? product.productCount : 1;
-    const isFree = offer.priceInCredits === 0 && offer.priceInActivityPoints === 0;
+    const isFree = !offer.isLazy && offer.priceInCredits === 0 && offer.priceInActivityPoints === 0;
     const furniData = product.furnitureData;
     const interactionInfo = furniData ? INTERACTION_LABELS[furniData.interactionType] : null;
 
@@ -65,13 +60,15 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
             <Tooltip>
                 <TooltipTrigger asChild>
                     <button
+                        data-ltd={ isUnique ? 'true' : undefined }
                         className={ cn(
-                            'group relative aspect-square cursor-pointer overflow-hidden rounded-xl bg-bg-weak-50 p-2 transition-all duration-150',
-                            'hover:bg-bg-white-0 hover:shadow-regular-xs hover:ring-1 hover:ring-inset hover:ring-stroke-soft-200 hover:z-10',
+                            'group relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-transparent p-1 transition-colors duration-100',
+                            'hover:bg-bg-weak-50',
+                            'data-[ltd=true]:min-h-16',
                             isMultiSelected
-                                ? 'bg-success-lighter ring-1 ring-inset ring-success-base z-10'
+                                ? 'bg-success-lighter ring-1 ring-inset ring-success-base'
                                 : itemActive
-                                    ? 'bg-primary-alpha-10 ring-1 ring-inset ring-primary-base z-10'
+                                    ? 'bg-primary-alpha-10 ring-1 ring-inset ring-primary-base'
                                     : '',
                             isSoldOut && 'opacity-40 grayscale'
                         ) }
@@ -79,36 +76,19 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                         onMouseUp={ onMouseEvent }
                         onMouseOut={ onMouseEvent }
                     >
-                        { (iconUrl && !isUnique && !iconFailed) && (
-                            <img
-                                src={ iconUrl }
-                                alt=""
-                                draggable={ false }
-                                className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-                                style={ { imageRendering: 'pixelated' } }
-                                onError={ () => setIconFailed(true) }
-                            />
-                        ) }
-                        { (iconUrl && !isUnique && iconFailed) && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <ImageOff className="w-5 h-5 text-text-soft-400/50" />
-                            </div>
+                        { !isBundle && (
+                            <CatalogProductTile product={ product } offer={ offer } />
                         ) }
                         { isMultiSelected &&
-                            <span className="absolute left-1 top-1 z-20 flex size-4 items-center justify-center rounded-full bg-success-base text-subheading-2xs text-static-white shadow-regular-xs">✓</span> }
+                            <span className="absolute left-0.5 top-0.5 z-20 flex size-3.5 items-center justify-center rounded-full bg-success-base text-[10px] leading-none text-static-white">✓</span> }
                         { (itemCount > 1) &&
-                            <span className="absolute right-1 top-1 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-base px-1 text-subheading-2xs leading-none text-static-white shadow-regular-xs">
+                            <span className="absolute right-0.5 top-0.5 z-10 flex h-3.5 min-w-3.5 items-center justify-center rounded bg-primary-base px-0.5 text-[10px] leading-none text-static-white">
                                 { itemCount }
                             </span> }
                         { isUnique && (
                             <>
-                                { (iconUrl && !iconFailed) ? (
-                                    <img src={ iconUrl } alt="" draggable={ false } className="absolute inset-0 w-full h-full object-contain pointer-events-none" style={ { imageRendering: 'pixelated' } } onError={ () => setIconFailed(true) } />
-                                ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center"><ImageOff className="w-5 h-5 text-text-soft-400/50" /></div>
-                                ) }
-                                <div className="absolute top-1 right-1">
-                                    <span className="rounded-md bg-warning-lighter px-1 text-subheading-2xs text-warning-base">LTD</span>
+                                <div className="absolute right-0.5 top-0.5 z-10">
+                                    <span className="rounded bg-warning-lighter px-1 text-[10px] leading-tight text-warning-base">LTD</span>
                                 </div>
                                 <div className="absolute bottom-0 left-0 right-0 z-10">
                                     <LayoutLimitedEditionStyledNumberView value={ product.uniqueLimitedItemSeriesSize } />
@@ -116,8 +96,8 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                             </>
                         ) }
                         { isFree && !isUnique && (
-                            <div className="absolute bottom-1 left-1">
-                                <span className="rounded-md bg-success-lighter px-1 text-subheading-2xs text-success-base">GRATIS</span>
+                            <div className="absolute bottom-0.5 left-0.5">
+                                <span className="rounded bg-success-lighter px-1 text-[10px] leading-tight text-success-base">GRATIS</span>
                             </div>
                         ) }
                         { (offer.product.productType === ProductTypeEnum.ROBOT) &&

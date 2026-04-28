@@ -42,7 +42,19 @@ export const LayoutRoomThumbnailView: FC<LayoutRoomThumbnailViewProps> = props =
 
     return (
         <Base shrink={ shrink } overflow={ overflow } classNames={ getClassNames } { ...rest }>
-            { getImageUrl && <img alt="" src={ getImageUrl } /> }
+            { getImageUrl && (
+                <img
+                    alt=""
+                    src={ getImageUrl }
+                    onError={ e =>
+                    {
+                        const img = e.currentTarget;
+                        if(img.dataset.fallbackApplied === '1') return;
+                        img.dataset.fallbackApplied = '1';
+                        img.src = '/navigator/thumbnail_placeholder.png';
+                    } }
+                />
+            ) }
             { children }
         </Base>
     );

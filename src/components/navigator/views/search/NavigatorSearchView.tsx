@@ -1,8 +1,7 @@
 import { FC, KeyboardEvent, useEffect, useState } from 'react';
-import { Search } from 'lucide-react';
 import { LocalizeText } from '../../../../api';
 import { useNavigator } from '../../../../hooks';
-import { NavigatorTextInput } from '../NavigatorPrimitives';
+import { NavSearchIcon, NavigatorTextInput } from '../NavigatorPrimitives';
 
 export interface NavigatorSearchViewProps
 {
@@ -38,7 +37,7 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
 
     return (
         <NavigatorTextInput
-            icon={ Search }
+            icon={ NavSearchIcon }
             type="text"
             placeholder={ LocalizeText('navigator.filter.input.placeholder') }
             value={ searchValue }

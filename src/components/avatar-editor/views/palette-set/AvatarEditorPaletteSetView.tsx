@@ -9,11 +9,12 @@ export interface AvatarEditorPaletteSetViewProps
     category: CategoryData;
     paletteSet: AvatarEditorGridColorItem[];
     paletteIndex: number;
+    label?: string | null;
 }
 
 export const AvatarEditorPaletteSetView: FC<AvatarEditorPaletteSetViewProps> = props =>
 {
-    const { model = null, category = null, paletteSet = [], paletteIndex = -1 } = props;
+    const { model = null, category = null, paletteSet = [], paletteIndex = -1, label = null } = props;
     const elementRef = useRef<HTMLDivElement>(null);
 
     const hcDisabled = useMemo(() => GetConfiguration<boolean>('hc.disabled', false), []);
@@ -35,15 +36,25 @@ export const AvatarEditorPaletteSetView: FC<AvatarEditorPaletteSetViewProps> = p
     }, [ model, category ]);
 
     return (
-        <AutoGrid innerRef={ elementRef } gap={ 2 } columnCount={ 10 } columnMinWidth={ 32 }>
-            { (paletteSet.length > 0) && paletteSet.map((item, index) =>
-                <AvatarEditorColorSwatch
-                    key={ index }
-                    colorItem={ item }
-                    hcDisabled={ hcDisabled }
-                    onClick={ () => selectColor(item) }
-                />
+        <div className="flex flex-col gap-2">
+            { label && (
+                <div className="flex items-center gap-2">
+                    <span className="text-subheading-2xs uppercase tracking-wider text-text-soft-400">
+                        { label }
+                    </span>
+                    <div className="h-px flex-1 bg-stroke-soft-200" />
+                </div>
             ) }
-        </AutoGrid>
+            <AutoGrid innerRef={ elementRef } gap={ 1 } columnCount={ 14 } columnMinWidth={ 26 }>
+                { (paletteSet.length > 0) && paletteSet.map((item, index) =>
+                    <AvatarEditorColorSwatch
+                        key={ index }
+                        colorItem={ item }
+                        hcDisabled={ hcDisabled }
+                        onClick={ () => selectColor(item) }
+                    />
+                ) }
+            </AutoGrid>
+        </div>
     );
 }

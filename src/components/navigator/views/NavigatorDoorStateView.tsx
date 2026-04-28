@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { FaBell, FaKey } from 'react-icons/fa';
-import { X } from 'lucide-react';
+import { NavCloseIcon } from './NavigatorPrimitives';
 import { CreateRoomSession, DoorStateType, GoToDesktop, LocalizeText } from '../../../api';
 import { DraggableWindow, DraggableWindowPosition } from '../../../common';
 import { useNavigator } from '../../../hooks';
@@ -75,7 +75,7 @@ export const NavigatorDoorStateView: FC<{}> = props =>
                         { LocalizeText(isDoorbell ? 'navigator.doorbell.title' : 'navigator.password.title') }
                     </span>
                     <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onMouseDown={ event => event.stopPropagation() } onClick={ onClose }>
-                        <AlignButton.Icon as={ X } className="size-4" />
+                        <AlignButton.Icon as={ NavCloseIcon } className="size-4" />
                     </AlignButton.Root>
                 </div>
                 <div className="flex flex-col gap-3 p-3">

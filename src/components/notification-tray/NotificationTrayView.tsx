@@ -6,8 +6,8 @@ import { NotificationCenterEntry, NotificationKind, useNotificationCenter } from
 import * as AlignDrawer from '@/align-ui/components/ui/drawer';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
-import * as AlignDivider from '@/align-ui/components/ui/divider';
-import { cn } from '@/align-ui/utils/cn';
+import * as AlignCompactButton from '@/align-ui/components/ui/compact-button';
+import { cn } from '@/lib/utils';
 
 type FilterId = 'all' | 'unread' | 'system' | 'achievement' | 'gift' | 'friend';
 
@@ -74,6 +74,18 @@ const groupByDay = (entries: NotificationCenterEntry[]) =>
     return { today, yesterday, older };
 }
 
+const DashedDivider: FC<{ className?: string }> = ({ className }) => (
+    <div className={ cn('relative h-0 w-full text-stroke-soft-200', className) } role="separator">
+        <div
+            className="absolute left-0 h-px w-full"
+            style={ {
+                background:
+                    'linear-gradient(90deg, currentColor 4px, transparent 4px) 50% 50% / 8px 1px repeat no-repeat',
+            } }
+        />
+    </div>
+);
+
 interface NotificationItemProps {
     entry: NotificationCenterEntry;
     onClick: () => void;
@@ -87,46 +99,45 @@ const NotificationItem: FC<NotificationItemProps> = ({ entry, onClick, onRemove 
     const [ imageFailed, setImageFailed ] = useState(false);
 
     return (
-        <button
-            type="button"
-            onClick={ onClick }
-            className={ cn(
-                'group relative flex w-full items-start gap-3 rounded-12 border px-3 py-2.5 text-left transition-colors',
-                'hover:bg-bg-white-0',
-                entry.read
-                    ? 'border-stroke-soft-200 bg-bg-weak-50'
-                    : 'border-primary-base/30 bg-primary-base/10',
-            ) }
-        >
-            { !entry.read && (
-                <span className="absolute left-2 top-2 size-2 rounded-full bg-primary-base shadow-sm" />
-            ) }
-            <div className="ml-3 flex size-8 shrink-0 items-center justify-center rounded-full bg-bg-weak-50">
-                { entry.iconUrl && !imageFailed ? (
-                    <img src={ entry.iconUrl } alt="" className="size-5 object-contain" onError={ () => setImageFailed(true) } />
-                ) : (
-                    <Icon className={ cn('size-4', meta.color) } />
-                ) }
-            </div>
-            <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-2">
-                    <span className="truncate text-label-xs font-semibold text-text-strong-950">{ entry.title }</span>
-                    <span className="shrink-0 text-paragraph-2xs text-text-soft-400">{ formatRelative(entry.createdAt) }</span>
-                </div>
-                <p
-                    className="mt-0.5 line-clamp-2 text-paragraph-xs text-text-sub-600"
-                    dangerouslySetInnerHTML={ { __html: entry.message.replace(/\r\n|\r|\n/g, '<br />') } }
-                />
-            </div>
+        <div className="group relative">
             <button
                 type="button"
+                onClick={ onClick }
+                className="flex w-full items-start gap-4 rounded-lg p-4 text-left transition-colors hover:bg-bg-weak-50"
+            >
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                    { entry.iconUrl && !imageFailed ? (
+                        <img src={ entry.iconUrl } alt="" className="size-5 object-contain" onError={ () => setImageFailed(true) } />
+                    ) : (
+                        <Icon className={ cn('size-5', meta.color) } />
+                    ) }
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                            <h5 className="truncate text-label-sm text-text-strong-950">{ entry.title }</h5>
+                            { !entry.read && (
+                                <div className="size-1.5 shrink-0 rounded-full bg-primary-base" />
+                            ) }
+                        </div>
+                        <span
+                            className="line-clamp-2 text-paragraph-sm text-text-sub-600"
+                            dangerouslySetInnerHTML={ { __html: entry.message.replace(/\r\n|\r|\n/g, '<br />') } }
+                        />
+                    </div>
+                    <span className="text-label-xs text-text-soft-400">{ formatRelative(entry.createdAt) }</span>
+                </div>
+            </button>
+            <AlignCompactButton.Root
+                size="medium"
+                variant="ghost"
                 onClick={ (e) => { e.stopPropagation(); onRemove(); } }
-                className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-full text-text-soft-400 opacity-0 transition-opacity hover:bg-bg-weak-50 hover:text-text-sub-600 group-hover:opacity-100"
+                className="absolute right-3 top-3 opacity-0 group-hover:opacity-100"
                 aria-label="Entfernen"
             >
-                <X className="size-3.5" />
-            </button>
-        </button>
+                <AlignCompactButton.Icon as={ X } />
+            </AlignCompactButton.Root>
+        </div>
     );
 }
 
@@ -192,22 +203,21 @@ export const NotificationTrayView: FC<{}> = () =>
                 className="notification-tray-drawer w-[420px]"
                 onOpenAutoFocus={ (event) => event.preventDefault() }
             >
-                <AlignDrawer.Header className="px-4 pb-2 pt-3">
+                <AlignDrawer.Header className="px-5 pb-3 pt-4">
                     <div className="flex items-center justify-between">
-                        <AlignDrawer.Title className="flex items-center gap-2 text-label-md text-text-strong-950">
-                            <Bell className="size-4 text-text-sub-600" />
+                        <AlignDrawer.Title className="flex items-center gap-2 text-label-md text-text-sub-600">
                             Benachrichtigungen
                             { unreadCount > 0 && (
                                 <AlignBadge.Root color="red" variant="filled" size="small">{ unreadCount }</AlignBadge.Root>
                             ) }
                         </AlignDrawer.Title>
                         <AlignDrawer.Description className="sr-only">Verlauf aller Benachrichtigungen</AlignDrawer.Description>
-                        <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ closeTray }>
-                            <AlignButton.Icon as={ X } className="size-4" />
-                        </AlignButton.Root>
+                        <AlignCompactButton.Root size="large" variant="ghost" onClick={ closeTray } aria-label="Schließen">
+                            <AlignCompactButton.Icon as={ X } />
+                        </AlignCompactButton.Root>
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-2">
-                        <span className="text-paragraph-2xs text-text-sub-600">{ entries.length } gesamt · { unreadCount } ungelesen</span>
+                        <span className="text-paragraph-xs text-text-sub-600">{ entries.length } gesamt · { unreadCount } ungelesen</span>
                         <div className="flex gap-1">
                             <AlignButton.Root
                                 type="button"
@@ -237,18 +247,18 @@ export const NotificationTrayView: FC<{}> = () =>
                     </div>
                 </AlignDrawer.Header>
 
-                <div className="px-4 pb-2">
-                    <div className="flex flex-wrap items-center gap-1 rounded-12 bg-bg-weak-50 p-1">
+                <div className="px-5 pb-3">
+                    <div className="flex flex-wrap items-center gap-1">
                         { FILTERS.map(f => (
                             <button
                                 key={ f.id }
                                 type="button"
                                 onClick={ () => setFilter(f.id) }
                                 className={ cn(
-                                    'rounded-8 px-2.5 py-1 text-label-2xs transition-colors',
+                                    'rounded-md px-2.5 py-1 text-label-xs transition-colors',
                                     filter === f.id
-                                        ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs'
-                                        : 'text-text-sub-600 hover:text-text-strong-950',
+                                        ? 'bg-bg-white-0 text-text-strong-950 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200'
+                                        : 'text-text-sub-600 hover:bg-bg-weak-50 hover:text-text-strong-950',
                                 ) }
                             >
                                 { f.label }
@@ -257,22 +267,24 @@ export const NotificationTrayView: FC<{}> = () =>
                     </div>
                 </div>
 
-                <AlignDivider.Root className="mx-4" />
+                <div className="px-5">
+                    <DashedDivider />
+                </div>
 
-                <AlignDrawer.Body className="flex flex-col gap-2 px-3 py-3">
+                <AlignDrawer.Body className="flex flex-col gap-1 px-2 py-2">
                     { filtered.length === 0 ? (
-                        <div className="flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">
-                            <div className="flex size-12 items-center justify-center rounded-full bg-bg-weak-50">
+                        <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
+                            <div className="flex size-12 items-center justify-center rounded-full bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
                                 <Bell className="size-5 text-text-soft-400" />
                             </div>
                             <p className="text-label-sm text-text-strong-950">Nichts Neues</p>
-                            <p className="px-6 text-paragraph-xs text-text-sub-600">Hier landen alle Benachrichtigungen, die du verpasst hast.</p>
+                            <p className="px-6 text-paragraph-sm text-text-sub-600">Hier landen alle Benachrichtigungen, die du verpasst hast.</p>
                         </div>
                     ) : (
                         <>
                             { groups.today.length > 0 && (
                                 <>
-                                    <span className="px-2 pt-1 text-label-2xs uppercase tracking-wider text-text-soft-400">Heute</span>
+                                    <span className="px-4 pt-2 text-label-xs uppercase tracking-wider text-text-soft-400">Heute</span>
                                     { groups.today.map(entry => (
                                         <NotificationItem
                                             key={ entry.id }
@@ -285,7 +297,7 @@ export const NotificationTrayView: FC<{}> = () =>
                             ) }
                             { groups.yesterday.length > 0 && (
                                 <>
-                                    <span className="px-2 pt-2 text-label-2xs uppercase tracking-wider text-text-soft-400">Gestern</span>
+                                    <span className="px-4 pt-3 text-label-xs uppercase tracking-wider text-text-soft-400">Gestern</span>
                                     { groups.yesterday.map(entry => (
                                         <NotificationItem
                                             key={ entry.id }
@@ -298,7 +310,7 @@ export const NotificationTrayView: FC<{}> = () =>
                             ) }
                             { groups.older.length > 0 && (
                                 <>
-                                    <span className="px-2 pt-2 text-label-2xs uppercase tracking-wider text-text-soft-400">Älter</span>
+                                    <span className="px-4 pt-3 text-label-xs uppercase tracking-wider text-text-soft-400">Älter</span>
                                     { groups.older.map(entry => (
                                         <NotificationItem
                                             key={ entry.id }

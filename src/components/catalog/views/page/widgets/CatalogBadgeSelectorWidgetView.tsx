@@ -3,6 +3,7 @@ import { FC, HTMLAttributes, useEffect, useMemo, useState } from 'react';
 import { LayoutBadgeImageView } from '../../../../../common';
 import { cn } from '../../../../../lib/utils';
 import { useCatalog, useInventoryBadges } from '../../../../../hooks';
+import { CATALOG_PICKER_GRID_CLASSES } from '../common/CatalogGridStyles';
 
 const EXCLUDED_BADGE_CODES: string[] = [];
 
@@ -63,16 +64,16 @@ export const CatalogBadgeSelectorWidgetView: FC<CatalogBadgeSelectorWidgetViewPr
     }, []);
 
     return (
-        <div className={ `grid grid-cols-5 gap-1.5 overflow-auto ${ className }` } { ...rest }>
+        <div className={ `${ CATALOG_PICKER_GRID_CLASSES } overflow-auto ${ className }` } { ...rest }>
             { badgeCodes && (badgeCodes.length > 0) && badgeCodes.map((badgeCode, index) =>
             {
                 return (
                     <div
                         key={ index }
                         className={ cn(
-                            'relative flex cursor-pointer items-center justify-center overflow-hidden rounded-10 bg-bg-weak-50 transition-all aspect-square ring-1 ring-stroke-soft-200',
-                            'hover:bg-bg-white-0 hover:shadow-regular-xs',
-                            (currentBadgeCode === badgeCode) && 'bg-primary-alpha-10 ring-primary-base'
+                            'relative flex cursor-pointer items-center justify-center overflow-hidden rounded-lg aspect-square transition-colors',
+                            'hover:bg-bg-weak-50',
+                            (currentBadgeCode === badgeCode) && 'bg-primary-alpha-10 ring-1 ring-inset ring-primary-base'
                         ) }
                         onClick={ event => setCurrentBadgeCode(badgeCode) }
                     >

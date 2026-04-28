@@ -1,6 +1,5 @@
 import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useRef } from 'react';
 import { AvatarEditorGridPartItem, CategoryData, GetConfiguration, IAvatarEditorCategoryModel } from '../../../../api';
-import { AutoGrid } from '../../../../common';
 import { AvatarEditorPartTile } from './AvatarEditorPartTile';
 
 export interface AvatarEditorFigureSetViewProps
@@ -38,7 +37,11 @@ export const AvatarEditorFigureSetView: FC<AvatarEditorFigureSetViewProps> = pro
     }, [ model, category ]);
 
     return (
-        <AutoGrid innerRef={ elementRef } columnCount={ 5 } columnMinHeight={ 50 } gap={ 2 }>
+        <div
+            ref={ elementRef }
+            className="grid gap-2"
+            style={ { gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))' } }
+        >
             { (category.parts.length > 0) && category.parts.map((item, index) =>
                 <AvatarEditorPartTile
                     key={ index }
@@ -47,6 +50,6 @@ export const AvatarEditorFigureSetView: FC<AvatarEditorFigureSetViewProps> = pro
                     onClick={ () => selectPart(item) }
                 />
             ) }
-        </AutoGrid>
+        </div>
     );
 }

@@ -1,12 +1,25 @@
 import { FC, PropsWithChildren, useEffect, useState } from 'react';
-import { Check, CircuitBoard, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { GetSessionDataManager, LocalizeText, WiredFurniType, WiredSelectionVisualizer } from '../../../api';
 import { DraggableWindow } from '../../../common';
 import { useWired } from '../../../hooks';
 import * as AlignButton from '@/align-ui/components/ui/button';
-import * as AlignDivider from '@/align-ui/components/ui/divider';
 import * as AlignSurface from '@/align-ui/components/ui/surface';
+import { cn } from '@/lib/utils';
+import settingsCogUrl from '@/assets/images/toolbar/icons/me-menu/cog.png';
 import { WiredFurniSelectorView } from './WiredFurniSelectorView';
+
+const WIRED_TYPE_LABEL: Record<string, string> = {
+    trigger: 'Trigger',
+    action: 'Effekt',
+    condition: 'Bedingung',
+};
+
+const WIRED_TYPE_PILL_CLASSES: Record<string, string> = {
+    trigger: 'bg-warning-lighter text-warning-base',
+    action: 'bg-information-lighter text-information-base',
+    condition: 'bg-feature-lighter text-feature-base',
+};
 
 export interface WiredBaseViewProps
 {
@@ -23,7 +36,7 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = props =>
     const [ wiredName, setWiredName ] = useState<string>(null);
     const [ wiredDescription, setWiredDescription ] = useState<string>(null);
     const [ needsSave, setNeedsSave ] = useState<boolean>(false);
-    const { trigger = null, setTrigger = null, setIntParams = null, setStringParam = null, setFurniIds = null, setAllowsFurni = null, saveWired = null } = useWired();
+    const { trigger = null, setTrigger = null, setIntParams = null, setStringParam = null, setFurniIds = null, setAllowsFurni = null, saveWired = null, furniIds = [] } = useWired();
 
     const onClose = () => setTrigger(null);
     
@@ -93,53 +106,77 @@ export const WiredBaseView: FC<PropsWithChildren<WiredBaseViewProps>> = props =>
         setAllowsFurni(requiresFurni);
     }, [ trigger, hasSpecialInput, requiresFurni, setIntParams, setStringParam, setFurniIds, setAllowsFurni ]);
 
+    const typeLabel = WIRED_TYPE_LABEL[wiredType] ?? wiredType;
+    const pillClasses = WIRED_TYPE_PILL_CLASSES[wiredType] ?? 'bg-bg-weak-50 text-text-sub-600';
+
+    const requiresFurniSelection = requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE;
+    const furniReady = !requiresFurniSelection || furniIds.length > 0;
+    const isReady = furniReady;
+    const statusText = !furniReady
+        ? 'Wähle erst Möbel im Raum aus.'
+        : 'Bereit zum Speichern.';
+
     return (
         <DraggableWindow uniqueKey="nitro-wired">
-            <AlignSurface.Panel className="nitro-wired w-[420px] max-w-[calc(100vw-32px)] overflow-hidden">
-                <div className="drag-handler flex cursor-grab items-center gap-3 border-b border-stroke-soft-200 px-4 py-3 active:cursor-grabbing">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-10 bg-primary-alpha-10 text-primary-base">
-                        <CircuitBoard className="size-5" />
-                    </div>
+            <AlignSurface.Panel className="nitro-wired flex w-[380px] max-w-[calc(100vw-32px)] flex-col overflow-hidden">
+                <div className="drag-handler flex cursor-grab items-center gap-3 border-b border-stroke-soft-200 px-3.5 py-2.5 active:cursor-grabbing">
+                    <div
+                        className="size-7 shrink-0"
+                        style={ {
+                            backgroundImage: `url(${ settingsCogUrl })`,
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center',
+                            backgroundSize: 'contain',
+                            imageRendering: 'pixelated',
+                        } }
+                        aria-hidden
+                    />
                     <div className="min-w-0 flex-1">
-                        <div className="truncate text-label-md text-text-strong-950">{ LocalizeText('wiredfurni.title') }</div>
-                        <div className="truncate text-paragraph-xs text-text-sub-600">{ wiredName }</div>
+                        <div className="text-paragraph-xs uppercase tracking-wider text-text-soft-400">
+                            Wired-Einstellungen
+                        </div>
+                        <div className="truncate text-label-md text-text-strong-950">{ wiredName }</div>
                     </div>
-                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" className="size-8 p-0" onClick={ onClose }>
+                    { !!typeLabel && (
+                        <span className={ cn('shrink-0 rounded-full px-2 py-0.5 text-paragraph-xs font-medium', pillClasses) }>
+                            { typeLabel }
+                        </span>
+                    ) }
+                    <AlignButton.Root variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ onClose }>
                         <AlignButton.Icon as={ X } className="size-4" />
                     </AlignButton.Root>
                 </div>
 
-                <div className="space-y-4 bg-bg-weak-50 p-4">
-                    <div className="rounded-2xl bg-bg-white-0 p-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
-                        <div className="flex items-start gap-3">
-                            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200">
-                                <i className={ `icon icon-wired-${ wiredType }` } />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <div className="text-label-sm text-text-strong-950">{ wiredName }</div>
-                                <p className="mt-1 text-paragraph-xs leading-5 text-text-sub-600">{ wiredDescription }</p>
-                            </div>
-                        </div>
-                    </div>
+                { wiredDescription && (
+                    <p className="bg-bg-weak-50 px-3.5 py-2 text-paragraph-xs leading-5 text-text-sub-600 line-clamp-2">
+                        { wiredDescription }
+                    </p>
+                ) }
 
-                    { !!children &&
-                        <div className="wired-align-section rounded-2xl bg-bg-white-0 p-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
-                            { children }
-                        </div> }
+                <div className="flex-1 space-y-3 overflow-y-auto p-3.5">
+                    { !!children && children }
 
-                    { (requiresFurni > WiredFurniType.STUFF_SELECTION_OPTION_NONE) &&
-                        <div className="rounded-2xl bg-bg-white-0 p-3 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                    { requiresFurniSelection && (
+                        <div className="rounded-xl bg-bg-white-0 p-3 ring-1 ring-inset ring-stroke-soft-200">
                             <WiredFurniSelectorView />
-                        </div> }
+                        </div>
+                    ) }
+                </div>
 
-                    <AlignDivider.Root />
-
-                    <div className="grid grid-cols-2 gap-2">
-                        <AlignButton.Root variant="primary" mode="filled" size="small" onClick={ onSave }>
+                <div className="border-t border-stroke-soft-200 bg-bg-weak-50 px-3.5 py-2.5">
+                    <div className="mb-2 flex items-center gap-2 text-paragraph-xs text-text-sub-600">
+                        <span className={ cn(
+                            'size-1.5 rounded-full',
+                            isReady ? 'bg-success-base' : 'bg-warning-base'
+                        ) } />
+                        { statusText }
+                    </div>
+                    <div className="grid grid-cols-[1fr_auto] gap-2">
+                        <AlignButton.Root variant="primary" mode="filled" size="xsmall" onClick={ onSave }>
                             <AlignButton.Icon as={ Check } className="size-4" />
                             { LocalizeText('wiredfurni.ready') }
                         </AlignButton.Root>
-                        <AlignButton.Root variant="neutral" mode="stroke" size="small" onClick={ onClose }>
+                        <AlignButton.Root variant="neutral" mode="ghost" size="xsmall" onClick={ onClose }>
                             { LocalizeText('cancel') }
                         </AlignButton.Root>
                     </div>

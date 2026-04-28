@@ -5,8 +5,7 @@ import { DraggableWindow, DraggableWindowPosition } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignSurface from '@/align-ui/components/ui/surface';
-import { X } from 'lucide-react';
-import { NavigatorPanel, NavigatorScrollViewport, NavigatorTabButton } from '../NavigatorPrimitives';
+import { NavCloseIcon, NavigatorPanel, NavigatorScrollViewport, NavigatorTabButton } from '../NavigatorPrimitives';
 import { NavigatorRoomSettingsAccessTabView } from './NavigatorRoomSettingsAccessTabView';
 import { NavigatorRoomSettingsBasicTabView } from './NavigatorRoomSettingsBasicTabView';
 import { NavigatorRoomSettingsModTabView } from './NavigatorRoomSettingsModTabView';
@@ -190,7 +189,7 @@ export const NavigatorRoomSettingsView: FC<{}> = props =>
                 <div className="drag-handler flex h-9 shrink-0 cursor-grab items-center justify-between border-b border-stroke-soft-200 px-3 active:cursor-grabbing">
                     <span className="truncate text-label-xs text-text-strong-950">{ LocalizeText('navigator.roomsettings') }</span>
                     <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onMouseDown={ event => event.stopPropagation() } onClick={ onClose }>
-                        <AlignButton.Icon as={ X } className="size-4" />
+                        <AlignButton.Icon as={ NavCloseIcon } className="size-4" />
                     </AlignButton.Root>
                 </div>
                 <NavigatorScrollViewport className="max-h-[500px] p-3">

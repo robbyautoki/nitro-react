@@ -3,51 +3,19 @@
     inset: 0;
     z-index: 100;
     overflow: hidden;
-    background: #0b0d12;
-    color: #fff;
     isolation: isolate;
 
-    .nitro-loading-logo {
-        display: block;
-        width: min(360px, 58vw);
-        height: auto;
-        max-height: 26vh;
-        object-fit: contain;
-        filter: drop-shadow(0 14px 30px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 18px rgba(255, 166, 71, 0.25));
-    }
-
-    .nitro-loading-mesh {
-        position: absolute;
-        inset: -20%;
-        z-index: 0;
-        background:
-            radial-gradient(40% 35% at 18% 22%, rgba(255, 166, 71, 0.55), transparent 70%),
-            radial-gradient(45% 40% at 82% 78%, rgba(78, 131, 255, 0.55), transparent 70%),
-            radial-gradient(35% 30% at 70% 18%, rgba(216, 96, 255, 0.35), transparent 75%),
-            radial-gradient(38% 32% at 22% 82%, rgba(46, 196, 182, 0.30), transparent 75%),
-            linear-gradient(180deg, #0b0d12 0%, #0a0c14 50%, #07090e 100%);
-        filter: blur(30px) saturate(110%);
-        animation: nitro-loading-mesh-drift 18s ease-in-out infinite alternate;
-        will-change: transform, filter;
-    }
-
-    .nitro-loading-noise {
+    &__grid {
         position: absolute;
         inset: 0;
         z-index: 0;
-        opacity: 0.35;
         pointer-events: none;
-        mix-blend-mode: overlay;
         background-image:
-            radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-            radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-        background-size: 3px 3px, 7px 7px;
-        background-position: 0 0, 1px 1px;
+            linear-gradient(to right, hsl(var(--align-stroke-soft-200) / 0.6) 1px, transparent 1px),
+            linear-gradient(to bottom, hsl(var(--align-stroke-soft-200) / 0.6) 1px, transparent 1px);
+        background-size: 32px 32px;
+        background-position: -1px -1px;
+        -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, black 0%, transparent 75%);
+                mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, black 0%, transparent 75%);
     }
-}
-
-@keyframes nitro-loading-mesh-drift {
-    0%   { transform: translate3d(0, 0, 0) scale(1); }
-    50%  { transform: translate3d(-2%, 1.5%, 0) scale(1.05); }
-    100% { transform: translate3d(2%, -1.5%, 0) scale(1.08); }
 }

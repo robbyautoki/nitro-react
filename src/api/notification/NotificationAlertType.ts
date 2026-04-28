@@ -7,4 +7,5 @@ export class NotificationAlertType
     public static NITRO: string = 'nitro';
     public static SEARCH: string = 'search';
     public static ALERT: string = 'alert';
+    public static STAFF_ONLINE: string = 'staff_online';
 }

@@ -109,11 +109,11 @@ export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProp
 
     return (
         <div
-            className={ `nitro-notification-bubble-card pointer-events-auto w-full max-w-sm cursor-pointer overflow-hidden rounded-2xl bg-bg-white-0 shadow-regular-md ${ isVisible ? 'is-visible' : 'is-closing' }` }
+            className={ `nitro-notification-bubble-card pointer-events-auto w-full max-w-[340px] cursor-pointer overflow-hidden rounded-xl bg-bg-white-0 shadow-regular-md ${ isVisible ? 'is-visible' : 'is-closing' }` }
             onClick={ handleClick }
         >
-            <div className="grid grid-cols-[44px_minmax(0,1fr)_28px] items-start gap-3 px-3.5 py-3.5">
-                <div className={ `flex size-11 items-center justify-center overflow-hidden rounded-xl ${ useCustomIcon ? 'bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200' : toneClasses.tile }` }>
+            <div className="grid grid-cols-[36px_minmax(0,1fr)_24px] items-start gap-2.5 px-3 py-2.5">
+                <div className={ `flex size-9 items-center justify-center overflow-hidden rounded-lg ${ useCustomIcon ? 'bg-bg-weak-50 ring-1 ring-inset ring-stroke-soft-200' : toneClasses.tile }` }>
                     { useCustomIcon ? (
                         <img
                             src={ item.iconUrl }
@@ -122,12 +122,12 @@ export const NotificationDefaultBubbleView: FC<NotificationDefaultBubbleViewProp
                             onError={ () => setImageFailed(true) }
                         />
                     ) : (
-                        <Icon className="size-5" />
+                        <Icon className="size-4" />
                     ) }
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5">
-                    <div className={ `text-paragraph-xs uppercase tracking-[0.08em] ${ toneClasses.eyebrow }` }>{ config.eyebrow }</div>
-                    <div className="text-paragraph-sm leading-relaxed text-text-strong-950">
+                    <div className={ `text-[10px] uppercase tracking-[0.08em] ${ toneClasses.eyebrow }` }>{ config.eyebrow }</div>
+                    <div className="text-paragraph-xs leading-snug text-text-strong-950">
                         <span dangerouslySetInnerHTML={ { __html: htmlText } } />
                     </div>
                 </div>

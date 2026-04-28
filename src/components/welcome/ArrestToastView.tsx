@@ -1,6 +1,6 @@
 import { NotificationDialogMessageEvent } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { useMessageEvent, TopbarBannerStack } from '../../hooks';
+import { useMessageEvent, TopbarBannerStack, useJailPrisonerState } from '../../hooks';
 import { cn } from '@/lib/utils';
 import { BadgeCheck, ChevronDown, Clock3, Gavel, ShieldAlert } from 'lucide-react';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
@@ -34,15 +34,6 @@ type PrisonerState = {
     reducedSeconds: number;
     tasks: JailTaskState[];
 };
-
-function decodePayload<T>(payload: string): T | null {
-    try {
-        const bytes = Uint8Array.from(atob(payload), char => char.charCodeAt(0));
-        return JSON.parse(new TextDecoder().decode(bytes)) as T;
-    } catch {
-        return null;
-    }
-}
 
 function formatRemaining(until: number) {
     if(!until) return 'Permanent';
@@ -236,9 +227,15 @@ export const ArrestToastView: FC<{}> = () => {
     const [ arrestMessage, setArrestMessage ] = useState('');
     const [ reasonText, setReasonText ] = useState('');
 
-    const [ prisoner, setPrisoner ] = useState<PrisonerState | null>(null);
+    const prisoner = useJailPrisonerState() as PrisonerState | null;
     const [ timerText, setTimerText ] = useState('');
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // sync reason text from prisoner state
+    useEffect(() => {
+        if(prisoner?.reason) setReasonText(prisoner.reason);
+        if(!prisoner) setTimerText('');
+    }, [ prisoner ]);
 
     useMessageEvent<NotificationDialogMessageEvent>(NotificationDialogMessageEvent, event => {
         const parser = event.getParser();
@@ -256,36 +253,6 @@ export const ArrestToastView: FC<{}> = () => {
             case 'jail.arrest.end': {
                 setArrestFading(true);
                 setTimeout(() => setArrestVisible(false), 450);
-                break;
-            }
-            case 'jail.timer': {
-                const until = parseInt(parser.parameters?.get('until') || '0', 10);
-                const reason = parser.parameters?.get('reason') || '';
-                if(reason) setReasonText(reason);
-                setPrisoner(previous => ({
-                    caseId: previous?.caseId || 0,
-                    username: previous?.username || '',
-                    reason,
-                    status: previous?.status || 'active',
-                    jailMinutes: previous?.jailMinutes || 0,
-                    until,
-                    reducedSeconds: previous?.reducedSeconds || 0,
-                    tasks: previous?.tasks || [],
-                }));
-                break;
-            }
-            case 'jail.prisoner.state': {
-                const payload = parser.parameters?.get('payload') || '';
-                const decoded = decodePayload<PrisonerState>(payload);
-                if(decoded) {
-                    setReasonText(decoded.reason || '');
-                    setPrisoner(decoded);
-                }
-                break;
-            }
-            case 'jail.timer.end': {
-                setPrisoner(null);
-                setTimerText('');
                 break;
             }
         }
@@ -341,6 +308,15 @@ export const ArrestToastView: FC<{}> = () => {
             return;
         }
 
+        // Stale-banner cleanup: only push if permanent (until==0) or the timer
+        // is still in the future. Defends against ghost banners that survived
+        // a server restart without a `jail.timer.end`.
+        const stillActive = !prisoner.until || prisoner.until > Date.now();
+        if(!stillActive) {
+            TopbarBannerStack.remove('jail-prisoner');
+            return;
+        }
+
         TopbarBannerStack.push({
             id: 'jail-prisoner',
             kind: 'jail-timer',
@@ -350,7 +326,7 @@ export const ArrestToastView: FC<{}> = () => {
                     prisoner={ prisoner }
                     timerText={ timerText }
                     taskSummary={ taskSummary }
-                    onHide={ () => setPrisoner(null) }
+                    onHide={ () => TopbarBannerStack.remove('jail-prisoner') }
                 />
             )
         });

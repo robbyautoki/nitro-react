@@ -1,8 +1,7 @@
 import { FC, useEffect, useState } from 'react';
-import ReactSlider from 'react-slider';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Column, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredSliderField } from '../WiredSliderField';
 import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 
 export const WiredTriggeScoreAchievedView: FC<{}> = props =>
@@ -19,15 +18,13 @@ export const WiredTriggeScoreAchievedView: FC<{}> = props =>
 
     return (
         <WiredTriggerBaseView requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_NONE } hasSpecialInput={ true } save={ save }>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('wiredfurni.params.setscore', [ 'points' ], [ points.toString() ]) }</Text>
-                <ReactSlider
-                    className={ 'nitro-slider' }
-                    min={ 1 }
-                    max={ 1000 }
-                    value={ points }
-                    onChange={ event => setPoints(event) } />
-            </Column>
+            <WiredSliderField
+                label={ LocalizeText('wiredfurni.params.setscore', [ 'points' ], [ points.toString() ]) }
+                value={ points }
+                min={ 1 }
+                max={ 1000 }
+                onChange={ setPoints }
+            />
         </WiredTriggerBaseView>
     );
 }

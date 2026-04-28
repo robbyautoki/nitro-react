@@ -1,5 +1,7 @@
 import { FC, HTMLAttributes, useEffect, useRef } from 'react';
 import { useCatalog } from '../../../../../hooks';
+import { CATALOG_GRID_CLASSES } from '../common/CatalogGridStyles';
+import { CatalogProductTile } from '../common/CatalogProductTile';
 
 interface CatalogBundleGridWidgetViewProps extends HTMLAttributes<HTMLDivElement>
 {
@@ -20,20 +22,16 @@ export const CatalogBundleGridWidgetView: FC<CatalogBundleGridWidgetViewProps> =
     if(!currentOffer) return null;
 
     return (
-        <div ref={ elementRef } className={ `grid grid-cols-[repeat(auto-fill,82px)] gap-2 ${ className }` } { ...rest }>
-            { currentOffer.products && (currentOffer.products.length > 0) && currentOffer.products.map((product, index) =>
-            {
-                const imageUrl = product.getIconUrl();
-
-                return (
-                    <div key={ index } className="relative flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-bg-weak-50 bg-contain bg-center bg-no-repeat" style={ imageUrl ? { backgroundImage: `url(${ imageUrl })` } : undefined }>
-                        { (product.productCount > 1) &&
-                            <span className="absolute right-1 top-1 rounded-md bg-primary-base px-1 text-subheading-2xs leading-tight text-static-white">
-                                { product.productCount }
-                            </span> }
-                    </div>
-                );
-            }) }
+        <div ref={ elementRef } className={ `${ CATALOG_GRID_CLASSES } ${ className }` } { ...rest }>
+            { currentOffer.products && (currentOffer.products.length > 0) && currentOffer.products.map((product, index) => (
+                <div key={ index } className="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-bg-weak-50/50 p-1">
+                    <CatalogProductTile product={ product } offer={ currentOffer } centered />
+                    { (product.productCount > 1) &&
+                        <span className="absolute right-0.5 top-0.5 rounded bg-primary-base px-0.5 text-[10px] leading-tight text-static-white">
+                            { product.productCount }
+                        </span> }
+                </div>
+            )) }
             { children }
         </div>
     );

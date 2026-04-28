@@ -1,13 +1,12 @@
 import { CreateFlatMessageComposer, HabboClubLevelEnum } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
-import { Check, Plus } from 'lucide-react';
 import { GetClubMemberLevel, GetConfiguration, IRoomModel, LocalizeText, SendMessageComposer } from '../../../api';
 import { useNavigator } from '../../../hooks';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignSelect from '@/align-ui/components/ui/select';
 import { cn } from '@/align-ui/utils/cn';
-import { NavigatorScrollViewport, NavigatorTextInput, NavigatorTextarea } from './NavigatorPrimitives';
+import { NavPlusIcon, NavigatorScrollViewport, NavigatorTextInput, NavigatorTextarea, PixelIcon } from './NavigatorPrimitives';
 
 const Select = AlignSelect.Root;
 const SelectTrigger = AlignSelect.Trigger;
@@ -188,7 +187,7 @@ export const NavigatorRoomCreatorView: FC<{}> = props =>
                                         </span>
                                         { isSelected && (
                                             <div className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-primary-base">
-                                                <Check className="size-2.5 text-static-white" />
+                                                <PixelIcon src="/navigator/icons/tick.png" size="size-2.5" alt="ausgewählt" />
                                             </div>
                                         ) }
                                         { !hcDisabled && isHc && (
@@ -203,7 +202,7 @@ export const NavigatorRoomCreatorView: FC<{}> = props =>
             </NavigatorScrollViewport>
             <div className="shrink-0 border-t border-stroke-soft-200 bg-bg-white-0 p-4">
                 <AlignButton.Root type="button" variant="primary" mode="filled" size="small" className="w-full gap-2" disabled={ !canCreate } onClick={ createRoom }>
-                    <AlignButton.Icon as={ Plus } className="size-4" />
+                    <AlignButton.Icon as={ NavPlusIcon } className="size-4" />
                     { LocalizeText('navigator.createroom.create') }
                 </AlignButton.Root>
             </div>

@@ -4,8 +4,7 @@ import { IRoomData, LocalizeText, SendMessageComposer } from '../../../../api';
 import { UserProfileIconView } from '../../../../common';
 import { useMessageEvent } from '../../../../hooks';
 import * as AlignButton from '@/align-ui/components/ui/button';
-import { NavigatorPanel, NavigatorPanelStack, NavigatorScrollViewport } from '../NavigatorPrimitives';
-import { X } from 'lucide-react';
+import { NavigatorPanel, NavigatorPanelStack, NavigatorScrollViewport, PixelIcon } from '../NavigatorPrimitives';
 
 interface NavigatorRoomSettingsTabViewProps
 {
@@ -77,7 +76,7 @@ export const NavigatorRoomSettingsRightsTabView: FC<NavigatorRoomSettingsTabView
                                         className="rounded p-0.5 opacity-0 transition-opacity hover:bg-error-lighter group-hover:opacity-100"
                                         onClick={ () => SendMessageComposer(new RoomTakeRightsComposer(id)) }
                                     >
-                                        <X className="size-3 text-error-base" />
+                                        <PixelIcon src="/navigator/icons/sign-red.png" size="size-3" alt="Entfernen" />
                                     </button>
                                 </div>
                             )) }

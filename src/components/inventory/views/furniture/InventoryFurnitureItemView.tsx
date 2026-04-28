@@ -1,7 +1,7 @@
 import { MouseEventType } from '@nitrots/nitro-renderer';
 import { ComponentProps, FC, MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Check } from 'lucide-react';
-import { attemptItemPlacement, GetSessionDataManager, GroupItem } from '../../../../api';
+import { attemptItemPlacement, GetSessionDataManager, getExternalImagePhotoUrl, GroupItem } from '../../../../api';
 import { useInventoryFurni } from '../../../../hooks';
 import { useInventoryCategories } from '../../../../hooks/inventory/useInventoryCategories';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
@@ -111,6 +111,8 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
         ? `${ (floorData as any)?.customParams?.split(',')[0] || '1' }×${ (floorData as any)?.customParams?.split(',')[1] || '1' }`
         : 'Wand';
 
+    const photoUrl = getExternalImagePhotoUrl(groupItem);
+
     return (
         <>
             <AlignTooltip.Provider delayDuration={ 350 }>
@@ -130,7 +132,17 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
                             onDoubleClick={ onMouseEvent }
                             onContextMenu={ multiSelectMode ? undefined : onContextMenu }
                         >
-                            { !imgError ? (
+                            { imgError ? (
+                                <Box className="size-4 text-text-soft-400" />
+                            ) : photoUrl ? (
+                                <img
+                                    className="pointer-events-none size-full rounded-[2px] object-contain p-[2px]"
+                                    src={ photoUrl }
+                                    alt=""
+                                    loading="lazy"
+                                    onError={ () => setImgError(true) }
+                                />
+                            ) : (
                                 <img
                                     className="pointer-events-none size-9 object-contain"
                                     style={ { imageRendering: 'pixelated' } }
@@ -138,8 +150,6 @@ export const InventoryFurnitureItemView: FC<InventoryFurnitureItemViewProps> = p
                                     alt=""
                                     onError={ () => setImgError(true) }
                                 />
-                            ) : (
-                                <Box className="size-4 text-text-soft-400" />
                             ) }
                             { groupItem.hasUnseenItems && (
                                 <span className="absolute left-1 top-1 z-[3] size-1.5 rounded-full bg-information-base" />

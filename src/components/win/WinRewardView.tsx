@@ -398,6 +398,16 @@ export const WinRewardView: FC<{}> = () =>
         }
     }, [ selectedCurrency, selectedItem, current, claiming ]);
 
+    // Hooks (must run before any conditional return below).
+    const claimedAmount = useCountUp(
+        current && selectedCurrency
+            ? selectedCurrency === 'credits' ? current.credits
+                : selectedCurrency === 'pixels' ? current.pixels
+                    : current.points
+            : 0,
+        800,
+    );
+
     if(!current) return null;
 
     const currencies: CurrencyMeta[] = [
@@ -437,7 +447,6 @@ export const WinRewardView: FC<{}> = () =>
     ];
 
     const selectedCurrencyMeta = currencies.find(c => c.key === selectedCurrency);
-    const claimedAmount = useCountUp(selectedCurrencyMeta?.amount ?? 0, 800);
 
     return (
         <div className="fixed inset-0 z-[250] flex items-center justify-center bg-bg-strong-950/70 backdrop-blur-xl pointer-events-auto">

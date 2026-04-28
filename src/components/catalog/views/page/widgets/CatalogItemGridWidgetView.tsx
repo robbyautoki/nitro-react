@@ -2,6 +2,7 @@ import { FC, HTMLAttributes, MouseEvent, useEffect, useRef, useState } from 'rea
 import { IPurchasableOffer, ProductTypeEnum } from '../../../../../api';
 import { useCatalog } from '../../../../../hooks';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
+import { CATALOG_GRID_CLASSES, CATALOG_GRID_CONTAINER_CLASSES } from '../common/CatalogGridStyles';
 
 interface CatalogItemGridWidgetViewProps extends HTMLAttributes<HTMLDivElement>
 {
@@ -89,17 +90,21 @@ export const CatalogItemGridWidgetView: FC<CatalogItemGridWidgetViewProps> = pro
     }
 
     return (
-        <div ref={ elementRef } className={ `grid grid-cols-[repeat(auto-fill,82px)] gap-2 overflow-y-auto p-3 ${ className }` } { ...rest }>
-            { currentPage.offers && (currentPage.offers.length > 0) && currentPage.offers.map((offer, index) =>
-                <CatalogGridOfferView
-                    key={ index }
-                    itemActive={ (currentOffer && (currentOffer.offerId === offer.offerId)) }
-                    isMultiSelected={ multiSelected.has(offer.offerId) }
-                    offer={ offer }
-                    selectOffer={ selectOffer }
-                />
-            ) }
-            { children }
+        <div className="p-2">
+            <div ref={ elementRef } className={ `${ CATALOG_GRID_CONTAINER_CLASSES } ${ className }` } { ...rest }>
+                <div className={ CATALOG_GRID_CLASSES }>
+                    { currentPage.offers && (currentPage.offers.length > 0) && currentPage.offers.map((offer, index) =>
+                        <CatalogGridOfferView
+                            key={ index }
+                            itemActive={ (currentOffer && (currentOffer.offerId === offer.offerId)) }
+                            isMultiSelected={ multiSelected.has(offer.offerId) }
+                            offer={ offer }
+                            selectOffer={ selectOffer }
+                        />
+                    ) }
+                    { children }
+                </div>
+            </div>
         </div>
     );
 }

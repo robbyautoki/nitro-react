@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
-import ReactSlider from 'react-slider';
 import { GetConfiguration, LocalizeText, WiredFurniType } from '../../../../api';
-import { Column, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import * as AlignInput from '@/align-ui/components/ui/input';
+import { WiredSliderField } from '../WiredSliderField';
 import { WiredActionBaseView } from './WiredActionBaseView';
 
 export const WiredActionMuteUserView: FC<{}> = props =>
@@ -25,19 +25,27 @@ export const WiredActionMuteUserView: FC<{}> = props =>
 
     return (
         <WiredActionBaseView requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_NONE } hasSpecialInput={ true } save={ save }>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('wiredfurni.params.length.minutes', [ 'minutes' ], [ time.toString() ]) }</Text>
-                <ReactSlider
-                    className={ 'nitro-slider' }
+            <div className="space-y-3">
+                <WiredSliderField
+                    label={ LocalizeText('wiredfurni.params.length.minutes', [ 'minutes' ], [ time.toString() ]) }
+                    value={ time }
                     min={ 1 }
                     max={ 10 }
-                    value={ time }
-                    onChange={ event => setTime(event) } />
-            </Column>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('wiredfurni.params.message') }</Text>
-                <input type="text" className="form-control form-control-sm" value={ message } onChange={ event => setMessage(event.target.value) } maxLength={ GetConfiguration<number>('wired.action.mute.user.max.length', 100) } />
-            </Column>
+                    onChange={ setTime }
+                />
+                <div className="space-y-1.5">
+                    <span className="text-label-sm text-text-strong-950">{ LocalizeText('wiredfurni.params.message') }</span>
+                    <AlignInput.Root size="small">
+                        <AlignInput.Wrapper>
+                            <AlignInput.Input
+                                value={ message }
+                                onChange={ event => setMessage(event.target.value) }
+                                maxLength={ GetConfiguration<number>('wired.action.mute.user.max.length', 100) }
+                            />
+                        </AlignInput.Wrapper>
+                    </AlignInput.Root>
+                </div>
+            </div>
         </WiredActionBaseView>
     );
 }

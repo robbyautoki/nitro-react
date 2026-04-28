@@ -1,7 +1,6 @@
 import { RoomSessionEvent } from '@nitrots/nitro-renderer';
 import { FC, useState } from 'react';
 import { useRoomSessionManagerEvent, useSeasonalTheme } from '../../hooks';
-import Grainient from './Grainient';
 
 export const HotelView: FC<{}> = props =>
 {
@@ -27,11 +26,14 @@ export const HotelView: FC<{}> = props =>
 
     return (
         <div className="nitro-hotel-view">
-            <Grainient
-                color1="#d856bf"
-                color2="#0e5ea5"
-                color3="#131318"
-            />
+            <picture className="nitro-hotel-view__bg" aria-hidden="true">
+                <source srcSet="/hotel-bg@2x.webp" type="image/webp" media="(min-width: 1920px)" />
+                <source srcSet="/hotel-bg.webp" type="image/webp" />
+                <img src="/hotel-bg.jpg" alt="" loading="eager" decoding="async" />
+            </picture>
+            <div className="nitro-hotel-view__top-glow" aria-hidden="true" />
+            <div className="nitro-hotel-view__vignette" aria-hidden="true" />
+            <div className="nitro-hotel-view__grain" aria-hidden="true" />
         </div>
     );
 }

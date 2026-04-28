@@ -35,3 +35,127 @@
 .room-info {
     width: 275px;
 }
+
+// ── Spotlight Highlight ───────────────────────────────────────────────────────
+// Linear/Notion-Style: 3px Side-Accent links + 4% Horizontal-Gradient-Tint.
+// AlignUI-konform, ruhig, hebt Spotlight-Items aus der Liste ohne sie einzurahmen.
+.nitro-room-spotlight {
+    background-image: linear-gradient(
+        to right,
+        hsl(var(--align-feature-base, var(--align-primary-base)) / 0.06) 0%,
+        hsl(var(--align-feature-base, var(--align-primary-base)) / 0.02) 30%,
+        transparent 60%
+    );
+}
+
+.nitro-room-spotlight::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background: hsl(var(--align-feature-base, var(--align-primary-base)));
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 6px hsl(var(--align-feature-base, var(--align-primary-base)) / 0.5);
+    pointer-events: none;
+}
+
+// ── Spotlight Icon Glow (Sparkles neben Raumname) ─────────────────────────────
+.nav-spotlight-icon {
+    animation: nav-spotlight-glow 2.4s ease-in-out infinite;
+    filter: drop-shadow(0 0 3px hsl(var(--align-feature-base, var(--align-primary-base)) / 0.6));
+}
+
+@keyframes nav-spotlight-glow {
+    0%, 100% {
+        opacity: 1;
+        filter: drop-shadow(0 0 3px hsl(var(--align-feature-base, var(--align-primary-base)) / 0.6));
+    }
+    50% {
+        opacity: 0.7;
+        filter: drop-shadow(0 0 6px hsl(var(--align-feature-base, var(--align-primary-base)) / 0.85));
+    }
+}
+
+// ── Hot-Pulse Dot (auf Thumbnails) ────────────────────────────────────────────
+.nav-hot-pulse {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+    animation: nav-hot-pulse 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes nav-hot-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+        transform: scale(1.15);
+    }
+}
+
+// ── Hot-Icon Wiggle (Flame neben Raumname) ────────────────────────────────────
+.nav-hot-icon {
+    animation: nav-hot-wiggle 2.4s ease-in-out infinite;
+    transform-origin: center bottom;
+}
+
+@keyframes nav-hot-wiggle {
+    0%, 100% { transform: rotate(-3deg); }
+    25%      { transform: rotate(4deg); }
+    50%      { transform: rotate(-2deg); }
+    75%      { transform: rotate(3deg); }
+}
+
+// ── Count-Pill Flash (when userCount changes) ─────────────────────────────────
+.nav-count-pill {
+    animation: nav-count-flash 0.45s ease-out;
+}
+
+@keyframes nav-count-flash {
+    0%   { transform: scale(1); filter: brightness(1.4); }
+    40%  { transform: scale(1.06); filter: brightness(1.2); }
+    100% { transform: scale(1); filter: brightness(1); }
+}
+
+// ── Live Pulse Dot (Header Stats) ─────────────────────────────────────────────
+.nav-pulse-dot {
+    animation: nav-pulse-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes nav-pulse-dot {
+    0%, 100% { opacity: 1;   transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(0.85); }
+}
+
+// ── No Scrollbar Helper ───────────────────────────────────────────────────────
+.nav-no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.nav-no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+// ── Thumbnail Fill (für Preview-Card + Official-Banner) ───────────────────────
+// Killt das Default-110×110-Placeholder-Background von .room-thumbnail
+// und stretcht das innere <img> auf 100% mit object-fit: cover.
+.nav-thumb-fill {
+    background-image: none !important;
+
+    > img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        display: block !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-hot-pulse,
+    .nav-hot-icon,
+    .nav-count-pill,
+    .nav-pulse-dot,
+    .nav-spotlight-icon { animation: none; }
+}

@@ -14,6 +14,38 @@
     }
 }
 
+/* ─── Phase 11.8: Vignette-Backdrop für Default-/Alert-/Moderation-Modals ──
+ * Wird in `NotificationCenterView` gerendert, sobald ein Default-Alert
+ * (Hotel-Nachricht, "Du bist frei!", Moderator-Hinweis) offen ist. MOTD,
+ * Staff-Online, Nitro, Search lösen den Backdrop NICHT aus. Klick auf den
+ * Backdrop schließt nichts (`pointer-events: none`).
+ */
+.nitro-default-alert-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: $notification-center-zindex - 1;
+    pointer-events: auto;
+    cursor: default;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(0, 0, 0, 0.72) 45%,
+        rgba(0, 0, 0, 0.86) 100%
+    );
+    animation: nitro-default-alert-backdrop-in 200ms ease-out both;
+}
+
+@keyframes nitro-default-alert-backdrop-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nitro-default-alert-backdrop {
+        animation: none;
+    }
+}
+
 .nitro-alert {
     max-height: 350px;
 
@@ -34,67 +66,77 @@
     }
 }
 
+/* ─── Phase 11.6: Unified Toast-Stack ─────────────────────────────────────
+ * EIN Container rechts oben für ALLE Toasts (Anti-Cheat, MOTD, Siren,
+ * Mugshot, Staff-Online, Wins, Bubbles). Optik der einzelnen Karten bleibt
+ * unverändert — der Stack stellt nur Position + max-height bereit, sodass
+ * nichts mehr die Float Bar überlappt und alle Toasts in EINER Spalte
+ * untereinander stapeln.
+ */
+.nitro-toast-stack-unified {
+    position: fixed;
+    top: var(--notification-top-offset, 8px);
+    right: calc(var(--drawer-width, 0px) + 12px);
+    z-index: $notification-center-zindex;
+    display: flex;
+    width: min(360px, calc(100vw - 24px));
+    max-height: calc(100vh - var(--notification-top-offset, 8px) - var(--bottom-bar-height, 80px) - 16px);
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    pointer-events: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    isolation: isolate;
+    scrollbar-width: thin;
+
+    > * {
+        pointer-events: auto;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .nitro-toast-stack-unified {
+        width: calc(100vw - 24px);
+    }
+}
+
+/* ─── Bubble-Card (NotificationDefaultBubbleView) ─────────────────────── */
+
 .nitro-notification-bubble {
     pointer-events: all;
     max-width: 320px;
 }
 
-.nitro-toast-stack {
-    position: fixed;
-    top: calc(var(--topbar-height, 60px) + 12px);
-    right: calc(12px + var(--drawer-open, 0) * (440px + 12px));
-    z-index: 78;
-    display: flex;
-    width: 400px;
-    max-width: calc(100vw - 24px);
-    flex-direction: column;
-    gap: 10px;
-    pointer-events: none;
-    transition: right 220ms cubic-bezier(0.16, 1, 0.3, 1);
-
-    > * {
-        pointer-events: auto;
-    }
-}
-
-@media (max-width: 768px) {
-    .nitro-toast-stack {
-        width: calc(100vw - 24px);
-        right: 12px;
-    }
-}
-
 .nitro-notification-bubble-card {
-    contain: layout paint;
+    flex-shrink: 0;
     transform-origin: top right;
-    max-height: 220px;
+    max-height: 160px;
     overflow: hidden;
     opacity: 0;
     filter: blur(2px);
-    transform: translate3d(18px, -4px, 0) scale(0.98);
+    margin-top: 0;
     transition:
         opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
-        transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
         filter 160ms ease-out,
-        max-height 180ms ease-out,
-        margin 180ms ease-out;
-    will-change: opacity, transform, max-height;
+        max-height 200ms ease-out,
+        margin-top 200ms ease-out;
+    will-change: opacity, max-height, margin-top;
 }
 
 .nitro-notification-bubble-card.is-visible {
-    max-height: 220px;
+    max-height: 160px;
     opacity: 1;
     filter: blur(0);
-    transform: translate3d(0, 0, 0) scale(1);
 }
 
 .nitro-notification-bubble-card.is-closing {
     max-height: 0;
-    margin-top: -4px;
+    margin-top: -8px;
     opacity: 0;
     pointer-events: none;
     filter: blur(2px);
-    transform: translate3d(18px, -4px, 0) scale(0.98);
 }
 
 .nitro-notification-bubble-progress {
@@ -116,48 +158,37 @@
     animation-play-state: paused;
 }
 
-.nitro-motd-toast-stack {
-    position: fixed;
-    top: var(--notification-top-offset, 8px);
-    right: calc(var(--drawer-width, 0px) + 12px);
-    z-index: $notification-center-zindex;
-    display: flex;
-    width: min(460px, calc(100vw - 24px));
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 10px;
-    pointer-events: none;
-}
+/* ─── MOTD-Toast (NotificationMotdAlertView) ──────────────────────────── */
 
 .nitro-motd-toast {
-    contain: layout paint;
+    flex-shrink: 0;
     transform-origin: top right;
-    max-height: 340px;
+    max-height: 260px;
     opacity: 0;
     filter: blur(2px);
-    transform: translate3d(18px, -4px, 0) scale(0.98);
+    margin-top: 0;
     transition:
         opacity 160ms cubic-bezier(0.16, 1, 0.3, 1),
-        transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
         filter 160ms ease-out,
-        max-height 180ms ease-out;
-    will-change: opacity, transform, max-height;
+        max-height 180ms ease-out,
+        margin-top 180ms ease-out;
+    will-change: opacity, max-height, margin-top;
 }
 
 .nitro-motd-toast.is-visible {
-    max-height: 340px;
+    max-height: 260px;
     opacity: 1;
     filter: blur(0);
-    transform: translate3d(0, 0, 0) scale(1);
     animation: nitro-motd-toast-enter 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .nitro-motd-toast.is-closing {
     max-height: 0;
+    margin-top: -8px;
     opacity: 0;
     pointer-events: none;
     filter: blur(2px);
-    transform: translate3d(18px, -4px, 0) scale(0.98);
+    overflow: hidden;
 }
 
 .nitro-motd-toast-progress-bar {
@@ -175,23 +206,17 @@
 @keyframes nitro-motd-toast-enter {
     from {
         opacity: 0;
-        transform: translate3d(16px, -4px, 0) scale(0.98);
+        filter: blur(2px);
     }
-
     to {
         opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
+        filter: blur(0);
     }
 }
 
 @keyframes nitro-motd-toast-progress {
-    from {
-        transform: scaleX(1);
-    }
-
-    to {
-        transform: scaleX(0);
-    }
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -202,4 +227,191 @@
         filter: none;
         transform: none;
     }
+}
+
+/* ─── Staff-Online Toast (NotificationStaffOnlineAlertView) ───────────── */
+
+.staff-online-toast {
+    contain: layout paint;
+    position: relative;
+    transform-origin: top right;
+    max-height: 160px;
+    opacity: 0;
+    filter: blur(2px);
+    transform: translate3d(18px, -4px, 0) scale(0.98);
+    transition:
+        opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+        transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+        filter 200ms ease-out,
+        max-height 220ms ease-out;
+    will-change: opacity, transform, max-height, box-shadow;
+    border: 1px solid hsl(var(--align-stroke-soft-200));
+}
+
+.staff-online-toast.is-visible {
+    max-height: 160px;
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+    animation:
+        staff-online-toast-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both,
+        staff-online-toast-pulse 1600ms ease-out 220ms 2 both;
+}
+
+.staff-online-toast.is-closing {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    filter: blur(2px);
+    transform: translate3d(18px, -4px, 0) scale(0.98);
+}
+
+.staff-online-toast__shimmer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: inherit;
+    z-index: 0;
+}
+
+.staff-online-toast.is-visible .staff-online-toast__shimmer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        110deg,
+        transparent 0%,
+        transparent 35%,
+        rgba(255, 255, 255, 0.42) 50%,
+        transparent 65%,
+        transparent 100%
+    );
+    transform: translateX(-110%);
+    animation: staff-online-shimmer 1400ms cubic-bezier(0.22, 0.61, 0.36, 1) 320ms 1 forwards;
+}
+
+.staff-online-avatar {
+    position: relative;
+    z-index: 1;
+}
+
+.staff-online-avatar::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 9999px;
+    pointer-events: none;
+    border: 2px solid currentColor;
+    opacity: 0.85;
+}
+
+.staff-online-ring--mod {
+    color: hsl(var(--align-information-base));
+}
+
+.staff-online-ring--admin {
+    color: hsl(var(--align-warning-base));
+}
+
+.staff-online-ring--owner {
+    color: hsl(var(--align-feature-base));
+}
+
+.staff-online-eyebrow {
+    color: hsl(var(--align-text-soft-400));
+}
+
+.staff-online-glow--mod .staff-online-eyebrow {
+    color: hsl(var(--align-information-base));
+}
+
+.staff-online-glow--admin .staff-online-eyebrow {
+    color: hsl(var(--align-warning-base));
+}
+
+.staff-online-glow--owner .staff-online-eyebrow {
+    color: hsl(var(--align-feature-base));
+}
+
+.staff-online-glow--mod {
+    --staff-glow-color: var(--align-information-base);
+}
+
+.staff-online-glow--admin {
+    --staff-glow-color: var(--align-warning-base);
+}
+
+.staff-online-glow--owner {
+    --staff-glow-color: var(--align-feature-base);
+}
+
+.staff-online-toast__progress {
+    height: 2px;
+    overflow: hidden;
+    background: hsl(var(--align-bg-soft-200));
+}
+
+.staff-online-toast__progress-bar {
+    height: 100%;
+    width: 100%;
+    transform-origin: left center;
+    background: hsl(var(--staff-glow-color, var(--align-information-base)));
+    animation-name: staff-online-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+}
+
+.staff-online-toast:hover .staff-online-toast__progress-bar,
+.staff-online-toast:focus-within .staff-online-toast__progress-bar {
+    animation-play-state: paused;
+}
+
+@keyframes staff-online-toast-enter {
+    from {
+        opacity: 0;
+        transform: translate3d(16px, -4px, 0) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes staff-online-toast-pulse {
+    0%   { box-shadow: 0 0 0 0 hsl(var(--staff-glow-color) / 0.55), 0 8px 24px rgba(0, 0, 0, 0.10); }
+    70%  { box-shadow: 0 0 0 14px hsl(var(--staff-glow-color) / 0), 0 8px 24px rgba(0, 0, 0, 0.10); }
+    100% { box-shadow: 0 0 0 0 hsl(var(--staff-glow-color) / 0), 0 8px 24px rgba(0, 0, 0, 0.10); }
+}
+
+@keyframes staff-online-shimmer {
+    0%   { transform: translateX(-110%); }
+    100% { transform: translateX(110%); }
+}
+
+@keyframes staff-online-progress {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .staff-online-toast,
+    .staff-online-toast.is-visible,
+    .staff-online-toast__shimmer::before {
+        animation: none;
+        transition: opacity 80ms linear;
+        filter: none;
+        transform: none;
+    }
+}
+
+/* ─── Anti-Cheat Toast Animation Keyframes (lokal in Komponente referenziert) ── */
+
+@keyframes jail-toast-in {
+    from { opacity: 0; transform: translateX(40px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes jail-toast-out {
+    to { opacity: 0; transform: translateX(40px); }
 }

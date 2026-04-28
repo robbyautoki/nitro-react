@@ -1,12 +1,10 @@
 import { FC, useCallback } from 'react';
-import { FaCopy } from 'react-icons/fa';
-import { X } from 'lucide-react';
 import { GetConfiguration, LocalizeText } from '../../../api';
 import { DraggableWindow, DraggableWindowPosition, LayoutRoomThumbnailView } from '../../../common';
 import { useNavigator } from '../../../hooks';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignSurface from '@/align-ui/components/ui/surface';
-import { NavigatorTextInput } from './NavigatorPrimitives';
+import { NavCloseIcon, NavLinkIcon, NavigatorTextInput } from './NavigatorPrimitives';
 
 export class NavigatorRoomLinkViewProps
 {
@@ -35,7 +33,7 @@ export const NavigatorRoomLinkView: FC<NavigatorRoomLinkViewProps> = props =>
                 <div className="drag-handler flex h-9 shrink-0 cursor-grab items-center justify-between border-b border-stroke-soft-200 px-3 active:cursor-grabbing">
                     <span className="truncate text-label-xs text-text-strong-950">{ LocalizeText('navigator.embed.title') }</span>
                     <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onMouseDown={ event => event.stopPropagation() } onClick={ onCloseClick }>
-                        <AlignButton.Icon as={ X } className="size-4" />
+                        <AlignButton.Icon as={ NavCloseIcon } className="size-4" />
                     </AlignButton.Root>
                 </div>
                 <div className="flex items-start gap-3 p-3">
@@ -58,7 +56,7 @@ export const NavigatorRoomLinkView: FC<NavigatorRoomLinkViewProps> = props =>
                                 className="size-8 shrink-0 p-0"
                                 onClick={ copyToClipboard }
                             >
-                                <AlignButton.Icon as={ FaCopy } className="size-3.5" />
+                                <AlignButton.Icon as={ NavLinkIcon } className="size-3.5" />
                             </AlignButton.Root>
                         </div>
                     </div>

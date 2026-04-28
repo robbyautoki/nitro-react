@@ -199,10 +199,13 @@
   --color-stable-lighter: hsl(var(--align-stable-lighter));
   --color-overlay: hsl(var(--align-overlay));
   --radius-10: .625rem;
+  --radius-12: .75rem;
+  --radius-16: 1rem;
   --radius-20: 1.25rem;
   --shadow-regular-xs: 0 1px 2px 0 hsl(220 36% 7% / 3%);
   --shadow-regular-sm: 0 2px 4px hsl(210 4% 11% / 4%);
   --shadow-regular-md: 0 16px 32px -12px hsl(220 36% 7% / 10%);
+  --shadow-toggle-switch: 0 6px 10px 0 hsl(220 36% 7% / 6%), 0 2px 4px 0 hsl(220 36% 7% / 3%);
   --shadow-tooltip: 0 12px 24px 0 hsl(220 36% 7% / 6%), 0 1px 2px 0 hsl(220 36% 7% / 3%);
   --shadow-button-primary-focus: 0 0 0 2px hsl(var(--align-bg-white-0)), 0 0 0 4px hsl(var(--align-primary-alpha-10));
   --shadow-button-important-focus: 0 0 0 2px hsl(var(--align-bg-white-0)), 0 0 0 4px hsl(var(--align-neutral-alpha-16));
@@ -312,12 +315,13 @@
   --align-neutral-alpha-16: 0 0% 63.92% / 16%;
   --align-neutral-alpha-10: 0 0% 63.92% / 10%;
   --align-red-alpha-10: 354.8 96.08% 60% / 10%;
-  --align-primary-dark: 148.47 72.84% 15.88%;
-  --align-primary-darker: 148.21 71.78% 31.96%;
-  --align-primary-base: 148.15 72.32% 43.92%;
-  --align-primary-alpha-24: 148.15 72.32% 43.92% / 24%;
-  --align-primary-alpha-16: 148.15 72.32% 43.92% / 16%;
-  --align-primary-alpha-10: 148.15 72.32% 43.92% / 10%;
+  /* Bahhos Brand Primary = Orange (synchron mit CMS --orange-500/700/800) */
+  --align-primary-dark: 24.07 83.92% 39.02%;
+  --align-primary-darker: 24.26 83.93% 43.92%;
+  --align-primary-base: 24 95.74% 53.92%;
+  --align-primary-alpha-24: 24 95.74% 53.92% / 24%;
+  --align-primary-alpha-16: 24 95.74% 53.92% / 16%;
+  --align-primary-alpha-10: 24 95.74% 53.92% / 10%;
   --align-static-black: var(--align-neutral-950);
   --align-static-white: var(--align-neutral-0);
   --align-bg-strong-950: var(--align-neutral-950);

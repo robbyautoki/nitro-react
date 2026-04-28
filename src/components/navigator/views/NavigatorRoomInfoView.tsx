@@ -9,8 +9,21 @@ import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignSurface from '@/align-ui/components/ui/surface';
 import * as AlignTooltip from '@/align-ui/components/ui/tooltip';
 import { cn } from '@/align-ui/utils/cn';
-import { Home, Star, Settings, Link2, Camera, Users, Copy, Check, MessageCircle, Flag, VolumeX, Volume2, Filter, LayoutGrid, Shield, ArrowLeft, X } from 'lucide-react';
-import { NavigatorPanel, NavigatorPanelStack, NavigatorScrollViewport, NavigatorTabButton, NavigatorTextInput } from './NavigatorPrimitives';
+import { ArrowLeft, Filter, LayoutGrid, Volume2, VolumeX } from 'lucide-react';
+import {
+    NavCameraIcon,
+    NavCheckIcon,
+    NavCloseIcon,
+    NavLinkIcon,
+    NavSettingsIcon,
+    NavWarningIcon,
+    NavigatorPanel,
+    NavigatorPanelStack,
+    NavigatorScrollViewport,
+    NavigatorTabButton,
+    NavigatorTextInput,
+    PixelIcon,
+} from './NavigatorPrimitives';
 import { NavigatorRoomSettingsBasicTabView } from './room-settings/NavigatorRoomSettingsBasicTabView';
 import { NavigatorRoomSettingsAccessTabView } from './room-settings/NavigatorRoomSettingsAccessTabView';
 import { NavigatorRoomSettingsRightsTabView } from './room-settings/NavigatorRoomSettingsRightsTabView';
@@ -35,7 +48,7 @@ function ActivityBar({ userCount, maxUsers }: { userCount: number; maxUsers: num
 
     return (
         <div className="flex items-center gap-1.5 w-full">
-            <MessageCircle className="size-3 shrink-0 text-text-soft-400" />
+            <PixelIcon src="/navigator/icons/chat.png" size="size-3" alt="Aktivität" />
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-bg-weak-50">
                 <div className={ `h-full rounded-full transition-all ${ barColor }` } style={ { width: `${ Math.max(pct, 2) }%` } } />
             </div>
@@ -277,7 +290,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                             { view === 'info' ? 'Rauminformationen' : 'Raumeinstellungen' }
                         </span>
                         <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ () => processAction('close') }>
-                            <AlignButton.Icon as={ X } className="size-4" />
+                            <AlignButton.Icon as={ NavCloseIcon } className="size-4" />
                         </AlignButton.Root>
                     </div>
                     <NavigatorScrollViewport className="max-h-[500px] p-2.5">
@@ -299,7 +312,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                                                     className="absolute left-1.5 top-1.5 size-6 p-0 bg-bg-white-0/90"
                                                                     onClick={ () => processAction('open_room_thumbnail_camera') }
                                                                 >
-                                                                    <AlignButton.Icon as={ Camera } className="size-3" />
+                                                                    <AlignButton.Icon as={ NavCameraIcon } className="size-3" />
                                                                 </AlignButton.Root>
                                                             </AlignTooltip.Trigger>
                                                             <AlignTooltip.Content side="bottom" size="xsmall">Thumbnail ändern</AlignTooltip.Content>
@@ -313,8 +326,8 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                                 <div className="flex min-w-0 items-center gap-1.5">
                                                     <AlignTooltip.Root>
                                                         <AlignTooltip.Trigger asChild>
-                                                            <button type="button" onClick={ () => processAction('set_home_room') } className="shrink-0">
-                                                                <Home className={ cn('size-3.5 transition-colors', isHome ? 'fill-warning-base text-warning-base' : 'text-text-soft-400 hover:text-text-sub-600') } />
+                                                            <button type="button" onClick={ () => processAction('set_home_room') } className={ cn('shrink-0 transition-opacity', isHome ? 'opacity-100' : 'opacity-50 hover:opacity-100') }>
+                                                                <PixelIcon src="/navigator/icons/house.png" size="size-3.5" alt={ isHome ? 'Heimraum' : 'Als Heimraum setzen' } />
                                                             </button>
                                                         </AlignTooltip.Trigger>
                                                         <AlignTooltip.Content side="bottom" size="xsmall">
@@ -328,7 +341,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                                         <AlignTooltip.Root>
                                                             <AlignTooltip.Trigger asChild>
                                                                 <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ () => processAction('open_room_settings') }>
-                                                                    <AlignButton.Icon as={ Settings } className="size-3.5" />
+                                                                    <AlignButton.Icon as={ NavSettingsIcon } className="size-3.5" />
                                                                 </AlignButton.Root>
                                                             </AlignTooltip.Trigger>
                                                             <AlignTooltip.Content side="bottom" size="xsmall">Raumeinstellungen</AlignTooltip.Content>
@@ -337,7 +350,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                                     <AlignTooltip.Root>
                                                         <AlignTooltip.Trigger asChild>
                                                             <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xxsmall" className="size-7 p-0" onClick={ () => setShowLink(prev => !prev) }>
-                                                                <AlignButton.Icon as={ Link2 } className="size-3.5" />
+                                                                <AlignButton.Icon as={ NavLinkIcon } className="size-3.5" />
                                                             </AlignButton.Root>
                                                         </AlignTooltip.Trigger>
                                                         <AlignTooltip.Content side="bottom" size="xsmall">Raum-Link</AlignTooltip.Content>
@@ -353,7 +366,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                             ) }
                                             <div className="flex items-center gap-1 text-subheading-2xs">
                                                 <span className="text-text-sub-600">Bewertung:</span>
-                                                <Star className="size-3 fill-warning-base text-warning-base" />
+                                                <PixelIcon src="/navigator/icons/like-room.png" size="size-3" alt="Bewertung" />
                                                 <span className="font-medium text-text-strong-950">{ navigatorData.currentRoomRating }</span>
                                             </div>
                                             { room.tags.length > 0 && (
@@ -376,7 +389,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                                     className="mt-0.5 flex items-center gap-1 text-subheading-2xs text-primary-base transition-colors hover:text-primary-darker hover:underline"
                                                     onClick={ () => processAction('open_group_info') }
                                                 >
-                                                    <Shield className="size-3" />
+                                                    <PixelIcon src="/navigator/icons/admin-shield.png" size="size-3" alt="Gruppe" />
                                                     { LocalizeText('navigator.guildbase', [ 'groupName' ], [ room.groupName ]) }
                                                 </button>
                                             ) }
@@ -388,7 +401,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                         <div className="flex items-center gap-2">
                                             <NavigatorTextInput readOnly value={ roomLink } rootClassName="flex-1" className="font-mono" onClick={ e => (e.target as HTMLInputElement).select() } />
                                             <AlignButton.Root type="button" variant="neutral" mode="stroke" size="xsmall" className="size-8 shrink-0 p-0" onClick={ handleCopyLink }>
-                                                <AlignButton.Icon as={ linkCopied ? Check : Copy } className={ cn('size-3.5', linkCopied && 'text-success-base') } />
+                                                <AlignButton.Icon as={ linkCopied ? NavCheckIcon : NavLinkIcon } className={ cn('size-3.5', linkCopied && 'text-success-base') } />
                                             </AlignButton.Root>
                                         </div>
                                     </NavigatorPanel>
@@ -397,12 +410,12 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                     <div className="flex flex-col gap-1">
                                         { hasPermission('staff_pick') && (
                                             <AlignButton.Root type="button" variant="neutral" mode="ghost" size="xsmall" className="w-full justify-center" onClick={ () => processAction('toggle_pick') }>
-                                                <AlignButton.Icon as={ Star } className={ cn('size-3.5', isRoomPicked && 'fill-warning-base text-warning-base') } />
+                                                <PixelIcon src={ isRoomPicked ? '/navigator/icons/pin-on.png' : '/navigator/icons/pin-off.png' } size="size-3.5" alt={ isRoomPicked ? 'Staff-Pick' : 'Nicht gepickt' } />
                                                 { isRoomPicked ? 'Staff-Pick entfernen' : 'Als Staff-Pick markieren' }
                                             </AlignButton.Root>
                                         ) }
                                         <AlignButton.Root type="button" variant="error" mode="ghost" size="xsmall" className="w-full justify-center" onClick={ () => processAction('report_room') }>
-                                            <AlignButton.Icon as={ Flag } className="size-3.5" />
+                                            <AlignButton.Icon as={ NavWarningIcon } className="size-3.5" />
                                             Diesen Raum melden
                                         </AlignButton.Root>
                                         { hasPermission('settings') && (
@@ -428,7 +441,7 @@ export const NavigatorRoomInfoView: FC<NavigatorRoomInfoViewProps> = props =>
                                 <NavigatorPanel className="space-y-2">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-1.5">
-                                            <Users className="size-3.5 text-text-sub-600" />
+                                            <PixelIcon src="/navigator/icons/user.png" size="size-3.5" alt="Besucher" />
                                             <span className="text-subheading-2xs text-text-sub-600">
                                                 { room.userCount }/{ room.maxUsers } Besucher
                                             </span>

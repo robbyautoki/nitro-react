@@ -5,8 +5,7 @@ import { useMessageEvent, useNavigator, useNotification } from '../../../../hook
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignCheckbox from '@/align-ui/components/ui/checkbox';
 import * as AlignSelect from '@/align-ui/components/ui/select';
-import { Trash2 } from 'lucide-react';
-import { NavigatorPanel, NavigatorPanelStack, NavigatorTextInput, NavigatorTextarea } from '../NavigatorPrimitives';
+import { NavTrashIcon, NavigatorPanel, NavigatorPanelStack, NavigatorTextInput, NavigatorTextarea } from '../NavigatorPrimitives';
 
 const Checkbox = AlignCheckbox.Root;
 const Select = AlignSelect.Root;
@@ -170,7 +169,7 @@ export const NavigatorRoomSettingsBasicTabView: FC<NavigatorRoomSettingsTabViewP
                     </div>
                     <div className="flex justify-center pt-1">
                         <AlignButton.Root type="button" variant="error" mode="ghost" size="xsmall" onClick={ deleteRoom }>
-                            <AlignButton.Icon as={ Trash2 } className="size-3.5" />
+                            <AlignButton.Icon as={ NavTrashIcon } className="size-3.5" />
                             { LocalizeText('navigator.roomsettings.delete') }
                         </AlignButton.Root>
                     </div>

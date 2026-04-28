@@ -1,8 +1,8 @@
 import { AvatarDirectionAngle } from '@nitrots/nitro-renderer';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { FC, useEffect, useState } from 'react';
 import { FigureData } from '../../../api';
 import { Base, Column, LayoutAvatarImageView } from '../../../common';
-import { AvatarEditorIcon } from './AvatarEditorIcon';
 
 export interface AvatarEditorFigurePreviewViewProps
 {
@@ -43,12 +43,16 @@ export const AvatarEditorFigurePreviewView: FC<AvatarEditorFigurePreviewViewProp
 
     return (
         <Column className="figure-preview-container" overflow="hidden" position="relative">
-            <LayoutAvatarImageView figure={ figureData.getFigureString() } direction={ figureData.direction } scale={ 2 } />
-            <AvatarEditorIcon className="avatar-spotlight" icon="spotlight" />
+            <Base className="avatar-stage-glow" />
+            <LayoutAvatarImageView figure={ figureData.getFigureString() } direction={ figureData.direction } scale={ 2.5 } />
             <Base className="avatar-shadow" />
             <Base className="arrow-container">
-                <AvatarEditorIcon pointer icon="arrow-left" onClick={ event => rotateFigure(figureData.direction + 1) } />
-                <AvatarEditorIcon pointer icon="arrow-right" onClick={ event => rotateFigure(figureData.direction - 1) } />
+                <button type="button" aria-label="Avatar nach links drehen" onClick={ () => rotateFigure(figureData.direction + 1) }>
+                    <ChevronLeft />
+                </button>
+                <button type="button" aria-label="Avatar nach rechts drehen" onClick={ () => rotateFigure(figureData.direction - 1) }>
+                    <ChevronRight />
+                </button>
             </Base>
         </Column>
     );

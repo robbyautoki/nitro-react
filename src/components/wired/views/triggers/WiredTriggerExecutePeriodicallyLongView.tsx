@@ -1,9 +1,8 @@
 import { FriendlyTime } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useState } from 'react';
-import ReactSlider from 'react-slider';
 import { LocalizeText, WiredFurniType } from '../../../../api';
-import { Column, Text } from '../../../../common';
 import { useWired } from '../../../../hooks';
+import { WiredSliderField } from '../WiredSliderField';
 import { WiredTriggerBaseView } from './WiredTriggerBaseView';
 
 export const WiredTriggeExecutePeriodicallyLongView: FC<{}> = props =>
@@ -18,17 +17,18 @@ export const WiredTriggeExecutePeriodicallyLongView: FC<{}> = props =>
         setTime((trigger.intData.length > 0) ? trigger.intData[0] : 0);
     }, [ trigger ]);
 
+    const formatted = FriendlyTime.format(time * 5).toString();
+
     return (
         <WiredTriggerBaseView requiresFurni={ WiredFurniType.STUFF_SELECTION_OPTION_NONE } hasSpecialInput={ true } save={ save }>
-            <Column gap={ 1 }>
-                <Text bold>{ LocalizeText('wiredfurni.params.setlongtime', [ 'time' ], [ FriendlyTime.format(time * 5).toString() ]) }</Text>
-                <ReactSlider
-                    className={ 'nitro-slider' }
-                    min={ 1 }
-                    max={ 120 }
-                    value={ time }
-                    onChange={ event => setTime(event) } />
-            </Column>
+            <WiredSliderField
+                label={ LocalizeText('wiredfurni.params.setlongtime', [ 'time' ], [ formatted ]) }
+                value={ time }
+                min={ 1 }
+                max={ 120 }
+                onChange={ setTime }
+                valueLabel={ formatted }
+            />
         </WiredTriggerBaseView>
     );
 }

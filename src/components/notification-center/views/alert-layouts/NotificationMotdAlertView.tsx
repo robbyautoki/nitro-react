@@ -80,53 +80,53 @@ export const NotificationMotdAlertView: FC<NotificationMotdAlertViewProps> = pro
     }
 
     return (
-        <div className={ `nitro-motd-toast pointer-events-auto w-full overflow-hidden rounded-2xl bg-bg-white-0 shadow-regular-md ${ isVisible ? 'is-visible' : 'is-closing' }` } role="status" aria-live="polite">
-            <div className="relative flex items-start gap-3 px-5 pt-4 pb-3.5 pr-12">
-                <div className="flex h-[44px] w-[44px] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-information-lighter text-information-base">
+        <div className={ `nitro-motd-toast pointer-events-auto w-full overflow-hidden rounded-xl bg-bg-white-0 shadow-regular-md ${ isVisible ? 'is-visible' : 'is-closing' }` } role="status" aria-live="polite">
+            <div className="relative flex items-start gap-2.5 px-3.5 pt-3 pb-2.5 pr-10">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-information-lighter text-information-base">
                     { hasImage ? (
                         <img src={ item.imageUrl } alt="" onError={ () => setImageFailed(true) } className="h-full w-full object-cover" />
                     ) : (
-                        <RiMegaphoneFill className="size-6" />
+                        <RiMegaphoneFill className="size-5" />
                     ) }
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5 flex-1">
-                    <div className="text-paragraph-xs uppercase tracking-[0.08em] text-text-soft-400">
+                    <div className="text-[10px] uppercase tracking-[0.08em] text-text-soft-400">
                         { eyebrow }
                     </div>
-                    <div className="text-label-md leading-snug text-text-strong-950 truncate">{ title }</div>
+                    <div className="text-label-sm leading-snug text-text-strong-950 truncate">{ title }</div>
                 </div>
                 <AlignCompactButton.Root
                     variant="ghost"
                     size="medium"
-                    className="absolute right-3 top-3"
+                    className="absolute right-2 top-2"
                     aria-label={ LocalizeText('generic.close') }
                     onClick={ closeToast }
                 >
                     <AlignCompactButton.Icon as={ RiCloseLine } />
                 </AlignCompactButton.Root>
             </div>
-            <div className="px-5 pb-4">
-                <div className="max-h-32 space-y-1 overflow-y-auto pr-1 text-paragraph-sm leading-relaxed text-text-sub-600">
+            <div className="px-3.5 pb-3">
+                <div className="max-h-24 space-y-1 overflow-y-auto pr-1 text-paragraph-xs leading-snug text-text-sub-600">
                     { body.length > 0
                         ? body.map((line, index) => <p key={ `${ item?.id ?? 'motd' }-${ index }` }>{ line }</p>)
                         : null
                     }
                 </div>
                 { sender && (
-                    <div className="mt-2 text-right text-paragraph-xs italic text-text-soft-400">
+                    <div className="mt-1.5 text-right text-[10px] italic text-text-soft-400">
                         — { sender }
                     </div>
                 ) }
             </div>
             { hasClickUrl && (
-                <div className="flex items-center justify-end border-t border-stroke-soft-200 px-5 py-3">
+                <div className="flex items-center justify-end border-t border-stroke-soft-200 px-3.5 py-2">
                     <AlignLinkButton.Root variant="primary" size="medium" onClick={ visitUrl }>
                         { item.clickUrlText || LocalizeText('generic.more') }
                         <AlignLinkButton.Icon as={ RiArrowRightLine } />
                     </AlignLinkButton.Root>
                 </div>
             ) }
-            <div className="h-1 overflow-hidden bg-bg-soft-200" aria-hidden="true">
+            <div className="h-[3px] overflow-hidden bg-bg-soft-200" aria-hidden="true">
                 <div
                     className="nitro-motd-toast-progress-bar h-full bg-information-base"
                     style={ { animationDuration: `${ displayDuration }ms` } }

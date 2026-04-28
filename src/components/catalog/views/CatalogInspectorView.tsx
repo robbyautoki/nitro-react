@@ -12,7 +12,6 @@ import { CatalogSpinnerWidgetView } from './page/widgets/CatalogSpinnerWidgetVie
 import { CatalogViewProductWidgetView } from './page/widgets/CatalogViewProductWidgetView';
 import * as AlignButton from '@/align-ui/components/ui/button';
 import * as AlignBadge from '@/align-ui/components/ui/badge';
-import * as Divider from '@/align-ui/components/ui/divider';
 import { X, RotateCw, Eye, Sparkles } from 'lucide-react';
 
 const ZOOM_SIZE = 300;
@@ -124,13 +123,13 @@ export const CatalogInspectorView: FC<{}> = () =>
         const totalPoints = selectedOffers.reduce((sum, o) => sum + o.priceInActivityPoints, 0);
 
         return (
-            <div className="flex w-[340px] shrink-0 flex-col overflow-y-auto border-l border-stroke-soft-200 bg-bg-weak-50" style={ { scrollbarWidth: 'thin' } }>
-                <div className="p-4 flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                        <span className="text-title-h5 text-text-strong-950">{ selectedOffers.length }</span>
-                        <span className="text-paragraph-xs text-text-sub-600">Items ausgewählt</span>
+            <div className="flex h-full w-[340px] shrink-0 flex-col overflow-hidden bg-bg-weak-50 p-3 pl-1.5">
+                <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden rounded-2xl bg-bg-white-0 p-4 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200">
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-title-h4 text-text-strong-950 leading-none">{ selectedOffers.length }</span>
+                        <span className="text-paragraph-sm text-text-sub-600">Items ausgewählt</span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto" style={ { scrollbarWidth: 'thin' } }>
                         { selectedOffers.map((offer) =>
                         {
                             const iconUrl = (offer.pricingModel !== Offer.PRICING_MODEL_BUNDLE && offer.product)
@@ -139,7 +138,7 @@ export const CatalogInspectorView: FC<{}> = () =>
                             return (
                                 <div
                                     key={ offer.offerId }
-                                    className="flex size-12 items-center justify-center overflow-hidden rounded-lg bg-success-lighter ring-1 ring-inset ring-success-base"
+                                    className="flex size-10 items-center justify-center overflow-hidden rounded-lg bg-success-lighter ring-1 ring-inset ring-success-base"
                                     style={ iconUrl ? { backgroundImage: `url(${ iconUrl })`, backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundSize: 'contain' } : undefined }
                                     title={ offer.localizationName }
                                 >
@@ -148,9 +147,13 @@ export const CatalogInspectorView: FC<{}> = () =>
                             );
                         }) }
                     </div>
-                    <Divider.Root />
-                    <CatalogPriceDisplay credits={ totalCredits } points={ totalPoints } />
-                    <CatalogPurchaseWidgetView />
+                    <div className="flex flex-col gap-1.5 rounded-xl bg-bg-weak-50 p-3 ring-1 ring-inset ring-stroke-soft-200/50">
+                        <span className="text-subheading-2xs uppercase tracking-wide text-text-soft-400">Gesamt</span>
+                        <CatalogPriceDisplay credits={ totalCredits } points={ totalPoints } size="lg" />
+                    </div>
+                    <div className="mt-auto">
+                        <CatalogPurchaseWidgetView />
+                    </div>
                 </div>
             </div>
         );
@@ -165,12 +168,13 @@ export const CatalogInspectorView: FC<{}> = () =>
     const stateCount = furniData?.customParams || 0;
 
     return (
-        <div className="flex w-[340px] shrink-0 flex-col overflow-y-auto border-l border-stroke-soft-200 bg-bg-weak-50 catalog-inspector-enter" style={ { scrollbarWidth: 'thin' } }>
-            <style>{ '@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }' }</style>
+        <div className="flex h-full w-[340px] shrink-0 flex-col overflow-hidden bg-bg-weak-50 p-3 pl-1.5">
+            <style>{ '@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } } @keyframes catalogInspectorIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }' }</style>
+            <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl bg-bg-white-0 shadow-regular-xs ring-1 ring-inset ring-stroke-soft-200" style={ { animation: 'catalogInspectorIn 0.2s ease-out' } }>
             { /* Room Preview Area */ }
             <div
                 ref={ previewRef }
-                className="relative h-[236px] shrink-0 cursor-zoom-in overflow-hidden border-b border-stroke-soft-200 bg-bg-white-0"
+                className="relative h-44 shrink-0 cursor-zoom-in overflow-hidden rounded-t-2xl border-b border-stroke-soft-200 bg-bg-white-0"
                 onMouseEnter={ () =>
                 {
                     if(hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
@@ -184,11 +188,11 @@ export const CatalogInspectorView: FC<{}> = () =>
                 } }
             >
                 <div className="absolute inset-0 bg-[linear-gradient(150deg,hsl(var(--align-bg-white-0))_0%,hsl(var(--align-bg-weak-50))_52%,hsl(var(--align-bg-soft-200))_100%)]" />
-                <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(30deg,hsl(var(--align-stroke-soft-200))_1px,transparent_1px),linear-gradient(150deg,hsl(var(--align-stroke-soft-200))_1px,transparent_1px)] [background-size:48px_48px]" />
+                <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(30deg,hsl(var(--align-stroke-soft-200))_1px,transparent_1px),linear-gradient(150deg,hsl(var(--align-stroke-soft-200))_1px,transparent_1px)] [background-size:48px_48px]" />
                 { (product?.productType !== ProductTypeEnum.BADGE) ? (
                     <div className="relative h-full" style={ loadedVariants.length <= 1 ? { animation: 'float 3s ease-in-out infinite' } : undefined }>
-                        <CatalogViewProductWidgetView height={ 220 } />
-                        <CatalogAddOnBadgeWidgetView className="absolute bottom-2 right-2 rounded bg-bg-strong-950/40" />
+                        <CatalogViewProductWidgetView height={ 160 } />
+                        <CatalogAddOnBadgeWidgetView className="absolute bottom-2 right-2 rounded bg-static-black/40" />
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full relative">
@@ -198,7 +202,7 @@ export const CatalogInspectorView: FC<{}> = () =>
                 { /* Close button */ }
                 <button
                     onClick={ () => setCurrentOffer(null) }
-                    className="absolute left-2.5 top-2.5 z-10 rounded-lg bg-bg-strong-950/40 p-1.5 text-static-white/70 backdrop-blur-sm transition-colors hover:bg-bg-strong-950/60 hover:text-static-white"
+                    className="absolute left-2.5 top-2.5 z-10 rounded-lg bg-static-black/35 p-1.5 text-static-white/85 backdrop-blur-md transition-colors hover:bg-static-black/55 hover:text-static-white"
                 >
                     <X className="w-3.5 h-3.5" />
                 </button>
@@ -207,7 +211,7 @@ export const CatalogInspectorView: FC<{}> = () =>
                     { loadedVariants.length > 1 && (
                         <button
                             onClick={ () => setVariantIdx(v => (v + 1) % loadedVariants.length) }
-                            className="rounded-lg bg-bg-strong-950/40 p-1.5 text-static-white/70 backdrop-blur-sm transition-colors hover:bg-bg-strong-950/60 hover:text-static-white"
+                            className="rounded-lg bg-static-black/35 p-1.5 text-static-white/85 backdrop-blur-md transition-colors hover:bg-static-black/55 hover:text-static-white"
                         >
                             <RotateCw className="w-3.5 h-3.5" />
                         </button>
@@ -217,7 +221,7 @@ export const CatalogInspectorView: FC<{}> = () =>
                 { loadedVariants.length > 1 && (
                     <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex gap-1">
                         { loadedVariants.map((_, i) => (
-                            <div key={ i } className={ `w-1.5 h-1.5 rounded-full transition-all ${ i === variantIdx % loadedVariants.length ? 'bg-text-strong-950/80 w-3' : 'bg-text-strong-950/20' }` } />
+                            <div key={ i } className={ `h-1.5 rounded-full transition-all ${ i === variantIdx % loadedVariants.length ? 'bg-text-strong-950/80 w-3' : 'bg-text-strong-950/25 w-1.5' }` } />
                         )) }
                     </div>
                 ) }
@@ -248,87 +252,101 @@ export const CatalogInspectorView: FC<{}> = () =>
                 />,
                 document.body
             ) }
-            { /* Item Info */ }
-            <div className="flex flex-col gap-3 p-4 flex-1">
-                <div>
-                    <h3 className="text-label-md text-text-strong-950">{ currentOffer.localizationName }</h3>
-                    <p className="mt-0.5 truncate font-mono text-paragraph-xs text-text-soft-400">{ currentOffer.localizationDescription || furniData?.className }</p>
-                </div>
-                { /* Badges */ }
-                <div className="flex items-center gap-1.5 flex-wrap">
-                    <AlignBadge.Root color="gray" variant="lighter" size="small" square>
-                        { isWall ? 'Wand' : 'Boden' }
-                    </AlignBadge.Root>
-                    { furniData && (
-                        <AlignBadge.Root color="gray" variant="lighter" size="small" square>
-                            { furniData.dimX }×{ furniData.dimY }
-                        </AlignBadge.Root>
-                    ) }
-                    { interactionInfo && (
-                        <AlignBadge.Root color="blue" variant="lighter" size="small" square>
-                            <span className={ `text-subheading-2xs ${ interactionInfo.color }` }>●</span>
-                            { interactionInfo.label }
-                        </AlignBadge.Root>
-                    ) }
-                    { stateCount > 1 && (
-                        <AlignBadge.Root color="gray" variant="lighter" size="small" square>
-                            <Eye className="w-2.5 h-2.5" />{ stateCount } Zustände
-                        </AlignBadge.Root>
-                    ) }
-                    { product?.isUniqueLimitedItem && (
-                        <AlignBadge.Root color="yellow" variant="lighter" size="small" square>
-                            <Sparkles className="w-2.5 h-2.5" />
-                            { product.uniqueLimitedItemsLeft }/{ product.uniqueLimitedItemSeriesSize }
-                        </AlignBadge.Root>
-                    ) }
-                </div>
-                { /* Rarity */ }
-                { rarityData?.rarityType && (
-                    <div className="flex items-center gap-2 flex-wrap">
-                        <span
-                            className="rounded-md px-2 py-0.5 text-subheading-2xs"
-                            style={ {
-                                background: `${ rarityData.rarityType.colorPrimary }20`,
-                                color: rarityData.rarityType.colorPrimary,
-                                border: `1px solid ${ rarityData.rarityType.colorPrimary }40`,
-                            } }
-                        >
-                            { rarityData.rarityType.displayName }
-                        </span>
-                        { rarityData.circulation > 0 && (
-                            <span className="text-paragraph-xs text-text-sub-600">{ rarityData.circulation.toLocaleString() } im Umlauf</span>
+            { /* Content — Info / Pricing / Actions */ }
+            <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden p-4">
+
+                { /* SECTION 1 — Info */ }
+                <div className="flex min-h-0 flex-col gap-1.5">
+                    <div>
+                        <h3 className="text-label-md leading-tight text-text-strong-950">{ currentOffer.localizationName }</h3>
+                        { currentOffer.localizationDescription && (
+                            <p className="mt-0.5 line-clamp-1 text-paragraph-xs text-text-sub-600">{ currentOffer.localizationDescription }</p>
                         ) }
                     </div>
-                ) }
-                <CatalogLimitedItemWidgetView fullWidth />
-                <Divider.Root />
-                { /* Price */ }
-                <CatalogPriceDisplay
-                    credits={ currentOffer.priceInCredits }
-                    points={ currentOffer.priceInActivityPoints }
-                    pointsType={ currentOffer.activityPointType }
-                />
-                { /* Quantity */ }
-                <CatalogSpinnerWidgetView />
-                { currentOffer.bundlePurchaseAllowed && (
-                    <div className="flex gap-1">
-                        { [ 5, 10, 25, 50 ].map((n) => (
-                            <AlignButton.Root
-                                key={ n }
-                                variant="neutral"
-                                mode="stroke"
-                                size="xxsmall"
-                                className="h-7 flex-1 rounded-lg text-label-xs"
-                                onClick={ () => setPurchaseOptions(prev => ({ ...prev, quantity: n })) }
+
+                    { /* Badges — 1 Zeile, dann clipping */ }
+                    <div className="flex max-h-7 flex-wrap items-center gap-1 overflow-hidden">
+                        <AlignBadge.Root color="gray" variant="lighter" size="small" square>
+                            { isWall ? 'Wand' : 'Boden' }
+                        </AlignBadge.Root>
+                        { furniData && (
+                            <AlignBadge.Root color="gray" variant="lighter" size="small" square>
+                                { furniData.dimX }×{ furniData.dimY }
+                            </AlignBadge.Root>
+                        ) }
+                        { interactionInfo && (
+                            <AlignBadge.Root color="blue" variant="lighter" size="small" square>
+                                <span className={ `text-subheading-2xs ${ interactionInfo.color }` }>●</span>
+                                { interactionInfo.label }
+                            </AlignBadge.Root>
+                        ) }
+                        { stateCount > 1 && (
+                            <AlignBadge.Root color="gray" variant="lighter" size="small" square>
+                                <Eye className="w-2.5 h-2.5" />{ stateCount }
+                            </AlignBadge.Root>
+                        ) }
+                        { product?.isUniqueLimitedItem && (
+                            <AlignBadge.Root color="yellow" variant="lighter" size="small" square>
+                                <Sparkles className="w-2.5 h-2.5" />
+                                { product.uniqueLimitedItemsLeft }/{ product.uniqueLimitedItemSeriesSize }
+                            </AlignBadge.Root>
+                        ) }
+                        { rarityData?.rarityType && (
+                            <span
+                                className="rounded-md px-1.5 py-0.5 text-subheading-2xs leading-tight"
+                                style={ {
+                                    background: `${ rarityData.rarityType.colorPrimary }20`,
+                                    color: rarityData.rarityType.colorPrimary,
+                                    border: `1px solid ${ rarityData.rarityType.colorPrimary }40`,
+                                } }
                             >
-                                ×{ n }
-                            </AlignButton.Root>
-                        )) }
+                                { rarityData.rarityType.displayName }
+                            </span>
+                        ) }
                     </div>
-                ) }
-                <Divider.Root />
-                { /* Purchase */ }
-                <CatalogPurchaseWidgetView />
+
+                    <CatalogLimitedItemWidgetView fullWidth />
+                </div>
+
+                { /* SECTION 2 — Pricing Sub-Panel */ }
+                <div className="flex flex-col gap-2 rounded-xl bg-bg-weak-50 p-3 ring-1 ring-inset ring-stroke-soft-200/50">
+                    <CatalogPriceDisplay
+                        credits={ currentOffer.priceInCredits * (purchaseOptions?.quantity || 1) }
+                        points={ currentOffer.priceInActivityPoints * (purchaseOptions?.quantity || 1) }
+                        pointsType={ currentOffer.activityPointType }
+                        size="lg"
+                    />
+
+                    { /* Quantity + Multiplier Presets */ }
+                    { currentOffer.bundlePurchaseAllowed && (
+                        <>
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="text-label-xs text-text-strong-950">Menge</span>
+                                <CatalogSpinnerWidgetView hideLabel />
+                            </div>
+                            <div className="grid grid-cols-4 gap-1">
+                                { [ 5, 10, 25, 50 ].map((n) => (
+                                    <AlignButton.Root
+                                        key={ n }
+                                        variant="neutral"
+                                        mode={ purchaseOptions?.quantity === n ? 'lighter' : 'stroke' }
+                                        size="xxsmall"
+                                        className="h-6 w-full rounded-md text-paragraph-xs"
+                                        onClick={ () => setPurchaseOptions(prev => ({ ...prev, quantity: n })) }
+                                    >
+                                        ×{ n }
+                                    </AlignButton.Root>
+                                )) }
+                            </div>
+                        </>
+                    ) }
+                </div>
+
+                { /* SECTION 3 — Actions (sticky am Boden) */ }
+                <div className="mt-auto">
+                    <CatalogPurchaseWidgetView />
+                </div>
+            </div>
             </div>
         </div>
     );

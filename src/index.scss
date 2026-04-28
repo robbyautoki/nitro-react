@@ -10,6 +10,18 @@
 @import './tailwind.css';
 
 // ─── App Styles ──────────────────────────────────────────────────────────────
+:root {
+    // Globale Layout-Anker für Toast-Stack, Drawer, Floating UI.
+    // Quelle: AGENTS.md → "UI-Stacking-Regel (KRITISCH)" / CLAUDE.md → "Notification-Stack & Floating UI (KRITISCH)".
+    --notification-top-offset: 8px;
+    --drawer-width: 0px;
+    --bottom-bar-height: 80px; // Höhe der Float Bar (Chat-Input + Toolbar) inkl. Safe-Area.
+    --topbar-height: 60px;
+    --topbar-center-offset: 42px;
+    --sidebar-width: 84px;
+    --drawer-open: 0;
+}
+
 html,
 body {
     padding: 0;

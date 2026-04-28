@@ -3,6 +3,8 @@ import { FC, useEffect } from 'react';
 import { FurniCategory, GetAvatarRenderManager, GetSessionDataManager, Offer, ProductTypeEnum } from '../../../../../api';
 import { LayoutRoomPreviewerView } from '../../../../../common';
 import { useCatalog } from '../../../../../hooks';
+import { CATALOG_PICKER_GRID_CLASSES } from '../common/CatalogGridStyles';
+import { CatalogProductTile } from '../common/CatalogProductTile';
 
 interface CatalogViewProductWidgetViewProps
 {
@@ -90,21 +92,17 @@ export const CatalogViewProductWidgetView: FC<CatalogViewProductWidgetViewProps>
     if(currentOffer.pricingModel === Offer.PRICING_MODEL_BUNDLE)
     {
         return (
-            <div className="w-full h-full overflow-hidden rounded-16 bg-bg-weak-50 p-2">
-                <div className="grid grid-cols-4 gap-1.5">
-                    { (currentOffer.products.length > 0) && currentOffer.products.map((product, index) =>
-                    {
-                        const imageUrl = product.getIconUrl(currentOffer);
-
-                        return (
-                            <div key={ index } className="relative flex items-center justify-center overflow-hidden rounded-10 bg-bg-white-0 shadow-regular-xs ring-1 ring-stroke-soft-200 aspect-square bg-center bg-no-repeat" style={ imageUrl ? { backgroundImage: `url(${ imageUrl })` } : undefined }>
-                                { (product.productCount > 1) &&
-                                    <span className="absolute top-0.5 right-0.5 rounded-md bg-primary-base px-1 text-subheading-2xs leading-tight text-static-white">
-                                        { product.productCount }
-                                    </span> }
-                            </div>
-                        );
-                    }) }
+            <div className="w-full h-full overflow-hidden rounded-16 bg-bg-weak-50/40 p-2">
+                <div className={ CATALOG_PICKER_GRID_CLASSES }>
+                    { (currentOffer.products.length > 0) && currentOffer.products.map((product, index) => (
+                        <div key={ index } className="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg bg-bg-white-0/60 p-1">
+                            <CatalogProductTile product={ product } offer={ currentOffer } centered />
+                            { (product.productCount > 1) &&
+                                <span className="absolute top-0.5 right-0.5 rounded bg-primary-base px-0.5 text-[10px] leading-tight text-static-white">
+                                    { product.productCount }
+                                </span> }
+                        </div>
+                    )) }
                 </div>
             </div>
         );

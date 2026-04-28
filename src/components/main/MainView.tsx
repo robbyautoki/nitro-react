@@ -33,6 +33,8 @@ import { UserSettingsView } from '../user-settings/UserSettingsView';
 import { LotteryView } from '../lottery/LotteryView';
 import { WelcomeDialogView } from '../welcome/WelcomeDialogView';
 import { JailStaffDrawerView } from '../jail/JailStaffDrawerView';
+import { JailInmateFabView } from '../jail/JailInmateFabView';
+import { JailDialogsRoot } from '../jail/JailDialogsRoot';
 import { NotificationTrayView } from '../notification-tray/NotificationTrayView';
 import { RadioView } from '../radio/RadioView';
 import { PriceListView } from '../pricelist/PriceListView';
@@ -111,6 +113,8 @@ export const MainView: FC<{}> = props =>
             <PurseView />
             <WelcomeDialogView />
             <JailStaffDrawerView />
+            <JailInmateFabView />
+            <JailDialogsRoot />
             <NotificationTrayView />
             <RadioView />
             <LotteryView />

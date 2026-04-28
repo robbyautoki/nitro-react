@@ -53,18 +53,18 @@ export const AvatarEditorModelView: FC<AvatarEditorModelViewProps> = props =>
     if(!model || !activeCategory) return null;
 
     return (
-        <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex min-h-0 flex-1 flex-col">
             { /* Top row: Gender SegmentedControl OR Sub-Category Tabs */ }
-            <div className="flex shrink-0 items-center gap-2 border-b border-stroke-soft-200 bg-bg-weak-50 px-3 py-2">
+            <div className="flex shrink-0 items-center gap-2 border-b border-stroke-soft-200 bg-bg-weak-50 px-4 py-2.5">
                 { model.canSetGender && (
-                    <div className="flex items-center gap-0.5 rounded-lg bg-bg-white-0 p-0.5 ring-1 ring-stroke-soft-200">
+                    <div className="flex items-center gap-0.5 rounded-xl bg-bg-white-0 p-1 ring-1 ring-stroke-soft-200">
                         <button
                             type="button"
                             onClick={ () => setGender(FigureData.MALE) }
                             className={ cn(
-                                'flex h-9 w-11 items-center justify-center rounded-md transition-all',
+                                'flex h-11 w-14 items-center justify-center rounded-lg transition-all',
                                 gender === FigureData.MALE
-                                    ? 'bg-primary-alpha-10 ring-1 ring-primary-base'
+                                    ? 'bg-primary-alpha-10 ring-2 ring-primary-base shadow-regular-xs'
                                     : 'hover:bg-bg-weak-50'
                             ) }
                         >
@@ -74,9 +74,9 @@ export const AvatarEditorModelView: FC<AvatarEditorModelViewProps> = props =>
                             type="button"
                             onClick={ () => setGender(FigureData.FEMALE) }
                             className={ cn(
-                                'flex h-9 w-11 items-center justify-center rounded-md transition-all',
+                                'flex h-11 w-14 items-center justify-center rounded-lg transition-all',
                                 gender === FigureData.FEMALE
-                                    ? 'bg-primary-alpha-10 ring-1 ring-primary-base'
+                                    ? 'bg-primary-alpha-10 ring-2 ring-primary-base shadow-regular-xs'
                                     : 'hover:bg-bg-weak-50'
                             ) }
                         >
@@ -95,10 +95,10 @@ export const AvatarEditorModelView: FC<AvatarEditorModelViewProps> = props =>
                             type="button"
                             onClick={ () => selectCategory(name) }
                             className={ cn(
-                                'flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-all ring-1 ring-inset',
+                                'flex size-12 shrink-0 items-center justify-center rounded-xl transition-all ring-inset',
                                 isActive
-                                    ? 'bg-primary-alpha-10 ring-primary-base'
-                                    : 'bg-bg-white-0 ring-stroke-soft-200 hover:bg-bg-weak-50 hover:ring-stroke-sub-300'
+                                    ? 'bg-primary-alpha-10 ring-2 ring-primary-base shadow-regular-xs'
+                                    : 'bg-bg-white-0 ring-1 ring-stroke-soft-200 hover:ring-stroke-sub-300 hover:shadow-regular-xs'
                             ) }
                         >
                             <AvatarEditorIcon icon={ category.name } selected={ isActive } />
@@ -107,17 +107,29 @@ export const AvatarEditorModelView: FC<AvatarEditorModelViewProps> = props =>
                 }) }
             </div>
             { /* Items + Colors split */ }
-            <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex min-h-0 flex-1 flex-col">
                 { /* Item Grid - scrollable */ }
-                <div className="flex-1 min-h-0 overflow-y-auto p-2">
+                <div className="min-h-0 flex-1 overflow-y-auto p-3">
                     <AvatarEditorFigureSetView model={ model } category={ activeCategory } setMaxPaletteCount={ setMaxPaletteCount } />
                 </div>
-                { /* Color Palette - fixed at bottom */ }
+                { /* Color Palette - fixed at bottom, shows fully (no inner scroll) */ }
                 { (maxPaletteCount >= 1) &&
-                    <div className="shrink-0 max-h-[140px] overflow-y-auto p-2 border-t border-stroke-soft-200 flex flex-col gap-2">
-                        <AvatarEditorPaletteSetView model={ model } category={ activeCategory } paletteSet={ activeCategory.getPalette(0) } paletteIndex={ 0 } />
+                    <div className="flex shrink-0 flex-col gap-3 border-t border-stroke-soft-200 bg-bg-weak-50/40 p-3">
+                        <AvatarEditorPaletteSetView
+                            model={ model }
+                            category={ activeCategory }
+                            paletteSet={ activeCategory.getPalette(0) }
+                            paletteIndex={ 0 }
+                            label={ maxPaletteCount === 2 ? 'Hautton' : null }
+                        />
                         { (maxPaletteCount === 2) &&
-                            <AvatarEditorPaletteSetView model={ model } category={ activeCategory } paletteSet={ activeCategory.getPalette(1) } paletteIndex={ 1 } /> }
+                            <AvatarEditorPaletteSetView
+                                model={ model }
+                                category={ activeCategory }
+                                paletteSet={ activeCategory.getPalette(1) }
+                                paletteIndex={ 1 }
+                                label="Akzent"
+                            /> }
                     </div> }
             </div>
         </div>
